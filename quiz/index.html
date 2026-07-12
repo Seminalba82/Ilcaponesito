@@ -295,6 +295,27 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   .dFace{padding:8px; border-radius:12px;}
 }
 
+/* ===== SIMON: PLANCIA TONDA 3D ===== */
+.simonWrap{position:relative; width:min(76vw,330px); aspect-ratio:1; margin:12px auto;}
+.simonBoard{position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 40% 30%, #23263a, #0d0f18 70%);
+  box-shadow:0 16px 0 #05030a, 0 28px 46px rgba(0,0,0,.75), inset 0 0 34px rgba(0,0,0,.9), 0 0 40px rgba(157,77,255,.25);
+  padding:9%; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:7%;}
+.wedge{border:none; cursor:pointer; opacity:.4; transition:opacity .1s, filter .1s, transform .06s; -webkit-tap-highlight-color:transparent;}
+.wedge:active{transform:scale(.96);}
+.wedge.lit{opacity:1; filter:brightness(1.6) saturate(1.2); box-shadow:0 0 34px currentColor;}
+.wedge[disabled]{cursor:default; pointer-events:none;}
+.w0{background:#ff3b3b; color:#ff3b3b; border-top-left-radius:100%;}
+.w1{background:#ffc93c; color:#ffc93c; border-top-right-radius:100%;}
+.w2{background:#37d67a; color:#37d67a; border-bottom-left-radius:100%;}
+.w3{background:#2e8bff; color:#2e8bff; border-bottom-right-radius:100%;}
+.simonHub{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:36%; aspect-ratio:1; border-radius:50%; z-index:2;
+  background:radial-gradient(circle at 38% 30%, #2a1a4d, #0b0614 75%); border:4px solid var(--gold);
+  box-shadow:0 8px 18px rgba(0,0,0,.7), 0 0 22px rgba(255,201,60,.4), inset 0 2px 6px rgba(255,255,255,.15);
+  display:flex; align-items:center; justify-content:center; font-size:30px;}
+.seqDots{display:flex; gap:9px; justify-content:center; flex-wrap:wrap; margin-top:12px; min-height:24px;}
+.seqDot{width:22px; height:22px; border-radius:50%; box-shadow:0 3px 0 rgba(0,0,0,.5), 0 0 12px currentColor; border:2px solid rgba(255,255,255,.35);}
+.ptsManual{width:110px !important; text-align:center; font-family:'Bungee' !important; color:var(--gold) !important;}
+
 /* ===== SCHERMO PROIETTORE ===== */
 body.proj{overflow:hidden;}
 body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:center;}
@@ -324,7 +345,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v4.2</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v4.3</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -406,6 +427,10 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
       <div class="grow">
         <div class="label">Punti in palio</div>
         <select id="qePoints"></select>
+      </div>
+      <div>
+        <div class="label">O scrivili</div>
+        <input type="number" id="qePointsMan" class="ptsManual" placeholder="—" min="10" step="10">
       </div>
       <div class="grow">
         <div class="label">Tempo per rispondere</div>
@@ -531,6 +556,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <button class="hb" onclick="btnEndQuiz()">🏁 Termina quiz</button>
   <button class="hb" onclick="openMini()">🥃 Minigioco bussolotti</button>
   <button class="hb" onclick="openDice()">🎲 Pari o Dispari</button>
+  <button class="hb" onclick="openSimon()">🎨 Simon</button>
   <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
   <button class="hb" onclick="openProjector()">📺 Apri proiettore</button>
   <button class="hb" id="hbQOnly" onclick="toggleQOnly()">🔍 Solo domanda</button>
@@ -557,7 +583,8 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="miniMsg" id="miniMsg">Scegli i punti e premi NASCONDI E MESCOLA</div>
   <div class="voteCounts" id="miniCounts" style="display:none"></div>
   <div class="row mt" style="justify-content:center; align-items:flex-end">
-    <div><div class="label">Punti in palio</div><select id="miniPoints" style="width:150px"></select></div>
+    <div><div class="label">Punti in palio</div><select id="miniPoints" style="width:140px"></select></div>
+    <div><div class="label">O scrivili</div><input type="number" id="miniPointsMan" class="ptsManual" placeholder="—" min="10" step="10"></div>
     <div><div class="label">Velocità</div><select id="miniSpeed" style="width:150px">
       <option value="750">🐌 Molto lenta</option>
       <option value="560">Lenta</option>
@@ -572,6 +599,47 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
 </div>
 
+<!-- ==================== HOST: SIMON ==================== -->
+<div class="screen" id="scrSimon">
+  <div class="brand"><div class="t1" style="font-size:clamp(22px,4vw,38px)">🎨 SIMON DEL CAPONE</div></div>
+  <div class="simonWrap"><div class="simonBoard" id="simonStage"></div><div class="simonHub">🎩</div></div>
+  <div class="timerWrap mt" style="max-width:520px"><div class="timerBar" id="simonTimerBar"></div></div>
+  <div class="miniMsg" id="simonMsg">Imposta lampeggi e punti, poi avvia</div>
+  <div class="seqDots" id="simonDots"></div>
+  <div class="voteCounts" id="simonCounts" style="display:none"></div>
+  <div class="row mt" style="justify-content:center; align-items:flex-end">
+    <div><div class="label">Lampeggi</div><select id="simonCount" style="width:110px"></select></div>
+    <div><div class="label">Punti</div><select id="simonPoints" style="width:140px"></select></div>
+    <div><div class="label">O scrivili</div><input type="number" id="simonPointsMan" class="ptsManual" placeholder="—" min="10" step="10"></div>
+    <button class="btn mg" id="simonBtnGo" onclick="simonStart()">▶ AVVIA SEQUENZA</button>
+    <button class="btn cy" id="simonBtnAgain" onclick="simonAgain()" style="display:none">🔁 Un'altra manche</button>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: SIMON ==================== -->
+<div class="screen" id="scrPjSimon">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🎨 SIMON DEL CAPONE</div></div>
+  <div class="simonWrap" style="width:min(52vh,420px)"><div class="simonBoard" id="pjSimonStage"></div><div class="simonHub">🎩</div></div>
+  <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjSimonTimerBar"></div></div>
+  <div class="miniMsg" id="pjSimonMsg" style="font-size:clamp(22px,3.5vw,40px)"></div>
+  <div class="seqDots" id="pjSimonDots"></div>
+  <div class="voteCounts" id="pjSimonCounts"></div>
+</div>
+
+<!-- ==================== PLAYER: SIMON ==================== -->
+<div class="screen" id="scrPlaySimon" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="psName" style="color:var(--gold)"></div>
+    <div class="pill" id="psScore"></div>
+  </div>
+  <div class="timerWrap mt"><div class="timerBar" id="psTimerBar"></div></div>
+  <div class="byline mt" id="psStatus">GUARDA E ASCOLTA LA SEQUENZA...</div>
+  <div class="simonWrap"><div class="simonBoard" id="psStage"></div><div class="simonHub">🎩</div></div>
+  <div class="seqDots" id="psDots"></div>
+  <div class="feedback mt" id="psSent" style="display:none; color:var(--cyan); font-size:22px">SEQUENZA INVIATA! 🎼</div>
+</div>
+
 <!-- ==================== HOST: PARI O DISPARI ==================== -->
 <div class="screen" id="scrDice">
   <div class="brand"><div class="t1" style="font-size:clamp(22px,4vw,38px)">🎲 PARI O DISPARI</div></div>
@@ -580,7 +648,8 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="miniMsg" id="diceMsg">Scegli i punti e lancia i dadi</div>
   <div class="voteCounts" id="diceCounts" style="display:none"></div>
   <div class="row mt" style="justify-content:center; align-items:flex-end">
-    <div><div class="label">Punti in palio</div><select id="dicePoints" style="width:160px"></select></div>
+    <div><div class="label">Punti in palio</div><select id="dicePoints" style="width:140px"></select></div>
+    <div><div class="label">O scrivili</div><input type="number" id="dicePointsMan" class="ptsManual" placeholder="—" min="10" step="10"></div>
     <button class="btn mg" id="diceBtnGo" onclick="diceRoll()">🎲 LANCIA I DADI</button>
     <button class="btn cy" id="diceBtnAgain" onclick="diceAgain()" style="display:none">🔁 Un'altra manche</button>
   </div>
@@ -709,7 +778,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 42; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 43; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -875,6 +944,7 @@ function openQEditor(i){
   // punti 100→2000
   $('qePoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
   $('qePoints').value = q.points;
+  $('qePointsMan').value = $('qePoints').value == q.points ? '' : q.points;
   $('qeTimer').innerHTML = TIMES.map(t=>`<option value="${t}">${t} secondi</option>`).join('');
   $('qeTimer').value = q.timer;
   $('qeAccepted').value = q.accepted || '';
@@ -920,7 +990,7 @@ function saveQuestion(){
     opts:[0,1,2,3].map(k=>$('qeOpt'+k).value.trim()),
     correct:+(document.querySelector('input[name=qeCorrect]:checked')||{value:0}).value,
     accepted: $('qeAccepted').value.trim(),
-    points:+$('qePoints').value, timer:+$('qeTimer').value };
+    points:getPoints('qePoints','qePointsMan'), timer:+$('qeTimer').value };
   if (type==='mult' && q.opts.filter(o=>o).length<2) return alert('Servono almeno 2 opzioni!');
   if (type==='mult' && !q.opts[q.correct]) return alert('L\'opzione corretta è vuota!');
   if (type==='open' && !q.accepted) return alert('Inserisci almeno una risposta accettata!');
@@ -1232,6 +1302,7 @@ function listenGame(){
     else if (g.status==='reveal') showPlayerFb(g);
     else if (g.status==='mini') showPlayerMini(g);
     else if (g.status==='dice') showPlayerDice(g);
+    else if (g.status==='simon') showPlayerSimon(g);
     else if (g.status==='pausa') { showScreen('scrWait'); $('waitMsg').textContent='OCCHI ALLO SCHERMO! 🎩'; $('waitSub').textContent='Il quiz continua tra poco...'; }
     else if (g.status==='end') showPlayerEnd(g);
   });
@@ -1277,6 +1348,64 @@ function sendOpenAnswer(){
   if (navigator.vibrate) navigator.vibrate(40);
 }
 $('pqOpenInput')?.addEventListener('keydown', e=>{ if(e.key==='Enter') sendOpenAnswer(); });
+function showPlayerSimon(g){
+  clearInterval(P.timerInt);
+  const m = g.simon||{};
+  $('psName').textContent = P.name;
+  $('psScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  buildSimon($('psStage'), i=> playerSimonTap(i));
+  if (m.phase==='show') {
+    if (P.simRound !== m.round) { P.simRound = m.round; P.simSeq = []; P.simSent = false; P.simShown = false; P.simLen = (m.seq||[]).length; }
+    $('psStage')._wedges.forEach(w=> w.disabled = true);
+    $('psStatus').textContent = '👀 GUARDA E ASCOLTA LA SEQUENZA...';
+    $('psDots').innerHTML=''; $('psSent').style.display='none';
+    $('psTimerBar').style.width='100%';
+    showScreen('scrPlaySimon');
+    if (!P.simShown) { P.simShown = true; simonPlaySeq($('psStage'), m.seq||[]); }
+  }
+  else if (m.phase==='input') {
+    if (P.simRound !== m.round) { P.simRound = m.round; P.simSeq = []; P.simSent = false; P.simLen = (m.seq||[]).length; }
+    P.simLen = (m.seq||[]).length;
+    $('psStage')._wedges.forEach(w=> w.disabled = P.simSent);
+    $('psStatus').textContent = P.simSent ? 'SEQUENZA INVIATA — INCROCIA LE DITA!' : '🎼 TOCCA GLI SPICCHI NELLO STESSO ORDINE ('+P.simSeq.length+'/'+P.simLen+')';
+    showScreen('scrPlaySimon');
+    clearInterval(P.simInt);
+    P.simInt = setInterval(()=>{
+      const left = Math.max(0, (m.endAt||0) - serverNow());
+      $('psTimerBar').style.width = (left/10000*100)+'%';
+      if (left<=0) clearInterval(P.simInt);
+    },100);
+  }
+  else if (m.phase==='result') {
+    clearInterval(P.simInt);
+    const r = (m.results||{})[P.id];
+    const msg = $('pfMsg'), pts = $('pfPts');
+    if (!r) { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='TEMPO SCADUTO ⏱'; pts.textContent='+0'; }
+    else if (r.ok) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='ORECCHIO FINO! 🎼'; pts.textContent='+'+r.pts+' PUNTI'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
+    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='SEQUENZA SBAGLIATA 💥'; pts.textContent='+0'; }
+    const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
+    const pos = arr.findIndex(p=>p.id===P.id)+1;
+    $('pfRank').innerHTML = (pos>0 ? `SEI <b style="color:var(--gold)">${pos}°</b> SU ${arr.length} · ${(((g.players||{})[P.id])||{}).score||0} PUNTI<br>` : '') +
+      '<span style="letter-spacing:1px">LA SEQUENZA ERA:</span><div class="seqDots">'+seqDotsHtml(m.seq||[])+'</div>';
+    showScreen('scrPlayFb');
+  }
+  else { showScreen('scrWait'); $('waitMsg').textContent='🎨 SIMON DEL CAPONE!'; $('waitSub').textContent='Prepara occhi, orecchie e memoria...'; }
+}
+function playerSimonTap(i){
+  if (P.simSent || P.simSeq.length >= P.simLen) return;
+  simonFlash($('psStage'), i, 240);
+  P.simSeq.push(i);
+  $('psDots').innerHTML = seqDotsHtml(P.simSeq);
+  $('psStatus').textContent = '🎼 TOCCA GLI SPICCHI NELLO STESSO ORDINE ('+P.simSeq.length+'/'+P.simLen+')';
+  if (navigator.vibrate) navigator.vibrate(25);
+  if (P.simSeq.length >= P.simLen) {
+    P.simSent = true;
+    P.ref.child('simon/answers/'+P.id).set({ s: P.simSeq.join(',') });
+    $('psSent').style.display='block';
+    $('psStatus').textContent = 'SEQUENZA INVIATA — INCROCIA LE DITA!';
+    $('psStage')._wedges.forEach(w=> w.disabled = true);
+  }
+}
 function showPlayerDice(g){
   clearInterval(P.timerInt);
   const m = g.dice||{};
@@ -1516,6 +1645,136 @@ function diceLand(el, d1, d2, sum, win){
 function diceIdle(el){ buildDiceStage(el); el._box.classList.remove('show'); el._dice.forEach(d=>{ d.classList.add('spin'); }); }
 
 /* ================================================================
+   SIMON — MOTORE PLANCIA (condiviso host / proiettore / telefono)
+================================================================ */
+const SIMON_COLORS = ['#ff3b3b','#ffc93c','#37d67a','#2e8bff'];
+const SIMON_NOTES = [261.63, 293.66, 329.63, 349.23]; // DO RE MI FA
+let _audioCtx = null;
+function simonBeep(i, dur){
+  try{
+    _audioCtx = _audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = _audioCtx.createOscillator(), g = _audioCtx.createGain();
+    o.type='triangle'; o.frequency.value = SIMON_NOTES[i];
+    g.gain.setValueAtTime(.0001, _audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.35, _audioCtx.currentTime+.02);
+    g.gain.exponentialRampToValueAtTime(.0001, _audioCtx.currentTime+dur/1000);
+    o.connect(g); g.connect(_audioCtx.destination);
+    o.start(); o.stop(_audioCtx.currentTime+dur/1000+.05);
+  }catch(e){}
+}
+function buildSimon(el, onTap){
+  if (el._sbuilt) return; el._sbuilt = true;
+  el.innerHTML = [0,1,2,3].map(i=>`<button class="wedge w${i}" data-i="${i}" ${onTap?'':'disabled'}></button>`).join('');
+  el._wedges = [...el.querySelectorAll('.wedge')];
+  if (onTap) el._wedges.forEach(w=> w.addEventListener('pointerdown', ()=> onTap(+w.dataset.i)));
+}
+function simonFlash(el, i, dur){
+  const w = el._wedges[i];
+  w.classList.add('lit'); simonBeep(i, dur);
+  setTimeout(()=> w.classList.remove('lit'), dur);
+}
+function simonPlaySeq(el, seq, done){
+  const flash = 420, gap = 200;
+  seq.forEach((i,k)=> setTimeout(()=> simonFlash(el, i, flash), k*(flash+gap)));
+  const tot = seq.length*(flash+gap)+250;
+  if (done) setTimeout(done, tot);
+  return tot;
+}
+function seqDotsHtml(seq){
+  return seq.map(i=>`<span class="seqDot" style="background:${SIMON_COLORS[i]};color:${SIMON_COLORS[i]}"></span>`).join('');
+}
+/* punti: campo manuale (se compilato) o menu a tendina */
+function getPoints(selId, manId){
+  const m = parseInt(($(manId)||{}).value);
+  if (m > 0) return Math.max(10, Math.round(m/10)*10);
+  return +$(selId).value;
+}
+
+/* ================================================================
+   SIMON — REGIA HOST
+================================================================ */
+let SIM = { round: 0 };
+const SIMON_INPUT_MS = 10000;
+$('simonPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
+$('simonCount').innerHTML = Array.from({length:8},(_,k)=>`<option value="${k+3}">${k+3} lampeggi</option>`).join('');
+function openSimon(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(SIM.timerInt);
+  G.ref.update({ status:'simon', simon:{ phase:'idle', round:SIM.round, points:getPoints('simonPoints','simonPointsMan') } });
+  $('simonMsg').textContent = 'Imposta lampeggi e punti, poi avvia';
+  $('simonDots').innerHTML=''; $('simonCounts').style.display='none'; $('simonTimerBar').style.width='100%';
+  $('simonBtnGo').style.display=''; $('simonBtnAgain').style.display='none';
+  pjSend({type:'simon', phase:'idle'});
+  showScreen('scrSimon');
+  buildSimon($('simonStage'), null);
+}
+function simonStart(){
+  SIM.round++;
+  SIM.points = getPoints('simonPoints','simonPointsMan');
+  const n = +$('simonCount').value;
+  SIM.seq = Array.from({length:n}, ()=> Math.floor(Math.random()*4));
+  G.ref.update({ 'simon/phase':'show', 'simon/round':SIM.round, 'simon/points':SIM.points,
+    'simon/seq':SIM.seq, 'simon/endAt':null, 'simon/win':null, 'simon/results':null });
+  G.ref.child('simon/answers').remove();
+  $('simonBtnGo').style.display='none'; $('simonBtnAgain').style.display='none';
+  $('simonDots').innerHTML=''; $('simonCounts').style.display='none';
+  $('simonMsg').textContent = '👀 OCCHI E ORECCHIE ALLA SEQUENZA...';
+  pjSend({type:'simonShow', seq:SIM.seq, round:SIM.round});
+  simonPlaySeq($('simonStage'), SIM.seq, ()=>{
+    const endAt = serverNow() + SIMON_INPUT_MS;
+    SIM.endAt = endAt;
+    G.ref.update({ 'simon/phase':'input', 'simon/endAt':endAt });
+    pjSend({type:'simonInput', endAt});
+    $('simonMsg').textContent = '🎼 RIPRODUCETE LA SEQUENZA SUL TELEFONO!';
+    $('simonCounts').style.display='flex';
+    G.ref.child('simon/answers').on('value', s=>{
+      const n2 = s.numChildren();
+      $('simonCounts').innerHTML = `<div class="vc">SEQUENZE INVIATE · ${n2}</div>`;
+    });
+    clearInterval(SIM.timerInt);
+    SIM.timerInt = setInterval(()=>{
+      const left = Math.max(0, endAt - serverNow());
+      $('simonTimerBar').style.width = (left/SIMON_INPUT_MS*100)+'%';
+      if (left<=0) { clearInterval(SIM.timerInt); simonReveal(); }
+    }, 100);
+  });
+}
+function simonReveal(){
+  G.ref.child('simon/answers').off();
+  const key = SIM.seq.join(',');
+  G.ref.child('simon/answers').once('value').then(as=>{
+    const answers = as.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const results = {}, updates = { 'simon/phase':'result' };
+      let okN = 0;
+      for (const pid in answers){
+        const ok = (answers[pid].s||'') === key;
+        const pts = ok ? SIM.points : 0;
+        if (ok) okN++;
+        results[pid] = { ok, pts };
+        if (ok && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + pts;
+      }
+      updates['simon/results'] = results;
+      G.ref.update(updates);
+      $('simonMsg').textContent = `🏆 SEQUENZA GIUSTA! ${okN} l'hanno azzeccata · +${SIM.points}`;
+      $('simonDots').innerHTML = seqDotsHtml(SIM.seq);
+      $('simonCounts').innerHTML = `<div class="vc">✔ GIUSTE · ${okN}</div><div class="vc">✗ SBAGLIATE · ${Object.keys(answers).length-okN}</div>`;
+      simonPlaySeq($('simonStage'), SIM.seq);
+      $('simonBtnAgain').style.display='';
+      pjSend({type:'simonResult', seq:SIM.seq, okN, tot:Object.keys(answers).length, points:SIM.points});
+    });
+  });
+}
+function simonAgain(){
+  G.ref.update({ 'simon/phase':'idle', 'simon/results':null });
+  pjSend({type:'simon', phase:'idle'});
+  $('simonMsg').textContent = 'Imposta lampeggi e punti, poi avvia';
+  $('simonDots').innerHTML=''; $('simonCounts').style.display='none'; $('simonTimerBar').style.width='100%';
+  $('simonBtnGo').style.display=''; $('simonBtnAgain').style.display='none';
+}
+
+/* ================================================================
    PARI O DISPARI — REGIA HOST
 ================================================================ */
 let DICE = { round: 0 };
@@ -1524,7 +1783,7 @@ $('dicePoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1
 function openDice(){
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(DICE.timerInt);
-  G.ref.update({ status:'dice', dice:{ phase:'idle', round:DICE.round, points:+$('dicePoints').value } });
+  G.ref.update({ status:'dice', dice:{ phase:'idle', round:DICE.round, points:getPoints('dicePoints','dicePointsMan') } });
   $('diceMsg').textContent = 'Scegli i punti e lancia i dadi';
   $('diceCounts').style.display='none'; $('diceTimerBar').style.width='100%';
   $('diceBtnGo').style.display=''; $('diceBtnAgain').style.display='none';
@@ -1534,7 +1793,7 @@ function openDice(){
 }
 function diceRoll(){
   DICE.round++;
-  DICE.points = +$('dicePoints').value;
+  DICE.points = getPoints('dicePoints','dicePointsMan');
   DICE.d1 = 1+Math.floor(Math.random()*6); DICE.d2 = 1+Math.floor(Math.random()*6);
   const endAt = serverNow() + DICE_BET_MS;
   DICE.endAt = endAt;
@@ -1602,7 +1861,7 @@ function openMini(){
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion();
   closeModal();
-  G.ref.update({ status:'mini', mini:{ phase:'watch', round:MINI.round, points:+$('miniPoints').value } });
+  G.ref.update({ status:'mini', mini:{ phase:'watch', round:MINI.round, points:getPoints('miniPoints','miniPointsMan') } });
   $('miniMsg').textContent = 'Scegli i punti e premi NASCONDI E MESCOLA';
   $('miniCounts').style.display='none';
   $('miniBtnGo').style.display=''; $('miniBtnReveal').style.display='none'; $('miniBtnAgain').style.display='none';
@@ -1612,7 +1871,7 @@ function openMini(){
 }
 function miniShuffle(){
   MINI.round++;
-  const points = +$('miniPoints').value;
+  const points = getPoints('miniPoints','miniPointsMan');
   const ball = Math.floor(Math.random()*3); // quale bussolotto (identici) nasconde la pallina
   const stepMs = +$('miniSpeed').value;
   const swaps = [];
@@ -1676,8 +1935,9 @@ function miniAgain(){
 function backToQuiz(){
   G.ref.child('mini/votes').off();
   G.ref.child('dice/bets').off();
-  clearInterval(DICE.timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null });
+  G.ref.child('simon/answers').off();
+  clearInterval(DICE.timerInt); clearInterval(SIM.timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = 'SI TORNA AL QUIZ!';
@@ -1764,6 +2024,38 @@ function pjRoute(m){
         if (left<=0) clearInterval(pjTimerInt);
       },100);
       showScreen('scrPjQ');
+    }
+    else if (m.type==='simon') {
+      buildSimon($('pjSimonStage'), null);
+      $('pjSimonDots').innerHTML=''; $('pjSimonCounts').innerHTML='';
+      $('pjSimonMsg').textContent = 'PRONTI CON LA MEMORIA...';
+      $('pjSimonTimerBar').style.width='100%';
+      showScreen('scrPjSimon');
+    }
+    else if (m.type==='simonShow') {
+      buildSimon($('pjSimonStage'), null);
+      $('pjSimonDots').innerHTML=''; $('pjSimonCounts').innerHTML='';
+      $('pjSimonMsg').textContent = '👀 OCCHI E ORECCHIE...';
+      showScreen('scrPjSimon');
+      simonPlaySeq($('pjSimonStage'), m.seq);
+    }
+    else if (m.type==='simonInput') {
+      $('pjSimonMsg').textContent = '🎼 RIPRODUCETE LA SEQUENZA SUL TELEFONO!';
+      clearInterval(window._pjSimInt);
+      window._pjSimInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjSimonTimerBar').style.width = (left/10000*100)+'%';
+        if (left<=0) clearInterval(window._pjSimInt);
+      },100);
+    }
+    else if (m.type==='simonResult') {
+      clearInterval(window._pjSimInt);
+      $('pjSimonTimerBar').style.width='0%';
+      $('pjSimonMsg').textContent = `🏆 ${m.okN} SU ${m.tot} L'HANNO AZZECCATA! +${m.points}`;
+      $('pjSimonDots').innerHTML = seqDotsHtml(m.seq);
+      $('pjSimonCounts').innerHTML = `<div class="vc">✔ GIUSTE · ${m.okN}</div><div class="vc">✗ SBAGLIATE · ${m.tot-m.okN}</div>`;
+      simonPlaySeq($('pjSimonStage'), m.seq);
+      confetti();
     }
     else if (m.type==='dice') {
       $('pjDiceCounts').innerHTML=''; $('pjDiceMsg').textContent = 'PRONTI A SCOMMETTERE...';
