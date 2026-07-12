@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IL CAPONE CHAT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0B12; --smoke:#16161F; --smoke-2:#1E1E29; --chalk:#F3F1F7; --chalk-dim:#9C9AAE;
+    --magenta:#FF2E88; --cyan:#2EE6FF; --lime:#C8FF4D; --line: rgba(243,241,247,0.09);
+    --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 800px 500px at 15% -10%, rgba(255,46,136,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 10%, rgba(46,230,255,0.12), transparent 55%),
+      var(--ink);
+    color:var(--chalk); font-family:var(--body); min-height:100vh;
+    display:flex; align-items:flex-start; justify-content:center; padding:28px 16px 60px;
+  }
+  button{font-family:inherit;}
+  ::selection{background:var(--magenta); color:var(--ink);}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--smoke-2); border-radius:8px;}
+
+  .stage{width:100%; max-width:460px;}
+  .config-banner{
+    background:rgba(255,46,136,0.12); border:1px solid var(--magenta); color:var(--chalk);
+    border-radius:14px; padding:14px 16px; font-size:12.5px; line-height:1.5; margin-bottom:16px;
+  }
+  .config-banner b{color:var(--magenta);}
+  .config-banner code{background:var(--smoke-2); padding:1px 6px; border-radius:5px; font-family:var(--mono); font-size:11.5px;}
+
+  .phone{width:100%; background:var(--smoke); border:1px solid var(--line); border-radius:34px; padding:10px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.7);}
+  .phone-inner{background:var(--ink); border-radius:26px; overflow:hidden; min-height:640px; display:flex; flex-direction:column; position:relative;}
+
+  .ticket-header{position:relative; background:linear-gradient(135deg, rgba(255,46,136,0.18), rgba(46,230,255,0.10)); border-bottom:1px dashed rgba(243,241,247,0.25); padding:18px 20px 22px;}
+  .ticket-header::after{content:""; position:absolute; left:-10px; right:-10px; bottom:-9px; height:18px; background-image:radial-gradient(circle at center, var(--smoke) 0 5px, transparent 5.5px); background-size:18px 18px; background-repeat:repeat-x; background-position:center;}
+  .ticket-eyebrow{font-family:var(--mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--cyan); display:flex; align-items:center; gap:8px;}
+  .dot-live{width:6px;height:6px;border-radius:50%;background:var(--lime); animation:pulse 1.6s infinite;}
+  .dot-off{width:6px;height:6px;border-radius:50%;background:#5b596b;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,255,77,0.5);}70%{box-shadow:0 0 0 8px rgba(200,255,77,0);}100%{box-shadow:0 0 0 0 rgba(200,255,77,0);}}
+  .venue-name{font-family:var(--display); font-weight:700; font-size:26px; letter-spacing:-.01em; margin:6px 0 2px; line-height:1.05;}
+  .venue-sub{font-size:12.5px; color:var(--chalk-dim);}
+  .ticket-code{position:absolute; top:18px; right:18px; text-align:right; font-family:var(--mono); font-size:10px; color:var(--chalk-dim);}
+  .ticket-code b{display:block; color:var(--chalk); font-size:13px; letter-spacing:.08em;}
+
+  .join-screen{padding:26px 22px; display:flex; flex-direction:column; gap:16px; flex:1;}
+  .field-label{font-size:11.5px; color:var(--chalk-dim); font-weight:600; letter-spacing:.03em; margin-bottom:6px; display:block;}
+  .field{width:100%; background:var(--smoke-2); border:1px solid var(--line); color:var(--chalk); padding:13px 14px; border-radius:12px; font-size:14.5px; outline:none; transition:border-color .2s;}
+  .field:focus{border-color:var(--cyan);}
+  .field::placeholder{color:#5b596b;}
+  .btn-primary{background:linear-gradient(120deg, var(--magenta), #ff5fa3); color:var(--ink); border:none; padding:14px; border-radius:12px; font-weight:700; font-size:14.5px; cursor:pointer; transition:transform .15s ease, filter .2s;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-primary:disabled{opacity:.5; cursor:not-allowed;}
+  .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--chalk); padding:12px; border-radius:12px; font-weight:600; font-size:13.5px; cursor:pointer; width:100%;}
+  .hint-error{font-size:12px; color:var(--magenta); min-height:14px;}
+  .small-note{font-size:11px; color:var(--chalk-dim); line-height:1.5; margin-top:6px;}
+
+  .chat-screen{display:flex; flex-direction:column; flex:1; min-height:0;}
+  .chat-toolbar{display:flex; align-items:center; justify-content:space-between; padding:10px 18px; border-bottom:1px solid var(--line); background:var(--smoke);}
+  .presence-pill{display:flex; align-items:center; gap:7px; background:var(--smoke-2); border:1px solid var(--line); padding:6px 12px 6px 8px; border-radius:999px; cursor:pointer; font-size:12px; font-weight:600; color:var(--chalk);}
+  .avatar-stack{display:flex;}
+  .avatar-stack .av{width:20px;height:20px;border-radius:50%; display:flex;align-items:center;justify-content:center; font-size:9px;font-weight:700;color:var(--ink); margin-left:-6px; border:2px solid var(--smoke-2);}
+  .avatar-stack .av:first-child{margin-left:0;}
+  .icon-btn{width:34px;height:34px; border-radius:10px; background:var(--smoke-2); border:1px solid var(--line); color:var(--chalk-dim); display:flex;align-items:center;justify-content:center; cursor:pointer; font-size:15px;}
+
+  .messages{flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:10px;}
+  .msg{max-width:78%; padding:9px 13px; border-radius:14px; font-size:13.5px; line-height:1.4; position:relative; animation:rise .25s ease;}
+  @keyframes rise{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .msg .who{display:block; font-size:10.5px; font-weight:700; margin-bottom:2px; letter-spacing:.02em;}
+  .msg.me{align-self:flex-end; background:linear-gradient(120deg, var(--magenta), #ff5fa3); color:var(--ink); border-bottom-right-radius:4px;}
+  .msg.other{align-self:flex-start; background:var(--smoke-2); border:1px solid var(--line); border-bottom-left-radius:4px;}
+  .msg.other .who{color:var(--cyan);}
+  .msg.admin{align-self:center; background:rgba(200,255,77,0.1); border:1px solid rgba(200,255,77,0.35); color:var(--lime); text-align:center; max-width:90%; font-weight:600;}
+  .msg.admin .who{color:var(--lime);}
+
+  .composer{display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--line); background:var(--smoke);}
+  .composer input{flex:1;}
+  .send-btn{width:46px; background:var(--cyan); border:none; border-radius:12px; color:var(--ink); font-weight:700; cursor:pointer; font-size:16px;}
+
+  .drawer{position:absolute; inset:0; background:rgba(11,11,18,0.92); backdrop-filter:blur(4px); transform:translateX(100%); transition:transform .3s ease; display:flex; flex-direction:column; z-index:5;}
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{display:flex; align-items:center; justify-content:space-between; padding:18px; border-bottom:1px solid var(--line);}
+  .drawer-head h3{margin:0; font-family:var(--display); font-size:16px;}
+  .plist{list-style:none; margin:0; padding:10px 14px; overflow-y:auto;}
+  .plist li{display:flex; align-items:center; gap:10px; padding:10px 8px; border-radius:10px;}
+  .plist li:hover{background:var(--smoke-2);}
+  .plist .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink);}
+  .plist .nm{font-size:13.5px; font-weight:600;}
+  .plist .tag{font-size:10.5px; color:var(--chalk-dim); font-family:var(--mono);}
+
+  .quiz-banner{margin:12px 14px 0; background:linear-gradient(120deg, rgba(200,255,77,0.14), rgba(46,230,255,0.08)); border:1px solid rgba(200,255,77,0.4); border-radius:14px; padding:14px; animation:rise .3s ease;}
+  .quiz-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .quiz-top .tag{font-family:var(--mono); font-size:10px; letter-spacing:.12em; color:var(--lime); text-transform:uppercase;}
+  .quiz-timer{font-family:var(--mono); font-weight:700; color:var(--lime); font-size:13px;}
+  .quiz-q{font-weight:700; font-size:14.5px; margin-bottom:10px; font-family:var(--display);}
+  .quiz-opts{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .quiz-opt{background:var(--smoke-2); border:1px solid var(--line); color:var(--chalk); padding:10px; border-radius:10px; font-size:12.5px; font-weight:600; cursor:pointer; text-align:left; transition:all .15s;}
+  .quiz-opt:hover{border-color:var(--lime);}
+  .quiz-opt.picked{background:var(--lime); color:var(--ink); border-color:var(--lime);}
+  .quiz-opt.correct{background:var(--lime); color:var(--ink); border-color:var(--lime);}
+  .quiz-opt.wrong{opacity:.35;}
+  .quiz-result{font-size:12px; color:var(--chalk-dim); margin-top:8px;}
+
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--chalk); color:var(--ink); padding:11px 20px; border-radius:999px; font-size:13px; font-weight:600; opacity:0; transition:all .3s ease; z-index:50; box-shadow:0 20px 40px -12px rgba(0,0,0,0.5);}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important; transition:none !important;}}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div id="configBanner" class="config-banner" style="display:none;">
+    ⚠️ <b>Firebase non configurato.</b> Incolla le chiavi del progetto nella sezione <code>firebaseConfig</code> di questo file.
+  </div>
+
+  <div id="guestPhone" class="phone">
+    <div class="phone-inner">
+      <div id="joinScreen" class="join-screen">
+        <div class="ticket-header" style="border-radius:16px;">
+          <div class="ticket-eyebrow"><span id="joinLiveDot" class="dot-off"></span> <span id="joinStatusLabel">CONNESSIONE…</span></div>
+          <div class="venue-name" id="joinVenueName">IL CAPONE CHAT</div>
+          <div class="venue-sub">Inserisci il codice della serata e un nickname</div>
+        </div>
+        <div>
+          <label class="field-label">Codice serata</label>
+          <input class="field" id="codeInput" placeholder="Es. NEON26" maxlength="12">
+        </div>
+        <div>
+          <label class="field-label">Il tuo nickname</label>
+          <input class="field" id="nickInput" placeholder="Come vuoi farti chiamare stasera?" maxlength="18">
+        </div>
+        <div>
+          <label class="field-label">PIN personale (4 cifre)</label>
+          <input class="field" id="pinInput" placeholder="Es. 4521" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+        </div>
+        <div class="hint-error" id="joinError"></div>
+        <button class="btn-primary" id="joinBtn">Entra nella chat →</button>
+        <div class="small-note" style="text-align:center;">Il PIN è tuo: se esci e rientri con lo stesso nickname e PIN, ritrovi la tua chat e il punteggio. Nessun altro potrà usare il tuo nickname senza conoscerlo.</div>
+      </div>
+
+      <div id="chatScreen" class="chat-screen" style="display:none;">
+        <div class="ticket-header">
+          <div class="ticket-code">CODICE<b id="chatCode">—</b></div>
+          <div class="ticket-eyebrow"><span class="dot-live"></span> IN DIRETTA</div>
+          <div class="venue-name" id="chatVenueName">—</div>
+          <div class="venue-sub">Stai chattando come <span id="myNickLabel">Tu</span></div>
+        </div>
+        <div class="chat-toolbar">
+          <div class="presence-pill" id="openParticipants">
+            <div class="avatar-stack" id="avatarStack"></div>
+            <span id="presenceCount">0 presenti</span>
+          </div>
+          <div class="icon-btn" id="closeChatBtn" title="Esci">⎋</div>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div id="quizArea"></div>
+        <div class="composer">
+          <input class="field" id="msgInput" placeholder="Scrivi un messaggio…">
+          <button class="send-btn" id="sendBtn">➤</button>
+        </div>
+        <div class="drawer" id="drawer">
+          <div class="drawer-head"><h3>Presenti stasera</h3><div class="icon-btn" id="closeDrawer">✕</div></div>
+          <ul class="plist" id="plist"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* ============================================================
+   CONFIGURAZIONE — deve coincidere con quella usata in admin.html
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyB-P0VYZ7W2ZuLskkrzYns5KHBQBBhK1sE",
+  authDomain: "il-capone-chat.firebaseapp.com",
+  projectId: "il-capone-chat",
+  storageBucket: "il-capone-chat.firebasestorage.app",
+  messagingSenderId: "273475235952",
+  appId: "1:273475235952:web:70d7ee2015ff5a7761c4b5"
+};
+/* ============================================================ */
+
+const isConfigured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("INCOLLA");
+const $ = (id) => document.getElementById(id);
+const toast = (msg) => {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2200);
+};
+if(!isConfigured){ $('configBanner').style.display = 'block'; }
+
+const COLORS = ['#FF2E88','#2EE6FF','#C8FF4D','#FF9F4D','#B18CFF','#4DFFC0'];
+const colorFor = (name) => { let h=0; for(const c of name) h=(h*31+c.charCodeAt(0))>>>0; return COLORS[h%COLORS.length]; };
+const initials = (name) => name.trim().slice(0,2).toUpperCase();
+
+const params = new URLSearchParams(location.search);
+const prefillCode = params.get('code') || '';
+if(prefillCode) $('codeInput').value = prefillCode.toUpperCase();
+
+let db=null, fs=null;
+let venueData = { name:"IL CAPONE CHAT", code:"", quiz:null };
+let participants = [];
+let myParticipantId = localStorage.getItem('cc_participantId') || null;
+let myName = localStorage.getItem('cc_name') || null;
+let myCodeStored = localStorage.getItem('cc_code') || null;
+let myQuizAnswered = null;
+let myQuizAnswerIdx = null;
+let quizCountdownHandle = null;
+
+async function initFirebase(){
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+  fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+  const app = initializeApp(firebaseConfig);
+  db = fs.getFirestore(app);
+}
+function venueRef(){ return fs.doc(db, "ilcaponechat", "venue"); }
+function participantsCol(){ return fs.collection(db, "ilcaponechat", "venue", "participants"); }
+function messagesCol(){ return fs.collection(db, "ilcaponechat", "venue", "messages"); }
+
+(async function boot(){
+  if(!isConfigured){ renderVenueUI(); return; }
+  await initFirebase();
+  listenVenue();
+  listenParticipants();
+  listenMessages();
+  if(myParticipantId && myName){ tryAutoRejoin(); }
+})();
+
+function listenVenue(){
+  fs.onSnapshot(venueRef(), async (snap) => {
+    if(!snap.exists()){
+      await fs.setDoc(venueRef(), { name:"IL CAPONE CHAT", code:"NEON26", quiz:null });
+      return;
+    }
+    venueData = snap.data();
+    renderVenueUI();
+    renderQuizFromVenue();
+  });
+}
+function listenParticipants(){
+  const q = fs.query(participantsCol(), fs.orderBy("joinedAt","asc"));
+  fs.onSnapshot(q, (snap) => {
+    participants = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderParticipants();
+    if(myParticipantId && !participants.some(p=>p.id===myParticipantId)){
+      forceBackToJoin("La serata è terminata: inserisci il nuovo codice per rientrare.");
+    }
+  });
+}
+function listenMessages(){
+  const q = fs.query(messagesCol(), fs.orderBy("createdAt","asc"), fs.limitToLast ? fs.limitToLast(200) : fs.limit(200));
+  fs.onSnapshot(q, (snap) => renderMessages(snap.docs.map(d=>({ id:d.id, ...d.data() }))));
+}
+
+function renderVenueUI(){
+  $('joinVenueName').textContent = venueData.name || "IL CAPONE CHAT";
+  $('chatVenueName').textContent = venueData.name || "IL CAPONE CHAT";
+  $('chatCode').textContent = venueData.code || "—";
+  $('joinLiveDot').className = isConfigured ? 'dot-live' : 'dot-off';
+  $('joinStatusLabel').textContent = isConfigured ? 'SERATA ATTIVA' : 'DEMO NON CONNESSA';
+}
+
+$('joinBtn').onclick = async () => {
+  const code = $('codeInput').value.trim().toUpperCase();
+  const nick = $('nickInput').value.trim();
+  const pin = $('pinInput').value.trim();
+  const err = $('joinError');
+  if(!isConfigured){ err.textContent = "L'app non è ancora collegata a un database."; return; }
+  if(!nick){ err.textContent = 'Inserisci un nickname per entrare.'; return; }
+  if(!/^\d{4}$/.test(pin)){ err.textContent = 'Il PIN deve essere di 4 cifre numeriche.'; return; }
+  if(!venueData.code || code !== venueData.code.toUpperCase()){ err.textContent = 'Codice non valido per la serata di stasera.'; return; }
+
+  const existing = participants.find(p=>p.name.toLowerCase()===nick.toLowerCase());
+  if(existing){
+    if(existing.pin === pin){
+      reclaimSession(existing, code);
+    } else {
+      err.textContent = 'Questo nickname è già in uso e il PIN non corrisponde. Se sei tu, controlla il PIN; altrimenti scegli un nickname diverso.';
+    }
+    return;
+  }
+
+  err.textContent = '';
+  const docRef = await fs.addDoc(participantsCol(), { name: nick, pin: pin, score:0, joinedAt: fs.serverTimestamp() });
+  myParticipantId = docRef.id; myName = nick;
+  localStorage.setItem('cc_participantId', myParticipantId);
+  localStorage.setItem('cc_name', myName);
+  localStorage.setItem('cc_code', code);
+  await fs.addDoc(messagesCol(), { who:'Regia', text:`${nick} è entrato/a nella chat 👋`, type:'admin', createdAt: fs.serverTimestamp() });
+  enterChatUI(nick);
+};
+
+function reclaimSession(existing, code){
+  myParticipantId = existing.id;
+  myName = existing.name;
+  localStorage.setItem('cc_participantId', myParticipantId);
+  localStorage.setItem('cc_name', myName);
+  localStorage.setItem('cc_code', code);
+  $('joinError').textContent = '';
+  enterChatUI(myName);
+}
+
+function tryAutoRejoin(){
+  if(!venueData.code) return;
+  if(myCodeStored !== venueData.code.toUpperCase() && myCodeStored !== venueData.code) return;
+  enterChatUI(myName);
+}
+function enterChatUI(nick){
+  $('joinScreen').style.display='none';
+  $('chatScreen').style.display='flex';
+  $('myNickLabel').textContent = nick;
+}
+function forceBackToJoin(msg){
+  myParticipantId = null; myName = null;
+  localStorage.removeItem('cc_participantId'); localStorage.removeItem('cc_name'); localStorage.removeItem('cc_code');
+  $('chatScreen').style.display='none';
+  $('joinScreen').style.display='flex';
+  $('joinError').textContent = msg || '';
+  toast(msg || 'Sessione terminata');
+}
+$('closeChatBtn').onclick = async () => {
+  if(myParticipantId && isConfigured){
+    try{ await fs.deleteDoc(fs.doc(db,"ilcaponechat","venue","participants",myParticipantId)); }catch(e){}
+  }
+  forceBackToJoin('');
+  $('nickInput').value=''; $('codeInput').value='';
+};
+
+function renderMessages(list){
+  const box = $('messages');
+  box.innerHTML='';
+  list.forEach(m=>{
+    const div = document.createElement('div');
+    const mine = m.who === myName;
+    div.className = 'msg ' + (m.type==='admin' ? 'admin' : (mine ? 'me':'other'));
+    if(m.type!=='admin'){
+      const who = document.createElement('span'); who.className='who';
+      who.style.color = mine ? 'rgba(11,11,18,0.7)' : colorFor(m.who||'?');
+      who.textContent = m.who; div.appendChild(who);
+    } else {
+      const who = document.createElement('span'); who.className='who'; who.textContent='📣 REGIA'; div.appendChild(who);
+    }
+    const txt = document.createElement('span'); txt.textContent = m.text; div.appendChild(txt);
+    box.appendChild(div);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+$('sendBtn').onclick = sendMsg;
+$('msgInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendMsg(); });
+async function sendMsg(){
+  const val = $('msgInput').value.trim();
+  if(!val || !myName || !isConfigured) return;
+  $('msgInput').value='';
+  await fs.addDoc(messagesCol(), { who: myName, text: val, type:'guest', createdAt: fs.serverTimestamp() });
+}
+
+$('openParticipants').onclick = () => $('drawer').classList.add('open');
+$('closeDrawer').onclick = () => $('drawer').classList.remove('open');
+function renderParticipants(){
+  const count = participants.length;
+  $('presenceCount').textContent = `${count} present${count===1?'e':'i'}`;
+  const stack = $('avatarStack'); stack.innerHTML='';
+  participants.slice(0,4).forEach(p=>{
+    const av=document.createElement('div'); av.className='av'; av.style.background=colorFor(p.name); av.textContent=initials(p.name); stack.appendChild(av);
+  });
+  const plist = $('plist'); plist.innerHTML='';
+  participants.forEach(p=>{
+    const li=document.createElement('li');
+    const av=document.createElement('div'); av.className='av'; av.style.background=colorFor(p.name); av.textContent=initials(p.name);
+    const info=document.createElement('div');
+    const nm=document.createElement('div'); nm.className='nm'; nm.textContent=p.name+(p.id===myParticipantId?' (tu)':'');
+    const tag=document.createElement('div'); tag.className='tag'; tag.textContent = (p.score>0? p.score+' pt quiz':'in ascolto');
+    info.appendChild(nm); info.appendChild(tag);
+    li.appendChild(av); li.appendChild(info); plist.appendChild(li);
+  });
+}
+
+function renderQuizFromVenue(){
+  const area = $('quizArea');
+  const quiz = venueData.quiz;
+  if(!quiz){ area.innerHTML=''; clearInterval(quizCountdownHandle); return; }
+  const alreadyAnswered = myQuizAnswered === quiz.startedAtMs;
+  const elapsed = (Date.now() - quiz.startedAtMs)/1000;
+  const timeLeft = Math.max(0, Math.ceil(quiz.duration - elapsed));
+
+  if(!quiz.active || timeLeft<=0){
+    area.innerHTML = `
+      <div class="quiz-banner">
+        <div class="quiz-top"><span class="tag">Quiz concluso</span></div>
+        <div class="quiz-q">${quiz.q}</div>
+        <div class="quiz-opts">${quiz.opts.map((o,i)=>`<div class="quiz-opt ${i===quiz.correct?'correct':'wrong'}">${o}</div>`).join('')}</div>
+        <div class="quiz-result">Risposta corretta evidenziata sopra.</div>
+      </div>`;
+    clearInterval(quizCountdownHandle);
+    return;
+  }
+  area.innerHTML = `
+    <div class="quiz-banner">
+      <div class="quiz-top"><span class="tag">Quiz lampo</span><span class="quiz-timer" id="quizTimerLabel">${timeLeft}s</span></div>
+      <div class="quiz-q">${quiz.q}</div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-result" id="quizResult">${alreadyAnswered? 'Risposta già inviata, aspetta il verdetto…':''}</div>
+    </div>`;
+  const optsBox = $('quizOpts');
+  quiz.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='quiz-opt' + (alreadyAnswered && i===myQuizAnswerIdx ? ' picked':'');
+    btn.textContent=opt;
+    btn.disabled = alreadyAnswered;
+    btn.onclick=()=>answerQuiz(i, quiz);
+    optsBox.appendChild(btn);
+  });
+  clearInterval(quizCountdownHandle);
+  quizCountdownHandle = setInterval(()=>{
+    const left = Math.max(0, Math.ceil(quiz.duration - (Date.now()-quiz.startedAtMs)/1000));
+    const lbl = $('quizTimerLabel'); if(lbl) lbl.textContent = left+'s';
+    if(left<=0){ clearInterval(quizCountdownHandle); renderQuizFromVenue(); }
+  }, 500);
+}
+async function answerQuiz(i, quiz){
+  if(myQuizAnswered === quiz.startedAtMs || !myParticipantId) return;
+  myQuizAnswered = quiz.startedAtMs;
+  myQuizAnswerIdx = i;
+  const timeLeft = Math.max(1, Math.ceil(quiz.duration - (Date.now()-quiz.startedAtMs)/1000));
+  document.querySelectorAll('.quiz-opt').forEach((b,idx)=>{ b.disabled=true; if(idx===i) b.classList.add('picked'); });
+  if(i === quiz.correct){
+    const pts = 10 + timeLeft;
+    const me = participants.find(p=>p.id===myParticipantId);
+    const newScore = (me?.score||0) + pts;
+    await fs.updateDoc(fs.doc(db,"ilcaponechat","venue","participants",myParticipantId), { score:newScore });
+    $('quizResult').textContent = `Risposta inviata! +${pts} punti se confermata corretta ⚡`;
+  } else {
+    $('quizResult').textContent = 'Risposta inviata, in attesa del verdetto…';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IL CAPONE CHAT — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0B12; --smoke:#16161F; --smoke-2:#1E1E29; --chalk:#F3F1F7; --chalk-dim:#9C9AAE;
+    --magenta:#FF2E88; --cyan:#2EE6FF; --lime:#C8FF4D; --line: rgba(243,241,247,0.09);
+    --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 800px 500px at 15% -10%, rgba(255,46,136,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 10%, rgba(46,230,255,0.12), transparent 55%),
+      var(--ink);
+    color:var(--chalk); font-family:var(--body); min-height:100vh;
+    display:flex; align-items:flex-start; justify-content:center; padding:28px 16px 60px;
+  }
+  button{font-family:inherit;}
+  ::selection{background:var(--magenta); color:var(--ink);}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--smoke-2); border-radius:8px;}
+
+  .stage{width:100%; max-width:460px;}
+  .config-banner{
+    background:rgba(255,46,136,0.12); border:1px solid var(--magenta); color:var(--chalk);
+    border-radius:14px; padding:14px 16px; font-size:12.5px; line-height:1.5; margin-bottom:16px;
+  }
+  .config-banner code{background:var(--smoke-2); padding:1px 6px; border-radius:5px; font-family:var(--mono); font-size:11.5px;}
+
+  .phone{width:100%; background:var(--smoke); border:1px solid var(--line); border-radius:34px; padding:10px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.7);}
+  .phone-inner{background:var(--ink); border-radius:26px; overflow:hidden; min-height:640px; display:flex; flex-direction:column; position:relative;}
+
+  .ticket-header{position:relative; background:linear-gradient(135deg, rgba(255,46,136,0.18), rgba(46,230,255,0.10)); border-bottom:1px dashed rgba(243,241,247,0.25); padding:18px 20px 22px;}
+  .ticket-header::after{content:""; position:absolute; left:-10px; right:-10px; bottom:-9px; height:18px; background-image:radial-gradient(circle at center, var(--smoke) 0 5px, transparent 5.5px); background-size:18px 18px; background-repeat:repeat-x; background-position:center;}
+  .ticket-eyebrow{font-family:var(--mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--cyan); display:flex; align-items:center; gap:8px;}
+  .dot-live{width:6px;height:6px;border-radius:50%;background:var(--lime); animation:pulse 1.6s infinite;}
+  .dot-off{width:6px;height:6px;border-radius:50%;background:#5b596b;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,255,77,0.5);}70%{box-shadow:0 0 0 8px rgba(200,255,77,0);}100%{box-shadow:0 0 0 0 rgba(200,255,77,0);}}
+  .venue-name{font-family:var(--display); font-weight:700; font-size:26px; letter-spacing:-.01em; margin:6px 0 2px; line-height:1.05;}
+  .venue-sub{font-size:12.5px; color:var(--chalk-dim);}
+
+  .join-screen{padding:26px 22px; display:flex; flex-direction:column; gap:16px; flex:1;}
+  .field-label{font-size:11.5px; color:var(--chalk-dim); font-weight:600; letter-spacing:.03em; margin-bottom:6px; display:block;}
+  .field{width:100%; background:var(--smoke-2); border:1px solid var(--line); color:var(--chalk); padding:13px 14px; border-radius:12px; font-size:14.5px; outline:none; transition:border-color .2s;}
+  .field:focus{border-color:var(--cyan);}
+  .field::placeholder{color:#5b596b;}
+  .btn-primary{background:linear-gradient(120deg, var(--magenta), #ff5fa3); color:var(--ink); border:none; padding:14px; border-radius:12px; font-weight:700; font-size:14.5px; cursor:pointer; transition:transform .15s ease, filter .2s;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--chalk); padding:12px; border-radius:12px; font-weight:600; font-size:13.5px; cursor:pointer;}
+  .hint-error{font-size:12px; color:var(--magenta); min-height:14px;}
+  .small-note{font-size:11px; color:var(--chalk-dim); line-height:1.5; margin-top:6px;}
+
+  .admin-body{padding:18px 20px; display:flex; flex-direction:column; gap:18px; flex:1; overflow-y:auto;}
+  .admin-card{background:var(--smoke-2); border:1px solid var(--line); border-radius:16px; padding:16px;}
+  .admin-card h4{margin:0 0 10px; font-family:var(--display); font-size:13.5px; display:flex; align-items:center; gap:8px;}
+  .swatch{width:9px;height:9px;border-radius:2px;}
+  .row{display:flex; gap:8px;}
+  .row .field{flex:1;}
+
+  .mod-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto;}
+  .mod-list li{display:flex; align-items:flex-start; gap:8px; background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:12.5px;}
+  .mod-list li.type-admin{border-color:rgba(200,255,77,0.3);}
+  .mod-list .mtext{flex:1; min-width:0;}
+  .mod-list .mtext .who{display:block; font-size:10px; font-weight:700; color:var(--cyan); margin-bottom:2px;}
+  .mod-list li.type-admin .mtext .who{color:var(--lime);}
+  .mod-list .mtext .body{word-break:break-word; color:var(--chalk);}
+  .mod-del{flex-shrink:0; width:26px; height:26px; border-radius:8px; background:transparent; border:1px solid var(--line); color:var(--magenta); cursor:pointer; font-size:13px; line-height:1;}
+  .mod-del:hover{background:rgba(255,46,136,0.15);}
+  .mod-empty{font-size:12px; color:var(--chalk-dim); text-align:center; padding:10px 0;}
+
+  .plist-admin{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px;}
+  .plist-admin li{display:flex; align-items:center; gap:8px; background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:7px 10px; font-size:12.5px;}
+  .plist-admin .av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ink); flex-shrink:0;}
+  .plist-admin .pname{flex:1; font-weight:600;}
+  .kick-btn{flex-shrink:0; border:1px solid var(--line); background:transparent; color:var(--magenta); font-size:11px; font-weight:700; padding:5px 9px; border-radius:8px; cursor:pointer;}
+  .kick-btn:hover{background:rgba(255,46,136,0.15);}
+
+  .quiz-build-opts{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;}
+  .radio-opt{display:flex; align-items:center; gap:8px; background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:8px 10px;}
+  .radio-opt input[type=radio]{accent-color:var(--lime);}
+  .radio-opt input.field-mini{flex:1; background:transparent; border:none; color:var(--chalk); font-size:12.5px; outline:none;}
+
+  .leaderboard{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px;}
+  .leaderboard li{display:flex; justify-content:space-between; align-items:center; background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:12.5px;}
+  .leaderboard li .rank{font-family:var(--mono); color:var(--lime); font-weight:700; margin-right:8px;}
+  .leaderboard li .pts{font-family:var(--mono); color:var(--chalk-dim);}
+
+  .danger-zone{border-color:rgba(255,46,136,0.35); background:rgba(255,46,136,0.06);}
+  .btn-danger{background:transparent; border:1px solid var(--magenta); color:var(--magenta); padding:11px; border-radius:12px; font-weight:700; font-size:13px; cursor:pointer; width:100%;}
+  .btn-danger:hover{background:rgba(255,46,136,0.12);}
+
+  .qr-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .qr-cell{background:var(--ink); border:1px solid var(--line); border-radius:12px; padding:10px; text-align:center;}
+  .qr-cell img{width:100%; max-width:140px; border-radius:8px; background:#fff; padding:6px;}
+  .qr-cell .cap{font-size:10.5px; color:var(--chalk-dim); margin-top:6px;}
+  .link-out{font-family:var(--mono); font-size:10.5px; color:var(--cyan); word-break:break-all;}
+
+  .photo-preview{width:100%; max-height:160px; object-fit:cover; border-radius:12px; margin-bottom:10px; display:none; border:1px solid var(--line);}
+  .file-row{display:flex; gap:8px; align-items:center;}
+  .file-row input[type=file]{flex:1; font-size:11.5px; color:var(--chalk-dim);}
+
+  .proj-btn{width:100%; background:linear-gradient(120deg, var(--cyan), #6ff0ff); color:var(--ink); border:none; padding:13px; border-radius:12px; font-weight:700; font-size:13.5px; cursor:pointer; margin-bottom:12px;}
+  .proj-btn:hover{filter:brightness(1.05);}
+  .mirror-frame{width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; border:1px solid var(--line); background:var(--ink); position:relative;}
+  .mirror-frame iframe{width:400%; height:400%; transform:scale(0.25); transform-origin:top left; border:none;}
+  .mirror-label{font-size:10.5px; color:var(--chalk-dim); margin-top:6px; text-align:center;}
+
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--chalk); color:var(--ink); padding:11px 20px; border-radius:999px; font-size:13px; font-weight:600; opacity:0; transition:all .3s ease; z-index:50; box-shadow:0 20px 40px -12px rgba(0,0,0,0.5);}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important; transition:none !important;}}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div id="configBanner" class="config-banner" style="display:none;">
+    ⚠️ <b>Firebase non configurato.</b> Incolla le chiavi del progetto nella sezione <code>firebaseConfig</code> di questo file.
+  </div>
+
+  <!-- LOGIN GATE -->
+  <div id="adminGate" class="phone">
+    <div class="phone-inner">
+      <div class="join-screen">
+        <div class="ticket-header" style="border-radius:16px;">
+          <div class="ticket-eyebrow"><span class="dot-off"></span> ACCESSO RISERVATO</div>
+          <div class="venue-name">Area Admin</div>
+          <div class="venue-sub">Questa pagina è visibile solo a te: non condividerne il link con gli ospiti</div>
+        </div>
+        <input class="field" id="adminPassInput" type="password" placeholder="Password admin">
+        <div class="hint-error" id="adminGateError"></div>
+        <button class="btn-primary" id="adminGateBtn">Entra nel pannello →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPhone" class="phone" style="display:none;">
+    <div class="phone-inner">
+      <div class="ticket-header">
+        <div class="ticket-eyebrow"><span class="dot-live"></span> PANNELLO ADMIN</div>
+        <div class="venue-name">Regia serata</div>
+        <div class="venue-sub" id="adminGuestCount">0 ospiti connessi</div>
+      </div>
+      <div class="admin-body">
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--cyan);"></span>Nome della serata</h4>
+          <div class="row">
+            <input class="field" id="venueNameInput" placeholder="Es. Il Capone Chat — Sabato Neon">
+            <button class="btn-ghost" id="applyVenueBtn">Applica</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--magenta);"></span>Codice d'ingresso</h4>
+          <div class="row">
+            <input class="field" id="entryCodeInput" placeholder="NEON26" style="font-family:var(--mono); letter-spacing:.1em;">
+            <button class="btn-ghost" id="applyCodeBtn">Aggiorna</button>
+          </div>
+          <div class="small-note">Cambialo a ogni serata: chi ha il vecchio codice non entra più.</div>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--cyan);"></span>QR code da proiettare</h4>
+          <div class="qr-grid">
+            <div class="qr-cell"><img id="qrJoin" alt="QR ingresso chat"><div class="cap">Scansiona per entrare</div></div>
+            <div class="qr-cell"><img id="qrApp" alt="QR apri app"><div class="cap">Scansiona per aprire l'app</div></div>
+          </div>
+          <div class="small-note">Link ospiti: <span class="link-out" id="joinLinkOut">—</span></div>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--lime);"></span>Messaggio come amministratore</h4>
+          <div class="row">
+            <input class="field" id="adminMsgInput" placeholder="Es. Tra 5 minuti si balla! 🎶">
+            <button class="btn-ghost" id="adminMsgBtn">Invia</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--lime);"></span>Lancia un quiz lampo</h4>
+          <input class="field" id="quizQInput" placeholder="Domanda…" style="margin-bottom:8px;">
+          <div class="quiz-build-opts">
+            <label class="radio-opt"><input type="radio" name="correctOpt" value="0" checked><input class="field-mini" data-i="0" placeholder="Risposta A"></label>
+            <label class="radio-opt"><input type="radio" name="correctOpt" value="1"><input class="field-mini" data-i="1" placeholder="Risposta B"></label>
+            <label class="radio-opt"><input type="radio" name="correctOpt" value="2"><input class="field-mini" data-i="2" placeholder="Risposta C"></label>
+            <label class="radio-opt"><input type="radio" name="correctOpt" value="3"><input class="field-mini" data-i="3" placeholder="Risposta D"></label>
+          </div>
+          <button class="btn-primary" id="launchQuizBtn" style="margin-top:10px; width:100%;">🚀 Lancia quiz (15s)</button>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--magenta);"></span>Moderazione chat</h4>
+          <ul class="mod-list" id="modList"><li class="mod-empty" style="border:none;">Nessun messaggio ancora.</li></ul>
+          <div class="small-note">Vedi tutti i messaggi in tempo reale. Clicca 🗑 per eliminare quelli inappropriati: spariscono subito dal telefono di tutti.</div>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--cyan);"></span>Gestione partecipanti</h4>
+          <ul class="plist-admin" id="plistAdmin"></ul>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--lime);"></span>Foto in vetrina (opzionale)</h4>
+          <img class="photo-preview" id="photoPreview" alt="Foto attuale">
+          <div class="file-row">
+            <input type="file" id="photoFileInput" accept="image/*">
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <button class="btn-ghost" id="uploadPhotoBtn" style="flex:1;">Carica foto</button>
+            <button class="btn-ghost" id="removePhotoBtn" style="flex:1; color:var(--magenta); border-color:var(--magenta);">Rimuovi</button>
+          </div>
+          <div class="small-note">Es. foto degli sposi, del locale o promozionale: comparirà sul videoproiettore sotto il nome della serata.</div>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--cyan);"></span>Videoproiezione</h4>
+          <button class="proj-btn" id="openProjectorBtn">🖥️ Apri videoproiezione a schermo intero</button>
+          <div class="mirror-frame"><iframe id="mirrorFrame" src="proiettore.html"></iframe></div>
+          <div class="mirror-label">Anteprima in tempo reale (specchio) di quello che vedono gli invitati</div>
+        </div>
+
+        <div class="admin-card">
+          <h4><span class="swatch" style="background:var(--cyan);"></span>Classifica serata</h4>
+          <ul class="leaderboard" id="leaderboard"></ul>
+        </div>
+
+        <div class="admin-card danger-zone">
+          <h4><span class="swatch" style="background:var(--magenta);"></span>Fine serata</h4>
+          <div class="small-note" style="margin-top:0; margin-bottom:10px;">Svuota chat, partecipanti e classifica per tutti i telefoni connessi.</div>
+          <button class="btn-danger" id="resetBtn">🔄 Reset chat e partecipanti</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* ============================================================
+   CONFIGURAZIONE — deve coincidere con quella usata in index.html
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyB-P0VYZ7W2ZuLskkrzYns5KHBQBBhK1sE",
+  authDomain: "il-capone-chat.firebaseapp.com",
+  projectId: "il-capone-chat",
+  storageBucket: "il-capone-chat.firebasestorage.app",
+  messagingSenderId: "273475235952",
+  appId: "1:273475235952:web:70d7ee2015ff5a7761c4b5"
+};
+
+// Password per accedere a questa pagina — CAMBIALA e non condividerla con gli ospiti.
+const ADMIN_PASSWORD = "capone2026";
+/* ============================================================ */
+
+const isConfigured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("INCOLLA");
+const $ = (id) => document.getElementById(id);
+const toast = (msg) => {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2200);
+};
+if(!isConfigured){ $('configBanner').style.display = 'block'; }
+
+const COLORS = ['#FF2E88','#2EE6FF','#C8FF4D','#FF9F4D','#B18CFF','#4DFFC0'];
+const colorFor = (name) => { let h=0; for(const c of name) h=(h*31+c.charCodeAt(0))>>>0; return COLORS[h%COLORS.length]; };
+const initials = (name) => name.trim().slice(0,2).toUpperCase();
+
+let db=null, fs=null, storage=null, sto=null;
+let venueData = { name:"IL CAPONE CHAT", code:"", quiz:null, photoUrl:null };
+let participants = [];
+
+async function initFirebase(){
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+  fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+  sto = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js");
+  const app = initializeApp(firebaseConfig);
+  db = fs.getFirestore(app);
+  storage = sto.getStorage(app);
+}
+function venueRef(){ return fs.doc(db, "ilcaponechat", "venue"); }
+function participantsCol(){ return fs.collection(db, "ilcaponechat", "venue", "participants"); }
+function messagesCol(){ return fs.collection(db, "ilcaponechat", "venue", "messages"); }
+
+/* ---------------- LOGIN ---------------- */
+if(sessionStorage.getItem('cc_admin_ok') === '1'){ enterAdmin(); }
+$('adminGateBtn').onclick = () => {
+  if($('adminPassInput').value === ADMIN_PASSWORD){
+    sessionStorage.setItem('cc_admin_ok','1');
+    enterAdmin();
+  } else {
+    $('adminGateError').textContent = 'Password errata.';
+  }
+};
+async function enterAdmin(){
+  $('adminGate').style.display='none';
+  $('adminPhone').style.display='block';
+  if(!isConfigured) return;
+  await initFirebase();
+  listenVenue();
+  listenParticipants();
+  listenMessages();
+}
+
+/* ---------------- LISTENERS ---------------- */
+function listenVenue(){
+  fs.onSnapshot(venueRef(), async (snap) => {
+    if(!snap.exists()){
+      await fs.setDoc(venueRef(), { name:"IL CAPONE CHAT", code:"NEON26", quiz:null });
+      return;
+    }
+    venueData = snap.data();
+    renderVenueUI();
+  });
+}
+function listenParticipants(){
+  const q = fs.query(participantsCol(), fs.orderBy("joinedAt","asc"));
+  fs.onSnapshot(q, (snap) => {
+    participants = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderAdminParticipants();
+    renderLeaderboard();
+    $('adminGuestCount').textContent = `${participants.length} ospit${participants.length===1?'e':'i'} conness${participants.length===1?'o':'i'}`;
+  });
+}
+function listenMessages(){
+  const q = fs.query(messagesCol(), fs.orderBy("createdAt","asc"), fs.limitToLast ? fs.limitToLast(200) : fs.limit(200));
+  fs.onSnapshot(q, (snap) => renderModeration(snap.docs.map(d=>({ id:d.id, ...d.data() }))));
+}
+
+function renderVenueUI(){
+  $('venueNameInput').value = venueData.name || "";
+  $('entryCodeInput').value = venueData.code || "";
+  const prev = $('photoPreview');
+  if(venueData.photoUrl){ prev.src = venueData.photoUrl; prev.style.display='block'; }
+  else { prev.style.display='none'; prev.src=''; }
+  buildQrCodes();
+}
+
+/* ---------------- VENUE & CODE ---------------- */
+$('applyVenueBtn').onclick = async () => {
+  const v = $('venueNameInput').value.trim(); if(!v||!isConfigured) return;
+  await fs.updateDoc(venueRef(), { name: v });
+  await fs.addDoc(messagesCol(), { who:'Regia', text:`Benvenuti a "${v}"! 🎉`, type:'admin', createdAt: fs.serverTimestamp() });
+  toast('Nome serata aggiornato ✓');
+};
+$('applyCodeBtn').onclick = async () => {
+  const c = $('entryCodeInput').value.trim().toUpperCase(); if(!c||!isConfigured) return;
+  await fs.updateDoc(venueRef(), { code: c });
+  toast("Codice d'ingresso aggiornato ✓");
+  buildQrCodes();
+};
+$('adminMsgBtn').onclick = async () => {
+  const v = $('adminMsgInput').value.trim(); if(!v||!isConfigured) return;
+  await fs.addDoc(messagesCol(), { who:'Regia', text:v, type:'admin', createdAt: fs.serverTimestamp() });
+  $('adminMsgInput').value='';
+};
+
+/* ---------------- QR CODES (puntano alla pagina ospiti index.html) ---------------- */
+function buildQrCodes(){
+  const guestBase = location.origin + location.pathname.replace(/admin\.html$/, '');
+  const joinUrl = guestBase + '?code=' + encodeURIComponent(venueData.code || '');
+  $('joinLinkOut').textContent = joinUrl;
+  $('qrJoin').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
+  $('qrApp').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(guestBase)}`;
+}
+
+/* ---------------- FOTO IN VETRINA ---------------- */
+$('uploadPhotoBtn').onclick = async () => {
+  if(!isConfigured) return;
+  const file = $('photoFileInput').files[0];
+  if(!file){ toast('Scegli prima un file immagine'); return; }
+  if(file.size > 5*1024*1024){ toast('Immagine troppo grande (max 5MB)'); return; }
+  toast('Caricamento in corso…');
+  try{
+    const fileRef = sto.ref(storage, 'ilcaponechat/venue-photo.jpg');
+    await sto.uploadBytes(fileRef, file);
+    const url = await sto.getDownloadURL(fileRef);
+    await fs.updateDoc(venueRef(), { photoUrl: url });
+    toast('Foto pubblicata sul videoproiettore ✓');
+  }catch(e){ toast('Errore nel caricamento: controlla Firebase Storage'); }
+};
+$('removePhotoBtn').onclick = async () => {
+  if(!isConfigured) return;
+  await fs.updateDoc(venueRef(), { photoUrl: null });
+  toast('Foto rimossa');
+};
+
+/* ---------------- VIDEOPROIEZIONE ---------------- */
+$('openProjectorBtn').onclick = () => {
+  window.open('proiettore.html', '_blank');
+};
+
+/* ---------------- QUIZ ---------------- */
+$('launchQuizBtn').onclick = async () => {
+  if(!isConfigured) return;
+  const q = $('quizQInput').value.trim();
+  const inputs = [...document.querySelectorAll('.field-mini')].sort((a,b)=>a.dataset.i-b.dataset.i).map(i=>i.value.trim());
+  if(!q || inputs.some(v=>!v)){ toast('Completa domanda e tutte le risposte'); return; }
+  const correctIdx = +document.querySelector('input[name="correctOpt"]:checked').value;
+  const quiz = { q, opts: inputs, correct: correctIdx, duration:15, startedAtMs: Date.now(), active:true };
+  await fs.updateDoc(venueRef(), { quiz });
+  await fs.addDoc(messagesCol(), { who:'Regia', text:`❓ Nuovo quiz lampo: "${q}"`, type:'admin', createdAt: fs.serverTimestamp() });
+  setTimeout(async ()=>{
+    const cur = (await fs.getDoc(venueRef())).data();
+    if(cur.quiz && cur.quiz.startedAtMs === quiz.startedAtMs){
+      await fs.updateDoc(venueRef(), { "quiz.active": false });
+      await fs.addDoc(messagesCol(), { who:'Regia', text:`⏱️ Tempo scaduto! Risposta corretta: "${quiz.opts[quiz.correct]}"`, type:'admin', createdAt: fs.serverTimestamp() });
+    }
+  }, quiz.duration*1000 + 300);
+};
+
+/* ---------------- MODERAZIONE CHAT ---------------- */
+function renderModeration(list){
+  const box = $('modList');
+  if(!list.length){ box.innerHTML = '<li class="mod-empty" style="border:none;">Nessun messaggio ancora.</li>'; return; }
+  box.innerHTML = '';
+  [...list].reverse().forEach(m=>{
+    const li = document.createElement('li');
+    li.className = m.type==='admin' ? 'type-admin' : '';
+    const info = document.createElement('div'); info.className='mtext';
+    const who = document.createElement('span'); who.className='who'; who.textContent = m.type==='admin' ? '📣 Regia' : m.who;
+    const body = document.createElement('span'); body.className='body'; body.textContent = m.text;
+    info.appendChild(who); info.appendChild(body);
+    const del = document.createElement('button'); del.className='mod-del'; del.textContent='🗑'; del.title='Elimina messaggio';
+    del.onclick = () => deleteMessage(m.id);
+    li.appendChild(info); li.appendChild(del);
+    box.appendChild(li);
+  });
+}
+async function deleteMessage(id){
+  if(!isConfigured || !id) return;
+  try{ await fs.deleteDoc(fs.doc(db,"ilcaponechat","venue","messages",id)); }
+  catch(e){ toast('Errore durante la cancellazione'); }
+}
+
+/* ---------------- GESTIONE PARTECIPANTI ---------------- */
+function renderAdminParticipants(){
+  const box = $('plistAdmin');
+  if(!participants.length){ box.innerHTML = '<li style="border:none; justify-content:center; color:var(--chalk-dim);">Nessun ospite connesso.</li>'; return; }
+  box.innerHTML = '';
+  participants.forEach(p=>{
+    const li = document.createElement('li');
+    const av = document.createElement('div'); av.className='av'; av.style.background=colorFor(p.name); av.textContent=initials(p.name);
+    const nm = document.createElement('div'); nm.className='pname'; nm.textContent = p.name + (p.score>0 ? ` · ${p.score} pt` : '');
+    const kick = document.createElement('button'); kick.className='kick-btn'; kick.textContent='Rimuovi';
+    kick.onclick = () => kickParticipant(p.id, p.name);
+    li.appendChild(av); li.appendChild(nm); li.appendChild(kick);
+    box.appendChild(li);
+  });
+}
+async function kickParticipant(id, name){
+  if(!isConfigured || !id) return;
+  if(!confirm(`Rimuovere ${name} dalla chat? Dovrà reinserire il codice per rientrare.`)) return;
+  try{
+    await fs.deleteDoc(fs.doc(db,"ilcaponechat","venue","participants",id));
+    await fs.addDoc(messagesCol(), { who:'Regia', text:`${name} è stato/a rimosso/a dalla chat.`, type:'admin', createdAt: fs.serverTimestamp() });
+  }catch(e){ toast('Errore durante la rimozione'); }
+}
+
+function renderLeaderboard(){
+  const lb=$('leaderboard'); lb.innerHTML='';
+  const ranked=[...participants].sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,8);
+  if(!ranked.length){ lb.innerHTML='<li>Nessun partecipante ancora.</li>'; return; }
+  ranked.forEach((p,i)=>{
+    const li=document.createElement('li');
+    li.innerHTML = `<span><span class="rank">#${i+1}</span>${p.name}</span><span class="pts">${p.score||0} pt</span>`;
+    lb.appendChild(li);
+  });
+}
+
+/* ---------------- RESET ---------------- */
+$('resetBtn').onclick = async () => {
+  if(!isConfigured) return;
+  if(!confirm('Confermi il reset? Chat, partecipanti e classifica verranno azzerati per tutti.')) return;
+  const partsSnap = await fs.getDocs(participantsCol());
+  await Promise.all(partsSnap.docs.map(d=>fs.deleteDoc(d.ref)));
+  const msgsSnap = await fs.getDocs(messagesCol());
+  await Promise.all(msgsSnap.docs.map(d=>fs.deleteDoc(d.ref)));
+  await fs.updateDoc(venueRef(), { quiz: null });
+  toast('Serata resettata: pronta per il prossimo evento 🔄');
+};
+</script>
+</body>
+</html>
