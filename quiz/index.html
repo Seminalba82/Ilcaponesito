@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>IL CAPONE QUIZ 3.0</title>
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Orbitron:wght@700;900&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -342,6 +342,51 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   text-shadow:0 0 34px rgba(182,255,46,.8), 0 8px 0 #3f5e00; transform:scale(0); transition:transform .5s cubic-bezier(.3,1.6,.5,1);}
 .votoAvg.show{transform:scale(1);}
 
+/* ===== COUNTDOWN INIZIALE 3D ===== */
+.countStage{position:relative; display:flex; align-items:center; justify-content:center; min-height:56vh; width:100%; perspective:800px; overflow:visible;}
+.countNum{font-family:'Bungee'; font-size:clamp(130px,32vw,320px); color:var(--gold); line-height:1;
+  text-shadow:0 0 40px rgba(255,201,60,.8), 0 6px 0 #b57f00, 0 12px 0 #7a4b00, 0 18px 0 #3d2500, 0 26px 40px rgba(0,0,0,.8);}
+.countNum.pop{animation:numPop .85s cubic-bezier(.2,1.4,.4,1);}
+@keyframes numPop{0%{transform:scale(3.4) rotateX(70deg); opacity:0; filter:blur(6px);}55%{transform:scale(.92) rotateX(0); opacity:1; filter:blur(0);}75%{transform:scale(1.08);}100%{transform:scale(1);}}
+.countNum.go{font-size:clamp(52px,13vw,150px);
+  background:linear-gradient(180deg,#ff7ac0,var(--magenta) 55%,#b3006b);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 0 26px rgba(255,46,154,.8)) drop-shadow(0 8px 0 rgba(90,0,55,.9));
+  animation:goPop .7s cubic-bezier(.2,1.5,.4,1);}
+@keyframes goPop{0%{transform:scale(.1) rotate(-14deg); opacity:0;}60%{transform:scale(1.18) rotate(3deg);}100%{transform:scale(1) rotate(0);}}
+.boomP{position:absolute; left:50%; top:50%; font-size:clamp(20px,4vw,40px); pointer-events:none; z-index:3;
+  animation:boomFly .95s cubic-bezier(.15,.8,.4,1) forwards;}
+@keyframes boomFly{0%{transform:translate(-50%,-50%) scale(1); opacity:1;}100%{transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(560deg) scale(.2); opacity:0;}}
+.boomFlash{position:absolute; inset:-20%; pointer-events:none; z-index:2;
+  background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.95), rgba(255,201,60,.5) 30%, transparent 62%);
+  animation:flashOut .55s ease-out forwards;}
+@keyframes flashOut{from{opacity:1; transform:scale(.4);}to{opacity:0; transform:scale(1.4);}}
+
+/* ===== TIMER GIGANTE + BOMBA ===== */
+.timerTitle{font-family:'Bungee'; font-size:clamp(24px,5vw,60px); text-align:center; color:var(--gold);
+  text-shadow:0 0 20px rgba(255,201,60,.6), 0 4px 0 #7a4b00; letter-spacing:2px; line-height:1.1;}
+.timerClock{font-family:'Orbitron',monospace; font-weight:900; font-variant-numeric:tabular-nums;
+  font-size:clamp(84px,22vw,240px); text-align:center; color:#00ffd5; letter-spacing:.06em; line-height:1;
+  text-shadow:0 0 14px rgba(0,255,213,.9), 0 0 46px rgba(0,255,213,.5), 0 6px 0 rgba(0,60,52,.9);}
+.timerClock.danger{color:#ff3b3b; text-shadow:0 0 14px rgba(255,59,59,.95), 0 0 50px rgba(255,59,59,.6), 0 6px 0 rgba(80,0,0,.9);
+  animation:dangerPulse .5s infinite alternate;}
+@keyframes dangerPulse{from{transform:scale(1); filter:brightness(1);}to{transform:scale(1.05); filter:brightness(1.5);}}
+.bombWrap{text-align:center; font-size:clamp(50px,10vw,110px); margin-top:6px; display:none; position:relative;}
+.bombWrap.on{display:block; animation:bombShake .3s infinite;}
+@keyframes bombShake{0%,100%{transform:translateX(0) rotate(-3deg);}50%{transform:translateX(6px) rotate(3deg);}}
+.bombWrap .spark{position:absolute; top:-6px; left:calc(50% + .5em); font-size:.45em; animation:sparkle .25s infinite alternate;}
+@keyframes sparkle{from{transform:scale(.7) rotate(-20deg); opacity:.7;}to{transform:scale(1.25) rotate(20deg); opacity:1;}}
+.timerStage{position:relative; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:50vh; overflow:visible;}
+
+/* ===== OVERLAY MESSAGGIO SU PROIETTORE ===== */
+#pjMsgOverlay{display:none; position:fixed; inset:0; z-index:66; background:rgba(5,2,10,.94); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:40px; text-align:center;}
+#pjMsgText2{font-family:'Bungee'; font-size:clamp(40px,9vw,120px); line-height:1.1; word-break:break-word;
+  background:linear-gradient(180deg,#ffe08a,var(--gold) 55%,#b57f00);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 0 30px rgba(255,201,60,.7)) drop-shadow(0 8px 0 rgba(61,37,0,.9));
+  animation:goPop .6s cubic-bezier(.2,1.5,.4,1);}
+
 /* ===== SCHERMO PROIETTORE ===== */
 body.proj{overflow:hidden;}
 body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:center;}
@@ -371,7 +416,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v4.5</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v4.8</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -582,10 +627,8 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <button class="hb" onclick="modalPoints()">± Punti</button>
   <button class="hb" onclick="modalQuestions()">📋 Scelta domanda</button>
   <button class="hb" onclick="btnEndQuiz()">🏁 Termina quiz</button>
-  <button class="hb" onclick="openMini()">🥃 Minigioco bussolotti</button>
-  <button class="hb" onclick="openDice()">🎲 Pari o Dispari</button>
-  <button class="hb" onclick="openSimon()">🎨 Simon</button>
-  <button class="hb" onclick="openVoto()">🌡 Votometro</button>
+  <button class="hb" onclick="modalGames()" style="border-color:var(--gold); color:var(--gold)">🕹 GIOCHI E MODULI</button>
+  <button class="hb" id="hbMsg" onclick="modalPjMsg()">💬 Messaggio → 📺</button>
   <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
   <button class="hb" onclick="openProjector()">📺 Apri proiettore</button>
   <button class="hb" id="hbQOnly" onclick="toggleQOnly()">🔍 Solo domanda</button>
@@ -628,6 +671,57 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
 </div>
 
+<!-- ==================== HOST: TIMER ==================== -->
+<div class="screen" id="scrTimer">
+  <div class="brand"><div class="t1" style="font-size:clamp(22px,4vw,38px)">⏱ TIMER</div></div>
+  <div class="panel mt" style="max-width:560px" id="timerSetup">
+    <div class="label">Titolo sopra il timer</div>
+    <input type="text" id="timerTitleIn" placeholder="Es. PAUSA BIRRETTA 🍺" maxlength="40">
+    <div class="row mt">
+      <div class="grow"><div class="label">Minuti</div><input type="number" id="timerMin" value="5" min="0" max="99" style="text-align:center"></div>
+      <div class="grow"><div class="label">Secondi</div><input type="number" id="timerSec" value="0" min="0" max="59" style="text-align:center"></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="timerStart()">▶ AVVIA TIMER</button>
+  </div>
+  <div id="timerLive" style="display:none; width:100%">
+    <div class="timerStage" id="timerStageHost">
+      <div class="timerTitle" id="timerTitleHost"></div>
+      <div class="timerClock" id="timerClockHost">00:00</div>
+      <div class="bombWrap" id="timerBombHost">💣<span class="spark">✨</span></div>
+    </div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn small mg" onclick="timerBomb()">💣 Ultimi 10 secondi!</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: TIMER ==================== -->
+<div class="screen" id="scrPjTimer">
+  <div class="timerStage" style="min-height:82vh">
+    <div class="timerTitle" id="timerTitlePj" style="font-size:clamp(30px,6vw,76px)"></div>
+    <div class="timerClock" id="timerClockPj" style="font-size:clamp(110px,26vw,320px)">00:00</div>
+    <div class="bombWrap" id="timerBombPj">💣<span class="spark">✨</span></div>
+  </div>
+</div>
+
+<!-- ==================== PLAYER: TIMER ==================== -->
+<div class="screen" id="scrPlayTimer">
+  <div class="timerStage">
+    <div class="timerTitle" id="timerTitlePl" style="font-size:clamp(20px,6vw,32px)"></div>
+    <div class="timerClock" id="timerClockPl" style="font-size:clamp(70px,24vw,120px)">00:00</div>
+    <div class="bombWrap" id="timerBombPl">💣<span class="spark">✨</span></div>
+  </div>
+</div>
+
+<!-- ==================== PROIETTORE: OVERLAY MESSAGGIO ==================== -->
+<div id="pjMsgOverlay"><div id="pjMsgText2"></div></div>
+
+<!-- ==================== COUNTDOWN (host / proiettore / telefono) ==================== -->
+<div class="screen" id="scrCount"><div class="countStage" id="countHost"></div></div>
+<div class="screen" id="scrPjCount"><div class="countStage" id="countPj" style="min-height:78vh"></div></div>
+<div class="screen" id="scrPlayCount"><div class="countStage" id="countPlay"></div></div>
+
 <!-- ==================== HOST: VOTOMETRO ==================== -->
 <div class="screen" id="scrVoto">
   <div class="brand"><div class="t1" style="font-size:clamp(22px,4vw,38px)">🌡 VOTOMETRO</div></div>
@@ -639,7 +733,17 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <input type="text" id="votoEvent" placeholder="Es. LA CORRIDA DEL CAPONE" maxlength="40">
     <div class="row mt">
       <div class="grow"><div class="label">Secondi per votare</div><select id="votoSecs"></select></div>
+      <div class="grow"><div class="label">Scala voti</div><select id="votoScale">
+        <option value="1">Da 1 a 10</option>
+        <option value="10">Da 10 a 100</option>
+        <option value="100">Da 100 a 1000</option>
+      </select></div>
     </div>
+    <div class="label mt">Dove vanno i punti?</div>
+    <select id="votoDest">
+      <option value="esib">🏅 Classifica esibizioni — fuori dal quiz (premi speciali)</option>
+      <option value="quiz">🎩 Classifica del quiz — i voti diventano punti squadra</option>
+    </select>
     <button class="btn mg mt" style="width:100%" onclick="votoStart()">▶ APRI LE VOTAZIONI</button>
   </div>
   <div id="votoLive" style="display:none; width:100%; max-width:640px" class="center">
@@ -652,6 +756,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div class="miniMsg" id="votoMsg"></div>
     <div class="row mt" style="justify-content:center">
       <button class="btn cy" id="votoBtnAgain" onclick="votoAgain()" style="display:none">🔁 Nuova votazione</button>
+      <button class="btn lm" id="votoBtnBoard" onclick="esibToProjector()" style="display:none">🏅 Esibizioni → 📺</button>
     </div>
   </div>
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
@@ -867,7 +972,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 45; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 48; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -1177,7 +1282,13 @@ function toggleHostBar(){
   $('hbToggle').textContent = c ? '🎛 REGIA ▴' : '🎛 REGIA ▾';
 }
 function abortGame(){ $('hostBar').classList.remove('on'); document.body.classList.remove('barOn'); if(G){ G.ref.off(); G.ref.remove(); G=null; } location.href = location.pathname; }
-function startQuiz(){ nextQuestion(); }
+function startQuiz(){
+  const startAt = serverNow() + 500;
+  G.ref.update({ status:'count', count:{ startAt } });
+  pjSend({type:'count', startAt});
+  showScreen('scrCount');
+  runCountdown($('countHost'), startAt, ()=> backToQuiz('SI GIOCA!'));
+}
 
 function nextQuestion(){
   G.qi++;
@@ -1187,6 +1298,7 @@ function nextQuestion(){
   G.closed = false;
   // scrive su DB solo ciò che serve ai telefoni (niente media, niente testo domanda)
   if (leadOv.on) sendLeadOverlay({on:false});
+  if (msgOv.on) sendPjMsg(false);
   G.ref.update({
     status:'question',
     current:{ i:G.qi, total:G.quiz.questions.length, type:q.type, points:q.points, timer:q.timer,
@@ -1435,6 +1547,14 @@ function listenGame(){
     else if (g.status==='dice') showPlayerDice(g);
     else if (g.status==='simon') showPlayerSimon(g);
     else if (g.status==='voto') showPlayerVoto(g);
+    else if (g.status==='timer') {
+      const t = g.timer||{};
+      if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
+    }
+    else if (g.status==='count') {
+      const st = (g.count||{}).startAt||0;
+      if (P.countAt !== st) { P.countAt = st; showScreen('scrPlayCount'); runCountdown($('countPlay'), st); }
+    }
     else if (g.status==='pausa') { showScreen('scrWait'); $('waitMsg').textContent='OCCHI ALLO SCHERMO! 🎩'; $('waitSub').textContent='Il quiz continua tra poco...'; }
     else if (g.status==='end') showPlayerEnd(g);
   });
@@ -1492,10 +1612,12 @@ function showPlayerVoto(g){
     $('pvTarget').textContent = (m.target||{}).name||'?';
     $('pvSelf').style.display = isSelf ? 'block' : 'none';
     $('pvGrid').style.display = isSelf ? 'none' : 'grid';
-    $('pvGrid').innerHTML = Array.from({length:10},(_,k)=>{
-      const v = k+1, hue = Math.round((v-1)/9*120);
+    const steps = m.steps || Array.from({length:10},(_,k)=>k+1);
+    $('pvGrid').innerHTML = steps.map((v,k)=>{
+      const hue = Math.round(k/9*120);
       const cls = (P.votoVal===v?'sel':'') + (P.votoVal && P.votoVal!==v ? ' dim':'');
-      return `<button class="vBtn ${cls}" style="background:linear-gradient(180deg,hsl(${hue},85%,62%),hsl(${hue},85%,42%));color:hsl(${hue},85%,55%)" onclick="voteVoto(${v})"><span style="color:#fff">${v}</span></button>`;
+      const fs = v>=100 ? 'font-size:15px' : v>=10 ? 'font-size:19px' : '';
+      return `<button class="vBtn ${cls}" style="background:linear-gradient(180deg,hsl(${hue},85%,62%),hsl(${hue},85%,42%));color:hsl(${hue},85%,55%);${fs}" onclick="voteVoto(${v})"><span style="color:#fff">${v}</span></button>`;
     }).join('');
     $('pvSent').style.display = P.votoVal ? 'block' : 'none';
     showScreen('scrPlayVoto');
@@ -1510,15 +1632,17 @@ function showPlayerVoto(g){
     clearInterval(P.votoInt);
     const isTarget = m.target && m.target.pid === P.id;
     const msg = $('pfMsg'), pts = $('pfPts');
+    const av = (m.steps&&m.steps[0]===1) ? (+m.avg).toFixed(1) : Math.round(m.avg)+'';
+    const dst = m.dest==='quiz' ? `+${m.tot} punti quiz` : `${m.tot} pt esibizioni`;
     if (isTarget) {
       msg.className='feedback mtb fb-ok'; msg.style.color='';
       msg.textContent = '🌡 LA GIURIA HA DECISO!';
-      pts.textContent = m.n ? `MEDIA ${(+m.avg).toFixed(1)} → +${m.tot} PUNTI` : 'Nessun voto';
+      pts.textContent = m.n ? `MEDIA ${av} → ${dst}` : 'Nessun voto';
       if (m.n && navigator.vibrate) navigator.vibrate([80,50,80]);
     } else {
       msg.className='feedback mtb'; msg.style.color='var(--cyan)';
       msg.textContent = '🌡 VERDETTO';
-      pts.textContent = m.n ? `${(m.target||{}).name}: ${(+m.avg).toFixed(1)} (+${m.tot})` : 'Nessun voto';
+      pts.textContent = m.n ? `${(m.target||{}).name}: ${av} (${dst})` : 'Nessun voto';
     }
     const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
     const pos = arr.findIndex(p=>p.id===P.id)+1;
@@ -1878,6 +2002,172 @@ function getPoints(selId, manId){
 }
 
 /* ================================================================
+   COUNTDOWN 3-2-1-SI GIOCA (condiviso)
+================================================================ */
+function beepHz(hz, dur, type){
+  try{
+    _audioCtx = _audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o=_audioCtx.createOscillator(), g=_audioCtx.createGain();
+    o.type=type||'square'; o.frequency.value=hz;
+    g.gain.setValueAtTime(.0001,_audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.3,_audioCtx.currentTime+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,_audioCtx.currentTime+dur/1000);
+    o.connect(g); g.connect(_audioCtx.destination); o.start(); o.stop(_audioCtx.currentTime+dur/1000+.05);
+  }catch(e){}
+}
+function explodeFx(el){
+  const flash = document.createElement('div'); flash.className='boomFlash'; el.appendChild(flash);
+  setTimeout(()=>flash.remove(), 600);
+  const em = ['✨','💥','⭐','🎩','💫','🔥'];
+  for (let i=0;i<26;i++){
+    const p = document.createElement('span'); p.className='boomP';
+    p.textContent = em[i%em.length];
+    const a = Math.random()*Math.PI*2, d = 130 + Math.random()*260;
+    p.style.setProperty('--dx', Math.cos(a)*d+'px');
+    p.style.setProperty('--dy', Math.sin(a)*d+'px');
+    el.appendChild(p); setTimeout(()=>p.remove(), 1000);
+  }
+  beepHz(70, 500, 'sawtooth');
+  confetti();
+  if (navigator.vibrate) navigator.vibrate([80,60,120]);
+}
+function runCountdown(el, startAt, done){
+  el.innerHTML = '<div class="countNum" id="'+el.id+'_n"></div>';
+  const num = el.firstChild;
+  let last = null, boomed = false;
+  clearInterval(el._cInt);
+  el._cInt = setInterval(()=>{
+    const elapsed = serverNow() - startAt;
+    if (elapsed < 0) return;
+    const n = 3 - Math.floor(elapsed/1000);
+    if (n >= 1) {
+      if (n !== last) { last = n;
+        num.classList.remove('pop','go'); void num.offsetWidth;
+        num.textContent = n; num.classList.add('pop');
+        if (navigator.vibrate) navigator.vibrate(30);
+      }
+    } else if (!boomed) {
+      boomed = true;
+      // 💥 esplosione: flash + particelle radiali
+      const flash = document.createElement('div'); flash.className='boomFlash'; el.appendChild(flash);
+      setTimeout(()=>flash.remove(), 600);
+      const em = ['✨','💥','⭐','🎩','💫','🔥'];
+      for (let i=0;i<26;i++){
+        const p = document.createElement('span'); p.className='boomP';
+        p.textContent = em[i%em.length];
+        const a = Math.random()*Math.PI*2, d = 130 + Math.random()*260;
+        p.style.setProperty('--dx', Math.cos(a)*d+'px');
+        p.style.setProperty('--dy', Math.sin(a)*d+'px');
+        el.appendChild(p); setTimeout(()=>p.remove(), 1000);
+      }
+      num.classList.remove('pop'); void num.offsetWidth;
+      num.textContent = 'SI GIOCA!'; num.classList.add('go');
+      confetti();
+      if (navigator.vibrate) navigator.vibrate([80,60,120]);
+      clearInterval(el._cInt);
+      if (done) setTimeout(done, 1500);
+    }
+  }, 50);
+}
+
+/* ================================================================
+   TIMER GIGANTE CON BOMBA (condiviso host / proiettore / telefono)
+================================================================ */
+function runBigTimer(sfx, title, endAt){
+  const clock = $('timerClock'+sfx), bomb = $('timerBomb'+sfx), stage = clock.parentElement, ttl = $('timerTitle'+sfx);
+  ttl.textContent = title||'';
+  clock.classList.remove('danger'); bomb.classList.remove('on');
+  clearInterval(clock._int);
+  let lastSec = null, boomed = false;
+  clock._int = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    const secs = Math.ceil(left/1000);
+    const mm = String(Math.floor(secs/60)).padStart(2,'0'), ss = String(secs%60).padStart(2,'0');
+    if (!boomed) clock.textContent = mm+':'+ss;
+    if (left <= 10500 && left > 0) {
+      clock.classList.add('danger'); bomb.classList.add('on');
+      if (secs !== lastSec) { lastSec = secs; beepHz(secs<=3?1400:950, 90); if(navigator.vibrate) navigator.vibrate(25); }
+    }
+    if (left <= 0 && !boomed) {
+      boomed = true;
+      bomb.classList.remove('on');
+      explodeFx(stage);
+      clock.classList.remove('danger');
+      clock.textContent = '';
+      clock.innerHTML = '<span class="countNum go" style="font-size:clamp(40px,10vw,110px)">SI RIPARTE!!!</span>';
+      clearInterval(clock._int);
+    }
+  }, 100);
+}
+
+/* ================================================================
+   TIMER — REGIA HOST
+================================================================ */
+let TMR = {};
+function openTimer(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal();
+  $('timerSetup').style.display='block'; $('timerLive').style.display='none';
+  showScreen('scrTimer');
+}
+function timerStart(){
+  const mins = Math.max(0, +$('timerMin').value||0), secs = Math.max(0, Math.min(59, +$('timerSec').value||0));
+  const dur = (mins*60+secs)*1000;
+  if (dur < 3000) return alert('Imposta almeno qualche secondo!');
+  TMR.title = $('timerTitleIn').value.trim();
+  TMR.endAt = serverNow() + dur;
+  G.ref.update({ status:'timer', timer:{ title:TMR.title, endAt:TMR.endAt, dur } });
+  pjSend({type:'timerStart', title:TMR.title, endAt:TMR.endAt});
+  $('timerSetup').style.display='none'; $('timerLive').style.display='block';
+  runBigTimer('Host', TMR.title, TMR.endAt);
+}
+function timerBomb(){
+  if (!TMR.endAt || TMR.endAt - serverNow() <= 11000) return;
+  TMR.endAt = serverNow() + 10800;
+  G.ref.update({ 'timer/endAt': TMR.endAt });
+  pjSend({type:'timerStart', title:TMR.title, endAt:TMR.endAt});
+  runBigTimer('Host', TMR.title, TMR.endAt);
+}
+
+/* ================================================================
+   MESSAGGIO PERSONALIZZATO SUL PROIETTORE
+================================================================ */
+let msgOv = { on:false };
+function modalPjMsg(){
+  openModal('💬 MESSAGGIO SUL PROIETTORE', `
+    <div class="label">Scrivi il messaggio (es. PRIMO ROUND, SPAZIO KARAOKE...)</div>
+    <input type="text" id="pjMsgIn" maxlength="60" value="${esc(msgOv.text||'')}" placeholder="Es. SECONDO ROUND!">
+    <div class="row mt">
+      <button class="btn mg grow" onclick="sendPjMsg(true)">📺 MOSTRA</button>
+      <button class="btn ghost" onclick="sendPjMsg(false)">🚫 Nascondi</button>
+    </div>`);
+  setTimeout(()=>{ const i=$('pjMsgIn'); if(i){ i.focus(); i.addEventListener('keydown',e=>{ if(e.key==='Enter') sendPjMsg(true); }); } }, 100);
+}
+function sendPjMsg(on){
+  const text = on ? ($('pjMsgIn')?$('pjMsgIn').value.trim():msgOv.text) : '';
+  if (on && !text) return;
+  msgOv = { on:!!on, text };
+  $('hbMsg').classList.toggle('on', msgOv.on);
+  if (bc) bc.postMessage({type:'msgOverlay', on:msgOv.on, text});
+  if (G && G.ref) G.ref.child('projMsg').set({on:msgOv.on, text});
+  closeModal();
+}
+
+/* ================================================================
+   GIOCHI E MODULI — menu unico
+================================================================ */
+function modalGames(){
+  openModal('🕹 GIOCHI E MODULI', `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+      <button class="btn mg" onclick="openMini()">🥃 Bussolotti</button>
+      <button class="btn cy" onclick="openDice()">🎲 Pari o Dispari</button>
+      <button class="btn lm" onclick="openSimon()">🎨 Simon</button>
+      <button class="btn" onclick="openVoto()">🌡 Votometro</button>
+      <button class="btn cy" style="grid-column:1/-1" onclick="openTimer()">⏱ Timer (pausa, karaoke, birretta...)</button>
+    </div>`);
+}
+
+/* ================================================================
    VOTOMETRO — REGIA HOST
 ================================================================ */
 let VOTO = { round: 0 };
@@ -1914,11 +2204,15 @@ function votoStart(){
   const go = (pid, name)=>{
     VOTO.round++;
     VOTO.secs = +$('votoSecs').value;
-    VOTO.target = { pid, name };
+    VOTO.dest = $('votoDest').value;
+    const mult = +$('votoScale').value;
+    VOTO.steps = Array.from({length:10},(_,k)=>(k+1)*mult);
+    VOTO.target = { pid: pid||null, name };
     VOTO.event = $('votoEvent').value.trim();
     const endAt = serverNow() + VOTO.secs*1000;
     VOTO.endAt = endAt;
     G.ref.update({ 'voto/phase':'vote', 'voto/round':VOTO.round, 'voto/target':VOTO.target,
+      'voto/steps':VOTO.steps, 'voto/dest':VOTO.dest,
       'voto/event':VOTO.event, 'voto/endAt':endAt, 'voto/secs':VOTO.secs, 'voto/avg':null, 'voto/results':null });
     G.ref.child('voto/votes').remove();
     $('votoSetup').style.display='none'; $('votoLive').style.display='block';
@@ -1927,7 +2221,7 @@ function votoStart(){
     $('votoAvgBox').classList.remove('show'); $('votoAvgBox').textContent='';
     $('votoMsg').textContent = '🌡 VOTAZIONI APERTE (da 1 a 10)';
     $('votoBtnAgain').style.display='none';
-    pjSend({type:'votoOpen', name, event:VOTO.event, endAt, secs:VOTO.secs});
+    pjSend({type:'votoOpen', name, event:VOTO.event, endAt, secs:VOTO.secs, steps:VOTO.steps});
     G.ref.child('voto/votes').on('value', vs=>{
       const v = Object.values(vs.val()||{});
       const avg = v.length ? (v.reduce((a,b)=>a+b,0)/v.length) : 0;
@@ -1940,9 +2234,13 @@ function votoStart(){
       if (left<=0) { clearInterval(VOTO.timerInt); votoReveal(); }
     }, 100);
   };
-  if (sel==='__new') ensureManualPlayer(manName, go);
+  if (sel==='__new') {
+    if ($('votoDest').value==='quiz') ensureManualPlayer(manName, go);
+    else go(null, manName); // esibizione fuori dal quiz: nessuna squadra creata
+  }
   else G.ref.child('players/'+sel+'/name').once('value', n=> go(sel, n.val()||'?'));
 }
+function fmtAvg(avg, steps){ return (steps&&steps[0]===1) ? (+avg).toFixed(1) : Math.round(avg)+''; }
 function votoReveal(){
   G.ref.child('voto/votes').off();
   G.ref.child('voto/votes').once('value').then(vs=>{
@@ -1950,16 +2248,36 @@ function votoReveal(){
     const arr = Object.values(votes);
     const tot = arr.reduce((a,b)=>a+b,0);
     const avg = arr.length ? tot/arr.length : 0;
-    G.ref.child('players/'+VOTO.target.pid+'/score').transaction(x=>(x||0)+tot).then(()=>{
-      G.ref.update({ 'voto/phase':'result', 'voto/avg':+avg.toFixed(1), 'voto/tot':tot, 'voto/n':arr.length });
-      $('votoAvgBox').textContent = avg ? avg.toFixed(1) : '—';
-      $('votoAvgBox').classList.add('show');
-      $('votoMsg').textContent = arr.length
-        ? `🏆 ${VOTO.target.name}: media ${avg.toFixed(1)} su ${arr.length} voti → +${tot} punti!`
-        : 'Nessun voto ricevuto.';
-      $('votoBtnAgain').style.display='';
-      pjSend({type:'votoResult', name:VOTO.target.name, event:VOTO.event, avg:+avg.toFixed(1), tot, n:arr.length});
-    });
+    const finish = ()=>{
+      // classifica esibizioni: si aggiorna SEMPRE, separata dal quiz
+      G.ref.child('votoBoard/'+campKey(VOTO.target.name)).transaction(cur=>{
+        cur = cur || { name:VOTO.target.name, tot:0, n:0, rounds:0 };
+        cur.tot += tot; cur.n += arr.length; cur.rounds += 1;
+        return cur;
+      }).then(()=>{
+        G.ref.update({ 'voto/phase':'result', 'voto/avg':+avg.toFixed(1), 'voto/tot':tot, 'voto/n':arr.length });
+        // steps e dest restano nel nodo voto: il telefono li usa per formattare il verdetto
+        const av = fmtAvg(avg, VOTO.steps);
+        $('votoAvgBox').textContent = arr.length ? av : '—';
+        $('votoAvgBox').classList.add('show');
+        $('votoMsg').textContent = arr.length
+          ? `🏆 ${VOTO.target.name}: media ${av} su ${arr.length} voti` + (VOTO.dest==='quiz' ? ` → +${tot} punti quiz!` : ` → classifica esibizioni!`)
+          : 'Nessun voto ricevuto.';
+        $('votoBtnAgain').style.display=''; $('votoBtnBoard').style.display='';
+        pjSend({type:'votoResult', name:VOTO.target.name, event:VOTO.event, avg:+avg.toFixed(1), tot, n:arr.length, steps:VOTO.steps, dest:VOTO.dest});
+      });
+    };
+    if (VOTO.dest==='quiz' && VOTO.target.pid)
+      G.ref.child('players/'+VOTO.target.pid+'/score').transaction(x=>(x||0)+tot).then(finish);
+    else finish();
+  });
+}
+function esibToProjector(){
+  G.ref.child('votoBoard').once('value').then(s=>{
+    const rows = Object.values(s.val()||{}).sort((a,b)=>(b.tot||0)-(a.tot||0)).slice(0,15)
+      .map((t,i)=>({pos:(i+1)+'°', name:t.name, val:t.tot+' pt · media '+(t.n?(t.tot/t.n).toFixed(1):'—')}));
+    if (!rows.length) return alert('Nessuna esibizione votata finora.');
+    sendLeadOverlay({on:true, kind:'esib', title:'🏅 CLASSIFICA ESIBIZIONI', rows});
   });
 }
 function votoAgain(){ openVoto(); }
@@ -2260,21 +2578,23 @@ function miniAgain(){
   $('miniCounts').style.display='none';
   $('miniBtnGo').style.display='';
 }
-function backToQuiz(){
+function backToQuiz(title){
   G.ref.child('mini/votes').off();
   G.ref.child('dice/bets').off();
   G.ref.child('simon/answers').off();
   clearInterval(DICE.timerInt); clearInterval(SIM.timerInt); clearInterval(VOTO.timerInt);
+  const hc = $('timerClockHost'); if (hc) clearInterval(hc._int);
   G.ref.child('voto/votes').off();
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null });
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
-    $('hrTitle').textContent = 'SI TORNA AL QUIZ!';
+    $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
     $('hrAnswer').textContent = '';
     $('hrPendingBox').style.display='none';
     const arr = renderLead($('hrLead'), players);
-    $('btnNext').textContent = (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
-    pjSend({type:'reveal', title:'CLASSIFICA', correctText:'', sym:null,
+    $('btnNext').textContent = G.qi < 0 ? '▶ Prima domanda'
+      : (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
+    pjSend({type:'reveal', title: title || 'CLASSIFICA', correctText:'', sym:null,
       lead: arr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
     showScreen('scrHostReveal');
   });
@@ -2309,9 +2629,15 @@ function initProjector(){
     base.child('projMode').on('value', s=>{ const v = s.val(); pjQOnly = !!(v && v.qOnly); applyPjMode(); });
     base.child('projQr').on('value', s=>{ pjApplyQr(s.val()||{}); });
     base.child('projLead').on('value', s=>{ pjApplyLead(s.val()||{}); });
+    base.child('projMsg').on('value', s=>{ pjApplyMsg(s.val()||{}); });
   } else if (!gcode) {
     $('pjWaitMsg').textContent = '⚠️ Manca il codice partita nel link: usa ?proj=1&g=CODICE';
   }
+}
+function pjApplyMsg(v){
+  const ov = $('pjMsgOverlay');
+  if (v && v.on && v.text) { $('pjMsgText2').textContent = v.text; ov.style.display='flex'; }
+  else ov.style.display='none';
 }
 function pjApplyLead(v){
   const ov = $('pjLeadOverlay');
@@ -2336,6 +2662,7 @@ function pjRoute(m){
     if (m.type==='mode') { pjQOnly = m.qOnly; applyPjMode(); return; }
     if (m.type==='qrOverlay') { pjApplyQr({on:m.on, url:m.url}); return; }
     if (m.type==='leadOverlay') { pjApplyLead(m); return; }
+    if (m.type==='msgOverlay') { pjApplyMsg(m); return; }
     if (m.type==='lobby') {
       $('pjLobbyTitle').textContent = m.title;
       $('pjLobbyCode').textContent = m.code;
@@ -2365,6 +2692,14 @@ function pjRoute(m){
       },100);
       showScreen('scrPjQ');
     }
+    else if (m.type==='timerStart') {
+      showScreen('scrPjTimer');
+      runBigTimer('Pj', m.title, m.endAt);
+    }
+    else if (m.type==='count') {
+      showScreen('scrPjCount');
+      runCountdown($('countPj'), m.startAt);
+    }
     else if (m.type==='voto') {
       $('pjVotoEvent').textContent=''; $('pjVotoName').textContent='...';
       $('pjVotoAvg').classList.remove('show'); $('pjVotoAvg').textContent=''; $('pjVotoMsg').textContent='SI PREPARA LA GIURIA...';
@@ -2375,7 +2710,7 @@ function pjRoute(m){
       $('pjVotoEvent').textContent = m.event||'';
       $('pjVotoName').textContent = m.name;
       $('pjVotoAvg').classList.remove('show'); $('pjVotoAvg').textContent='';
-      $('pjVotoMsg').textContent = '🌡 VOTATE DA 1 A 10 DAL TELEFONO!';
+      $('pjVotoMsg').textContent = m.steps ? `🌡 VOTATE DA ${m.steps[0]} A ${m.steps[9]} DAL TELEFONO!` : '🌡 VOTATE DA 1 A 10 DAL TELEFONO!';
       showScreen('scrPjVoto');
       clearInterval(window._pjVotoInt);
       window._pjVotoInt = setInterval(()=>{
@@ -2387,9 +2722,9 @@ function pjRoute(m){
     else if (m.type==='votoResult') {
       clearInterval(window._pjVotoInt);
       $('pjVotoTimerBar').style.width='0%';
-      $('pjVotoAvg').textContent = m.n ? m.avg.toFixed(1) : '—';
+      $('pjVotoAvg').textContent = m.n ? ((m.steps&&m.steps[0]===1)?m.avg.toFixed(1):Math.round(m.avg)) : '—';
       $('pjVotoAvg').classList.add('show');
-      $('pjVotoMsg').textContent = m.n ? `${m.name} → +${m.tot} PUNTI (${m.n} voti)` : 'NESSUN VOTO';
+      $('pjVotoMsg').textContent = m.n ? `${m.name} → ${m.tot} ${m.dest==='quiz'?'PUNTI QUIZ':'PT ESIBIZIONI'} (${m.n} voti)` : 'NESSUN VOTO';
       if (m.n && m.avg >= 6) confetti();
     }
     else if (m.type==='simon') {
