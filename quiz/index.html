@@ -146,8 +146,11 @@ option{background:var(--bg2);}
 .fb-no{color:var(--red); text-shadow:0 0 26px rgba(255,59,59,.8),0 5px 0 #5e0000; animation:shake .4s;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
 .podio{display:flex; align-items:flex-end; gap:12px; justify-content:center; margin-top:30px; width:100%; max-width:600px;}
-.podStep{flex:1; border-radius:18px 18px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:14px; animation:rise 1s ease-out;}
-@keyframes rise{from{height:0 !important; opacity:0}to{opacity:1}}
+.podStep{flex:1; border-radius:18px 18px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:14px;
+  opacity:0; transform:translateY(90px) scale(.55); transition:opacity .55s, transform .55s cubic-bezier(.25,1.6,.45,1);}
+.podStep.show{opacity:1; transform:translateY(0) scale(1);}
+.podHiddenLead{opacity:0; transition:opacity .8s;}
+.podHiddenLead.show{opacity:1;}
 .podStep .nm{font-weight:900; font-size:16px; padding:0 6px; text-align:center; word-break:break-word;}
 .podStep .sc{font-family:'Bungee'; font-size:15px; margin-top:4px;}
 .pod1{height:220px; background:linear-gradient(180deg,var(--gold),#8a5f00); box-shadow:0 0 34px rgba(255,201,60,.7);}
@@ -316,6 +319,29 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .seqDot{width:22px; height:22px; border-radius:50%; box-shadow:0 3px 0 rgba(0,0,0,.5), 0 0 12px currentColor; border:2px solid rgba(255,255,255,.35);}
 .ptsManual{width:110px !important; text-align:center; font-family:'Bungee' !important; color:var(--gold) !important;}
 
+/* ===== OVERLAY CLASSIFICHE SU PROIETTORE ===== */
+#pjLeadOverlay{display:none; position:fixed; inset:0; z-index:65; background:rgba(5,2,10,.94); backdrop-filter:blur(6px);
+  flex-direction:column; align-items:center; justify-content:center; padding:30px; overflow:auto;}
+#pjLeadOverlay .brand{margin-bottom:10px;}
+#pjLeadRows{width:100%; max-width:720px;}
+#pjLeadRows .leadRow{font-size:clamp(16px,2.4vw,26px); padding:14px 22px;}
+
+/* ===== VOTOMETRO ===== */
+.votoLabel{font-weight:900; letter-spacing:5px; font-size:clamp(13px,2vw,18px); color:var(--muted); text-align:center;}
+.votoName{font-family:'Bungee'; font-size:clamp(30px,6vw,64px); text-align:center; color:var(--gold);
+  text-shadow:0 0 22px rgba(255,201,60,.6), 0 5px 0 #7a4b00; line-height:1.05; margin:6px 0;}
+.votoEvent{font-family:'Bungee'; font-size:clamp(14px,2.6vw,24px); text-align:center; color:var(--magenta);
+  text-shadow:0 0 14px rgba(255,46,154,.6); letter-spacing:2px;}
+.voteGrid{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; width:100%; max-width:400px; margin-top:16px;}
+.vBtn{font-family:'Bungee'; font-size:24px; color:#fff; border:none; cursor:pointer; padding:16px 0; border-radius:16px;
+  text-shadow:0 2px 0 rgba(0,0,0,.5); box-shadow:0 6px 0 rgba(0,0,0,.5); transition:transform .08s, filter .2s;}
+.vBtn:active{transform:translateY(5px); box-shadow:0 1px 0 rgba(0,0,0,.5);}
+.vBtn.dim{filter:grayscale(.85) brightness(.4); pointer-events:none;}
+.vBtn.sel{outline:4px solid #fff; transform:translateY(5px); box-shadow:0 1px 0 rgba(0,0,0,.5), 0 0 26px currentColor;}
+.votoAvg{font-family:'Bungee'; font-size:clamp(60px,12vw,130px); text-align:center; color:var(--lime);
+  text-shadow:0 0 34px rgba(182,255,46,.8), 0 8px 0 #3f5e00; transform:scale(0); transition:transform .5s cubic-bezier(.3,1.6,.5,1);}
+.votoAvg.show{transform:scale(1);}
+
 /* ===== SCHERMO PROIETTORE ===== */
 body.proj{overflow:hidden;}
 body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:center;}
@@ -345,13 +371,14 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v4.3</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v4.5</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
   <div class="row mtb" style="justify-content:center">
     <button class="btn mg" onclick="newQuiz()">✚ Crea nuovo quiz</button>
     <button class="btn cy" onclick="importQuiz()">⬆ Importa quiz</button>
+    <button class="btn lm" onclick="modalCampionato()">🏆 Campionato serate</button>
   </div>
   <div class="panel mtb" style="max-width:640px">
     <div class="label">I tuoi quiz salvati</div>
@@ -497,6 +524,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="podio" id="podium"></div>
   <div class="lead mtb"><div id="podLead"></div></div>
   <div class="row mtb">
+    <button class="btn lm" id="btnSaveCamp" onclick="saveCampionato()">💾 Salva nel campionato serate</button>
     <button class="btn cy" onclick="location.href=location.pathname">🏠 Torna alla home</button>
   </div>
 </div>
@@ -549,14 +577,15 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div id="hostBar">
   <button id="hbToggle" onclick="toggleHostBar()">🎛 REGIA ▾</button>
   <div class="hbwrap">
-  <button class="hb" onclick="modalFastest()">⚡ Più veloci</button>
-  <button class="hb" onclick="modalLead()">🏆 Classifica generale</button>
+  <button class="hb" id="hbFast" onclick="toggleLeadOverlay('fast')">⚡ Più veloci → 📺</button>
+  <button class="hb" id="hbLead" onclick="toggleLeadOverlay('lead')">🏆 Classifica → 📺</button>
   <button class="hb" onclick="modalPoints()">± Punti</button>
   <button class="hb" onclick="modalQuestions()">📋 Scelta domanda</button>
   <button class="hb" onclick="btnEndQuiz()">🏁 Termina quiz</button>
   <button class="hb" onclick="openMini()">🥃 Minigioco bussolotti</button>
   <button class="hb" onclick="openDice()">🎲 Pari o Dispari</button>
   <button class="hb" onclick="openSimon()">🎨 Simon</button>
+  <button class="hb" onclick="openVoto()">🌡 Votometro</button>
   <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
   <button class="hb" onclick="openProjector()">📺 Apri proiettore</button>
   <button class="hb" id="hbQOnly" onclick="toggleQOnly()">🔍 Solo domanda</button>
@@ -597,6 +626,60 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <button class="btn cy" id="miniBtnAgain" onclick="miniAgain()" style="display:none">🔁 Un'altra manche</button>
   </div>
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== HOST: VOTOMETRO ==================== -->
+<div class="screen" id="scrVoto">
+  <div class="brand"><div class="t1" style="font-size:clamp(22px,4vw,38px)">🌡 VOTOMETRO</div></div>
+  <div class="panel mt" style="max-width:620px" id="votoSetup">
+    <div class="label">Chi riceve i voti?</div>
+    <select id="votoTarget"></select>
+    <input type="text" id="votoTargetMan" class="mt" placeholder="...oppure scrivi qui il nome del concorrente" maxlength="24" style="display:none">
+    <div class="label mt">Evento (facoltativo — es. Sfilata, Gara di canto, Corrida)</div>
+    <input type="text" id="votoEvent" placeholder="Es. LA CORRIDA DEL CAPONE" maxlength="40">
+    <div class="row mt">
+      <div class="grow"><div class="label">Secondi per votare</div><select id="votoSecs"></select></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="votoStart()">▶ APRI LE VOTAZIONI</button>
+  </div>
+  <div id="votoLive" style="display:none; width:100%; max-width:640px" class="center">
+    <div class="votoEvent" id="votoLiveEvent"></div>
+    <div class="votoLabel mt">STAI VOTANDO PER</div>
+    <div class="votoName" id="votoLiveName"></div>
+    <div class="timerWrap mt"><div class="timerBar" id="votoTimerBar"></div></div>
+    <div class="votoAvg" id="votoAvgBox"></div>
+    <div class="voteCounts mt" id="votoCounts"></div>
+    <div class="miniMsg" id="votoMsg"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="votoBtnAgain" onclick="votoAgain()" style="display:none">🔁 Nuova votazione</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: VOTOMETRO ==================== -->
+<div class="screen" id="scrPjVoto">
+  <div class="votoEvent" id="pjVotoEvent" style="font-size:clamp(20px,3.4vw,36px)"></div>
+  <div class="votoLabel mtb">STAI VOTANDO PER</div>
+  <div class="votoName" id="pjVotoName" style="font-size:clamp(44px,8vw,96px)"></div>
+  <div class="timerWrap mtb" style="max-width:760px"><div class="timerBar" id="pjVotoTimerBar"></div></div>
+  <div class="votoAvg" id="pjVotoAvg"></div>
+  <div class="miniMsg" id="pjVotoMsg"></div>
+</div>
+
+<!-- ==================== PLAYER: VOTOMETRO ==================== -->
+<div class="screen" id="scrPlayVoto" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="pvName" style="color:var(--gold)"></div>
+    <div class="pill" id="pvScore"></div>
+  </div>
+  <div class="timerWrap mt"><div class="timerBar" id="pvTimerBar"></div></div>
+  <div class="votoEvent mt" id="pvEvent" style="font-size:16px"></div>
+  <div class="votoLabel mt">STAI VOTANDO PER</div>
+  <div class="votoName" id="pvTarget" style="font-size:clamp(26px,7vw,40px)"></div>
+  <div class="voteGrid" id="pvGrid"></div>
+  <div class="byline mtb" id="pvSelf" style="display:none; color:var(--gold)">😄 NON PUOI VOTARE PER TE STESSO — GODITI LA GIURIA!</div>
+  <div class="feedback mt" id="pvSent" style="display:none; color:var(--cyan); font-size:22px">VOTO INVIATO! 🌡</div>
 </div>
 
 <!-- ==================== HOST: SIMON ==================== -->
@@ -705,6 +788,12 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="feedback mt" id="pmSent" style="display:none; color:var(--cyan); font-size:24px">VOTO INVIATO! 🚀</div>
 </div>
 
+<!-- ==================== PROIETTORE: OVERLAY CLASSIFICHE ==================== -->
+<div id="pjLeadOverlay">
+  <div class="brand"><div class="t1" id="pjLeadTitle" style="font-size:clamp(26px,4.5vw,52px)"></div></div>
+  <div id="pjLeadRows"></div>
+</div>
+
 <!-- ==================== PROIETTORE: OVERLAY QR (nuovi giocatori) ==================== -->
 <div id="pjQrOverlay" style="display:none; position:fixed; inset:0; z-index:70; background:rgba(5,2,10,.92); backdrop-filter:blur(6px); flex-direction:column; align-items:center; justify-content:center; gap:18px;">
   <div class="brand"><div class="t1" style="font-size:clamp(26px,4.5vw,52px)">📱 ENTRA IN PARTITA!</div></div>
@@ -778,7 +867,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 43; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 45; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -825,6 +914,30 @@ function openProjector(){
   setTimeout(()=>{ if(lastPjMsg) pjSend(lastPjMsg); pjSendMode(); }, 700);
 }
 function toggleQOnly(){ qOnly=!qOnly; $('hbQOnly').classList.toggle('on', qOnly); pjSendMode(); }
+let leadOv = { on:false, kind:null };
+function toggleLeadOverlay(kind){
+  if (!G) return;
+  if (leadOv.on && leadOv.kind===kind) return sendLeadOverlay({on:false});
+  if (kind==='fast') {
+    if (!G.lastResults) { openModal('⚡ I PIÙ VELOCI', '<div class="byline" style="letter-spacing:1px">Disponibile dopo la prima domanda.</div>'); return; }
+    const rows = Object.entries(G.lastResults).filter(([,r])=>r.ok).sort((a,b)=>a[1].t-b[1].t).slice(0,10)
+      .map(([pid,r],i)=>({pos:(i+1)+'°', name:(G.lastPlayers[pid]||{}).name||'?', val:(r.t/1000).toFixed(2)+'s · +'+r.pts}));
+    sendLeadOverlay({on:true, kind, title:'⚡ I PIÙ VELOCI — DOMANDA '+(G.qi+1), rows});
+  } else {
+    G.ref.child('players').once('value', s=>{
+      const rows = Object.values(s.val()||{}).sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,15)
+        .map((p,i)=>({pos:(i+1)+'°', name:p.name, val:(p.score||0)+''}));
+      sendLeadOverlay({on:true, kind, title:'🏆 CLASSIFICA GENERALE', rows});
+    });
+  }
+}
+function sendLeadOverlay(v){
+  leadOv = { on:!!v.on, kind:v.kind||null };
+  $('hbFast').classList.toggle('on', leadOv.on && leadOv.kind==='fast');
+  $('hbLead').classList.toggle('on', leadOv.on && leadOv.kind==='lead');
+  if (bc) bc.postMessage({type:'leadOverlay', ...v});
+  if (G && G.ref) G.ref.child('projLead').set(v);
+}
 let qrOverlayOn = false;
 function toggleQrOverlay(){
   if (!G || !G.url) return;
@@ -874,8 +987,16 @@ function modalPoints(){
       html += `<div class="ptRow"><span>${esc(players[pid].name)}</span><span class="sc" id="sc_${pid}">${players[pid].score||0}</span>
         <button class="btn small lm" onclick="adjPoints('${pid}',1)">➕</button>
         <button class="btn small mg" onclick="adjPoints('${pid}',-1)">➖</button></div>`;
-    openModal('± PUNTI MANUALI', html || 'Nessuna squadra.');
+    html += `<div class="row mt"><input type="text" id="newTeamName" class="grow" placeholder="Nome nuova squadra/concorrente" maxlength="24">
+      <button class="btn small lm" onclick="addManualTeam()">➕</button></div>
+      <div class="label" style="text-transform:none;letter-spacing:0">Le squadre manuali partecipano senza smartphone: ricevono punti da te e dal Votometro.</div>`;
+    openModal('± PUNTI MANUALI', html);
   });
+}
+function addManualTeam(){
+  const name = ($('newTeamName')||{value:''}).value.trim();
+  if (!name) return;
+  ensureManualPlayer(name, ()=> modalPoints());
 }
 function adjPoints(pid, sign){
   const v = Math.abs(+($('ptsVal').value||0)); if(!v) return;
@@ -1065,6 +1186,7 @@ function nextQuestion(){
   G.played.add(G.qi);
   G.closed = false;
   // scrive su DB solo ciò che serve ai telefoni (niente media, niente testo domanda)
+  if (leadOv.on) sendLeadOverlay({on:false});
   G.ref.update({
     status:'question',
     current:{ i:G.qi, total:G.quiz.questions.length, type:q.type, points:q.points, timer:q.timer,
@@ -1211,22 +1333,31 @@ function renderLead(box, players, meId){
     `<div class="leadRow ${p.id===meId?'me':''}"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score||0}</span></div>`).join('');
   return arr;
 }
+function renderPodiumStaged(podEl, leadEl, top3){
+  const order = [ [1,'pod2','🥈'], [0,'pod1','👑'], [2,'pod3','🥉'] ];
+  podEl.innerHTML = order.map(([idx,cls,ico])=>{
+    const p = top3[idx]; if(!p) return '';
+    return `<div class="podStep ${cls}" data-rank="${idx+1}"><div class="crown">${ico}</div><div class="nm">${esc(p.name)}</div><div class="sc">${p.score||0} pt</div></div>`;
+  }).join('');
+  if (leadEl) leadEl.classList.add('podHiddenLead');
+  const reveal = (rank, delay, fanfare)=> setTimeout(()=>{
+    const el = podEl.querySelector('[data-rank="'+rank+'"]');
+    if (el) { el.classList.add('show'); if (fanfare) confetti(); }
+  }, delay);
+  reveal(3, 700); reveal(2, 2400); reveal(1, 4300, true);
+  if (leadEl) setTimeout(()=> leadEl.classList.add('show'), 5400);
+}
 function endQuiz(){
+  if (leadOv.on) sendLeadOverlay({on:false});
   G.ref.child('players').once('value').then(ps=>{
     const players = ps.val()||{};
     const arr = Object.entries(players).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
     G.ref.update({ status:'end', final: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})) });
-    const pod = $('podium'); pod.innerHTML='';
-    const order = [ [1,'pod2','🥈'], [0,'pod1','👑'], [2,'pod3','🥉'] ];
-    order.forEach(([idx,cls,ico])=>{
-      const p = arr[idx]; if(!p) return;
-      pod.innerHTML += `<div class="podStep ${cls}"><div class="crown">${ico}</div><div class="nm">${esc(p.name)}</div><div class="sc">${p.score||0} pt</div></div>`;
-    });
+    renderPodiumStaged($('podium'), $('podLead'), arr);
     renderLead($('podLead'), players);
     pjSend({type:'podium', top3: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})),
       lead: arr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
     showScreen('scrPodium');
-    confetti();
     setTimeout(()=>{ if(G) G.ref.remove(); }, 15*60*1000);
   });
 }
@@ -1303,6 +1434,7 @@ function listenGame(){
     else if (g.status==='mini') showPlayerMini(g);
     else if (g.status==='dice') showPlayerDice(g);
     else if (g.status==='simon') showPlayerSimon(g);
+    else if (g.status==='voto') showPlayerVoto(g);
     else if (g.status==='pausa') { showScreen('scrWait'); $('waitMsg').textContent='OCCHI ALLO SCHERMO! 🎩'; $('waitSub').textContent='Il quiz continua tra poco...'; }
     else if (g.status==='end') showPlayerEnd(g);
   });
@@ -1348,6 +1480,61 @@ function sendOpenAnswer(){
   if (navigator.vibrate) navigator.vibrate(40);
 }
 $('pqOpenInput')?.addEventListener('keydown', e=>{ if(e.key==='Enter') sendOpenAnswer(); });
+function showPlayerVoto(g){
+  clearInterval(P.timerInt);
+  const m = g.voto||{};
+  $('pvName').textContent = P.name;
+  $('pvScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  if (m.phase==='vote') {
+    if (P.votoRound !== m.round) { P.votoRound = m.round; P.votoVal = null; }
+    const isSelf = m.target && m.target.pid === P.id;
+    $('pvEvent').textContent = m.event||'';
+    $('pvTarget').textContent = (m.target||{}).name||'?';
+    $('pvSelf').style.display = isSelf ? 'block' : 'none';
+    $('pvGrid').style.display = isSelf ? 'none' : 'grid';
+    $('pvGrid').innerHTML = Array.from({length:10},(_,k)=>{
+      const v = k+1, hue = Math.round((v-1)/9*120);
+      const cls = (P.votoVal===v?'sel':'') + (P.votoVal && P.votoVal!==v ? ' dim':'');
+      return `<button class="vBtn ${cls}" style="background:linear-gradient(180deg,hsl(${hue},85%,62%),hsl(${hue},85%,42%));color:hsl(${hue},85%,55%)" onclick="voteVoto(${v})"><span style="color:#fff">${v}</span></button>`;
+    }).join('');
+    $('pvSent').style.display = P.votoVal ? 'block' : 'none';
+    showScreen('scrPlayVoto');
+    clearInterval(P.votoInt);
+    P.votoInt = setInterval(()=>{
+      const left = Math.max(0, (m.endAt||0) - serverNow());
+      $('pvTimerBar').style.width = (left/((m.secs||20)*1000)*100)+'%';
+      if (left<=0) clearInterval(P.votoInt);
+    },100);
+  }
+  else if (m.phase==='result') {
+    clearInterval(P.votoInt);
+    const isTarget = m.target && m.target.pid === P.id;
+    const msg = $('pfMsg'), pts = $('pfPts');
+    if (isTarget) {
+      msg.className='feedback mtb fb-ok'; msg.style.color='';
+      msg.textContent = '🌡 LA GIURIA HA DECISO!';
+      pts.textContent = m.n ? `MEDIA ${(+m.avg).toFixed(1)} → +${m.tot} PUNTI` : 'Nessun voto';
+      if (m.n && navigator.vibrate) navigator.vibrate([80,50,80]);
+    } else {
+      msg.className='feedback mtb'; msg.style.color='var(--cyan)';
+      msg.textContent = '🌡 VERDETTO';
+      pts.textContent = m.n ? `${(m.target||{}).name}: ${(+m.avg).toFixed(1)} (+${m.tot})` : 'Nessun voto';
+    }
+    const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
+    const pos = arr.findIndex(p=>p.id===P.id)+1;
+    $('pfRank').innerHTML = pos>0 ? `SEI <b style="color:var(--gold)">${pos}°</b> SU ${arr.length} · ${(((g.players||{})[P.id])||{}).score||0} PUNTI` : '';
+    showScreen('scrPlayFb');
+  }
+  else { showScreen('scrWait'); $('waitMsg').textContent='🌡 VOTOMETRO!'; $('waitSub').textContent='Preparati a fare il giurato...'; }
+}
+function voteVoto(v){
+  if (P.votoVal) return;
+  P.votoVal = v;
+  P.ref.child('voto/votes/'+P.id).set(v);
+  document.querySelectorAll('#pvGrid .vBtn').forEach((b,i)=>{ b.classList.toggle('sel', i+1===v); b.classList.toggle('dim', i+1!==v); });
+  $('pvSent').style.display='block';
+  if (navigator.vibrate) navigator.vibrate(40);
+}
 function showPlayerSimon(g){
   clearInterval(P.timerInt);
   const m = g.simon||{};
@@ -1686,8 +1873,149 @@ function seqDotsHtml(seq){
 /* punti: campo manuale (se compilato) o menu a tendina */
 function getPoints(selId, manId){
   const m = parseInt(($(manId)||{}).value);
-  if (m > 0) return Math.max(10, Math.round(m/10)*10);
+  if (m > 0) return m; // cifra libera: qualsiasi numero, anche non multiplo di 100, senza massimale
   return +$(selId).value;
+}
+
+/* ================================================================
+   VOTOMETRO — REGIA HOST
+================================================================ */
+let VOTO = { round: 0 };
+$('votoSecs').innerHTML = [10,15,20,30,45,60].map(t=>`<option value="${t}" ${t===20?'selected':''}>${t} secondi</option>`).join('');
+$('votoTarget').addEventListener('change', ()=>{ $('votoTargetMan').style.display = $('votoTarget').value==='__new' ? 'block' : 'none'; });
+function openVoto(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(VOTO.timerInt);
+  G.ref.update({ status:'voto', voto:{ phase:'idle', round:VOTO.round } });
+  G.ref.child('players').once('value', s=>{
+    const players = s.val()||{};
+    $('votoTarget').innerHTML = Object.entries(players)
+      .map(([pid,p])=>`<option value="${pid}">${esc(p.name)}</option>`).join('') +
+      `<option value="__new">➕ Nuovo concorrente (scrivi il nome)...</option>`;
+    $('votoTargetMan').style.display='none';
+  });
+  $('votoSetup').style.display='block'; $('votoLive').style.display='none';
+  pjSend({type:'voto', phase:'idle'});
+  showScreen('scrVoto');
+}
+/* crea (o ritrova) una squadra/concorrente manuale — partecipa senza smartphone */
+function ensureManualPlayer(name, cb){
+  G.ref.child('players').once('value', s=>{
+    const players = s.val()||{};
+    for (const pid in players) if (norm(players[pid].name)===norm(name)) return cb(pid, players[pid].name);
+    const pref = G.ref.child('players').push({ name, score:0, manual:true });
+    cb(pref.key, name);
+  });
+}
+function votoStart(){
+  const sel = $('votoTarget').value;
+  const manName = $('votoTargetMan').value.trim();
+  if (sel==='__new' && !manName) return alert('Scrivi il nome del concorrente!');
+  const go = (pid, name)=>{
+    VOTO.round++;
+    VOTO.secs = +$('votoSecs').value;
+    VOTO.target = { pid, name };
+    VOTO.event = $('votoEvent').value.trim();
+    const endAt = serverNow() + VOTO.secs*1000;
+    VOTO.endAt = endAt;
+    G.ref.update({ 'voto/phase':'vote', 'voto/round':VOTO.round, 'voto/target':VOTO.target,
+      'voto/event':VOTO.event, 'voto/endAt':endAt, 'voto/secs':VOTO.secs, 'voto/avg':null, 'voto/results':null });
+    G.ref.child('voto/votes').remove();
+    $('votoSetup').style.display='none'; $('votoLive').style.display='block';
+    $('votoLiveEvent').textContent = VOTO.event;
+    $('votoLiveName').textContent = name;
+    $('votoAvgBox').classList.remove('show'); $('votoAvgBox').textContent='';
+    $('votoMsg').textContent = '🌡 VOTAZIONI APERTE (da 1 a 10)';
+    $('votoBtnAgain').style.display='none';
+    pjSend({type:'votoOpen', name, event:VOTO.event, endAt, secs:VOTO.secs});
+    G.ref.child('voto/votes').on('value', vs=>{
+      const v = Object.values(vs.val()||{});
+      const avg = v.length ? (v.reduce((a,b)=>a+b,0)/v.length) : 0;
+      $('votoCounts').innerHTML = `<div class="vc">VOTI · ${v.length}</div><div class="vc">MEDIA · ${avg?avg.toFixed(1):'—'}</div>`;
+    });
+    clearInterval(VOTO.timerInt);
+    VOTO.timerInt = setInterval(()=>{
+      const left = Math.max(0, endAt - serverNow());
+      $('votoTimerBar').style.width = (left/(VOTO.secs*1000)*100)+'%';
+      if (left<=0) { clearInterval(VOTO.timerInt); votoReveal(); }
+    }, 100);
+  };
+  if (sel==='__new') ensureManualPlayer(manName, go);
+  else G.ref.child('players/'+sel+'/name').once('value', n=> go(sel, n.val()||'?'));
+}
+function votoReveal(){
+  G.ref.child('voto/votes').off();
+  G.ref.child('voto/votes').once('value').then(vs=>{
+    const votes = vs.val()||{};
+    const arr = Object.values(votes);
+    const tot = arr.reduce((a,b)=>a+b,0);
+    const avg = arr.length ? tot/arr.length : 0;
+    G.ref.child('players/'+VOTO.target.pid+'/score').transaction(x=>(x||0)+tot).then(()=>{
+      G.ref.update({ 'voto/phase':'result', 'voto/avg':+avg.toFixed(1), 'voto/tot':tot, 'voto/n':arr.length });
+      $('votoAvgBox').textContent = avg ? avg.toFixed(1) : '—';
+      $('votoAvgBox').classList.add('show');
+      $('votoMsg').textContent = arr.length
+        ? `🏆 ${VOTO.target.name}: media ${avg.toFixed(1)} su ${arr.length} voti → +${tot} punti!`
+        : 'Nessun voto ricevuto.';
+      $('votoBtnAgain').style.display='';
+      pjSend({type:'votoResult', name:VOTO.target.name, event:VOTO.event, avg:+avg.toFixed(1), tot, n:arr.length});
+    });
+  });
+}
+function votoAgain(){ openVoto(); }
+
+/* ================================================================
+   CAMPIONATO DELLE SERATE — punteggi che si sommano nel tempo
+================================================================ */
+function campKey(name){ return norm(name).replace(/\s+/g,'-').replace(/[.#$\[\]\/]/g,'') || 'squadra'; }
+function saveCampionato(){
+  if (!G) return;
+  if (G.campSaved) return alert('Punteggi già salvati per questa serata!');
+  G.ref.child('players').once('value').then(ps=>{
+    const players = ps.val()||{};
+    const names = Object.values(players).map(p=>p.name);
+    if (!names.length) return alert('Nessuna squadra da salvare.');
+    let done = 0;
+    for (const pid in players){
+      const p = players[pid];
+      db.ref('caponequiz/campionato/'+campKey(p.name)).transaction(cur=>{
+        cur = cur || { name:p.name, total:0, serate:0 };
+        cur.total = (cur.total||0) + (p.score||0);
+        cur.serate = (cur.serate||0) + 1;
+        cur.updated = Date.now();
+        return cur;
+      }).then(()=>{ if (++done === Object.keys(players).length) {
+        G.campSaved = true;
+        $('btnSaveCamp').textContent = '✔ Salvato nel campionato!';
+        $('btnSaveCamp').disabled = true;
+      }});
+    }
+  });
+}
+function modalCampionato(){
+  if (!fbOK) return alert('Configura prima Firebase.');
+  db.ref('caponequiz/campionato').once('value').then(s=>{
+    const teams = Object.entries(s.val()||{}).map(([k,t])=>({k,...t})).sort((a,b)=>(b.total||0)-(a.total||0));
+    let html = teams.length ? teams.map((t,i)=>
+      `<div class="leadRow"><span class="pos">${i+1}°</span> <span class="grow">${esc(t.name)}<br><small style="color:var(--muted);font-weight:700">${t.serate||0} serate</small></span>
+       <span class="pts">${t.total||0}</span>
+       <button class="btn small ghost" onclick="campDelete('${t.k}')" style="margin-left:8px">🗑</button></div>`).join('')
+      : '<div class="byline" style="letter-spacing:1px">Nessuna squadra ancora. Salva i punteggi dal podio a fine serata!</div>';
+    if (G && teams.length) html += `<button class="btn small cy mt" style="width:100%" onclick="campToProjector()">📺 Mostra sul proiettore</button>`;
+    openModal('🏆 CAMPIONATO DELLE SERATE', html);
+  });
+}
+function campDelete(k){
+  if (!confirm('Eliminare questa squadra dal campionato?')) return;
+  db.ref('caponequiz/campionato/'+k).remove().then(modalCampionato);
+}
+function campToProjector(){
+  db.ref('caponequiz/campionato').once('value').then(s=>{
+    const rows = Object.values(s.val()||{}).sort((a,b)=>(b.total||0)-(a.total||0)).slice(0,15)
+      .map((t,i)=>({pos:(i+1)+'°', name:t.name+' ('+(t.serate||0)+' serate)', val:(t.total||0)+''}));
+    sendLeadOverlay({on:true, kind:'camp', title:'🏆 CAMPIONATO DELLE SERATE', rows});
+    closeModal();
+  });
 }
 
 /* ================================================================
@@ -1936,8 +2264,9 @@ function backToQuiz(){
   G.ref.child('mini/votes').off();
   G.ref.child('dice/bets').off();
   G.ref.child('simon/answers').off();
-  clearInterval(DICE.timerInt); clearInterval(SIM.timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null });
+  clearInterval(DICE.timerInt); clearInterval(SIM.timerInt); clearInterval(VOTO.timerInt);
+  G.ref.child('voto/votes').off();
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = 'SI TORNA AL QUIZ!';
@@ -1979,9 +2308,19 @@ function initProjector(){
       err=>{ pjDiagState.fb='✗ LETTURA NEGATA (regole!)'; pjDiag(); });
     base.child('projMode').on('value', s=>{ const v = s.val(); pjQOnly = !!(v && v.qOnly); applyPjMode(); });
     base.child('projQr').on('value', s=>{ pjApplyQr(s.val()||{}); });
+    base.child('projLead').on('value', s=>{ pjApplyLead(s.val()||{}); });
   } else if (!gcode) {
     $('pjWaitMsg').textContent = '⚠️ Manca il codice partita nel link: usa ?proj=1&g=CODICE';
   }
+}
+function pjApplyLead(v){
+  const ov = $('pjLeadOverlay');
+  if (v && v.on) {
+    $('pjLeadTitle').textContent = v.title||'';
+    $('pjLeadRows').innerHTML = (v.rows||[]).map(r=>
+      `<div class="leadRow"><span class="pos">${esc(r.pos)}</span> ${esc(r.name)} <span class="pts">${esc(r.val)}</span></div>`).join('');
+    ov.style.display='flex';
+  } else ov.style.display='none';
 }
 function pjApplyQr(v){
   const ov = $('pjQrOverlay');
@@ -1996,6 +2335,7 @@ function pjRoute(m){
     pjDiagState.msgs++; pjDiagState.last = m.type; pjDiag();
     if (m.type==='mode') { pjQOnly = m.qOnly; applyPjMode(); return; }
     if (m.type==='qrOverlay') { pjApplyQr({on:m.on, url:m.url}); return; }
+    if (m.type==='leadOverlay') { pjApplyLead(m); return; }
     if (m.type==='lobby') {
       $('pjLobbyTitle').textContent = m.title;
       $('pjLobbyCode').textContent = m.code;
@@ -2024,6 +2364,33 @@ function pjRoute(m){
         if (left<=0) clearInterval(pjTimerInt);
       },100);
       showScreen('scrPjQ');
+    }
+    else if (m.type==='voto') {
+      $('pjVotoEvent').textContent=''; $('pjVotoName').textContent='...';
+      $('pjVotoAvg').classList.remove('show'); $('pjVotoAvg').textContent=''; $('pjVotoMsg').textContent='SI PREPARA LA GIURIA...';
+      $('pjVotoTimerBar').style.width='100%';
+      showScreen('scrPjVoto');
+    }
+    else if (m.type==='votoOpen') {
+      $('pjVotoEvent').textContent = m.event||'';
+      $('pjVotoName').textContent = m.name;
+      $('pjVotoAvg').classList.remove('show'); $('pjVotoAvg').textContent='';
+      $('pjVotoMsg').textContent = '🌡 VOTATE DA 1 A 10 DAL TELEFONO!';
+      showScreen('scrPjVoto');
+      clearInterval(window._pjVotoInt);
+      window._pjVotoInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjVotoTimerBar').style.width = (left/(m.secs*1000)*100)+'%';
+        if (left<=0) clearInterval(window._pjVotoInt);
+      },100);
+    }
+    else if (m.type==='votoResult') {
+      clearInterval(window._pjVotoInt);
+      $('pjVotoTimerBar').style.width='0%';
+      $('pjVotoAvg').textContent = m.n ? m.avg.toFixed(1) : '—';
+      $('pjVotoAvg').classList.add('show');
+      $('pjVotoMsg').textContent = m.n ? `${m.name} → +${m.tot} PUNTI (${m.n} voti)` : 'NESSUN VOTO';
+      if (m.n && m.avg >= 6) confetti();
     }
     else if (m.type==='simon') {
       buildSimon($('pjSimonStage'), null);
@@ -2108,15 +2475,11 @@ function pjRoute(m){
     }
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
-      const order = [[1,'pod2','🥈'],[0,'pod1','👑'],[2,'pod3','🥉']];
-      $('pjPodium').innerHTML = order.map(([idx,cls,ico])=>{
-        const p = (m.top3||[])[idx]; if(!p) return '';
-        return `<div class="podStep ${cls}"><div class="crown">${ico}</div><div class="nm">${esc(p.name)}</div><div class="sc">${p.score} pt</div></div>`;
-      }).join('');
+      pjApplyLead({on:false});
       $('pjPodLead').innerHTML = (m.lead||[]).map((p,i)=>
         `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score}</span></div>`).join('');
       showScreen('scrPjPodium');
-      confetti();
+      renderPodiumStaged($('pjPodium'), $('pjPodLead'), (m.top3||[]).map(p=>({name:p.name, score:p.score})));
     }
 }
 function applyPjMode(){
