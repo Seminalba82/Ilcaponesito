@@ -387,6 +387,49 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   filter:drop-shadow(0 0 30px rgba(255,201,60,.7)) drop-shadow(0 8px 0 rgba(61,37,0,.9));
   animation:goPop .6s cubic-bezier(.2,1.5,.4,1);}
 
+/* ===== TOMBOLA ===== */
+.tomTitle{font-family:'Bungee'; font-size:clamp(20px,3.4vw,40px); color:var(--gold); text-align:center;
+  text-shadow:0 0 18px rgba(255,201,60,.6), 0 4px 0 #7a4b00;}
+.tomTitle small{display:block; font-family:'Outfit'; font-weight:900; font-size:.38em; letter-spacing:4px; color:var(--muted); text-shadow:none;}
+.tomLayout{display:flex; gap:16px; width:100%; max-width:1250px; align-items:flex-start; justify-content:center; flex-wrap:wrap;}
+.tabellone{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; flex:1 1 640px; max-width:820px;}
+.tomBlock{display:grid; grid-template-columns:repeat(5,1fr); gap:4px; background:rgba(11,6,20,.75);
+  border:2px solid rgba(157,77,255,.4); border-radius:12px; padding:6px;}
+.tomN{aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:8px;
+  font-family:'Bungee'; font-size:clamp(11px,1.5vw,20px); color:#6d5f8f;
+  background:rgba(0,0,0,.4); border:1px solid rgba(157,77,255,.2); transition:all .25s;}
+.tomN.hit{color:#2a1a00; background:linear-gradient(180deg,#ffe08a,var(--gold)); border-color:#7a4b00;
+  box-shadow:0 0 14px rgba(255,201,60,.7), 0 2px 0 #7a4b00; animation:pop .35s;}
+.tomN.last{outline:3px solid var(--magenta); box-shadow:0 0 20px rgba(255,46,154,.9); transform:scale(1.12); z-index:2;}
+.tomPrizes{flex:0 0 240px; display:flex; flex-direction:column; gap:8px;}
+.tomPrize{background:rgba(11,6,20,.75); border:2px solid rgba(157,77,255,.4); border-radius:12px; padding:8px 12px;}
+.tomPrize .lv{font-family:'Bungee'; font-size:15px; color:var(--cyan);}
+.tomPrize .pz{font-weight:900; font-size:13px; color:var(--gold);}
+.tomPrize .wn{font-weight:700; font-size:12px; color:var(--lime);}
+.tomPrize.won{border-color:var(--lime); box-shadow:0 0 14px rgba(182,255,46,.4);}
+.tomDrawn{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:12px; min-height:40px;}
+.tomBall{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'Bungee'; font-size:15px; color:#2a1a00;
+  background:radial-gradient(circle at 35% 30%, #fff, #ffd76e 45%, #c98a00); box-shadow:0 3px 0 rgba(0,0,0,.5), 0 0 10px rgba(255,201,60,.4);}
+.tomBall.new{transform:scale(1.25); outline:3px solid var(--magenta); box-shadow:0 0 20px rgba(255,46,154,.9); animation:pop .4s;}
+.tomBig{font-family:'Bungee'; font-size:clamp(60px,12vw,120px); color:var(--lime); text-align:center;
+  text-shadow:0 0 30px rgba(182,255,46,.8), 0 6px 0 #3f5e00; min-height:1.1em; line-height:1;}
+#pjTomBanner{display:none; position:fixed; inset:0; z-index:68; background:rgba(5,2,10,.93); backdrop-filter:blur(6px);
+  flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;}
+/* cartella giocatore */
+.cartella{display:grid; grid-template-columns:repeat(9,1fr); gap:4px; background:#0d5c31;
+  border:6px solid #5b3a1e; border-radius:14px; padding:8px; box-shadow:0 10px 0 rgba(0,0,0,.5), 0 0 26px rgba(18,163,82,.35); width:100%;}
+.carN{aspect-ratio:5/4; display:flex; align-items:center; justify-content:center; border-radius:6px;
+  font-family:'Bungee'; font-size:clamp(13px,3.6vmin,24px); color:#2a1a00;
+  background:linear-gradient(180deg,#fff8e0,#f2e3b8); border:1px solid #c9b06a;}
+.carN.empty{background:rgba(0,0,0,.28); border-color:transparent;}
+.carN.hit{color:#fff; background:radial-gradient(circle at 35% 30%, #ff7a95, #c2183d 70%); border-color:#6e0e21;
+  box-shadow:0 0 12px rgba(255,46,154,.8); animation:pop .35s;}
+.rotWrap{width:100%;}
+@media (orientation:portrait){
+  .rotWrap{position:fixed; top:50%; left:50%; width:96vh; transform:translate(-50%,-50%) rotate(90deg); z-index:5;}
+}
+
 /* ===== SCHERMO PROIETTORE ===== */
 body.proj{overflow:hidden;}
 body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:center;}
@@ -416,7 +459,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v4.8</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v4.9</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -669,6 +712,58 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <button class="btn cy" id="miniBtnAgain" onclick="miniAgain()" style="display:none">🔁 Un'altra manche</button>
   </div>
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== HOST: TOMBOLA ==================== -->
+<div class="screen" id="scrTombola">
+  <div class="tomTitle">TOMBOLA<small>BY ALBERTO SEMINERIO</small></div>
+  <div class="panel mt" style="max-width:620px" id="tomSetup">
+    <div class="label">Premi (punti quiz + eventuale premio extra: birre, gadget...)</div>
+    <div id="tomPrizeInputs"></div>
+    <button class="btn mg mt" style="width:100%" onclick="tombolaStart()">🎱 GENERA LE CARTELLE E VIA!</button>
+    <div class="label mt" style="text-transform:none; letter-spacing:0">Ogni squadra collegata riceve una cartella unica sul telefono. Chi entra dopo l'avvio non ha la cartella per questa partita.</div>
+  </div>
+  <div id="tomLive" style="display:none; width:100%">
+    <div class="tomBig" id="tomLastNum">—</div>
+    <div class="row" style="justify-content:center">
+      <button class="btn mg" id="tomBtnDraw" onclick="tombolaDraw()">🎱 ESTRAI NUMERO</button>
+    </div>
+    <div class="tomDrawn" id="tomDrawnHost"></div>
+    <div class="tomLayout mt">
+      <div class="tabellone" id="tomBoardHost"></div>
+      <div class="tomPrizes" id="tomPrizesHost"></div>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: TOMBOLA ==================== -->
+<div class="screen" id="scrPjTombola">
+  <div class="tomTitle" style="font-size:clamp(26px,4vw,52px)">TOMBOLA<small>BY ALBERTO SEMINERIO</small></div>
+  <div class="tomLayout mt">
+    <div class="tabellone" id="tomBoardPj"></div>
+    <div class="tomPrizes" id="tomPrizesPj"></div>
+  </div>
+  <div class="tomDrawn" id="tomDrawnPj"></div>
+</div>
+<div id="pjTomBanner">
+  <div class="brand"><div class="t1" id="tomBannerLv" style="font-size:clamp(34px,6vw,80px)"></div></div>
+  <div class="byline mt" style="font-size:clamp(14px,2vw,22px)">DALLE CARTELLE DI</div>
+  <div class="votoName" id="tomBannerNames" style="font-size:clamp(28px,5vw,60px)"></div>
+  <div class="pill mt" id="tomBannerPrize" style="font-size:clamp(16px,2.4vw,28px)"></div>
+</div>
+
+<!-- ==================== PLAYER: TOMBOLA ==================== -->
+<div class="screen" id="scrPlayTombola" style="justify-content:center">
+  <div class="rotWrap">
+    <div class="tomTitle" style="font-size:clamp(15px,4vmin,26px)">TOMBOLA<small>BY ALBERTO SEMINERIO</small></div>
+    <div class="row mt" style="justify-content:space-between">
+      <div class="pill" id="ptName" style="color:var(--gold)"></div>
+      <div class="pill" id="ptLast" style="color:var(--lime)"></div>
+    </div>
+    <div class="cartella mt" id="ptCard"></div>
+    <div class="byline mt center" id="ptMsg" style="letter-spacing:2px"></div>
+  </div>
 </div>
 
 <!-- ==================== HOST: TIMER ==================== -->
@@ -972,7 +1067,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 48; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 49; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -1547,6 +1642,7 @@ function listenGame(){
     else if (g.status==='dice') showPlayerDice(g);
     else if (g.status==='simon') showPlayerSimon(g);
     else if (g.status==='voto') showPlayerVoto(g);
+    else if (g.status==='tombola') showPlayerTombola(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -1600,6 +1696,31 @@ function sendOpenAnswer(){
   if (navigator.vibrate) navigator.vibrate(40);
 }
 $('pqOpenInput')?.addEventListener('keydown', e=>{ if(e.key==='Enter') sendOpenAnswer(); });
+function showPlayerTombola(g){
+  clearInterval(P.timerInt);
+  const t = g.tombola||{};
+  $('ptName').textContent = P.name;
+  const drawn = t.drawn||[];
+  const drawnSet = new Set(drawn);
+  $('ptLast').textContent = drawn.length ? 'N° '+drawn[drawn.length-1] : 'SI COMINCIA...';
+  const card = (t.cards||{})[P.id];
+  if (card && card.r) {
+    renderCartella($('ptCard'), card.r, drawnSet);
+    const mine = card.r.flat().filter(x=>x && drawnSet.has(x)).length;
+    let msg = 'SEGNATI '+mine+' SU 15';
+    const lw = t.lastWin;
+    if (lw && lw.pids && lw.pids[P.id]) {
+      msg = '🎉 '+lw.label+'! +'+lw.pts+' PUNTI'+(lw.txt?' + '+lw.txt:'');
+      if (P.tomWinAt !== lw.at) { P.tomWinAt = lw.at; if (navigator.vibrate) navigator.vibrate([120,60,120,60,200]); confetti(); }
+    } else if (lw && P.tomLwAt !== lw.at) { P.tomLwAt = lw.at; msg = lw.label+' di '+(lw.names||[]).join(', ')+'!'; }
+    else if (lw) msg = lw.label+' di '+(lw.names||[]).join(', ')+' · '+msg;
+    $('ptMsg').textContent = msg;
+  } else {
+    $('ptCard').innerHTML = '';
+    $('ptMsg').textContent = '⏳ CARTELLE GIÀ DISTRIBUITE — SI GIOCA ALLA PROSSIMA!';
+  }
+  showScreen('scrPlayTombola');
+}
 function showPlayerVoto(g){
   clearInterval(P.timerInt);
   const m = g.voto||{};
@@ -2071,6 +2192,146 @@ function runCountdown(el, startAt, done){
 }
 
 /* ================================================================
+   TOMBOLA — generatore cartelle, tabellone e regia
+================================================================ */
+const TOM_LEVELS = [['ambo',2,'AMBO'],['terno',3,'TERNO'],['quaterna',4,'QUATERNA'],['cinquina',5,'CINQUINA'],['tombola',15,'TOMBOLA']];
+function genCartella(){
+  const counts = Array(9).fill(1); let extra = 6;
+  while (extra>0){ const c = Math.floor(Math.random()*9); if (counts[c]<3){ counts[c]++; extra--; } }
+  const rowsOf = Array.from({length:9},()=>[]), cap=[5,5,5];
+  const order = [...Array(9).keys()].sort((a,b)=>counts[b]-counts[a]);
+  for (const c of order){
+    const rows = [0,1,2].sort((a,b)=> (cap[b]-cap[a]) || Math.random()-.5).slice(0,counts[c]);
+    rows.forEach(r=>{ cap[r]--; rowsOf[c].push(r); });
+  }
+  if (cap.some(x=>x!==0)) return genCartella();
+  const grid = [Array(9).fill(0),Array(9).fill(0),Array(9).fill(0)];
+  for (let c=0;c<9;c++){
+    const lo = c===0?1:c*10, hi = c===8?90:c*10+9;
+    const pool = []; for(let n=lo;n<=hi;n++) pool.push(n);
+    const picked = [];
+    for (let k=0;k<counts[c];k++) picked.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+    picked.sort((a,b)=>a-b);
+    rowsOf[c].sort((a,b)=>a-b).forEach((r,idx)=> grid[r][c]=picked[idx]);
+  }
+  return grid;
+}
+function renderTabellone(el, drawnSet, lastN){
+  if (!el._built){
+    el._built = true;
+    let html='';
+    for (let b=0;b<6;b++){
+      html += '<div class="tomBlock">';
+      for (let n=b*15+1;n<=b*15+15;n++) html += `<div class="tomN" data-n="${n}">${n}</div>`;
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  }
+  el.querySelectorAll('.tomN').forEach(c=>{
+    const n = +c.dataset.n;
+    c.classList.toggle('hit', drawnSet.has(n));
+    c.classList.toggle('last', n===lastN);
+  });
+}
+function renderTomPrizes(el, prizes, won){
+  el.innerHTML = [...TOM_LEVELS].reverse().map(([k,,label])=>{
+    const p = prizes[k]||{}, w = (won||{})[k];
+    return `<div class="tomPrize ${w?'won':''}"><div class="lv">${label}</div>
+      <div class="pz">${p.pts||0} punti${p.txt?' + '+esc(p.txt):''}</div>
+      ${w?`<div class="wn">✔ ${esc((w.names||[]).join(', '))}</div>`:''}</div>`;
+  }).join('');
+}
+function renderTomDrawn(el, drawn){
+  const last15 = drawn.slice(-15);
+  el.innerHTML = last15.map((n,i)=>`<div class="tomBall ${i===last15.length-1?'new':''}">${n}</div>`).join('');
+}
+function renderCartella(el, grid, drawnSet){
+  el.innerHTML = grid.map(row=> row.map(n=>
+    n ? `<div class="carN ${drawnSet.has(n)?'hit':''}">${n}</div>` : '<div class="carN empty"></div>'
+  ).join('')).join('');
+}
+
+/* ================================================================
+   TOMBOLA — REGIA HOST
+================================================================ */
+let TOM = {};
+const TOM_DEFAULTS = { ambo:100, terno:200, quaterna:300, cinquina:500, tombola:1000 };
+function openTombola(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal();
+  $('tomPrizeInputs').innerHTML = [...TOM_LEVELS].reverse().map(([k,,label])=>`
+    <div class="row mt"><b style="font-family:'Bungee'; min-width:110px; color:var(--cyan)">${label}</b>
+      <input type="number" id="tomPts_${k}" value="${TOM_DEFAULTS[k]}" min="0" style="width:100px; text-align:center">
+      <input type="text" id="tomTxt_${k}" class="grow" placeholder="Premio extra (es. birra media 🍺)" maxlength="30"></div>`).join('');
+  $('tomSetup').style.display='block'; $('tomLive').style.display='none';
+  showScreen('scrTombola');
+}
+function tombolaStart(){
+  const prizes = {};
+  TOM_LEVELS.forEach(([k])=> prizes[k] = { pts: Math.max(0,+$('tomPts_'+k).value||0), txt: $('tomTxt_'+k).value.trim() });
+  G.ref.child('players').once('value').then(ps=>{
+    const players = ps.val()||{};
+    const cards = {}, seen = new Set();
+    for (const pid in players){
+      let grid, key;
+      do { grid = genCartella(); key = grid.flat().filter(Boolean).join(','); } while (seen.has(key));
+      seen.add(key);
+      cards[pid] = { r: grid };
+    }
+    TOM = { prizes, cards, drawn:[], won:{}, remaining: Array.from({length:90},(_,i)=>i+1), players };
+    G.ref.update({ status:'tombola', tombola:{ phase:'play', prizes, cards, drawn:null, won:null, lastWin:null } });
+    $('tomSetup').style.display='none'; $('tomLive').style.display='block';
+    $('tomLastNum').textContent='—'; $('tomBtnDraw').disabled=false;
+    renderTabellone($('tomBoardHost'), new Set(), null);
+    renderTomPrizes($('tomPrizesHost'), prizes, {});
+    renderTomDrawn($('tomDrawnHost'), []);
+    pjSend({type:'tombola', prizes, drawn:[], won:{}});
+  });
+}
+function tombolaDraw(){
+  if (!TOM.remaining || !TOM.remaining.length) return;
+  const idx = Math.floor(Math.random()*TOM.remaining.length);
+  const n = TOM.remaining.splice(idx,1)[0];
+  TOM.drawn.push(n);
+  const drawnSet = new Set(TOM.drawn);
+  // controllo vincite sui livelli non ancora assegnati
+  const newWins = [];
+  G.ref.child('players').once('value').then(ps=>{
+    const players = ps.val()||{};
+    const updates = { 'tombola/drawn': TOM.drawn };
+    for (const [k, need, label] of TOM_LEVELS){
+      if (TOM.won[k]) continue;
+      const winners = [];
+      for (const pid in TOM.cards){
+        const grid = TOM.cards[pid].r;
+        const hit = k==='tombola'
+          ? grid.flat().filter(x=>x && drawnSet.has(x)).length >= 15
+          : grid.some(row=> row.filter(x=>x && drawnSet.has(x)).length >= need);
+        if (hit) winners.push(pid);
+      }
+      if (winners.length){
+        const names = winners.map(pid=> (players[pid]||{}).name||'?');
+        const p = TOM.prizes[k];
+        TOM.won[k] = { names, pids:Object.fromEntries(winners.map(w=>[w,1])), pts:p.pts, txt:p.txt };
+        updates['tombola/won/'+k] = TOM.won[k];
+        updates['tombola/lastWin'] = { level:k, label, names, pids:TOM.won[k].pids, pts:p.pts, txt:p.txt, at:Date.now() };
+        winners.forEach(pid=>{ if (players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + p.pts; players[pid] && (players[pid].score=(players[pid].score||0)+p.pts); });
+        newWins.push({ level:k, label, names, pts:p.pts, txt:p.txt });
+      }
+    }
+    G.ref.update(updates);
+    // schermo host
+    $('tomLastNum').textContent = n;
+    renderTabellone($('tomBoardHost'), drawnSet, n);
+    renderTomPrizes($('tomPrizesHost'), TOM.prizes, TOM.won);
+    renderTomDrawn($('tomDrawnHost'), TOM.drawn);
+    pjSend({type:'tombola', prizes:TOM.prizes, drawn:TOM.drawn, won:TOM.won, lastN:n});
+    newWins.forEach((w,i)=> setTimeout(()=> pjSend({type:'tombolaWin', ...w}), 600 + i*4000));
+    if (TOM.won.tombola || !TOM.remaining.length) $('tomBtnDraw').disabled = true;
+  });
+}
+
+/* ================================================================
    TIMER GIGANTE CON BOMBA (condiviso host / proiettore / telefono)
 ================================================================ */
 function runBigTimer(sfx, title, endAt){
@@ -2163,7 +2424,8 @@ function modalGames(){
       <button class="btn cy" onclick="openDice()">🎲 Pari o Dispari</button>
       <button class="btn lm" onclick="openSimon()">🎨 Simon</button>
       <button class="btn" onclick="openVoto()">🌡 Votometro</button>
-      <button class="btn cy" style="grid-column:1/-1" onclick="openTimer()">⏱ Timer (pausa, karaoke, birretta...)</button>
+      <button class="btn cy" onclick="openTimer()">⏱ Timer</button>
+      <button class="btn lm" onclick="openTombola()">🎱 Tombola</button>
     </div>`);
 }
 
@@ -2585,7 +2847,7 @@ function backToQuiz(title){
   clearInterval(DICE.timerInt); clearInterval(SIM.timerInt); clearInterval(VOTO.timerInt);
   const hc = $('timerClockHost'); if (hc) clearInterval(hc._int);
   G.ref.child('voto/votes').off();
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null });
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -2691,6 +2953,20 @@ function pjRoute(m){
         if (left<=0) clearInterval(pjTimerInt);
       },100);
       showScreen('scrPjQ');
+    }
+    else if (m.type==='tombola') {
+      showScreen('scrPjTombola');
+      renderTabellone($('tomBoardPj'), new Set(m.drawn||[]), m.lastN||null);
+      renderTomPrizes($('tomPrizesPj'), m.prizes||{}, m.won||{});
+      renderTomDrawn($('tomDrawnPj'), m.drawn||[]);
+    }
+    else if (m.type==='tombolaWin') {
+      $('tomBannerLv').textContent = m.label + '!';
+      $('tomBannerNames').textContent = (m.names||[]).join(', ');
+      $('tomBannerPrize').textContent = `+${m.pts} punti${m.txt?' + '+m.txt:''}`;
+      $('pjTomBanner').style.display='flex';
+      explodeFx($('pjTomBanner'));
+      setTimeout(()=>{ $('pjTomBanner').style.display='none'; }, 5200);
     }
     else if (m.type==='timerStart') {
       showScreen('scrPjTimer');
