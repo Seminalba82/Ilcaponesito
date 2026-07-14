@@ -517,6 +517,22 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .hlAlta{background:linear-gradient(180deg,#ccff66,#8fd400); color:#1c2a00; box-shadow:0 9px 0 #4a7000,0 0 26px rgba(182,255,46,.5);}
 .hlBassa{background:linear-gradient(180deg,#4df6ff,#00a8c2); color:#00232a; box-shadow:0 9px 0 #00636e,0 0 26px rgba(0,240,255,.5);}
 
+/* ===== LA RUOTA GIRA PER TUTTI ===== */
+.bigWheelBox{width:min(78vw,420px); position:relative; margin:16px auto 0; padding-top:28px;}
+.bigWheelBox::before{content:"▼"; position:absolute; top:0; left:50%; transform:translateX(-50%); z-index:5;
+  font-size:30px; color:var(--gold); text-shadow:0 0 14px rgba(255,201,60,.9), 0 3px 0 #7a4b00;}
+.bigWheelBox .wheel{border-width:8px;}
+.bigWheelBox .wlbl{font-size:clamp(10px,2.4vw,15px); max-width:90px; text-align:center; line-height:1.05;}
+.bigWheelBox .wheelHub{width:18%; font-size:clamp(18px,3.4vw,32px);}
+.rwSegRow{display:flex; gap:8px; align-items:center; margin-top:8px;}
+.rwSegRow input[type=text]{flex:1;}
+.rwSegRow input[type=number]{width:90px; text-align:center;}
+.rwHistRow{display:flex; align-items:center; gap:10px; padding:9px 14px; border-radius:12px; background:rgba(11,6,20,.6);
+  border:1px solid rgba(157,77,255,.25); margin-top:6px; font-weight:800;}
+.rwHistRow .n{color:var(--cyan); font-family:'Bungee'; margin-left:auto; font-size:13px;}
+.rwWinner{font-family:'Bungee'; text-align:center; font-size:clamp(26px,5.4vw,52px); color:var(--lime);
+  text-shadow:0 0 22px rgba(182,255,46,.7); min-height:1.3em;}
+
 /* ===== TAP TAP ===== */
 .tapBtn{width:min(70vw,280px); aspect-ratio:1; border-radius:50%; border:none; cursor:pointer; margin:14px auto 0; display:block;
   font-family:'Bungee'; font-size:clamp(22px,7vw,34px); color:#fff; text-shadow:0 3px 0 rgba(0,0,0,.5);
@@ -628,7 +644,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v6.2</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v6.4</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1023,6 +1039,61 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div class="grow"><button class="rnBtn hlBassa" id="phBassa" onclick="betHiLo('bassa')">⬇ BASSA</button></div>
   </div>
   <div class="feedback mt" id="phFb" style="display:none; font-size:24px"></div>
+</div>
+
+<!-- ==================== HOST: LA RUOTA GIRA PER TUTTI ==================== -->
+<div class="screen" id="scrRuota">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🎡 LA RUOTA GIRA PER TUTTI</div></div>
+  <div class="panel mt" style="max-width:560px" id="ruotaSetup">
+    <div class="label">Titolo mostrato su schermo e telefoni</div>
+    <input type="text" id="ruotaTitleIn" placeholder="Es. ESTRAZIONE PANETTONI 🎄" maxlength="60">
+    <div class="label mt">Chi/cosa mettiamo sulla ruota?</div>
+    <select id="ruotaSource" onchange="ruotaSourceChanged()">
+      <option value="players">🎮 Solo i giocatori già iscritti al quiz</option>
+      <option value="manual">✍️ Solo cose scritte a mano (persone, animali, oggetti...)</option>
+      <option value="prizes">🎁 Solo premi (mai punti in classifica)</option>
+    </select>
+    <div class="label mt">Spicchi della ruota — modificabili liberamente, con punti facoltativi</div>
+    <div id="ruotaSegList"></div>
+    <button class="btn small cy mt" type="button" onclick="ruotaAddSeg()">➕ Aggiungi spicchio</button>
+    <div class="row mt">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
+        <input type="checkbox" id="ruotaRemoveWin" checked style="width:20px; height:20px; accent-color:var(--lime)">
+        <span style="font-weight:700; font-size:14px">Togli dalla ruota chi ha già vinto</span>
+      </label>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="ruotaBuild()">🎡 PREPARA LA RUOTA</button>
+  </div>
+  <div id="ruotaLive" style="display:none; width:100%" class="center">
+    <div class="gradTitle" id="ruotaTitleHost"></div>
+    <div class="bigWheelBox" id="ruotaWheelHost"></div>
+    <div class="rwWinner" id="ruotaWinnerHost"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn mg" id="ruotaBtnSpin" onclick="ruotaSpin()">🎡 GIRA LA RUOTA!</button>
+    </div>
+    <div class="label mt center" id="ruotaHistLabel" style="display:none">STORICO ESTRAZIONI</div>
+    <div class="lead mt" id="ruotaHistHost" style="max-width:460px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="ruotaBtnAgain" onclick="openRuota()" style="display:none">🔁 Prepara un'altra ruota</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: LA RUOTA GIRA PER TUTTI ==================== -->
+<div class="screen" id="scrPjRuota">
+  <div class="gradTitle" id="pjRuotaTitle" style="font-size:clamp(26px,4.4vw,52px)"></div>
+  <div class="bigWheelBox" id="ruotaWheelPj" style="width:min(60vw,520px)"></div>
+  <div class="rwWinner" id="pjRuotaWinner"></div>
+  <div class="lead mt" id="pjRuotaHist" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: LA RUOTA GIRA PER TUTTI (solo spettatore) ==================== -->
+<div class="screen" id="scrPlayRuota" style="align-items:center; justify-content:center">
+  <div class="gradTitle" id="prTitle" style="font-size:clamp(17px,4.6vw,28px)"></div>
+  <div class="bigWheelBox" id="ruotaWheelPl" style="width:min(78vw,340px)"></div>
+  <div class="rwWinner" id="prWinner"></div>
+  <div class="lead mt" id="prHist" style="width:100%"></div>
 </div>
 
 <!-- ==================== HOST: TAP TAP ==================== -->
@@ -1845,7 +1916,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 62; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 64; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2562,6 +2633,7 @@ function listenGame(){
     else if (g.status==='wheels') showPlayerWheels(g);
     else if (g.status==='hilo') showPlayerHiLo(g);
     else if (g.status==='swiss') showPlayerSwiss(g);
+    else if (g.status==='ruota') showPlayerRuota(g);
     else if (g.status==='taptap') showPlayerTapTap(g);
     else if (g.status==='grad') showPlayerGrad(g);
     else if (g.status==='seed') showPlayerSeed(g);
@@ -2998,6 +3070,31 @@ function wsCheckSelection(){
 $('wsGridPl').addEventListener('pointerdown', wsPointerDown);
 document.addEventListener('pointermove', wsPointerMove);
 document.addEventListener('pointerup', wsPointerUp);
+function showPlayerRuota(g){
+  const m = g.ruota||{};
+  showScreen('scrPlayRuota');
+  $('prTitle').textContent = m.title||'LA RUOTA GIRA PER TUTTI';
+  if (m.phase==='spin'){
+    if (P.ruotaSpinAt !== m.spinAt){
+      P.ruotaSpinAt = m.spinAt;
+      buildBigWheel($('ruotaWheelPl'), m.segs||[]);
+      bigWheelSpin($('ruotaWheelPl'));
+      $('prWinner').textContent='';
+      bigWheelStop($('ruotaWheelPl'), m.spinIdx, ()=>{});
+    }
+  } else if (m.phase==='ready' || m.phase==='result'){
+    if (P.ruotaSegsKey !== JSON.stringify(m.segs)){
+      P.ruotaSegsKey = JSON.stringify(m.segs);
+      buildBigWheel($('ruotaWheelPl'), m.segs||[]);
+    }
+    if (m.history && m.history.length && P.ruotaHistN !== m.history.length){
+      P.ruotaHistN = m.history.length;
+      const last = m.history[m.history.length-1];
+      $('prWinner').textContent = `🏆 ${last.label}` + (last.points?` +${last.points} PUNTI`:'');
+    }
+    renderRuotaHist($('prHist'), m.history||[]);
+  }
+}
 function showPlayerTapTap(g){
   const m = g.taptap||{};
   $('ptpName').textContent = P.name;
@@ -3912,6 +4009,160 @@ function hiloFlip(){
         $('hiloBtnAgain').style.display='';
       }
     });
+  });
+}
+
+/* ================================================================
+   LA RUOTA GIRA PER TUTTI — motore condiviso + regia
+================================================================ */
+function buildBigWheel(box, segs){
+  const n = Math.max(1, segs.length);
+  const seg = 360/n;
+  const grad = segs.map((_,i)=>`${WHEEL_COLORS[i%WHEEL_COLORS.length]} ${i*seg}deg ${(i+1)*seg}deg`).join(',');
+  box.innerHTML = `<div class="wheel" style="background:conic-gradient(${grad})"></div><div class="wheelHub">🎩</div>`;
+  const w = box.querySelector('.wheel');
+  segs.forEach((s2,i)=>{
+    const l = document.createElement('span'); l.className='wlbl';
+    let txt = s2.label + (s2.points ? ' +'+s2.points : '');
+    if (txt.length>16) txt = txt.slice(0,15)+'…';
+    l.textContent = txt;
+    l.style.transform = `rotate(${i*seg+seg/2}deg) translateY(calc(-1 * min(15vw, 190px)))`;
+    l.style.transformOrigin = '0 0';
+    w.appendChild(l);
+  });
+  box._wheel = w; box._n = n;
+}
+function bigWheelSpin(box){
+  if (!box._wheel) return;
+  box._wheel.style.transition='none'; box._wheel.style.transform=''; box._wheel.classList.add('spin');
+}
+function bigWheelStop(box, idx, done){
+  if (!box._wheel) return;
+  const seg = 360/box._n;
+  const wobble = (Math.random()*0.5-0.25)*seg;
+  const final = 360*5 - (idx*seg + seg/2) + wobble;
+  box._wheel.classList.remove('spin');
+  box._wheel.style.transition = `transform 5000ms cubic-bezier(.1,.7,.15,1)`;
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{ box._wheel.style.transform = `rotate(${final}deg)`; }));
+  if (done) setTimeout(done, 5150);
+}
+function renderRuotaHist(el, history){
+  el.innerHTML = history.length ? history.map((h,i)=>
+    `<div class="rwHistRow"><span>${i+1}° giro — ${esc(h.label)}</span>${h.points?`<span class="n">+${h.points}</span>`:''}</div>`).join('')
+    : '';
+}
+
+/* ================================================================
+   LA RUOTA GIRA PER TUTTI — REGIA HOST
+================================================================ */
+let RUOTA = {};
+function ruotaRenderSegList(vals){
+  const list = vals && vals.length ? vals : [{label:'',points:0},{label:'',points:0}];
+  const mode = $('ruotaSource').value;
+  const isPrizes = mode==='prizes';
+  const ph = mode==='players' ? 'Nome giocatore' : (isPrizes ? 'Es. Panettone, Buono Amazon...' : 'Nome, animale, oggetto...');
+  $('ruotaSegList').innerHTML = list.map((v,k)=>`
+    <div class="rwSegRow">
+      <input type="text" class="ruotaSegLabel" data-k="${k}" value="${esc(v.label||'')}" placeholder="${ph}" maxlength="30">
+      ${isPrizes ? '' : `<input type="number" class="ruotaSegPts" data-k="${k}" value="${v.points||0}" min="0" placeholder="punti">`}
+      <button class="btn small ghost" type="button" onclick="ruotaRemoveSeg(${k})" ${list.length<=1?'disabled':''}>🗑</button>
+    </div>`).join('');
+  if (isPrizes) $('ruotaSegList').insertAdjacentHTML('beforeend',
+    '<div class="label mt" style="text-transform:none; letter-spacing:0">🎁 In questa modalità i premi non danno mai punti a nessun giocatore: è solo un\'estrazione di oggetti/regali.</div>');
+}
+function ruotaReadSegList(){
+  const rows = [...document.querySelectorAll('.rwSegRow')];
+  return rows.map(row=>{
+    const l = row.querySelector('.ruotaSegLabel'), p = row.querySelector('.ruotaSegPts');
+    return { label:l.value.trim(), points: p ? Math.max(0,+p.value||0) : 0, pid:l.dataset.pid||null };
+  }).filter(s=>s.label);
+}
+function ruotaAddSeg(){
+  const cur = ruotaReadSegListRaw();
+  cur.push({label:'', points:0});
+  ruotaRenderSegList(cur);
+}
+function ruotaReadSegListRaw(){
+  const rows = [...document.querySelectorAll('.rwSegRow')];
+  return rows.map(row=>{
+    const l = row.querySelector('.ruotaSegLabel'), p = row.querySelector('.ruotaSegPts');
+    return { label:l.value, points: p ? (+p.value||0) : 0, pid:l.dataset.pid||null };
+  });
+}
+function ruotaRemoveSeg(k){
+  const cur = ruotaReadSegListRaw();
+  if (cur.length<=1) return;
+  cur.splice(k,1);
+  ruotaRenderSegList(cur);
+}
+function ruotaSourceChanged(){
+  if ($('ruotaSource').value==='players'){
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const list = Object.entries(players).map(([pid,p])=>({label:p.name, points:0, pid}));
+      ruotaRenderSegList(list.length ? list : null);
+    });
+  } else {
+    ruotaRenderSegList([{label:'',points:0},{label:'',points:0}]);
+  }
+}
+function openRuota(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal();
+  $('ruotaTitleIn').value=''; $('ruotaSource').value='players'; ruotaSourceChanged();
+  G.ref.update({ status:'ruota', ruota:{ phase:'idle' } });
+  $('ruotaSetup').style.display='block'; $('ruotaLive').style.display='none';
+  pjSend({type:'ruotaState', msg:'SI PREPARA LA RUOTA...'});
+  showScreen('scrRuota');
+}
+function ruotaBuild(){
+  const title = $('ruotaTitleIn').value.trim() || 'LA RUOTA GIRA PER TUTTI';
+  const mode = $('ruotaSource').value;
+  const segs = ruotaReadSegList();
+  if (segs.length < 2) return alert('Servono almeno 2 spicchi sulla ruota!');
+  RUOTA = { title, segs, mode, removeWin: $('ruotaRemoveWin').checked, history: [] };
+  G.ref.update({ status:'ruota', ruota:{ phase:'ready', title, segs, history:[] } });
+  $('ruotaSetup').style.display='none'; $('ruotaLive').style.display='block';
+  $('ruotaTitleHost').textContent = title;
+  $('ruotaWinnerHost').textContent=''; $('ruotaHistLabel').style.display='none';
+  $('ruotaHistHost').innerHTML=''; $('ruotaBtnAgain').style.display='none';
+  $('ruotaBtnSpin').disabled=false; $('ruotaBtnSpin').style.display='';
+  buildBigWheel($('ruotaWheelHost'), segs);
+  pjSend({type:'ruotaBuild', title, segs});
+}
+function ruotaSpin(){
+  if (!RUOTA.segs.length) return;
+  $('ruotaBtnSpin').disabled = true;
+  $('ruotaWinnerHost').textContent='';
+  const idx = Math.floor(Math.random()*RUOTA.segs.length);
+  const win = RUOTA.segs[idx];
+  bigWheelSpin($('ruotaWheelHost'));
+  pjSend({type:'ruotaSpin', segs:RUOTA.segs, idx});
+  // scrivo anche sul nodo di gioco: il telefono non ascolta i messaggi del proiettore, ma ascolta questo
+  G.ref.update({ 'ruota/phase':'spin', 'ruota/spinIdx':idx, 'ruota/spinAt':serverNow(), 'ruota/segs':RUOTA.segs });
+  bigWheelStop($('ruotaWheelHost'), idx, ()=>{
+    RUOTA.history.push({ label:win.label, points:win.points, at:Date.now() });
+    $('ruotaWinnerHost').textContent = `🏆 ${win.label}` + (win.points?` +${win.points} PUNTI`:'');
+    $('ruotaHistLabel').style.display='block';
+    renderRuotaHist($('ruotaHistHost'), RUOTA.history);
+    confetti();
+    const finish = ()=>{
+      if (RUOTA.removeWin) RUOTA.segs.splice(idx,1);
+      G.ref.update({ 'ruota/segs':RUOTA.segs, 'ruota/history':RUOTA.history, 'ruota/phase': RUOTA.segs.length>=2?'ready':'result' });
+      pjSend({type:'ruotaResult', segs:RUOTA.segs, history:RUOTA.history, win});
+      if (RUOTA.segs.length >= 2){
+        buildBigWheel($('ruotaWheelHost'), RUOTA.segs);
+        $('ruotaBtnSpin').disabled=false;
+      } else {
+        $('ruotaBtnSpin').style.display='none';
+        $('ruotaBtnAgain').style.display='';
+      }
+    };
+    // in modalità "solo premi" non si toccano mai i punti di nessun giocatore
+    if (win.points>0 && RUOTA.mode!=='prizes'){
+      if (win.pid) G.ref.child('players/'+win.pid+'/score').transaction(v=>(v||0)+win.points).then(finish);
+      else ensureManualPlayer(win.label, pid=> G.ref.child('players/'+pid+'/score').transaction(v=>(v||0)+win.points).then(finish));
+    } else finish();
   });
 }
 
@@ -5056,7 +5307,8 @@ function modalGames(){
       <button class="btn mg" onclick="openCards()">🎴 Carta Rossa, Carta Nera</button>
       <button class="btn" onclick="openSeed()">🃏 Il Seme Vincente</button>
       <button class="btn lm" onclick="openGrad()">📊 Classifica di Gradimento</button>
-      <button class="btn mg" style="grid-column:1/-1" onclick="openTapTap()">👆 Tap Tap</button>
+      <button class="btn mg" onclick="openTapTap()">👆 Tap Tap</button>
+      <button class="btn cy" style="grid-column:1/-1" onclick="openRuota()">🎡 La Ruota Gira per Tutti</button>
       <button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>
       <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
       <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
@@ -5499,7 +5751,7 @@ function backToQuiz(title){
   G.ref.child('swiss/press').off();
   G.ref.child('hilo/bets').off();
   G.ref.child('wheels/bets').off();
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null });
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -5681,6 +5933,29 @@ function pjRoute(m){
         `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(r.name)} — ${(r.t/1000).toFixed(3)}s
          <span class="pts" style="color:${r.pts>=0?'var(--lime)':'var(--red)'}">${r.pts>=0?'+':''}${r.pts}</span></div>`).join('');
       if (m.rows && m.rows.length) confetti();
+    }
+    else if (m.type==='ruotaState') {
+      showScreen('scrPjRuota');
+      $('pjRuotaTitle').textContent=''; $('ruotaWheelPj').innerHTML=''; $('pjRuotaWinner').textContent=''; $('pjRuotaHist').innerHTML='';
+    }
+    else if (m.type==='ruotaBuild') {
+      showScreen('scrPjRuota');
+      $('pjRuotaTitle').textContent = m.title;
+      $('pjRuotaWinner').textContent=''; $('pjRuotaHist').innerHTML='';
+      buildBigWheel($('ruotaWheelPj'), m.segs);
+    }
+    else if (m.type==='ruotaSpin') {
+      buildBigWheel($('ruotaWheelPj'), m.segs);
+      bigWheelSpin($('ruotaWheelPj'));
+      $('pjRuotaWinner').textContent='';
+      // gira e si ferma in autonomia, sincronizzata con la regia sullo stesso indice estratto
+      bigWheelStop($('ruotaWheelPj'), m.idx, ()=>{});
+    }
+    else if (m.type==='ruotaResult') {
+      $('pjRuotaWinner').textContent = `🏆 ${m.win.label}` + (m.win.points?` +${m.win.points} PUNTI`:'');
+      renderRuotaHist($('pjRuotaHist'), m.history||[]);
+      confetti();
+      setTimeout(()=> buildBigWheel($('ruotaWheelPj'), m.segs), 2600);
     }
     else if (m.type==='tapState') {
       showScreen('scrPjTapTap');
