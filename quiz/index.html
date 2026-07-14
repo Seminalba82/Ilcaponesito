@@ -104,6 +104,23 @@ option{background:var(--bg2);}
 .ansBtn.win{animation:winPulse 1s infinite alternate;}
 @keyframes winPulse{from{filter:brightness(1)}to{filter:brightness(1.35); transform:scale(1.03)}}
 
+/* ===== SELEZIONE MULTIPLA / CASELLE / SONDAGGIO ===== */
+.ansBtn.sel{outline:5px solid var(--gold); box-shadow:0 2px 0 rgba(0,0,0,.5), 0 0 30px rgba(255,201,60,.85); transform:translateY(5px);}
+.qBoxes{display:flex; flex-direction:column; gap:8px; align-items:center; margin-top:12px;}
+.qBoxRow{display:flex; gap:5px; flex-wrap:wrap; justify-content:center;}
+.qBox{width:clamp(24px,7vw,40px); aspect-ratio:4/5; border-radius:7px; display:flex; align-items:center; justify-content:center;
+  font-family:'Bungee'; font-size:clamp(14px,4vw,24px); background:rgba(0,0,0,.45);
+  border:2px solid rgba(157,77,255,.55); color:#fff; text-transform:uppercase;}
+.qBox.hint{color:var(--gold); border-color:rgba(255,201,60,.7); background:rgba(255,201,60,.12);}
+.qBox.fill{border-color:var(--cyan); box-shadow:0 0 10px rgba(0,240,255,.35);}
+.statRow{display:flex; align-items:center; gap:10px; margin-top:8px; font-weight:900; font-size:14px;}
+.statRow .sym{min-width:26px; text-align:center;}
+.statRow .barBox{flex:1; height:20px; background:rgba(0,0,0,.45); border-radius:99px; overflow:hidden; border:1px solid rgba(157,77,255,.35);}
+.statRow .bar{height:100%; border-radius:99px; background:linear-gradient(90deg,var(--viola),var(--magenta)); transition:width .8s ease-out;}
+.statRow.right .bar{background:linear-gradient(90deg,var(--lime),var(--cyan));}
+.statRow .pct{font-family:'Bungee'; min-width:74px; text-align:right; color:var(--cyan);}
+.statRow.right .pct{color:var(--lime);}
+
 /* ===== TIMER ===== */
 .timerWrap{width:100%; height:22px; border-radius:99px; background:rgba(0,0,0,.5); border:2px solid rgba(157,77,255,.4); overflow:hidden; position:relative;}
 .timerBar{height:100%; width:100%; border-radius:99px;
@@ -453,6 +470,8 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .rnNera{background:linear-gradient(180deg,#3a3f52,#14161f); color:#fff; box-shadow:0 9px 0 #000,0 0 26px rgba(0,0,0,.8); border:2px solid #4a5068;}
 .rnBtn.dim{filter:grayscale(.7) brightness(.4); pointer-events:none;}
 .rnBtn.sel{outline:4px solid var(--gold); transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,.5), 0 0 30px rgba(255,201,60,.8);}
+.hlAlta{background:linear-gradient(180deg,#ccff66,#8fd400); color:#1c2a00; box-shadow:0 9px 0 #4a7000,0 0 26px rgba(182,255,46,.5);}
+.hlBassa{background:linear-gradient(180deg,#4df6ff,#00a8c2); color:#00232a; box-shadow:0 9px 0 #00636e,0 0 26px rgba(0,240,255,.5);}
 
 /* ===== PRECISIONE SVIZZERA ===== */
 .swissClock{font-family:'Orbitron',monospace; font-weight:900; font-variant-numeric:tabular-nums;
@@ -468,6 +487,29 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .bigRed:disabled{filter:grayscale(.6) brightness(.55); pointer-events:none;}
 .swissTarget{font-family:'Bungee'; text-align:center; font-size:clamp(14px,3vw,22px); color:var(--muted); letter-spacing:2px;}
 .swissTarget b{color:var(--gold);}
+
+/* ===== LE RUOTE DELLA FORTUNA ===== */
+.wheelsRow{display:flex; gap:4%; justify-content:center; align-items:flex-start; width:100%; max-width:960px; margin:16px auto 0;}
+.wheelBox{flex:1; max-width:280px; position:relative; padding-top:26px;}
+.wheelBox::before{content:"▼"; position:absolute; top:0; left:50%; transform:translateX(-50%); z-index:5;
+  font-size:26px; color:var(--gold); text-shadow:0 0 12px rgba(255,201,60,.9), 0 3px 0 #7a4b00;}
+.wheel{width:100%; aspect-ratio:1; border-radius:50%; position:relative; border:6px solid var(--gold);
+  box-shadow:0 10px 0 rgba(0,0,0,.5), 0 0 30px rgba(255,201,60,.35), inset 0 0 24px rgba(0,0,0,.55);
+  transition:none;}
+.wheel .wlbl{position:absolute; left:50%; top:50%; font-family:'Bungee'; font-size:clamp(10px,1.6vw,17px);
+  color:#fff; text-shadow:0 2px 0 rgba(0,0,0,.7); transform-origin:0 0;}
+.wheel.spin{animation:wheelSpin .5s linear infinite;}
+@keyframes wheelSpin{to{transform:rotate(360deg);}}
+.wheelHub{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:22%; aspect-ratio:1; border-radius:50%; z-index:3;
+  background:radial-gradient(circle at 38% 30%, #2a1a4d, #0b0614 75%); border:3px solid var(--gold);
+  display:flex; align-items:center; justify-content:center; font-size:clamp(14px,2.6vw,26px);
+  box-shadow:0 4px 10px rgba(0,0,0,.6);}
+.wheelName{font-family:'Bungee'; text-align:center; margin-top:8px; font-size:clamp(12px,2vw,18px); color:var(--muted);}
+.wheelVal{font-family:'Bungee'; text-align:center; font-size:clamp(18px,3.4vw,34px); color:var(--lime);
+  text-shadow:0 0 14px rgba(182,255,46,.7); min-height:1.2em;}
+.wheelBox.pick .wheel{outline:5px solid var(--lime); box-shadow:0 10px 0 rgba(0,0,0,.5), 0 0 34px rgba(182,255,46,.7);}
+.wheelBox.pickable{cursor:pointer;}
+.wheelBox.pickable:active .wheel{transform:scale(.96);}
 
 /* ===== SCHERMO PROIETTORE ===== */
 body.proj{overflow:hidden;}
@@ -498,7 +540,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v5.1</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v5.4</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -567,14 +609,23 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     </div>
 
     <div id="qeMultBox">
-      <div class="label">Le 4 opzioni — spunta quella giusta</div>
+      <div class="row mt">
+        <div class="grow"><div class="label">Quante opzioni?</div>
+          <select id="qeNumOpts" onchange="qeRenderOpts()"><option>2</option><option>3</option><option value="4" selected>4</option><option>5</option></select>
+        </div>
+      </div>
+      <div class="label mt">Le opzioni — spunta la giusta (o più di una: chi risponde dovrà prenderle tutte!)</div>
       <div id="qeOpts"></div>
     </div>
 
     <div id="qeOpenBox" style="display:none">
       <div class="label">Risposte accettate (separate da virgola — maiuscole e accenti non contano)</div>
       <input type="text" id="qeAccepted" placeholder="Es. Frank Sinatra, Sinatra">
-      <div class="label" style="text-transform:none; letter-spacing:0">💡 Se un giocatore scrive qualcosa di diverso, potrai approvarla a mano dopo la domanda.</div>
+      <div class="row mt">
+        <div class="grow"><div class="label">Lettere di aiuto mostrate (dalla prima risposta)</div>
+          <input type="number" id="qeHint" value="0" min="0" max="20" style="text-align:center"></div>
+      </div>
+      <div class="label" style="text-transform:none; letter-spacing:0">💡 I giocatori vedranno le caselle con la lunghezza delle parole (e le eventuali lettere d'aiuto). Le risposte diverse potrai approvarle a mano.</div>
     </div>
 
     <div class="row mt">
@@ -590,6 +641,12 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
         <div class="label">Tempo per rispondere</div>
         <select id="qeTimer"></select>
       </div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Chi sbaglia perde</div>
+        <input type="number" id="qePenWrong" value="0" min="0" style="text-align:center"></div>
+      <div class="grow"><div class="label">Chi non risponde perde</div>
+        <input type="number" id="qePenNone" value="0" min="0" style="text-align:center"></div>
     </div>
 
     <div class="row mtb">
@@ -635,6 +692,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHostReveal">
   <div class="brand"><div class="t1" style="font-size:clamp(22px,4vw,40px)" id="hrTitle">RISPOSTA GIUSTA</div></div>
   <div class="bigQ" id="hrAnswer" style="color:var(--lime)"></div>
+  <div style="width:100%; max-width:640px" id="hrStats"></div>
   <div class="panel mt" id="hrPendingBox" style="display:none; max-width:640px">
     <div class="label">Risposte da approvare a mano (tocca ✔ per dare i punti)</div>
     <div id="hrPending"></div>
@@ -684,10 +742,12 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   </div>
   <div class="timerWrap mt"><div class="timerBar" id="pqTimerBar"></div></div>
   <div class="pqQ" id="pqQText"></div>
-  <div class="byline mt">RISPONDI! PIÙ SEI VELOCE, PIÙ PUNTI FAI 💨</div>
+  <div class="byline mt" id="pqHint">RISPONDI! PIÙ SEI VELOCE, PIÙ PUNTI FAI 💨</div>
   <div class="ansGrid mtb" id="pqOpts"></div>
+  <button class="btn lm mtb" id="pqMultiSend" style="display:none; width:100%; max-width:420px" onclick="sendMultiAnswer()">📨 INVIA LE RISPOSTE SCELTE</button>
   <div id="pqOpenBox" style="display:none; width:100%; max-width:420px" class="mtb">
-    <input type="text" id="pqOpenInput" placeholder="Scrivi la risposta..." autocomplete="off">
+    <div class="qBoxes" id="pqBoxes"></div>
+    <input type="text" id="pqOpenInput" class="mt" placeholder="Scrivi la risposta completa..." autocomplete="off">
     <button class="btn cy mt" style="width:100%" onclick="sendOpenAnswer()">📨 INVIA</button>
   </div>
   <div class="feedback mtb" id="pqSent" style="display:none; color:var(--cyan)">INVIATA! 🚀</div>
@@ -739,6 +799,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="row mt" style="justify-content:center; align-items:flex-end">
     <div><div class="label">Punti in palio</div><select id="miniPoints" style="width:140px"></select></div>
     <div><div class="label">O scrivili</div><input type="number" id="miniPointsMan" class="ptsManual" placeholder="—" min="10" step="10"></div>
+      <div class="grow"><div class="label">Se sbaglia perde</div><input type="number" id="miniPen" value="0" min="0" style="text-align:center"></div>
     <div><div class="label">Velocità</div><select id="miniSpeed" style="width:150px">
       <option value="750">🐌 Molto lenta</option>
       <option value="560">Lenta</option>
@@ -751,6 +812,99 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <button class="btn cy" id="miniBtnAgain" onclick="miniAgain()" style="display:none">🔁 Un'altra manche</button>
   </div>
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== HOST: RUOTE DELLA FORTUNA ==================== -->
+<div class="screen" id="scrWheels">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🎡 LE RUOTE DELLA FORTUNA</div></div>
+  <div class="wheelsRow" id="wheelsHost"></div>
+  <div class="timerWrap mt" style="max-width:560px; margin-left:auto; margin-right:auto"><div class="timerBar" id="wheelsTimerBar"></div></div>
+  <div class="miniMsg" id="wheelsMsg">Premi VIA: 10 secondi per scegliere la ruota, poi si fermano una alla volta</div>
+  <div class="voteCounts" id="wheelsCounts"></div>
+  <div class="row mt" style="justify-content:center">
+    <button class="btn mg" id="wheelsBtnGo" onclick="wheelsSpin()">🎡 FALLE GIRARE!</button>
+    <button class="btn cy" id="wheelsBtnAgain" onclick="wheelsSpin()" style="display:none">🔁 Un altro giro</button>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: RUOTE ==================== -->
+<div class="screen" id="scrPjWheels">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🎡 LE RUOTE DELLA FORTUNA</div></div>
+  <div class="wheelsRow" id="wheelsPj" style="max-width:1100px"></div>
+  <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjWheelsTimerBar"></div></div>
+  <div class="miniMsg" id="pjWheelsMsg" style="font-size:clamp(22px,3.6vw,42px)"></div>
+  <div class="voteCounts" id="pjWheelsCounts"></div>
+</div>
+
+<!-- ==================== PLAYER: SCEGLI LA RUOTA ==================== -->
+<div class="screen" id="scrPlayWheels" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="plwName" style="color:var(--gold)"></div>
+    <div class="pill" id="plwScore"></div>
+  </div>
+  <div class="timerWrap mt"><div class="timerBar" id="plwTimerBar"></div></div>
+  <div class="byline mt" id="plwStatus">TOCCA LA RUOTA SU CUI PUNTARE!</div>
+  <div class="wheelsRow" id="wheelsPl" style="gap:3%"></div>
+  <div class="feedback mt" id="plwFb" style="display:none; font-size:24px"></div>
+</div>
+
+<!-- ==================== HOST: CARTA ALTA CARTA BASSA ==================== -->
+<div class="screen" id="scrHiLo">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🃏 CARTA ALTA, CARTA BASSA</div></div>
+  <div class="panel mt" style="max-width:520px" id="hiloSetup">
+    <div class="row" style="align-items:flex-end">
+      <div class="grow"><div class="label">Punti per carta indovinata</div><select id="hiloPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="hiloPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+      <div class="grow"><div class="label">Se sbaglia perde</div><input type="number" id="hiloPen" value="0" min="0" style="text-align:center"></div>
+    </div>
+    <div class="label mt" style="text-transform:none; letter-spacing:0">🃏 La prima carta comanda. Poi si scommette: la prossima sarà più ALTA o più BASSA? (A vale 1, K vale 13 — valori sempre tutti diversi, niente pareggi)</div>
+    <button class="btn mg mt" style="width:100%" onclick="hiloDeal()">🃏 MESCOLA E GIRA LA PRIMA</button>
+  </div>
+  <div id="hiloLive" style="display:none; width:100%">
+    <div class="miniStage" style="height:auto; min-height:0">
+      <div class="felt" style="position:relative; height:auto; padding:18px 10px 26px; border-radius:26px;">
+        <div class="cardsRow" id="hiloTableHost"></div>
+      </div>
+    </div>
+    <div class="timerWrap mt" style="max-width:520px; margin-left:auto; margin-right:auto"><div class="timerBar" id="hiloTimerBar"></div></div>
+    <div class="miniMsg" id="hiloMsg"></div>
+    <div class="voteCounts" id="hiloCounts"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn mg" id="hiloBtnBet" onclick="hiloBet()">⬆⬇ APRI SCOMMESSE — CARTA 2</button>
+      <button class="btn cy" id="hiloBtnAgain" onclick="openHiLo()" style="display:none">🔁 Un'altra mano</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: ALTA/BASSA ==================== -->
+<div class="screen" id="scrPjHiLo">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🃏 CARTA ALTA, CARTA BASSA</div></div>
+  <div class="miniStage" style="height:auto; min-height:0; max-width:1000px">
+    <div class="felt" style="position:relative; height:auto; padding:24px 14px 34px; border-radius:30px;">
+      <div class="cardsRow" id="hiloTablePj" style="max-width:960px"></div>
+    </div>
+  </div>
+  <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjHiLoTimerBar"></div></div>
+  <div class="miniMsg" id="pjHiLoMsg" style="font-size:clamp(22px,3.6vw,42px)"></div>
+  <div class="voteCounts" id="pjHiLoCounts"></div>
+</div>
+
+<!-- ==================== PLAYER: TELECOMANDO ALTA/BASSA ==================== -->
+<div class="screen" id="scrPlayHiLo" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="phName" style="color:var(--gold)"></div>
+    <div class="pill" id="phScore"></div>
+  </div>
+  <div class="cardsRow" id="hiloTablePl" style="max-width:360px"></div>
+  <div class="timerWrap mt"><div class="timerBar" id="phTimerBar"></div></div>
+  <div class="byline mt" id="phStatus"></div>
+  <div class="row mtb" style="width:100%; max-width:380px; gap:14px">
+    <div class="grow"><button class="rnBtn hlAlta" id="phAlta" onclick="betHiLo('alta')">⬆ ALTA</button></div>
+    <div class="grow"><button class="rnBtn hlBassa" id="phBassa" onclick="betHiLo('bassa')">⬇ BASSA</button></div>
+  </div>
+  <div class="feedback mt" id="phFb" style="display:none; font-size:24px"></div>
 </div>
 
 <!-- ==================== HOST: PRECISIONE SVIZZERA ==================== -->
@@ -805,6 +959,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div class="row" style="align-items:flex-end">
       <div class="grow"><div class="label">Punti per carta indovinata</div><select id="cardsPoints"></select></div>
       <div><div class="label">O scrivili</div><input type="number" id="cardsPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+      <div class="grow"><div class="label">Se sbaglia perde</div><input type="number" id="cardsPen" value="0" min="0" style="text-align:center"></div>
     </div>
     <button class="btn mg mt" style="width:100%" onclick="cardsDeal()">🎴 MESCOLA E DISTRIBUISCI</button>
   </div>
@@ -1034,6 +1189,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div><div class="label">Lampeggi</div><select id="simonCount" style="width:110px"></select></div>
     <div><div class="label">Punti</div><select id="simonPoints" style="width:140px"></select></div>
     <div><div class="label">O scrivili</div><input type="number" id="simonPointsMan" class="ptsManual" placeholder="—" min="10" step="10"></div>
+      <div class="grow"><div class="label">Se sbaglia perde</div><input type="number" id="simonPen" value="0" min="0" style="text-align:center"></div>
     <button class="btn mg" id="simonBtnGo" onclick="simonStart()">▶ AVVIA SEQUENZA</button>
     <button class="btn cy" id="simonBtnAgain" onclick="simonAgain()" style="display:none">🔁 Un'altra manche</button>
   </div>
@@ -1073,6 +1229,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="row mt" style="justify-content:center; align-items:flex-end">
     <div><div class="label">Punti in palio</div><select id="dicePoints" style="width:140px"></select></div>
     <div><div class="label">O scrivili</div><input type="number" id="dicePointsMan" class="ptsManual" placeholder="—" min="10" step="10"></div>
+      <div class="grow"><div class="label">Se sbaglia perde</div><input type="number" id="dicePen" value="0" min="0" style="text-align:center"></div>
     <button class="btn mg" id="diceBtnGo" onclick="diceRoll()">🎲 LANCIA I DADI</button>
     <button class="btn cy" id="diceBtnAgain" onclick="diceAgain()" style="display:none">🔁 Un'altra manche</button>
   </div>
@@ -1170,6 +1327,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="timerNum" id="pjTimerNum"></div>
   <div class="timerWrap"><div class="timerBar" id="pjTimerBar"></div></div>
   <div id="pjQText"></div>
+  <div class="qBoxes" id="pjBoxes"></div>
   <div class="center" id="pjMedia"></div>
   <div class="ansGrid mtb" id="pjOpts" style="max-width:1200px"></div>
 </div>
@@ -1178,6 +1336,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrPjReveal">
   <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)" id="pjRevealTitle">RISPOSTA GIUSTA</div></div>
   <div class="bigQ" id="pjAnswer" style="color:var(--lime); font-size:clamp(30px,5vw,64px)"></div>
+  <div style="width:100%; max-width:760px" id="pjStats"></div>
   <div class="lead mtb" style="max-width:760px"><div class="label center" style="font-size:15px">CLASSIFICA</div><div id="pjLead"></div></div>
 </div>
 
@@ -1207,7 +1366,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 51; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 54; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -1222,7 +1381,44 @@ function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.class
 function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
 function randCode(){ const A='ABCDEFGHJKLMNPQRSTUVWXYZ'; let c=''; for(let i=0;i<4;i++) c+=A[Math.floor(Math.random()*A.length)]; return c; }
-const SYMS = ['♠','♦','🎩','★'];
+const SYMS = ['♠','♦','🎩','★','🎲'];
+/* pattern caselle per risposte aperte: lunghezze parole + lettere di aiuto */
+function buildPattern(answer, hintN){
+  const words = (answer||'').trim().split(/\s+/).filter(Boolean).map(w=>[...w.toUpperCase()]);
+  const hints = [];
+  let li = 0;
+  for (const w of words) for (const ch of w){ if (li < (hintN||0)) hints.push(ch); else hints.push(null); li++; }
+  return { w: words.map(w=>w.length), h: hints };
+}
+function renderBoxes(el, pat, typed){
+  if (!pat || !pat.w || !pat.w.length){ el.innerHTML=''; return; }
+  const letters = [...(typed||'').toUpperCase().replace(/\s+/g,'')];
+  let li = 0, html = '';
+  for (const len of pat.w){
+    html += '<div class="qBoxRow">';
+    for (let k=0;k<len;k++){
+      const t = letters[li], h = (pat.h||[])[li];
+      html += `<div class="qBox ${t?'fill':(h?'hint':'')}">${t||h||''}</div>`;
+      li++;
+    }
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+function renderStats(el, opts, stats, corrects){
+  if (!stats || !opts){ el.innerHTML=''; return; }
+  const tot = stats.tot||0;
+  el.innerHTML = opts.map((o,i)=>{
+    if (!o) return '';
+    const n = (stats.counts||[])[i]||0;
+    const pct = tot ? Math.round(n/tot*100) : 0;
+    const right = (corrects||[]).includes(i);
+    return `<div class="statRow ${right?'right':''}"><span class="sym">${SYMS[i]}</span>
+      <span style="min-width:90px; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${esc(o)}</span>
+      <div class="barBox"><div class="bar" style="width:${pct}%"></div></div>
+      <span class="pct">${pct}% (${n})</span></div>`;
+  }).join('');
+}
 
 /* logo nei placeholder */
 document.querySelectorAll('[data-logo]').forEach(el=> el.appendChild($('tplLogo').content.cloneNode(true)));
@@ -1399,25 +1595,40 @@ function delQ(i){ curQuiz.questions.splice(i,1); renderEdQuestions(); }
 
 function openQEditor(i){
   curQIdx = i;
-  const q = i>=0 ? curQuiz.questions[i] : { text:'', type:'mult', media:{kind:'none'}, opts:['','','',''], correct:0, accepted:'', points:100, timer:20 };
+  const q = i>=0 ? curQuiz.questions[i] : { text:'', type:'mult', media:{kind:'none'}, opts:['','','',''], corrects:[0], accepted:'', points:100, timer:20, penWrong:0, penNone:0, hint:0 };
+  if (!q.corrects) q.corrects = [q.correct||0]; // migrazione domande vecchie
   $('qeTitle').textContent = i>=0 ? 'DOMANDA '+(i+1) : 'NUOVA DOMANDA';
   $('qeText').value = q.text; $('qeType').value = q.type; $('qeMedia').value = q.media.kind;
-  // punti 100→2000
   $('qePoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
   $('qePoints').value = q.points;
   $('qePointsMan').value = $('qePoints').value == q.points ? '' : q.points;
   $('qeTimer').innerHTML = TIMES.map(t=>`<option value="${t}">${t} secondi</option>`).join('');
   $('qeTimer').value = q.timer;
   $('qeAccepted').value = q.accepted || '';
-  $('qeOpts').innerHTML = q.opts.map((o,k)=>`
-    <div class="row mt">
-      <input type="radio" name="qeCorrect" value="${k}" ${q.correct===k?'checked':''} style="width:24px;height:24px;accent-color:var(--lime)">
-      <span class="sym" style="font-size:20px">${SYMS[k]}</span>
-      <input type="text" class="grow" id="qeOpt${k}" value="${esc(o)}" placeholder="Opzione ${k+1}" maxlength="60">
-    </div>`).join('');
+  $('qeHint').value = q.hint||0;
+  $('qePenWrong').value = q.penWrong||0;
+  $('qePenNone').value = q.penNone||0;
+  $('qeNumOpts').value = Math.min(5, Math.max(2, q.opts.length));
+  window._qeQ = q;
+  qeRenderOpts(q);
   window._qeMedia = q.media && q.media.data ? {...q.media} : {kind:q.media.kind||'none'};
   $('qeFile').value=''; qeTypeChanged(); qeMediaChanged(true);
   showScreen('scrQEdit');
+}
+function qeRenderOpts(q){
+  q = (q && q.opts) ? q : (window._qeQ||{opts:[],corrects:[0]});
+  // conservo il testo già digitato quando cambio il numero di opzioni
+  const prev = [];
+  for (let k=0;k<5;k++){ const el=$('qeOpt'+k); prev[k] = el ? el.value : (q.opts[k]||''); }
+  const prevChk = [];
+  for (let k=0;k<5;k++){ const c=document.querySelector('#qeOpts input[data-k="'+k+'"]'); prevChk[k] = c ? c.checked : (q.corrects||[]).includes(k); }
+  const n = +$('qeNumOpts').value;
+  $('qeOpts').innerHTML = Array.from({length:n},(_,k)=>`
+    <div class="row mt">
+      <input type="checkbox" data-k="${k}" ${prevChk[k]?'checked':''} style="width:24px;height:24px;accent-color:var(--lime)">
+      <span class="sym" style="font-size:20px">${SYMS[k]}</span>
+      <input type="text" class="grow" id="qeOpt${k}" value="${esc(prev[k]||'')}" placeholder="Opzione ${k+1}" maxlength="60">
+    </div>`).join('');
 }
 function qeTypeChanged(){ const m = $('qeType').value==='mult'; $('qeMultBox').style.display = m?'block':'none'; $('qeOpenBox').style.display = m?'none':'block'; }
 function qeMediaChanged(keep){
@@ -1447,13 +1658,19 @@ function saveQuestion(){
   const text = $('qeText').value.trim();
   if (!text) return alert('Scrivi il testo della domanda!');
   const type = $('qeType').value;
+  const n = +$('qeNumOpts').value;
+  const opts = Array.from({length:n},(_,k)=>($('qeOpt'+k)||{value:''}).value.trim());
+  const corrects = [...document.querySelectorAll('#qeOpts input[type=checkbox]')].map((c,k)=>c.checked?k:null).filter(x=>x!==null);
   const q = { text, type, media: window._qeMedia||{kind:'none'},
-    opts:[0,1,2,3].map(k=>$('qeOpt'+k).value.trim()),
-    correct:+(document.querySelector('input[name=qeCorrect]:checked')||{value:0}).value,
+    opts, corrects, correct: corrects[0]||0,
     accepted: $('qeAccepted').value.trim(),
+    hint: Math.max(0,+$('qeHint').value||0),
+    penWrong: Math.max(0,+$('qePenWrong').value||0),
+    penNone: Math.max(0,+$('qePenNone').value||0),
     points:getPoints('qePoints','qePointsMan'), timer:+$('qeTimer').value };
-  if (type==='mult' && q.opts.filter(o=>o).length<2) return alert('Servono almeno 2 opzioni!');
-  if (type==='mult' && !q.opts[q.correct]) return alert('L\'opzione corretta è vuota!');
+  if (type==='mult' && opts.filter(o=>o).length<2) return alert('Servono almeno 2 opzioni compilate!');
+  if (type==='mult' && !corrects.length) return alert('Spunta almeno una risposta giusta!');
+  if (type==='mult' && corrects.some(k=>!opts[k])) return alert('Una risposta spuntata come giusta è vuota!');
   if (type==='open' && !q.accepted) return alert('Inserisci almeno una risposta accettata!');
   if (curQIdx>=0) curQuiz.questions[curQIdx]=q; else curQuiz.questions.push(q);
   renderEdQuestions(); showScreen('scrEditor');
@@ -1534,11 +1751,15 @@ function nextQuestion(){
   // scrive su DB solo ciò che serve ai telefoni (niente media, niente testo domanda)
   if (leadOv.on) sendLeadOverlay({on:false});
   if (msgOv.on) sendPjMsg(false);
+  const corrects = (q.corrects && q.corrects.length) ? q.corrects : [q.correct||0];
+  const multi = q.type==='mult' && corrects.length > 1;
+  const pattern = q.type==='open' ? buildPattern((q.accepted||'').split(',')[0], q.hint||0) : null;
   G.ref.update({
     status:'question',
     current:{ i:G.qi, total:G.quiz.questions.length, type:q.type, points:q.points, timer:q.timer,
       text:q.text, mediaKind:(q.media&&q.media.kind)||'none',
-      opts: q.type==='mult' ? q.opts.map(o=>o||null) : null, startAt: serverNow() },
+      opts: q.type==='mult' ? q.opts.map(o=>o||null) : null,
+      multi, pattern, startAt: serverNow() },
     reveal:null
   });
   G.ref.child('answers/'+G.qi).remove();
@@ -1552,13 +1773,15 @@ function nextQuestion(){
     if (q.media.kind==='photo') mbox.innerHTML = `<img src="${q.media.data}" class="hostMedia">`;
     else { mbox.innerHTML = `<audio id="hqAudio" controls autoplay src="${q.media.data}"></audio>`; }
   }
+  const nOpts = q.type==='mult' ? q.opts.filter(o=>o).length : 0;
   $('hqOpts').innerHTML = q.type==='mult'
-    ? q.opts.map((o,k)=> o?`<button class="ansBtn a${k}" style="pointer-events:none"><span class="sym">${SYMS[k]}</span>${esc(o)}</button>`:'').join('')
+    ? (multi?`<div class="byline" style="grid-column:1/-1; color:var(--gold)">✅ RISPOSTA MULTIPLA: vanno prese tutte le giuste!</div>`:'') +
+      q.opts.map((o,k)=> o?`<button class="ansBtn a${k}" style="pointer-events:none; ${(q.opts.length%2===1 && k===q.opts.length-1)?'grid-column:1/-1':''}"><span class="sym">${SYMS[k]}</span>${esc(o)}</button>`:'').join('')
     : `<div class="byline" style="grid-column:1/-1">✍️ RISPOSTA APERTA — SI SCRIVE DAL TELEFONO</div>`;
   // proiettore
   pjSend({type:'question', i:G.qi, total:G.quiz.questions.length, text:q.text, points:q.points,
     timer:q.timer, startAt:serverNow(), qtype:q.type,
-    opts: q.type==='mult'?q.opts:null,
+    opts: q.type==='mult'?q.opts:null, multi, pattern,
     photo: (q.media && q.media.kind==='photo' && q.media.data) ? q.media.data : null});
   // conta risposte live
   G.ref.child('answers/'+G.qi).on('value', s=>{
@@ -1625,20 +1848,33 @@ function closeQuestion(){
       const players = ps.val()||{};
       const results = {}, pending = [];
       const accepted = (q.accepted||'').split(',').map(norm).filter(Boolean);
+      const corrects = (q.corrects && q.corrects.length) ? q.corrects : [q.correct||0];
+      const multi = q.type==='mult' && corrects.length > 1;
+      const keyOk = corrects.slice().sort((x,y)=>x-y).join(',');
+      const penW = q.penWrong||0, penN = q.penNone||0;
+      const stats = q.type==='mult' ? { counts: q.opts.map(()=>0), tot: 0 } : null;
       for (const pid in ans) {
         const a = ans[pid]; let ok = false;
-        if (q.type==='mult') ok = (+a.a === q.correct);
+        if (q.type==='mult') {
+          const sel = String(a.a).split(',').map(Number).filter(n=>!isNaN(n)).sort((x,y)=>x-y);
+          ok = sel.join(',') === keyOk;
+          if (stats) { stats.tot++; sel.forEach(i=>{ if (stats.counts[i]!==undefined) stats.counts[i]++; }); }
+        }
         else ok = accepted.includes(norm(a.a));
-        const pts = ok ? calcPts(q, a.t) : 0;
+        const pts = ok ? calcPts(q, a.t) : -penW;
         results[pid] = { ok, pts, a:a.a, t:a.t };
-        if (ok && players[pid]) players[pid].score = (players[pid].score||0)+pts;
+        if (players[pid]) players[pid].score = Math.max(0, (players[pid].score||0)+pts);
         if (!ok && q.type==='open' && players[pid]) pending.push({pid, name:players[pid].name, a:a.a, t:a.t});
       }
-      const correctText = q.type==='mult' ? q.opts[q.correct] : (q.accepted.split(',')[0]||'').trim();
-      const updates = { status:'reveal', reveal:{ i:G.qi, correct: q.type==='mult'?q.correct:null, correctText, results } };
+      if (penN > 0) for (const pid in players) if (!ans[pid]) {
+        results[pid] = { ok:false, pts:-penN, none:true };
+        players[pid].score = Math.max(0, (players[pid].score||0)-penN);
+      }
+      const correctText = q.type==='mult' ? corrects.map(i=>q.opts[i]).filter(Boolean).join(' + ') : (q.accepted.split(',')[0]||'').trim();
+      const updates = { status:'reveal', reveal:{ i:G.qi, correct: q.type==='mult'?corrects[0]:null, corrects: q.type==='mult'?corrects:null, correctText, results, stats } };
       for (const pid in players) updates['players/'+pid+'/score'] = players[pid].score||0;
       G.ref.update(updates);
-      showReveal(q, correctText, players, pending, results);
+      showReveal(q, correctText, players, pending, results, stats);
     });
   });
 }
@@ -1646,10 +1882,14 @@ function calcPts(q, tMs){
   const frac = Math.max(0, 1 - tMs/(q.timer*1000));
   return Math.round(q.points*(0.5+0.5*frac)/10)*10;
 }
-function showReveal(q, correctText, players, pending, results){
+function showReveal(q, correctText, players, pending, results, stats){
   G.lastResults = results; G.lastPlayers = JSON.parse(JSON.stringify(players));
+  const corrects = (q.corrects && q.corrects.length) ? q.corrects : [q.correct||0];
   $('hrTitle').textContent = 'RISPOSTA GIUSTA';
-  $('hrAnswer').innerHTML = q.type==='mult' ? `<span class="sym">${SYMS[q.correct]}</span> ${esc(correctText)}` : esc(correctText);
+  $('hrAnswer').innerHTML = q.type==='mult'
+    ? corrects.map(i=>`<span class="sym">${SYMS[i]}</span> ${esc(q.opts[i]||'')}`).join(' &nbsp; ')
+    : esc(correctText);
+  if (q.type==='mult' && stats) renderStats($('hrStats'), q.opts, stats, corrects); else $('hrStats').innerHTML='';
   const pbox = $('hrPending'); pbox.innerHTML='';
   $('hrPendingBox').style.display = pending.length?'block':'none';
   pending.forEach(p=>{
@@ -1658,7 +1898,8 @@ function showReveal(q, correctText, players, pending, results){
     const b = document.createElement('button'); b.className='btn small lm'; b.textContent='✔ Giusta';
     b.onclick = ()=>{
       const pts = calcPts(q, p.t); b.disabled = true; b.textContent = '+'+pts;
-      G.ref.child('players/'+p.pid+'/score').transaction(v=>(v||0)+pts);
+      const delta = pts + (q.penWrong||0); // punti + rimborso della penalità già applicata
+      G.ref.child('players/'+p.pid+'/score').transaction(v=>Math.max(0,(v||0)+delta));
       G.ref.child('reveal/results/'+p.pid).update({ok:true, pts});
       if (G.lastResults && G.lastResults[p.pid]) { G.lastResults[p.pid].ok=true; G.lastResults[p.pid].pts=pts; }
       G.ref.child('players').once('value', ps=>{
@@ -1669,7 +1910,8 @@ function showReveal(q, correctText, players, pending, results){
     d.appendChild(b); pbox.appendChild(d);
   });
   const leadArr = renderLead($('hrLead'), players);
-  pjSend({type:'reveal', correctText, sym: q.type==='mult'?SYMS[q.correct]:null,
+  pjSend({type:'reveal', correctText, sym: q.type==='mult'?SYMS[corrects[0]]:null,
+    stats: q.type==='mult'?stats:null, opts: q.type==='mult'?q.opts:null, corrects: q.type==='mult'?corrects:null,
     lead: leadArr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
   $('btnNext').textContent = (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
   showScreen('scrHostReveal');
@@ -1782,6 +2024,8 @@ function listenGame(){
     else if (g.status==='dice') showPlayerDice(g);
     else if (g.status==='simon') showPlayerSimon(g);
     else if (g.status==='voto') showPlayerVoto(g);
+    else if (g.status==='wheels') showPlayerWheels(g);
+    else if (g.status==='hilo') showPlayerHiLo(g);
     else if (g.status==='swiss') showPlayerSwiss(g);
     else if (g.status==='cards') showPlayerCards(g);
     else if (g.status==='tombola') showPlayerTombola(g);
@@ -1806,12 +2050,20 @@ function showPlayerQ(cur){
                   : cur.mediaKind==='audio' ? '<small>🎵 Ascolta la musica!</small>' : '';
   $('pqQText').innerHTML = cur.text ? esc(cur.text) + mediaNote : '';
   $('pqQText').style.display = cur.text ? 'block' : 'none';
+  P.multiSel = new Set(); P.curPattern = cur.pattern || null;
+  $('pqMultiSend').style.display='none';
   if (cur.type==='mult') {
     $('pqOpenBox').style.display='none';
-    $('pqOpts').innerHTML = (cur.opts||[]).map((o,k)=> o?`<button class="ansBtn a${k}" onclick="sendAnswer(${k},this)"><span class="sym">${SYMS[k]}</span>${esc(o)}</button>`:'').join('');
+    $('pqOpts').innerHTML = (cur.opts||[]).map((o,k)=> o?`<button class="ansBtn a${k}" style="${(cur.opts.length%2===1 && k===cur.opts.length-1)?'grid-column:1/-1':''}" onclick="${cur.multi?`toggleMulti(${k},this)`:`sendAnswer(${k},this)`}"><span class="sym">${SYMS[k]}</span>${esc(o)}</button>`:'').join('');
+    if (cur.multi){ $('pqMultiSend').style.display='block'; $('pqMultiSend').disabled=false; $('pqHint').textContent='✅ SCEGLI TUTTE LE RISPOSTE GIUSTE E POI INVIA!'; }
+    else $('pqHint').textContent='RISPONDI! PIÙ SEI VELOCE, PIÙ PUNTI FAI 💨';
   } else {
     $('pqOpts').innerHTML=''; $('pqOpenBox').style.display='block';
     $('pqOpenInput').value=''; $('pqOpenInput').disabled=false;
+    renderBoxes($('pqBoxes'), P.curPattern, '');
+    $('pqHint').textContent = P.curPattern && P.curPattern.h && P.curPattern.h.some(x=>x)
+      ? '✍️ SCRIVI LA RISPOSTA COMPLETA — LE LETTERE ORO TI AIUTANO!'
+      : (P.curPattern ? '✍️ LE CASELLE TI DICONO QUANTO È LUNGA LA RISPOSTA!' : 'RISPONDI! PIÙ SEI VELOCE, PIÙ PUNTI FAI 💨');
     setTimeout(()=>$('pqOpenInput').focus(), 300);
   }
   clearInterval(P.timerInt);
@@ -1838,6 +2090,128 @@ function sendOpenAnswer(){
   if (navigator.vibrate) navigator.vibrate(40);
 }
 $('pqOpenInput')?.addEventListener('keydown', e=>{ if(e.key==='Enter') sendOpenAnswer(); });
+$('pqOpenInput')?.addEventListener('input', ()=>{ if (P.curPattern) renderBoxes($('pqBoxes'), P.curPattern, $('pqOpenInput').value); });
+function toggleMulti(k, btn){
+  if (P.answered) return;
+  if (P.multiSel.has(k)) { P.multiSel.delete(k); btn.classList.remove('sel'); }
+  else { P.multiSel.add(k); btn.classList.add('sel'); }
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+function sendMultiAnswer(){
+  if (P.answered || !P.multiSel || !P.multiSel.size) return;
+  P.answered = true;
+  const val = [...P.multiSel].sort((a,b)=>a-b).join(',');
+  document.querySelectorAll('#pqOpts .ansBtn').forEach(b=>{ b.style.pointerEvents='none'; if(!b.classList.contains('sel')) b.classList.add('dim'); });
+  $('pqMultiSend').disabled = true;
+  P.ref.child('answers/'+P.curI+'/'+P.id).set({ a:val, t: Date.now()-P.t0 });
+  $('pqSent').style.display='block';
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+function showPlayerWheels(g){
+  clearInterval(P.timerInt);
+  const m = g.wheels||{};
+  $('plwName').textContent = P.name;
+  $('plwScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayWheels');
+  if (m.phase==='bet'){
+    if (P.whRound !== m.round){
+      P.whRound = m.round; P.whBet = null; P.whStopped = false;
+      renderWheels($('wheelsPl'), m.orders||[[],[],[]], true, k=> pickWheel(k));
+      wheelsSpinAll($('wheelsPl'));
+    }
+    ($('wheelsPl')._boxes||[]).forEach((b,k)=> b.classList.toggle('pick', P.whBet===k));
+    $('plwStatus').textContent = P.whBet==null ? 'TOCCA LA RUOTA SU CUI PUNTARE!' : 'HAI PUNTATO SULLA RUOTA '+(P.whBet+1)+' 🎰';
+    $('plwFb').style.display='none';
+    clearInterval(P.whInt);
+    P.whInt = setInterval(()=>{
+      const left = Math.max(0, (m.endAt||0) - serverNow());
+      $('plwTimerBar').style.width = (left/10000*100)+'%';
+      if (left<=0) clearInterval(P.whInt);
+    },100);
+  }
+  else if (m.phase==='result'){
+    clearInterval(P.whInt);
+    $('plwTimerBar').style.width='0%';
+    const lr = m.lastResult;
+    if (!P.whStopped && m.res){
+      P.whStopped = true;
+      if (!$('wheelsPl')._boxes) renderWheels($('wheelsPl'), m.orders||[[],[],[]], false);
+      wheelsStopAll($('wheelsPl'), m.res, ()=>{
+        const r = lr && (lr.results||{})[P.id];
+        $('plwFb').style.display='block';
+        if (!r){ $('plwFb').style.color='var(--muted)'; $('plwFb').textContent='NON HAI PUNTATO 🎡'; $('plwStatus').textContent='ANDATA COSÌ...'; }
+        else if (r.val>0){ $('plwFb').style.color='var(--lime)'; $('plwFb').textContent='RUOTA '+(r.w+1)+' → +'+r.val+' PUNTI!'; $('plwStatus').textContent='OTTIMO FIUTO! 🎰'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
+        else { $('plwFb').style.color='var(--red)'; $('plwFb').textContent='RUOTA '+(r.w+1)+' → ZERO! 💥'; $('plwStatus').textContent='LA SFORTUNA È CIECA...'; }
+      });
+      $('plwStatus').textContent = 'LE RUOTE FRENANO... 🤞';
+    }
+  }
+  else {
+    $('plwStatus').textContent = 'SI PREPARANO LE RUOTE...';
+    $('plwFb').style.display='none';
+    if (m.orders && P.whIdleRound !== m.round){ P.whIdleRound = m.round; renderWheels($('wheelsPl'), m.orders, false); }
+  }
+}
+function pickWheel(k){
+  if (P.whBet != null) return;
+  P.whBet = k;
+  P.ref.child('wheels/bets/'+P.id).set(k);
+  ($('wheelsPl')._boxes||[]).forEach((b,i)=> b.classList.toggle('pick', i===k));
+  $('plwStatus').textContent = 'HAI PUNTATO SULLA RUOTA '+(k+1)+' 🎰';
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+function showPlayerHiLo(g){
+  clearInterval(P.timerInt);
+  const m = g.hilo||{};
+  $('phName').textContent = P.name;
+  $('phScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  renderCardTable($('hiloTablePl'), m.revealed||[]);
+  const betting = m.phase==='bet';
+  if (betting && P.hiloRound !== m.round) { P.hiloRound = m.round; P.hiloBet = null; }
+  ['alta','bassa'].forEach(k=>{
+    const b = $(k==='alta'?'phAlta':'phBassa');
+    b.classList.toggle('sel', P.hiloBet===k);
+    b.classList.toggle('dim', !betting || (!!P.hiloBet && P.hiloBet!==k));
+  });
+  const prev = (m.revealed||[])[(m.revealed||[]).length-1];
+  if (betting){
+    $('phStatus').textContent = prev ? `CARTA ${m.round+1}: PIÙ ALTA O PIÙ BASSA DEL ${RANKS[prev.r]}?` : '';
+    $('phFb').style.display = P.hiloBet ? 'block' : 'none';
+    if (P.hiloBet){ $('phFb').style.color='var(--cyan)'; $('phFb').textContent='SCOMMESSA PIAZZATA! 🎰'; }
+    clearInterval(P.hiloInt);
+    P.hiloInt = setInterval(()=>{
+      const left = Math.max(0, (m.endAt||0) - serverNow());
+      $('phTimerBar').style.width = (left/10000*100)+'%';
+      if (left<=0) clearInterval(P.hiloInt);
+    },100);
+  } else {
+    clearInterval(P.hiloInt);
+    $('phTimerBar').style.width='0%';
+    const lr = m.lastResult;
+    if (m.phase==='flip' && lr){
+      const r = (lr.results||{})[P.id];
+      $('phStatus').textContent = `IL ${lr.rank} ERA PIÙ ${lr.esito.toUpperCase()} DEL ${lr.prevRank}!`;
+      $('phFb').style.display='block';
+      if (!r){ $('phFb').style.color='var(--muted)'; $('phFb').textContent='NON HAI SCOMMESSO'; }
+      else if (r.ok){ $('phFb').style.color='var(--lime)'; $('phFb').textContent='INDOVINATO! +'+r.pts;
+        if (P.hiloFbAt !== lr.at){ P.hiloFbAt = lr.at; if(navigator.vibrate) navigator.vibrate([60,40,60]); } }
+      else { $('phFb').style.color='var(--red)'; $('phFb').textContent='SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
+    } else {
+      $('phStatus').textContent = prev ? `COMANDA IL ${RANKS[prev.r]} — OCCHI SUL TAVOLO...` : 'OCCHI SUL TAVOLO...';
+      $('phFb').style.display='none';
+    }
+  }
+  showScreen('scrPlayHiLo');
+}
+function betHiLo(k){
+  if (P.hiloBet) return;
+  P.hiloBet = k;
+  P.ref.child('hilo/bets/'+P.id).set(k);
+  $('phAlta').classList.toggle('sel', k==='alta'); $('phAlta').classList.toggle('dim', k!=='alta');
+  $('phBassa').classList.toggle('sel', k==='bassa'); $('phBassa').classList.toggle('dim', k!=='bassa');
+  $('phFb').style.display='block'; $('phFb').style.color='var(--cyan)'; $('phFb').textContent='SCOMMESSA PIAZZATA! 🎰';
+  if (navigator.vibrate) navigator.vibrate(40);
+}
 function showPlayerSwiss(g){
   clearInterval(P.timerInt);
   const m = g.swiss||{};
@@ -1920,7 +2294,7 @@ function showPlayerCards(g){
       if (!r) { $('pcFb').style.color='var(--muted)'; $('pcFb').textContent='NON HAI SCOMMESSO'; }
       else if (r.ok) { $('pcFb').style.color='var(--lime)'; $('pcFb').textContent='INDOVINATO! +'+r.pts;
         if (P.cardsFbAt !== lr.at) { P.cardsFbAt = lr.at; if(navigator.vibrate) navigator.vibrate([60,40,60]); } }
-      else { $('pcFb').style.color='var(--red)'; $('pcFb').textContent='SBAGLIATO 💥'; }
+      else { $('pcFb').style.color='var(--red)'; $('pcFb').textContent='SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
     } else {
       $('pcStatus').textContent = 'OCCHI SUL TAVOLO...';
       $('pcFb').style.display='none';
@@ -2055,7 +2429,7 @@ function showPlayerSimon(g){
     const msg = $('pfMsg'), pts = $('pfPts');
     if (!r) { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='TEMPO SCADUTO ⏱'; pts.textContent='+0'; }
     else if (r.ok) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='ORECCHIO FINO! 🎼'; pts.textContent='+'+r.pts+' PUNTI'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
-    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='SEQUENZA SBAGLIATA 💥'; pts.textContent='+0'; }
+    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='SEQUENZA SBAGLIATA 💥'; pts.textContent = r.pts<0 ? r.pts+' PUNTI' : '+0'; }
     const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
     const pos = arr.findIndex(p=>p.id===P.id)+1;
     $('pfRank').innerHTML = (pos>0 ? `SEI <b style="color:var(--gold)">${pos}°</b> SU ${arr.length} · ${(((g.players||{})[P.id])||{}).score||0} PUNTI<br>` : '') +
@@ -2108,7 +2482,7 @@ function showPlayerDice(g){
     const msg = $('pfMsg'), pts = $('pfPts');
     if (!r) { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='NON HAI SCOMMESSO 🎲'; pts.textContent='Era '+(m.win||'?').toUpperCase()+' ('+m.sum+')'; }
     else if (r.ok) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='INDOVINATO! 🎰'; pts.textContent='+'+r.pts+' PUNTI'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
-    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='SBANCATO! 💥'; pts.textContent='Era '+(m.win||'?').toUpperCase()+' ('+m.sum+')'; }
+    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='SBANCATO!'+(r.pts<0?' '+r.pts:'')+' 💥'; pts.textContent='Era '+(m.win||'?').toUpperCase()+' ('+m.sum+')'; }
     const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
     const pos = arr.findIndex(p=>p.id===P.id)+1;
     $('pfRank').innerHTML = pos>0 ? `SEI <b style="color:var(--gold)">${pos}°</b> SU ${arr.length} · ${(((g.players||{})[P.id])||{}).score||0} PUNTI` : '';
@@ -2152,7 +2526,7 @@ function showPlayerMini(g){
     const msg = $('pfMsg'), pts = $('pfPts');
     if (!r) { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='NON HAI VOTATO 🥃'; pts.textContent='Era il '+(m.win||'?'); }
     else if (r.ok) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='BUSSOLOTTO GIUSTO! 🎩'; pts.textContent='+'+r.pts+' PUNTI'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
-    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='NIENTE PALLINA 💥'; pts.textContent='Era il '+(m.win||'?'); }
+    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='NIENTE PALLINA'+(r.pts<0?' '+r.pts:'')+' 💥'; pts.textContent='Era il '+(m.win||'?'); }
     const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
     const pos = arr.findIndex(p=>p.id===P.id)+1;
     $('pfRank').innerHTML = pos>0 ? `SEI <b style="color:var(--gold)">${pos}°</b> SU ${arr.length} · ${(((g.players||{})[P.id])||{}).score||0} PUNTI` : '';
@@ -2173,8 +2547,9 @@ function showPlayerFb(g){
   const r = (g.reveal && g.reveal.results || {})[P.id];
   const msg = $('pfMsg'), pts = $('pfPts');
   if (!r) { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='TEMPO SCADUTO ⏱'; pts.textContent='+0'; }
+  else if (r.none) { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='NON HAI RISPOSTO ⏱'; pts.textContent = r.pts+' PUNTI'; }
   else if (r.ok) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='GIUSTA! 🎩'; pts.textContent='+'+r.pts+' PUNTI'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
-  else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='SBAGLIATA 💥'; pts.textContent = g.reveal.correctText ? 'Era: '+g.reveal.correctText : '+0'; }
+  else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='SBAGLIATA 💥'; pts.textContent = (r.pts<0 ? r.pts+' PUNTI · ' : '') + (g.reveal.correctText ? 'Era: '+g.reveal.correctText : '+0'); }
   const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
   const pos = arr.findIndex(p=>p.id===P.id)+1;
   $('pfRank').innerHTML = pos>0 ? `SEI <b style="color:var(--gold)">${pos}°</b> SU ${arr.length} · ${( (g.players||{})[P.id]||{} ).score||0} PUNTI` : '';
@@ -2433,6 +2808,227 @@ function runCountdown(el, startAt, done){
 }
 
 /* ================================================================
+   LE RUOTE DELLA FORTUNA — motore condiviso + regia
+================================================================ */
+const WHEEL_VALUES = [0,100,200,300,400,500,600,700,800,1000];
+const WHEEL_COLORS = ['#ff2e9a','#00c2cf','#8fd400','#ffab00','#9d4dff'];
+const WHEEL_STOPS = [2200, 3600, 5000]; // frenate a scalare
+function shuffledWheel(){ const a=[...WHEEL_VALUES]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function buildWheel(box, order, name){
+  const seg = 360/order.length;
+  const grad = order.map((_,i)=>`${WHEEL_COLORS[i%WHEEL_COLORS.length]} ${i*seg}deg ${(i+1)*seg}deg`).join(',');
+  box.innerHTML = `<div class="wheel" style="background:conic-gradient(${grad})">` +
+    order.map((v,i)=>`<span class="wlbl" style="transform:rotate(${i*seg+seg/2}deg) translate(-50%,-88%) translateY(-140%)"> </span>`).join('') +
+    `</div><div class="wheelHub">🎩</div><div class="wheelName">${name}</div><div class="wheelVal"> </div>`;
+  // etichette: ruotate attorno al centro
+  const w = box.querySelector('.wheel');
+  w.querySelectorAll('.wlbl').forEach((l,i)=>{
+    l.textContent = order[i];
+    l.style.transform = `rotate(${i*seg+seg/2}deg) translateY(calc(-1 * min(11vw, 108px)))`;
+    l.style.transformOrigin = '0 0';
+  });
+  box._wheel = w; box._order = order;
+}
+function renderWheels(rowEl, orders, pickable, onPick){
+  rowEl.innerHTML = '';
+  rowEl._boxes = [];
+  ['RUOTA 1','RUOTA 2','RUOTA 3'].forEach((nm,k)=>{
+    const box = document.createElement('div');
+    box.className = 'wheelBox' + (pickable?' pickable':'');
+    rowEl.appendChild(box);
+    buildWheel(box, orders[k], nm);
+    if (pickable && onPick) box.addEventListener('pointerdown', ()=> onPick(k));
+    rowEl._boxes.push(box);
+  });
+}
+function wheelsSpinAll(rowEl){ (rowEl._boxes||[]).forEach(b=>{ b._wheel.style.transition='none'; b._wheel.style.transform=''; b._wheel.classList.add('spin'); b.querySelector('.wheelVal').textContent=' '; }); }
+function wheelsStopAll(rowEl, resIdx, done){
+  (rowEl._boxes||[]).forEach((b,k)=>{
+    setTimeout(()=>{
+      const seg = 360/b._order.length;
+      const final = 360*4 - (resIdx[k]*seg + seg/2);
+      b._wheel.classList.remove('spin');
+      b._wheel.style.transition = `transform ${WHEEL_STOPS[k]}ms cubic-bezier(.12,.75,.2,1)`;
+      requestAnimationFrame(()=> requestAnimationFrame(()=>{ b._wheel.style.transform = `rotate(${final}deg)`; }));
+      setTimeout(()=>{
+        b.querySelector('.wheelVal').textContent = b._order[resIdx[k]] + ' PT';
+        beepHz(300+k*120, 160);
+      }, WHEEL_STOPS[k]+50);
+    }, k*120);
+  });
+  if (done) setTimeout(done, WHEEL_STOPS[2]+700);
+}
+
+/* ================================================================
+   RUOTE — REGIA HOST
+================================================================ */
+let WH = { round:0 };
+function openWheels(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(WH.timerInt);
+  WH.orders = [shuffledWheel(), shuffledWheel(), shuffledWheel()];
+  G.ref.update({ status:'wheels', wheels:{ phase:'idle', round:WH.round, orders:WH.orders } });
+  $('wheelsMsg').textContent = 'Premi VIA: 10 secondi per scegliere la ruota, poi si fermano una alla volta';
+  $('wheelsCounts').innerHTML=''; $('wheelsTimerBar').style.width='100%';
+  $('wheelsBtnGo').style.display=''; $('wheelsBtnAgain').style.display='none';
+  pjSend({type:'wheelsState', orders:WH.orders});
+  showScreen('scrWheels');
+  renderWheels($('wheelsHost'), WH.orders, false);
+}
+function wheelsSpin(){
+  WH.round++;
+  WH.orders = [shuffledWheel(), shuffledWheel(), shuffledWheel()];
+  const endAt = serverNow() + 10000;
+  WH.endAt = endAt;
+  G.ref.update({ 'wheels/phase':'bet', 'wheels/round':WH.round, 'wheels/orders':WH.orders,
+    'wheels/endAt':endAt, 'wheels/res':null, 'wheels/lastResult':null });
+  G.ref.child('wheels/bets').remove();
+  $('wheelsBtnGo').style.display='none'; $('wheelsBtnAgain').style.display='none';
+  $('wheelsMsg').textContent = '🎡 SCEGLIETE LA RUOTA DAL TELEFONO!';
+  renderWheels($('wheelsHost'), WH.orders, false);
+  wheelsSpinAll($('wheelsHost'));
+  pjSend({type:'wheelsBet', orders:WH.orders, endAt, round:WH.round});
+  G.ref.child('wheels/bets').on('value', s2=>{
+    const v = Object.values(s2.val()||{}); const c=[0,0,0];
+    v.forEach(x=>{ if(c[x]!==undefined) c[x]++; });
+    $('wheelsCounts').innerHTML = c.map((n,i)=>`<div class="vc">RUOTA ${i+1} · ${n}</div>`).join('');
+  });
+  clearInterval(WH.timerInt);
+  WH.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('wheelsTimerBar').style.width = (left/10000*100)+'%';
+    if (left<=0) { clearInterval(WH.timerInt); wheelsStop(); }
+  }, 100);
+}
+function wheelsStop(){
+  G.ref.child('wheels/bets').off();
+  const resIdx = [0,1,2].map(()=> Math.floor(Math.random()*WHEEL_VALUES.length));
+  const values = resIdx.map((ri,k)=> WH.orders[k][ri]);
+  G.ref.child('wheels/bets').once('value').then(bs=>{
+    const bets = bs.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const results = {}, updates = { 'wheels/phase':'result', 'wheels/res':resIdx, 'wheels/values':values };
+      const c=[0,0,0];
+      for (const pid in bets){
+        const w = bets[pid];
+        if (c[w]!==undefined) c[w]++;
+        const val = values[w]||0;
+        results[pid] = { w, val };
+        if (val>0 && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + val;
+      }
+      updates['wheels/lastResult'] = { round:WH.round, results, values, at:Date.now() };
+      G.ref.update(updates);
+      $('wheelsMsg').textContent = '🎡 LE RUOTE FRENANO...';
+      pjSend({type:'wheelsStop', resIdx, values, counts:c, orders:WH.orders});
+      wheelsStopAll($('wheelsHost'), resIdx, ()=>{
+        $('wheelsMsg').textContent = `RISULTATI: ${values.map((v,i)=>'R'+(i+1)+'='+v).join(' · ')}`;
+        $('wheelsBtnAgain').style.display='';
+        confetti();
+      });
+    });
+  });
+}
+
+/* ================================================================
+   CARTA ALTA CARTA BASSA — REGIA HOST
+================================================================ */
+let HILO = {};
+$('hiloPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
+function openHiLo(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(HILO.timerInt);
+  G.ref.update({ status:'hilo', hilo:{ phase:'idle', round:0, revealed:null, lastResult:null } });
+  $('hiloSetup').style.display='block'; $('hiloLive').style.display='none';
+  pjSend({type:'hiloState', revealed:[], msg:'SI MESCOLA IL MAZZO...'});
+  showScreen('scrHiLo');
+}
+function hiloDeal(){
+  HILO.points = getPoints('hiloPoints','hiloPointsMan');
+  HILO.pen = Math.max(0, +($('hiloPen')||{value:0}).value||0);
+  // 5 carte con VALORI tutti diversi (niente pareggi): A=1 ... K=13
+  const ranks = [...Array(13).keys()];
+  HILO.deal = [];
+  for (let i=0;i<5;i++){
+    const r = ranks.splice(Math.floor(Math.random()*ranks.length),1)[0];
+    HILO.deal.push({ s: Math.floor(Math.random()*4), r });
+  }
+  HILO.round = 1; // la carta 0 comanda ed è già girata
+  HILO.revealed = [HILO.deal[0]];
+  G.ref.update({ 'hilo/phase':'ready', 'hilo/round':1, 'hilo/points':HILO.points,
+    'hilo/revealed':HILO.revealed, 'hilo/lastResult':null });
+  G.ref.child('hilo/bets').remove();
+  $('hiloSetup').style.display='none'; $('hiloLive').style.display='block';
+  const base = HILO.deal[0];
+  $('hiloMsg').textContent = `COMANDA IL ${RANKS[base.r]}${SUITS[base.s]} — apri le scommesse per la carta 2!`;
+  $('hiloCounts').innerHTML=''; $('hiloTimerBar').style.width='100%';
+  $('hiloBtnBet').style.display=''; $('hiloBtnBet').textContent='⬆⬇ APRI SCOMMESSE — CARTA 2';
+  $('hiloBtnAgain').style.display='none';
+  resetCardTable($('hiloTableHost'));
+  renderCardTable($('hiloTableHost'), HILO.revealed);
+  pjSend({type:'hiloState', revealed:HILO.revealed, msg:`COMANDA IL ${RANKS[base.r]}${SUITS[base.s]}!`});
+}
+function hiloBet(){
+  const endAt = serverNow() + 10000;
+  HILO.endAt = endAt;
+  const prev = HILO.revealed[HILO.revealed.length-1];
+  G.ref.update({ 'hilo/phase':'bet', 'hilo/round':HILO.round, 'hilo/endAt':endAt });
+  G.ref.child('hilo/bets').remove();
+  $('hiloBtnBet').style.display='none';
+  $('hiloMsg').textContent = `⬆⬇ CARTA ${HILO.round+1}: più ALTA o più BASSA del ${RANKS[prev.r]}?`;
+  pjSend({type:'hiloBet', round:HILO.round, endAt, revealed:HILO.revealed, prevRank:RANKS[prev.r]});
+  G.ref.child('hilo/bets').on('value', s2=>{
+    const v = Object.values(s2.val()||{}); const c = {alta:0, bassa:0};
+    v.forEach(x=>{ if(c[x]!==undefined) c[x]++; });
+    $('hiloCounts').innerHTML = `<div class="vc" style="color:var(--lime)">⬆ ${c.alta}</div><div class="vc" style="color:var(--cyan)">⬇ ${c.bassa}</div>`;
+  });
+  clearInterval(HILO.timerInt);
+  HILO.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('hiloTimerBar').style.width = (left/10000*100)+'%';
+    if (left<=0) { clearInterval(HILO.timerInt); hiloFlip(); }
+  }, 100);
+}
+function hiloFlip(){
+  G.ref.child('hilo/bets').off();
+  G.ref.child('wheels/bets').off();
+  const prev = HILO.revealed[HILO.revealed.length-1];
+  const card = HILO.deal[HILO.round];
+  const esito = card.r > prev.r ? 'alta' : 'bassa';
+  G.ref.child('hilo/bets').once('value').then(bs=>{
+    const bets = bs.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const results = {}, updates = {};
+      const c = {alta:0, bassa:0};
+      for (const pid in bets){
+        if (c[bets[pid]]!==undefined) c[bets[pid]]++;
+        const ok = bets[pid]===esito;
+        const pts = ok ? HILO.points : -(HILO.pen||0);
+        results[pid] = { ok, pts, bet:bets[pid] };
+        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
+      }
+      HILO.revealed.push(card);
+      updates['hilo/phase'] = 'flip';
+      updates['hilo/revealed'] = HILO.revealed;
+      updates['hilo/lastResult'] = { round:HILO.round, esito, prevRank:RANKS[prev.r], rank:RANKS[card.r], results, at:Date.now() };
+      G.ref.update(updates);
+      renderCardTable($('hiloTableHost'), HILO.revealed);
+      $('hiloMsg').textContent = `${RANKS[card.r]}${SUITS[card.s]} → più ${esito.toUpperCase()} del ${RANKS[prev.r]}! +${HILO.points} a chi ha indovinato`;
+      pjSend({type:'hiloFlip', revealed:HILO.revealed, esito, rank:RANKS[card.r], suit:SUITS[card.s], prevRank:RANKS[prev.r], counts:c, pts:HILO.points, round:HILO.round});
+      HILO.round++;
+      if (HILO.round < 5){
+        $('hiloBtnBet').style.display='';
+        $('hiloBtnBet').textContent = `⬆⬇ APRI SCOMMESSE — CARTA ${HILO.round+1}`;
+      } else {
+        $('hiloMsg').textContent += ' · MANO FINITA! 🃏';
+        $('hiloBtnAgain').style.display='';
+      }
+    });
+  });
+}
+
+/* ================================================================
    PRECISIONE SVIZZERA — motore + regia
 ================================================================ */
 const SWISS_MAX = 12000;
@@ -2482,6 +3078,8 @@ function swissStart(){
 }
 function swissReveal(){
   G.ref.child('swiss/press').off();
+  G.ref.child('hilo/bets').off();
+  G.ref.child('wheels/bets').off();
   G.ref.child('swiss/press').once('value').then(prs=>{
     const press = prs.val()||{};
     G.ref.child('players').once('value').then(ps=>{
@@ -2550,6 +3148,7 @@ function openCards(){
 }
 function cardsDeal(){
   CARDS.points = getPoints('cardsPoints','cardsPointsMan');
+  CARDS.pen = Math.max(0, +($('cardsPen')||{value:0}).value||0);
   // 5 carte distinte pescate a caso da un mazzo da 52
   const deck = []; for (let s2=0;s2<4;s2++) for (let r=0;r<13;r++) deck.push({s:s2,r});
   CARDS.deal = [];
@@ -2598,8 +3197,9 @@ function cardsFlip(){
       for (const pid in bets){
         if (c[bets[pid]]!==undefined) c[bets[pid]]++;
         const ok = bets[pid]===col;
-        results[pid] = { ok, pts: ok?CARDS.points:0, bet:bets[pid] };
-        if (ok && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + CARDS.points;
+        const pts = ok ? CARDS.points : -(CARDS.pen||0);
+        results[pid] = { ok, pts, bet:bets[pid] };
+        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
       }
       CARDS.revealed.push(card);
       updates['cards/phase'] = 'flip';
@@ -2858,6 +3458,8 @@ function modalGames(){
       <button class="btn lm" onclick="openTombola()">🎱 Tombola</button>
       <button class="btn mg" onclick="openCards()">🎴 Carta Rossa, Carta Nera</button>
       <button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>
+      <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
+      <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
     </div>`);
 }
 
@@ -3051,6 +3653,7 @@ function openSimon(){
 function simonStart(){
   SIM.round++;
   SIM.points = getPoints('simonPoints','simonPointsMan');
+  SIM.pen = Math.max(0, +($('simonPen')||{value:0}).value||0);
   const n = +$('simonCount').value;
   SIM.seq = Array.from({length:n}, ()=> Math.floor(Math.random()*4));
   G.ref.update({ 'simon/phase':'show', 'simon/round':SIM.round, 'simon/points':SIM.points,
@@ -3090,10 +3693,10 @@ function simonReveal(){
       let okN = 0;
       for (const pid in answers){
         const ok = (answers[pid].s||'') === key;
-        const pts = ok ? SIM.points : 0;
+        const pts = ok ? SIM.points : -(SIM.pen||0);
         if (ok) okN++;
         results[pid] = { ok, pts };
-        if (ok && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + pts;
+        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
       }
       updates['simon/results'] = results;
       G.ref.update(updates);
@@ -3134,6 +3737,7 @@ function openDice(){
 function diceRoll(){
   DICE.round++;
   DICE.points = getPoints('dicePoints','dicePointsMan');
+  DICE.pen = Math.max(0, +($('dicePen')||{value:0}).value||0);
   DICE.d1 = 1+Math.floor(Math.random()*6); DICE.d2 = 1+Math.floor(Math.random()*6);
   const endAt = serverNow() + DICE_BET_MS;
   DICE.endAt = endAt;
@@ -3169,9 +3773,9 @@ function diceReveal(){
       const c = {pari:0, dispari:0};
       for (const pid in bets){
         const ok = bets[pid]===win; if(c[bets[pid]]!==undefined) c[bets[pid]]++;
-        const pts = ok ? DICE.points : 0;
+        const pts = ok ? DICE.points : -(DICE.pen||0);
         results[pid] = { ok, pts };
-        if (ok && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + pts;
+        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
       }
       updates['dice/results'] = results;
       G.ref.update(updates);
@@ -3219,6 +3823,7 @@ function miniShuffle(){
   for (let k=0;k<n;k++){ const i = Math.floor(Math.random()*3); const j = (i+1+Math.floor(Math.random()*2))%3; swaps.push([i,j]); }
   MINI.plan = { ball, swaps, stepMs };
   MINI.points = points;
+  MINI.pen = Math.max(0, +($('miniPen')||{value:0}).value||0);
   G.ref.update({ 'mini/phase':'watch', 'mini/round':MINI.round, 'mini/points':points, 'mini/win':null, 'mini/results':null, 'mini/plan':MINI.plan });
   G.ref.child('mini/votes').remove();
   $('miniBtnGo').style.display='none'; $('miniBtnAgain').style.display='none';
@@ -3250,9 +3855,9 @@ function miniReveal(){
       const c = {A:0,B:0,C:0};
       for (const pid in votes){
         const ok = votes[pid]===win; if(c[votes[pid]]!==undefined) c[votes[pid]]++;
-        const pts = ok ? MINI.points : 0;
+        const pts = ok ? MINI.points : -(MINI.pen||0);
         results[pid] = { ok, pts };
-        if (ok && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + pts;
+        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
       }
       updates['mini/results'] = results;
       G.ref.update(updates);
@@ -3279,11 +3884,13 @@ function backToQuiz(title){
   clearInterval(DICE.timerInt); clearInterval(SIM.timerInt); clearInterval(VOTO.timerInt);
   const hc = $('timerClockHost'); if (hc) clearInterval(hc._int);
   G.ref.child('voto/votes').off();
-  clearInterval(CARDS.timerInt); clearTimeout(SW.revealTO);
+  clearInterval(CARDS.timerInt); clearInterval(HILO.timerInt); clearInterval(WH.timerInt); clearTimeout(SW.revealTO);
   const swc = $('swissClockHost'); if (swc) clearInterval(swc._int);
   G.ref.child('cards/bets').off();
   G.ref.child('swiss/press').off();
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null });
+  G.ref.child('hilo/bets').off();
+  G.ref.child('wheels/bets').off();
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -3377,8 +3984,10 @@ function pjRoute(m){
       $('pjPoints').textContent = m.points+' PUNTI';
       $('pjQText').textContent = m.text;
       $('pjMedia').innerHTML = m.photo ? `<img src="${m.photo}" class="hostMedia" style="max-height:48vh">` : '';
+      renderBoxes($('pjBoxes'), m.qtype==='open' ? m.pattern : null, '');
       $('pjOpts').innerHTML = (m.qtype==='mult' && m.opts)
-        ? m.opts.map((o,k)=> o?`<div class="ansBtn a${k}"><span class="sym">${SYMS[k]}</span>${esc(o)}</div>`:'').join('')
+        ? (m.multi?`<div class="byline" style="grid-column:1/-1; font-size:18px; color:var(--gold)">✅ RISPOSTA MULTIPLA: PRENDILE TUTTE!</div>`:'') +
+          m.opts.map((o,k)=> o?`<div class="ansBtn a${k}" style="${(m.opts.length%2===1 && k===m.opts.length-1)?'grid-column:1/-1':''}"><span class="sym">${SYMS[k]}</span>${esc(o)}</div>`:'').join('')
         : `<div class="byline" style="grid-column:1/-1; font-size:18px">✍️ SCRIVI LA RISPOSTA SUL TELEFONO</div>`;
       applyPjMode();
       clearInterval(pjTimerInt);
@@ -3389,6 +3998,62 @@ function pjRoute(m){
         if (left<=0) clearInterval(pjTimerInt);
       },100);
       showScreen('scrPjQ');
+    }
+    else if (m.type==='wheelsState') {
+      showScreen('scrPjWheels');
+      renderWheels($('wheelsPj'), m.orders, false);
+      $('pjWheelsMsg').textContent = 'PRONTI A PUNTARE...'; $('pjWheelsCounts').innerHTML='';
+      $('pjWheelsTimerBar').style.width='100%';
+    }
+    else if (m.type==='wheelsBet') {
+      showScreen('scrPjWheels');
+      renderWheels($('wheelsPj'), m.orders, false);
+      wheelsSpinAll($('wheelsPj'));
+      $('pjWheelsMsg').textContent = '🎡 SCEGLIETE LA VOSTRA RUOTA DAL TELEFONO!';
+      $('pjWheelsCounts').innerHTML='';
+      clearInterval(window._pjWhInt);
+      window._pjWhInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjWheelsTimerBar').style.width = (left/10000*100)+'%';
+        if (left<=0) clearInterval(window._pjWhInt);
+      },100);
+    }
+    else if (m.type==='wheelsStop') {
+      clearInterval(window._pjWhInt);
+      $('pjWheelsTimerBar').style.width='0%';
+      $('pjWheelsMsg').textContent = '🎡 FRENANO... TRATTENETE IL FIATO!';
+      wheelsStopAll($('wheelsPj'), m.resIdx, ()=>{
+        $('pjWheelsMsg').textContent = m.values.map((v,i)=>'RUOTA '+(i+1)+': '+v+' PT').join(' · ');
+        $('pjWheelsCounts').innerHTML = m.counts.map((n,i)=>`<div class="vc">R${i+1} · ${n} puntate</div>`).join('');
+        confetti();
+      });
+    }
+    else if (m.type==='hiloState') {
+      showScreen('scrPjHiLo');
+      resetCardTable($('hiloTablePj'));
+      renderCardTable($('hiloTablePj'), m.revealed||[]);
+      $('pjHiLoMsg').textContent = m.msg||''; $('pjHiLoCounts').innerHTML='';
+      $('pjHiLoTimerBar').style.width='100%';
+    }
+    else if (m.type==='hiloBet') {
+      showScreen('scrPjHiLo');
+      renderCardTable($('hiloTablePj'), m.revealed||[]);
+      $('pjHiLoMsg').textContent = `⬆⬇ CARTA ${m.round+1}: PIÙ ALTA O PIÙ BASSA DEL ${m.prevRank}?`;
+      $('pjHiLoCounts').innerHTML='';
+      clearInterval(window._pjHiLoInt);
+      window._pjHiLoInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjHiLoTimerBar').style.width = (left/10000*100)+'%';
+        if (left<=0) clearInterval(window._pjHiLoInt);
+      },100);
+    }
+    else if (m.type==='hiloFlip') {
+      clearInterval(window._pjHiLoInt);
+      $('pjHiLoTimerBar').style.width='0%';
+      renderCardTable($('hiloTablePj'), m.revealed||[]);
+      $('pjHiLoMsg').textContent = `${m.rank}${m.suit} → PIÙ ${m.esito.toUpperCase()} DEL ${m.prevRank}! +${m.pts}`;
+      $('pjHiLoCounts').innerHTML = `<div class="vc" style="color:var(--lime)">⬆ ${m.counts.alta}</div><div class="vc" style="color:var(--cyan)">⬇ ${m.counts.bassa}</div>`;
+      if (m.round>=4) confetti();
     }
     else if (m.type==='swissState') {
       showScreen('scrPjSwiss');
@@ -3561,6 +4226,7 @@ function pjRoute(m){
       clearInterval(pjTimerInt);
       $('pjRevealTitle').textContent = m.title || 'RISPOSTA GIUSTA';
       $('pjAnswer').innerHTML = (m.sym?`<span class="sym">${m.sym}</span> `:'')+esc(m.correctText||'');
+      if (m.stats && m.opts) renderStats($('pjStats'), m.opts, m.stats, m.corrects||[]); else $('pjStats').innerHTML='';
       $('pjLead').innerHTML = (m.lead||[]).map((p,i)=>
         `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score}</span></div>`).join('');
       showScreen('scrPjReveal');
