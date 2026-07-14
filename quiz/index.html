@@ -644,7 +644,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v6.5</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v6.6</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -903,7 +903,8 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <button class="hb" onclick="modalPoints()">± Punti</button>
   <button class="hb" onclick="modalQuestions()">📋 Scelta domanda</button>
   <button class="hb" onclick="btnEndQuiz()">🏁 Termina quiz</button>
-  <button class="hb" onclick="modalGames()" style="border-color:var(--gold); color:var(--gold)">🕹 GIOCHI E MODULI</button>
+  <button class="hb" onclick="modalGames()" style="border-color:var(--gold); color:var(--gold)">🕹 GIOCHI</button>
+  <button class="hb" onclick="modalModules()" style="border-color:var(--cyan); color:var(--cyan)">🧩 MODULI</button>
   <button class="hb" id="hbMsg" onclick="modalPjMsg()">💬 Messaggio → 📺</button>
   <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
   <button class="hb" onclick="openProjector()">📺 Apri proiettore</button>
@@ -1956,7 +1957,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 65; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 66; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -5430,28 +5431,33 @@ function sendPjMsg(on){
 }
 
 /* ================================================================
-   GIOCHI E MODULI — menu unico
+   GIOCHI e MODULI — due menu separati
 ================================================================ */
 function modalGames(){
-  openModal('🕹 GIOCHI E MODULI', `
+  openModal('🕹 GIOCHI', `
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
       <button class="btn mg" onclick="openMini()">🥃 Bussolotti</button>
       <button class="btn cy" onclick="openDice()">🎲 Pari o Dispari</button>
       <button class="btn lm" onclick="openSimon()">🎨 Simon</button>
-      <button class="btn" onclick="openVoto()">🌡 Votometro</button>
-      <button class="btn cy" onclick="openTimer()">⏱ Timer</button>
       <button class="btn mg" onclick="openPuzzle()">🧩 Puzzle</button>
       <button class="btn cy" onclick="openWordSearch()">🔤 Trova la Parola</button>
       <button class="btn" onclick="openAnagram()">🔤➰ Anagramma</button>
       <button class="btn lm" onclick="openTombola()">🎱 Tombola</button>
       <button class="btn mg" onclick="openCards()">🎴 Carta Rossa, Carta Nera</button>
       <button class="btn" onclick="openSeed()">🃏 Il Seme Vincente</button>
-      <button class="btn lm" onclick="openGrad()">📊 Classifica di Gradimento</button>
       <button class="btn mg" onclick="openTapTap()">👆 Tap Tap</button>
-      <button class="btn cy" style="grid-column:1/-1" onclick="openRuota()">🎡 La Ruota Gira per Tutti</button>
+      <button class="btn cy" onclick="openRuota()">🎡 La Ruota Gira per Tutti</button>
       <button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>
       <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
       <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
+    </div>`);
+}
+function modalModules(){
+  openModal('🧩 MODULI', `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+      <button class="btn" onclick="openVoto()">🌡 Votometro</button>
+      <button class="btn cy" onclick="openTimer()">⏱ Timer</button>
+      <button class="btn lm" style="grid-column:1/-1" onclick="openGrad()">📊 Classifica di Gradimento</button>
     </div>`);
 }
 
