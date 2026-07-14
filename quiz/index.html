@@ -379,6 +379,38 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   animation:flashOut .55s ease-out forwards;}
 @keyframes flashOut{from{opacity:1; transform:scale(.4);}to{opacity:0; transform:scale(1.4);}}
 
+/* ===== PUZZLE ===== */
+.puzRef{max-width:340px; width:100%; border-radius:14px; border:3px solid var(--gold); box-shadow:0 0 22px rgba(255,201,60,.4); margin:0 auto; display:block;}
+.puzGrid{display:grid; gap:3px; width:100%; max-width:460px; margin:14px auto 0; aspect-ratio:1; background:#000; border-radius:10px; overflow:hidden; border:3px solid var(--viola);}
+.puzTile{background-repeat:no-repeat; cursor:pointer; position:relative; transition:transform .15s, filter .15s;}
+.puzTile.sel{outline:4px solid var(--gold); box-shadow:0 0 16px rgba(255,201,60,.8); z-index:2; transform:scale(.94);}
+.puzTile.solved{cursor:default;}
+.puzTile.solved::after{content:'✔'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:1.6em; color:#fff; background:rgba(18,163,82,.25); text-shadow:0 2px 4px rgba(0,0,0,.7);}
+.puzBanner{font-family:'Bungee'; text-align:center; font-size:clamp(20px,4vw,36px); color:var(--lime);
+  text-shadow:0 0 18px rgba(182,255,46,.7); min-height:1.3em;}
+
+/* ===== ANAGRAMMA ===== */
+.qBox.scramble{color:var(--gold); border-color:rgba(255,201,60,.75); background:linear-gradient(180deg,rgba(255,224,138,.18),rgba(255,201,60,.1));
+  font-size:clamp(16px,4.6vw,30px);}
+.anaClue{font-family:'Bungee'; text-align:center; font-size:clamp(16px,2.8vw,26px); color:var(--gold);
+  text-shadow:0 0 14px rgba(255,201,60,.5); max-width:600px; margin:0 auto;}
+
+/* ===== TROVA LA PAROLA ===== */
+.wsClue{font-family:'Bungee'; text-align:center; font-size:clamp(14px,2.6vw,24px); color:var(--gold);
+  text-shadow:0 0 14px rgba(255,201,60,.5); max-width:600px; margin:0 auto;}
+.wsGrid{display:grid; gap:2px; width:100%; max-width:480px; margin:14px auto 0; background:#000;
+  border:3px solid var(--viola); border-radius:10px; overflow:hidden; touch-action:none; user-select:none;
+  box-shadow:0 0 22px rgba(157,77,255,.35);}
+.wsGrid.big{max-width:760px;}
+.wsTile{aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-family:'Bungee';
+  font-size:clamp(10px,3.4vw,20px); color:#fff; background:rgba(157,77,255,.14); cursor:pointer; transition:background .1s;}
+.wsGrid.big .wsTile{font-size:clamp(16px,2.6vw,32px);}
+.wsTile.sel{background:linear-gradient(180deg,#ffe08a,var(--gold)); color:#2a1a00;}
+.wsTile.found{background:linear-gradient(180deg,#ccff66,#8fd400); color:#1c2a00;}
+.wsBanner{font-family:'Bungee'; text-align:center; font-size:clamp(20px,4vw,36px); color:var(--lime);
+  text-shadow:0 0 18px rgba(182,255,46,.7); min-height:1.3em;}
+
 /* ===== TIMER GIGANTE + BOMBA ===== */
 .timerTitle{font-family:'Bungee'; font-size:clamp(24px,5vw,60px); text-align:center; color:var(--gold);
   text-shadow:0 0 20px rgba(255,201,60,.6), 0 4px 0 #7a4b00; letter-spacing:2px; line-height:1.1;}
@@ -396,6 +428,18 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .timerStage{position:relative; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:50vh; overflow:visible;}
 
 /* ===== OVERLAY MESSAGGIO SU PROIETTORE ===== */
+#plLeadOverlay{display:none; position:fixed; inset:0; z-index:65; background:rgba(5,2,10,.96); backdrop-filter:blur(6px);
+  flex-direction:column; align-items:center; justify-content:center; padding:18px; overflow:auto;}
+#plLeadOverlay .t1{font-size:clamp(20px,6vw,32px);}
+#plLeadRows{width:100%; max-width:420px;}
+#plLeadRows .leadRow{font-size:clamp(14px,4vw,18px); padding:10px 14px;}
+#plMsgOverlay{display:none; position:fixed; inset:0; z-index:66; background:rgba(5,2,10,.96); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:22px; text-align:center;}
+#plMsgText{font-family:'Bungee'; font-size:clamp(28px,10vw,52px); line-height:1.15; word-break:break-word;
+  background:linear-gradient(180deg,#ffe08a,var(--gold) 55%,#b57f00);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 0 24px rgba(255,201,60,.7)) drop-shadow(0 6px 0 rgba(61,37,0,.9));}
+
 #pjMsgOverlay{display:none; position:fixed; inset:0; z-index:66; background:rgba(5,2,10,.94); backdrop-filter:blur(6px);
   align-items:center; justify-content:center; padding:40px; text-align:center;}
 #pjMsgText2{font-family:'Bungee'; font-size:clamp(40px,9vw,120px); line-height:1.1; word-break:break-word;
@@ -473,6 +517,50 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .hlAlta{background:linear-gradient(180deg,#ccff66,#8fd400); color:#1c2a00; box-shadow:0 9px 0 #4a7000,0 0 26px rgba(182,255,46,.5);}
 .hlBassa{background:linear-gradient(180deg,#4df6ff,#00a8c2); color:#00232a; box-shadow:0 9px 0 #00636e,0 0 26px rgba(0,240,255,.5);}
 
+/* ===== TAP TAP ===== */
+.tapBtn{width:min(70vw,280px); aspect-ratio:1; border-radius:50%; border:none; cursor:pointer; margin:14px auto 0; display:block;
+  font-family:'Bungee'; font-size:clamp(22px,7vw,34px); color:#fff; text-shadow:0 3px 0 rgba(0,0,0,.5);
+  background:radial-gradient(circle at 35% 28%, #ff8ac8, var(--magenta) 55%, #8a0050);
+  box-shadow:0 14px 0 #5c002e, 0 22px 0 rgba(0,0,0,.5), 0 0 44px rgba(255,46,154,.6), inset 0 4px 10px rgba(255,255,255,.35);
+  transition:transform .04s; user-select:none; -webkit-user-select:none; touch-action:manipulation;}
+.tapBtn:active{transform:scale(.93);}
+.tapBtn.dim{filter:grayscale(.6) brightness(.5); pointer-events:none;}
+.tapCount{font-family:'Orbitron',monospace; font-weight:900; text-align:center; font-size:clamp(50px,14vw,110px);
+  color:var(--lime); text-shadow:0 0 20px rgba(182,255,46,.8), 0 5px 0 #3f5e00; line-height:1;}
+.tapPrizeRow{display:flex; gap:8px; align-items:center; margin-top:6px;}
+.tapPrizeRow .medal{min-width:32px; font-size:20px; text-align:center;}
+.tapRankRow{display:flex; align-items:center; gap:10px; padding:9px 14px; border-radius:12px; background:rgba(11,6,20,.6);
+  border:1px solid rgba(157,77,255,.25); margin-top:6px; font-weight:800;}
+.tapRankRow .medal{font-size:22px; min-width:28px;}
+.tapRankRow .n{color:var(--cyan); font-family:'Bungee'; margin-left:auto;}
+.tapRankRow .pz{color:var(--gold); font-weight:900; font-size:13px;}
+
+/* ===== CLASSIFICA DI GRADIMENTO ===== */
+.gradOptRow{display:flex; gap:8px; align-items:center; margin-top:8px;}
+.gradOptRow input{flex:1;}
+.gradBtn{font-family:'Bungee'; font-size:clamp(14px,4vw,19px); color:#fff; border:none; cursor:pointer;
+  min-height:76px; border-radius:16px; padding:12px 10px; display:flex; align-items:center; justify-content:center; text-align:center;
+  text-shadow:0 2px 0 rgba(0,0,0,.5); box-shadow:0 7px 0 rgba(0,0,0,.4); transition:transform .08s, filter .2s; word-break:break-word;}
+.gradBtn:active{transform:translateY(6px); box-shadow:0 1px 0 rgba(0,0,0,.4);}
+.gradBtn.dim{filter:grayscale(.8) brightness(.4); pointer-events:none;}
+.gradBtn.sel{outline:5px solid var(--gold); box-shadow:0 2px 0 rgba(0,0,0,.4), 0 0 30px rgba(255,201,60,.85); transform:translateY(6px);}
+.gradGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%;}
+.gradTitle{font-family:'Bungee'; text-align:center; font-size:clamp(20px,4vw,38px); color:var(--gold);
+  text-shadow:0 0 18px rgba(255,201,60,.6), 0 4px 0 #7a4b00;}
+.gradWin{font-family:'Bungee'; text-align:center; font-size:clamp(26px,5vw,50px); color:var(--lime);
+  text-shadow:0 0 22px rgba(182,255,46,.7); margin-top:8px;}
+
+/* ===== IL SEME VINCENTE ===== */
+.seedFace{font-size:clamp(34px,7vw,64px) !important; gap:0 !important;}
+.seedBtn{font-family:'Bungee'; font-size:34px; border:none; cursor:pointer; padding:18px 0; border-radius:18px; width:100%;
+  text-shadow:0 3px 0 rgba(0,0,0,.35); transition:transform .08s, filter .2s; box-shadow:0 8px 0 rgba(0,0,0,.4);}
+.seedBtn:active{transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,.4);}
+.seedBtn.red{background:linear-gradient(180deg,#ff8a8a,#d40b2e); color:#fff;}
+.seedBtn.black{background:linear-gradient(180deg,#3a3f52,#14161f); color:#fff; border:2px solid #4a5068;}
+.seedBtn.dim{filter:grayscale(.7) brightness(.4); pointer-events:none;}
+.seedBtn.sel{outline:4px solid var(--gold); transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,.4), 0 0 30px rgba(255,201,60,.8);}
+.seedGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%; max-width:340px;}
+
 /* ===== PRECISIONE SVIZZERA ===== */
 .swissClock{font-family:'Orbitron',monospace; font-weight:900; font-variant-numeric:tabular-nums;
   font-size:clamp(56px,14vw,120px); text-align:center; color:#00ffd5; letter-spacing:.04em; line-height:1;
@@ -540,7 +628,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v5.4</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v6.2</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -590,6 +678,8 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
         <select id="qeType" onchange="qeTypeChanged()">
           <option value="mult">Risposta multipla (4 opzioni)</option>
           <option value="open">Risposta aperta (si scrive)</option>
+          <option value="wordsearch">🔤 Trova la Parola (griglia)</option>
+          <option value="anagram">🔤➰ Anagramma</option>
         </select>
       </div>
       <div class="grow">
@@ -621,11 +711,38 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div id="qeOpenBox" style="display:none">
       <div class="label">Risposte accettate (separate da virgola — maiuscole e accenti non contano)</div>
       <input type="text" id="qeAccepted" placeholder="Es. Frank Sinatra, Sinatra">
+      <div class="label" style="text-transform:none; letter-spacing:0">💡 I giocatori vedranno le caselle con la lunghezza delle parole (e le eventuali lettere d'aiuto). Le risposte diverse potrai approvarle a mano.</div>
+    </div>
+
+    <div id="qeHintBox" style="display:none">
       <div class="row mt">
         <div class="grow"><div class="label">Lettere di aiuto mostrate (dalla prima risposta)</div>
           <input type="number" id="qeHint" value="0" min="0" max="20" style="text-align:center"></div>
       </div>
-      <div class="label" style="text-transform:none; letter-spacing:0">💡 I giocatori vedranno le caselle con la lunghezza delle parole (e le eventuali lettere d'aiuto). Le risposte diverse potrai approvarle a mano.</div>
+    </div>
+
+    <div id="qeAnaBox" style="display:none">
+      <div class="label">Parola giusta</div>
+      <input type="text" id="qeAnaWord" placeholder="Es. GANGSTER" maxlength="24" oninput="qeAnaAutoScramble()">
+      <div class="row mt" style="align-items:flex-end">
+        <div class="grow"><div class="label">Anagramma mostrato ai giocatori (puoi modificarlo a mano)</div>
+          <input type="text" id="qeAnaScramble" placeholder="Si genera da solo..." maxlength="30" style="text-transform:uppercase"></div>
+        <button class="btn small cy" type="button" onclick="qeAnaAutoScramble(true)">🔀 Rigenera</button>
+      </div>
+      <div class="label" style="text-transform:none; letter-spacing:0">🔤➰ Il testo della domanda sopra funge da indizio. Se l'anagramma automatico viene illeggibile, riscrivilo a mano tenendo le lettere mescolate ma un po' più leggibili.</div>
+    </div>
+
+    <div id="qeWsBox" style="display:none">
+      <div class="label">Parola da nascondere nella griglia</div>
+      <input type="text" id="qeWsWord" placeholder="Es. GANGSTER" maxlength="20">
+      <div class="label mt">Indizio (facoltativo)</div>
+      <input type="text" id="qeWsClue" placeholder="Es. Malvivente in giacca e cappello" maxlength="80">
+      <div class="row mt">
+        <div class="grow"><div class="label">Dimensione griglia</div>
+          <select id="qeWsSize"><option value="8">8×8</option><option value="10" selected>10×10</option><option value="12">12×12</option></select>
+        </div>
+      </div>
+      <div class="label" style="text-transform:none; letter-spacing:0">🔤 La parola verrà scritta MAIUSCOLA, senza spazi né accenti, nascosta in orizzontale/verticale/diagonale. I giocatori la cercano passando il dito sulla griglia sul telefono. Punti a chi la trova più veloce; "chi non risponde perde" si applica a chi non la trova in tempo.</div>
     </div>
 
     <div class="row mt">
@@ -758,6 +875,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="feedback mtb" id="pfMsg"></div>
   <div class="brand mt"><div class="t1" style="font-size:30px" id="pfPts"></div></div>
   <div class="byline mt" id="pfRank"></div>
+  <div style="width:100%; max-width:380px" id="pfStats"></div>
 </div>
 
 <!-- ==================== BARRA COMANDI HOST ==================== -->
@@ -907,6 +1025,169 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="feedback mt" id="phFb" style="display:none; font-size:24px"></div>
 </div>
 
+<!-- ==================== HOST: TAP TAP ==================== -->
+<div class="screen" id="scrTapTap">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">👆 TAP TAP</div></div>
+  <div class="panel mt" style="max-width:480px" id="tapSetup">
+    <div class="label">Secondi di gioco</div>
+    <select id="tapSecs"></select>
+    <div class="label mt">Premi dal 1° al 5° classificato</div>
+    <div id="tapPrizeInputs"></div>
+    <button class="btn mg mt" style="width:100%" onclick="tapStart()">👆 VIA AL TAP TAP!</button>
+  </div>
+  <div id="tapLive" style="display:none; width:100%" class="center">
+    <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="tapTimerBar"></div></div>
+    <div class="miniMsg" id="tapMsg">👆 PICCHIA IL PULSANTE DAL TELEFONO!</div>
+    <div class="lead mt" id="tapRanking" style="max-width:460px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="tapBtnAgain" onclick="openTapTap()" style="display:none">🔁 Un'altra sfida</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: TAP TAP ==================== -->
+<div class="screen" id="scrPjTapTap">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">👆 TAP TAP</div></div>
+  <div class="miniMsg" id="pjTapMsg" style="font-size:clamp(20px,3.2vw,36px)">PICCHIATE IL PULSANTE DAL TELEFONO!</div>
+  <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjTapTimerBar"></div></div>
+  <div class="lead mt" id="pjTapRanking" style="max-width:640px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: TAP TAP ==================== -->
+<div class="screen" id="scrPlayTapTap" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="ptpName" style="color:var(--gold)"></div>
+    <div class="pill" id="ptpScore"></div>
+  </div>
+  <div class="timerWrap mt"><div class="timerBar" id="ptpTimerBar"></div></div>
+  <div class="tapCount" id="ptpCount">0</div>
+  <button class="tapBtn" id="ptpBtn" onclick="tapHit()">TAP!</button>
+  <div id="ptpResultBox" style="display:none; width:100%; max-width:420px">
+    <div class="feedback mtb" id="ptpFbMsg"></div>
+    <div class="brand mt"><div class="t1" style="font-size:26px" id="ptpFbPts"></div></div>
+    <div class="lead mt" id="ptpLead"></div>
+  </div>
+</div>
+
+<!-- ==================== HOST: CLASSIFICA DI GRADIMENTO ==================== -->
+<div class="screen" id="scrGrad">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">📊 CLASSIFICA DI GRADIMENTO</div></div>
+  <div class="panel mt" style="max-width:560px" id="gradSetup">
+    <div class="label">Titolo della votazione</div>
+    <input type="text" id="gradTitleIn" placeholder="Es. Il costume più assurdo della serata" maxlength="60">
+    <div class="label mt">Chi/cosa mettiamo al voto (almeno 2)</div>
+    <div id="gradOptsList"></div>
+    <button class="btn small cy mt" type="button" onclick="gradAddOpt()">➕ Aggiungi opzione</button>
+    <div class="row mt" style="align-items:flex-end">
+      <div class="grow"><div class="label">Punti a chi vota il più votato</div><select id="gradPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="gradPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+      <div class="grow"><div class="label">Secondi per votare</div><select id="gradSecs"></select></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="gradStart()">📊 APRI LE VOTAZIONI!</button>
+  </div>
+  <div id="gradLive" style="display:none; width:100%" class="center">
+    <div class="gradTitle" id="gradTitleHost"></div>
+    <div class="timerWrap mt" style="max-width:480px"><div class="timerBar" id="gradTimerBar"></div></div>
+    <div class="miniMsg" id="gradMsg"></div>
+    <div style="width:100%; max-width:560px" id="gradBarsHost"></div>
+    <div class="gradWin" id="gradWinHost"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="gradBtnAgain" onclick="openGrad()" style="display:none">🔁 Un'altra classifica</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: CLASSIFICA DI GRADIMENTO ==================== -->
+<div class="screen" id="scrPjGrad">
+  <div class="gradTitle" id="pjGradTitle" style="font-size:clamp(26px,4.4vw,52px)"></div>
+  <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjGradTimerBar"></div></div>
+  <div class="miniMsg" id="pjGradMsg" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div style="width:100%; max-width:760px" id="gradBarsPj"></div>
+  <div class="gradWin" id="pjGradWin"></div>
+</div>
+
+<!-- ==================== PLAYER: CLASSIFICA DI GRADIMENTO ==================== -->
+<div class="screen" id="scrPlayGrad" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="pgName" style="color:var(--gold)"></div>
+    <div class="pill" id="pgScore"></div>
+  </div>
+  <div class="timerWrap mt"><div class="timerBar" id="pgTimerBar"></div></div>
+  <div class="gradTitle mt" id="pgTitle" style="font-size:clamp(17px,4.4vw,28px)"></div>
+  <div class="gradGrid mtb" id="pgOpts"></div>
+  <div class="feedback mt" id="pgSent" style="display:none; color:var(--cyan)">VOTO INVIATO! 🎩</div>
+  <div id="pgResultBox" style="display:none; width:100%; max-width:420px">
+    <div class="feedback mtb" id="pgFbMsg"></div>
+    <div class="brand mt"><div class="t1" style="font-size:26px" id="pgFbPts"></div></div>
+    <div style="width:100%" id="gradBarsPl"></div>
+  </div>
+</div>
+
+<!-- ==================== HOST: IL SEME VINCENTE ==================== -->
+<div class="screen" id="scrSeed">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🃏 IL SEME VINCENTE</div></div>
+  <div class="panel mt" style="max-width:520px" id="seedSetup">
+    <div class="row" style="align-items:flex-end">
+      <div class="grow"><div class="label">Punti a chi indovina il seme</div><select id="seedPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="seedPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Secondi per scegliere</div><select id="seedSecs"></select></div>
+      <div class="grow"><div class="label">Se sbaglia perde</div><input type="number" id="seedPen" value="0" min="0" style="text-align:center"></div>
+    </div>
+    <div class="label mt" style="text-transform:none; letter-spacing:0">🃏 4 carte coperte, un seme a testa: ♥ ♦ ♣ ♠. Ogni turno esce un seme a sorte (25% di possibilità) — 4 turni per manche!</div>
+    <button class="btn mg mt" style="width:100%" onclick="seedDeal()">🃏 MESCOLA E VIA!</button>
+  </div>
+  <div id="seedLive" style="display:none; width:100%">
+    <div class="miniStage" style="height:auto; min-height:0">
+      <div class="felt" style="position:relative; height:auto; padding:18px 10px 26px; border-radius:26px;">
+        <div class="cardsRow" id="seedTableHost"></div>
+      </div>
+    </div>
+    <div class="timerWrap mt" style="max-width:480px; margin-left:auto; margin-right:auto"><div class="timerBar" id="seedTimerBar"></div></div>
+    <div class="miniMsg" id="seedMsg"></div>
+    <div class="voteCounts" id="seedCounts"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn mg" id="seedBtnBet" onclick="seedBet()">🃏 APRI SCOMMESSE — TURNO 1</button>
+      <button class="btn cy" id="seedBtnAgain" onclick="openSeed()" style="display:none">🔁 Un'altra mano</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: IL SEME VINCENTE ==================== -->
+<div class="screen" id="scrPjSeed">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🃏 IL SEME VINCENTE</div></div>
+  <div class="miniStage" style="height:auto; min-height:0; max-width:900px">
+    <div class="felt" style="position:relative; height:auto; padding:24px 14px 34px; border-radius:30px;">
+      <div class="cardsRow" id="seedTablePj" style="max-width:820px"></div>
+    </div>
+  </div>
+  <div class="timerWrap mt" style="max-width:640px"><div class="timerBar" id="pjSeedTimerBar"></div></div>
+  <div class="miniMsg" id="pjSeedMsg" style="font-size:clamp(20px,3.2vw,38px)"></div>
+  <div class="voteCounts" id="pjSeedCounts"></div>
+</div>
+
+<!-- ==================== PLAYER: IL SEME VINCENTE ==================== -->
+<div class="screen" id="scrPlaySeed" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="psName" style="color:var(--gold)"></div>
+    <div class="pill" id="psScore"></div>
+  </div>
+  <div class="cardsRow" id="seedTablePl" style="max-width:280px"></div>
+  <div class="timerWrap mt"><div class="timerBar" id="psTimerBar"></div></div>
+  <div class="byline mt" id="psStatus"></div>
+  <div class="seedGrid mtb">
+    <button class="seedBtn red" id="psHeart" onclick="betSeed(0)">♥</button>
+    <button class="seedBtn red" id="psDiamond" onclick="betSeed(1)">♦</button>
+    <button class="seedBtn black" id="psClub" onclick="betSeed(2)">♣</button>
+    <button class="seedBtn black" id="psSpade" onclick="betSeed(3)">♠</button>
+  </div>
+  <div class="feedback mt" id="psFb" style="display:none; font-size:24px"></div>
+</div>
+
 <!-- ==================== HOST: PRECISIONE SVIZZERA ==================== -->
 <div class="screen" id="scrSwiss">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">⌚ PRECISIONE SVIZZERA</div></div>
@@ -950,6 +1231,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="swissClock" id="swissClockPl">0.000</div>
   <button class="bigRed" id="pwStop" onclick="swissPress()">STOP!</button>
   <div class="feedback mt" id="pwFb" style="display:none; font-size:22px"></div>
+  <div class="lead mt" id="pwLead" style="width:100%; max-width:380px"></div>
 </div>
 
 <!-- ==================== HOST: CARTA ROSSA CARTA NERA ==================== -->
@@ -1059,6 +1341,201 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div class="cartella mt" id="ptCard"></div>
     <div class="byline mt center" id="ptMsg" style="letter-spacing:2px"></div>
   </div>
+  <!-- fuori dal blocco che ruota: così restano leggibili anche prima di girare il telefono,
+       e chi segue da un'altra sala vede numeri estratti e premi esattamente come sul proiettore -->
+  <div class="mt center" style="width:100%; max-width:420px; margin:10px auto 0">
+    <div class="label center">ULTIMI NUMERI ESTRATTI</div>
+    <div class="tomDrawn" id="ptDrawn"></div>
+    <div class="label center mt">PREMI IN PALIO</div>
+    <div class="tomPrizes" id="ptPrizes" style="max-width:340px; margin:0 auto"></div>
+  </div>
+</div>
+
+<!-- ==================== HOST: PUZZLE ==================== -->
+<div class="screen" id="scrPuzzle">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🧩 PUZZLE</div></div>
+  <div class="panel mt" style="max-width:520px" id="puzSetup">
+    <div class="label">Carica la foto del puzzle</div>
+    <input type="file" id="puzFile" accept="image/*">
+    <img id="puzPreview" style="display:none; max-height:180px; border-radius:10px; margin-top:8px">
+    <div class="row mt">
+      <div class="grow"><div class="label">Difficoltà</div>
+        <select id="puzDiff"><option value="3">😊 Facile — 9 pezzi (3×3)</option><option value="5">🔥 Difficile — 25 pezzi (5×5)</option></select>
+      </div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti (a chi risolve per primo)</div><select id="puzPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="puzPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Tempo per risolvere</div><select id="puzTime"></select></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="puzzleStart()">🧩 VIA AL PUZZLE!</button>
+  </div>
+  <div id="puzLive" style="display:none; width:100%" class="center">
+    <img id="puzRefHost" class="puzRef">
+    <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="puzTimerBar"></div></div>
+    <div class="miniMsg" id="puzMsg">🧩 Si risolve dal telefono!</div>
+    <div class="lead mt" id="puzRanking" style="max-width:460px"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="puzBtnAgain" onclick="openPuzzle()" style="display:none">🔁 Un altro puzzle</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: PUZZLE ==================== -->
+<div class="screen" id="scrPjPuzzle">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🧩 PUZZLE</div></div>
+  <img id="puzRefPj" class="puzRef" style="max-width:480px">
+  <div class="timerWrap mt" style="max-width:640px"><div class="timerBar" id="pjPuzTimerBar"></div></div>
+  <div class="miniMsg" id="pjPuzMsg">🧩 RICOMPONETE LA FOTO DAL TELEFONO!</div>
+  <div class="lead mt" id="pjPuzRanking" style="max-width:600px"></div>
+</div>
+
+<!-- ==================== PLAYER: PUZZLE ==================== -->
+<div class="screen" id="scrPlayPuzzle" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="ppzName" style="color:var(--gold)"></div>
+    <div class="pill" id="ppzScore"></div>
+  </div>
+  <div class="timerWrap mt"><div class="timerBar" id="ppzTimerBar"></div></div>
+  <div class="label center mt">LA FOTO DA RICOMPORRE</div>
+  <img id="puzRefPl" class="puzRef" style="max-width:220px">
+  <div class="label center mt">TOCCA DUE PEZZI PER SCAMBIARLI</div>
+  <div class="puzGrid" id="puzGridPl"></div>
+  <div class="puzBanner mt" id="ppzBanner"></div>
+  <div class="lead mt" id="ppzRanking" style="width:100%; max-width:380px"></div>
+</div>
+
+<!-- ==================== HOST: ANAGRAMMA ==================== -->
+<div class="screen" id="scrAnagram">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🔤➰ ANAGRAMMA</div></div>
+  <div class="panel mt" style="max-width:560px" id="anaSetup">
+    <div class="label">La parola giusta</div>
+    <input type="text" id="anaWord" placeholder="Es. GANGSTER" maxlength="24" oninput="anaAutoScramble()">
+    <div class="label mt">Frase indizio</div>
+    <input type="text" id="anaClue" placeholder="Es. Malvivente in giacca e cappello" maxlength="80">
+    <div class="row mt" style="align-items:flex-end">
+      <div class="grow"><div class="label">Anagramma (rimescolato — puoi modificarlo a mano)</div>
+        <input type="text" id="anaScramble" placeholder="Si genera da solo..." maxlength="30" style="text-transform:uppercase"></div>
+      <button class="btn small cy" onclick="anaAutoScramble(true)">🔀 Rigenera</button>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Lettere di aiuto</div><input type="number" id="anaHint" value="0" min="0" max="20" style="text-align:center"></div>
+      <div class="grow"><div class="label">Chi sbaglia perde</div><input type="number" id="anaPenWrong" value="0" min="0" style="text-align:center"></div>
+      <div class="grow"><div class="label">Chi non risponde perde</div><input type="number" id="anaPenNone" value="0" min="0" style="text-align:center"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti</div><select id="anaPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="anaPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+      <div class="grow"><div class="label">Tempo</div><select id="anaTimer"></select></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="anagramStart()">🔤➰ VIA ALL'ANAGRAMMA!</button>
+  </div>
+  <div id="anaLive" style="display:none; width:100%" class="center">
+    <div class="anaClue" id="anaClueHost"></div>
+    <div class="qBoxes" id="anaScrambleHost"></div>
+    <div class="timerWrap mt" style="max-width:480px"><div class="timerBar" id="anaTimerBar"></div></div>
+    <div class="byline mt" id="anaAnswered">0 risposte</div>
+    <div id="anaRevealBox" style="display:none; width:100%; max-width:560px">
+      <div class="bigQ" style="color:var(--lime); font-size:clamp(26px,4.4vw,44px)" id="anaAnswerText"></div>
+      <div id="anaPending"></div>
+      <div class="lead mt" id="anaLead"></div>
+    </div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn mg" id="anaBtnNext" style="display:none" onclick="anagramNextClick()">🔁 Un altro anagramma</button>
+    </div>
+  </div>
+  <div class="row mt" id="anaBtnBackRow"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: ANAGRAMMA ==================== -->
+<div class="screen" id="scrPjAnagram">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🔤➰ ANAGRAMMA</div></div>
+  <div class="anaClue" id="pjAnaClue" style="font-size:clamp(20px,3.2vw,34px)"></div>
+  <div class="qBoxes" id="pjAnaScramble" style="transform:scale(1.3); margin-top:26px"></div>
+  <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjAnaTimerBar"></div></div>
+  <div class="bigQ mt" id="pjAnaAnswer" style="color:var(--lime); display:none"></div>
+  <div class="lead mt" id="pjAnaLead" style="max-width:600px"></div>
+</div>
+
+<!-- ==================== PLAYER: ANAGRAMMA ==================== -->
+<div class="screen" id="scrPlayAnagram" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="paName" style="color:var(--gold)"></div>
+    <div class="pill" id="paScore"></div>
+  </div>
+  <div class="timerWrap mt"><div class="timerBar" id="paTimerBar"></div></div>
+  <div class="anaClue mt" id="paClue"></div>
+  <div class="qBoxes" id="paScramble"></div>
+  <div class="label center mt">LA TUA RISPOSTA</div>
+  <div class="qBoxes" id="paBoxes"></div>
+  <input type="text" id="paInput" class="mt" placeholder="Scrivi la parola giusta..." autocomplete="off" style="max-width:380px">
+  <button class="btn lm mt" style="max-width:380px; width:100%" onclick="sendAnaAnswer()">📨 INVIA</button>
+  <div class="feedback mt" id="paSent" style="display:none; color:var(--cyan)">RISPOSTA INVIATA! 🎩</div>
+  <div id="paResultBox" style="display:none; width:100%; max-width:400px">
+    <div class="feedback mtb" id="paFbMsg"></div>
+    <div class="brand mt"><div class="t1" style="font-size:26px" id="paFbPts"></div></div>
+    <div class="lead mt" id="paLead"></div>
+  </div>
+</div>
+
+<!-- ==================== HOST: TROVA LA PAROLA ==================== -->
+<div class="screen" id="scrWordSearch">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🔤 TROVA LA PAROLA</div></div>
+  <div class="panel mt" style="max-width:520px" id="wsSetup">
+    <div class="label">La parola da nascondere nella griglia</div>
+    <input type="text" id="wsWord" placeholder="Es. GANGSTER" maxlength="20">
+    <div class="label mt">Indizio (facoltativo)</div>
+    <input type="text" id="wsClue" placeholder="Es. Malvivente in giacca e cappello" maxlength="80">
+    <div class="row mt">
+      <div class="grow"><div class="label">Dimensione griglia</div>
+        <select id="wsSize"><option value="8">8×8</option><option value="10" selected>10×10</option><option value="12">12×12</option></select>
+      </div>
+      <div class="grow"><div class="label">Tempo per trovarla</div><select id="wsTime"></select></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti (a chi trova per primo)</div><select id="wsPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="wsPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="label mt" style="text-transform:none; letter-spacing:0">🔤 La parola verrà scritta MAIUSCOLA, senza spazi né accenti, e nascosta in orizzontale, verticale o diagonale.</div>
+    <button class="btn mg mt" style="width:100%" onclick="wordsearchStart()">🔤 NASCONDI LA PAROLA!</button>
+  </div>
+  <div id="wsLive" style="display:none; width:100%" class="center">
+    <div class="wsClue" id="wsClueHost"></div>
+    <div class="wsGrid" id="wsGridHost"></div>
+    <div class="timerWrap mt" style="max-width:480px"><div class="timerBar" id="wsTimerBar"></div></div>
+    <div class="miniMsg" id="wsMsg">🔤 Si cerca dal telefono, passando il dito sulle lettere!</div>
+    <div class="lead mt" id="wsRanking" style="max-width:480px"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="wsBtnAgain" onclick="wsAgainClick()" style="display:none">🔁 Un'altra parola</button>
+    </div>
+  </div>
+  <div class="row mt" id="wsBtnBackRow"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: TROVA LA PAROLA ==================== -->
+<div class="screen" id="scrPjWordSearch">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🔤 TROVA LA PAROLA</div></div>
+  <div class="wsClue" id="pjWsClue" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div class="wsGrid big" id="wsGridPj"></div>
+  <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjWsTimerBar"></div></div>
+  <div class="miniMsg" id="pjWsMsg">🔤 CERCATELA DAL TELEFONO — ORIZZONTALE, VERTICALE O DIAGONALE!</div>
+  <div class="lead mt" id="pjWsRanking" style="max-width:600px"></div>
+</div>
+
+<!-- ==================== PLAYER: TROVA LA PAROLA ==================== -->
+<div class="screen" id="scrPlayWordSearch" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="pwsName" style="color:var(--gold)"></div>
+    <div class="pill" id="pwsScore"></div>
+  </div>
+  <div class="timerWrap mt"><div class="timerBar" id="pwsTimerBar"></div></div>
+  <div class="wsClue mt" id="pwsClue"></div>
+  <div class="wsGrid" id="wsGridPl"></div>
+  <div class="wsBanner mt" id="pwsBanner"></div>
+  <div class="lead mt" id="pwsRanking" style="width:100%; max-width:380px"></div>
 </div>
 
 <!-- ==================== HOST: TIMER ==================== -->
@@ -1106,6 +1583,8 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 
 <!-- ==================== PROIETTORE: OVERLAY MESSAGGIO ==================== -->
 <div id="pjMsgOverlay"><div id="pjMsgText2"></div></div>
+<div id="plLeadOverlay"><div class="brand"><div class="t1" id="plLeadTitle"></div></div><div id="plLeadRows"></div></div>
+<div id="plMsgOverlay"><div id="plMsgText"></div></div>
 
 <!-- ==================== COUNTDOWN (host / proiettore / telefono) ==================== -->
 <div class="screen" id="scrCount"><div class="countStage" id="countHost"></div></div>
@@ -1366,7 +1845,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 54; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 62; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -1595,7 +2074,7 @@ function delQ(i){ curQuiz.questions.splice(i,1); renderEdQuestions(); }
 
 function openQEditor(i){
   curQIdx = i;
-  const q = i>=0 ? curQuiz.questions[i] : { text:'', type:'mult', media:{kind:'none'}, opts:['','','',''], corrects:[0], accepted:'', points:100, timer:20, penWrong:0, penNone:0, hint:0 };
+  const q = i>=0 ? curQuiz.questions[i] : { text:'', type:'mult', media:{kind:'none'}, opts:['','','',''], corrects:[0], accepted:'', points:100, timer:20, penWrong:0, penNone:0, hint:0, wsWord:'', wsClue:'', wsSize:10, scramble:'' };
   if (!q.corrects) q.corrects = [q.correct||0]; // migrazione domande vecchie
   $('qeTitle').textContent = i>=0 ? 'DOMANDA '+(i+1) : 'NUOVA DOMANDA';
   $('qeText').value = q.text; $('qeType').value = q.type; $('qeMedia').value = q.media.kind;
@@ -1608,7 +2087,12 @@ function openQEditor(i){
   $('qeHint').value = q.hint||0;
   $('qePenWrong').value = q.penWrong||0;
   $('qePenNone').value = q.penNone||0;
-  $('qeNumOpts').value = Math.min(5, Math.max(2, q.opts.length));
+  $('qeWsWord').value = q.wsWord||'';
+  $('qeWsClue').value = q.wsClue||'';
+  $('qeWsSize').value = q.wsSize||10;
+  $('qeAnaWord').value = q.type==='anagram' ? (q.accepted||'') : '';
+  $('qeAnaScramble').value = q.scramble||''; $('qeAnaScramble')._touched = !!q.scramble;
+  $('qeNumOpts').value = Math.min(5, Math.max(2, (q.opts||[]).length||4));
   window._qeQ = q;
   qeRenderOpts(q);
   window._qeMedia = q.media && q.media.data ? {...q.media} : {kind:q.media.kind||'none'};
@@ -1630,7 +2114,20 @@ function qeRenderOpts(q){
       <input type="text" class="grow" id="qeOpt${k}" value="${esc(prev[k]||'')}" placeholder="Opzione ${k+1}" maxlength="60">
     </div>`).join('');
 }
-function qeTypeChanged(){ const m = $('qeType').value==='mult'; $('qeMultBox').style.display = m?'block':'none'; $('qeOpenBox').style.display = m?'none':'block'; }
+function qeTypeChanged(){
+  const t = $('qeType').value;
+  $('qeMultBox').style.display = t==='mult' ? 'block' : 'none';
+  $('qeOpenBox').style.display = t==='open' ? 'block' : 'none';
+  $('qeWsBox').style.display = t==='wordsearch' ? 'block' : 'none';
+  $('qeAnaBox').style.display = t==='anagram' ? 'block' : 'none';
+  $('qeHintBox').style.display = (t==='open' || t==='anagram') ? 'block' : 'none';
+}
+function qeAnaAutoScramble(force){
+  const w = $('qeAnaWord').value.trim();
+  if (!w) { $('qeAnaScramble').value=''; return; }
+  if (force || !$('qeAnaScramble')._touched) $('qeAnaScramble').value = shuffleLetters(w);
+}
+$('qeAnaScramble').addEventListener('input', ()=>{ $('qeAnaScramble')._touched = true; });
 function qeMediaChanged(keep){
   const k = $('qeMedia').value;
   $('qeMediaBox').style.display = k==='none'?'none':'block';
@@ -1672,6 +2169,21 @@ function saveQuestion(){
   if (type==='mult' && !corrects.length) return alert('Spunta almeno una risposta giusta!');
   if (type==='mult' && corrects.some(k=>!opts[k])) return alert('Una risposta spuntata come giusta è vuota!');
   if (type==='open' && !q.accepted) return alert('Inserisci almeno una risposta accettata!');
+  if (type==='wordsearch'){
+    q.wsWord = $('qeWsWord').value.trim();
+    q.wsClue = $('qeWsClue').value.trim();
+    q.wsSize = +$('qeWsSize').value;
+    if (!q.wsWord) return alert('Scrivi la parola da nascondere nella griglia!');
+    const letters = q.wsWord.toUpperCase().replace(/[^A-Z]/g,'');
+    if (!letters.length) return alert('La parola deve contenere almeno una lettera (A-Z)!');
+    if (letters.length > q.wsSize) return alert('La parola è troppo lunga per la griglia scelta: aumenta la dimensione o accorcia la parola.');
+  }
+  if (type==='anagram'){
+    const word = $('qeAnaWord').value.trim();
+    if (!word) return alert('Scrivi la parola giusta!');
+    q.accepted = word;
+    q.scramble = ($('qeAnaScramble').value.trim() || shuffleLetters(word)).toUpperCase();
+  }
   if (curQIdx>=0) curQuiz.questions[curQIdx]=q; else curQuiz.questions.push(q);
   renderEdQuestions(); showScreen('scrEditor');
 }
@@ -1748,9 +2260,11 @@ function nextQuestion(){
   const q = G.quiz.questions[G.qi];
   G.played.add(G.qi);
   G.closed = false;
-  // scrive su DB solo ciò che serve ai telefoni (niente media, niente testo domanda)
   if (leadOv.on) sendLeadOverlay({on:false});
   if (msgOv.on) sendPjMsg(false);
+  if (q.type==='wordsearch') { playWsQuestion(q); return; }
+  if (q.type==='anagram') { playAnagramQuestion(q); return; }
+  // scrive su DB solo ciò che serve ai telefoni (niente media, niente testo domanda)
   const corrects = (q.corrects && q.corrects.length) ? q.corrects : [q.correct||0];
   const multi = q.type==='mult' && corrects.length > 1;
   const pattern = q.type==='open' ? buildPattern((q.accepted||'').split(',')[0], q.hint||0) : null;
@@ -1814,7 +2328,7 @@ function modalQuestions(){
   const rows = G.quiz.questions.map((q,i)=>{
     const stato = i===G.qi ? '<span class="tag media">IN CORSO</span>'
       : G.played.has(i) ? '<span class="tag mult">✔ GIOCATA</span>' : '';
-    const tag = `<span class="tag ${q.type==='mult'?'mult':'open'}">${q.type==='mult'?'Multipla':'Aperta'}</span>`;
+    const tag = `<span class="tag ${q.type==='mult'?'mult':(q.type==='wordsearch'||q.type==='anagram'?'media':'open')}">${q.type==='mult'?'Multipla':(q.type==='wordsearch'?'🔤 Trova parola':(q.type==='anagram'?'🔤➰ Anagramma':'Aperta'))}</span>`;
     return `<div class="ptRow"><b style="font-family:'Bungee';color:var(--gold);min-width:30px">${i+1}</b>
       <span class="grow">${esc(q.text).slice(0,48)}<br>${tag} ${stato}
         <small style="color:var(--muted)">${q.points} pt · ${q.timer}s</small></span>
@@ -1871,7 +2385,7 @@ function closeQuestion(){
         players[pid].score = Math.max(0, (players[pid].score||0)-penN);
       }
       const correctText = q.type==='mult' ? corrects.map(i=>q.opts[i]).filter(Boolean).join(' + ') : (q.accepted.split(',')[0]||'').trim();
-      const updates = { status:'reveal', reveal:{ i:G.qi, correct: q.type==='mult'?corrects[0]:null, corrects: q.type==='mult'?corrects:null, correctText, results, stats } };
+      const updates = { status:'reveal', reveal:{ i:G.qi, correct: q.type==='mult'?corrects[0]:null, corrects: q.type==='mult'?corrects:null, correctText, results, stats, opts: q.type==='mult'?q.opts:null } };
       for (const pid in players) updates['players/'+pid+'/score'] = players[pid].score||0;
       G.ref.update(updates);
       showReveal(q, correctText, players, pending, results, stats);
@@ -2006,7 +2520,28 @@ function tryResume(){
   });
   return true;
 }
+function plApplyLead(v){
+  const ov = $('plLeadOverlay');
+  if (v && v.on) {
+    $('plLeadTitle').textContent = v.title||'';
+    $('plLeadRows').innerHTML = (v.rows||[]).map(r=>
+      `<div class="leadRow"><span class="pos">${esc(r.pos)}</span> ${esc(r.name)} <span class="pts">${esc(r.val)}</span></div>`).join('');
+    ov.style.display='flex';
+  } else ov.style.display='none';
+}
+function plApplyMsg(v){
+  const ov = $('plMsgOverlay');
+  if (v && v.on && v.text) { $('plMsgText').textContent = v.text; ov.style.display='flex'; }
+  else ov.style.display='none';
+}
 function listenGame(){
+  if (!P._overlaysBound) {
+    P._overlaysBound = true;
+    // tutto quello che appare sul videoproiettore (classifiche, messaggi) arriva anche qui,
+    // così chi segue dallo smartphone in un'altra sala non si perde nulla
+    P.ref.child('projLead').on('value', s=> plApplyLead(s.val()||{}));
+    P.ref.child('projMsg').on('value', s=> plApplyMsg(s.val()||{}));
+  }
   P.ref.on('value', s=>{
     const g = s.val();
     if (g && g.ver && g.ver > APP_V && !sessionStorage.getItem('capone_reloaded')) {
@@ -2027,8 +2562,14 @@ function listenGame(){
     else if (g.status==='wheels') showPlayerWheels(g);
     else if (g.status==='hilo') showPlayerHiLo(g);
     else if (g.status==='swiss') showPlayerSwiss(g);
+    else if (g.status==='taptap') showPlayerTapTap(g);
+    else if (g.status==='grad') showPlayerGrad(g);
+    else if (g.status==='seed') showPlayerSeed(g);
     else if (g.status==='cards') showPlayerCards(g);
     else if (g.status==='tombola') showPlayerTombola(g);
+    else if (g.status==='anagram') showPlayerAnagram(g);
+    else if (g.status==='wordsearch') showPlayerWordSearch(g);
+    else if (g.status==='puzzle') showPlayerPuzzle(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -2238,6 +2779,13 @@ function showPlayerSwiss(g){
       else if (r.pts === 0){ $('pwFb').style.color='var(--muted)'; $('pwFb').textContent='SUL FILO: 0 PUNTI'; }
       else { $('pwFb').style.color='var(--red)'; $('pwFb').textContent='FUORI SOGLIA: '+r.pts+' PUNTI 💥'; }
     }
+    // stessa classifica di precisione che vede la regia: dal più preciso al più distante da 10.000
+    const rows = Object.entries(m.results||{}).map(([pid,rr])=>({name:(((g.players||{})[pid])||{}).name||'?', ...rr}))
+      .sort((a,b)=> Math.abs(a.t-10000) - Math.abs(b.t-10000));
+    $('pwLead').innerHTML = rows.length ? rows.slice(0,10).map((rr,i)=>
+      `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(rr.name)} — ${(rr.t/1000).toFixed(3)}s
+       <span class="pts" style="color:${rr.pts>=0?'var(--lime)':'var(--red)'}">${rr.pts>=0?'+':''}${rr.pts}</span></div>`).join('')
+      : '<div class="byline">Nessuno ha fermato il cronometro!</div>';
   }
   else {
     clearInterval(clock._int); clock.textContent='0.000'; clock.classList.remove('stopped');
@@ -2259,6 +2807,339 @@ function swissPress(){
   P.ref.child('swiss/press/'+P.id).set(t);
   $('pwFb').style.display='block'; $('pwFb').style.color='var(--cyan)'; $('pwFb').textContent='FERMATO! ORA IL VERDETTO...';
   if (navigator.vibrate) navigator.vibrate(50);
+}
+function buildSolveRanking(solves, players){
+  return Object.entries(solves||{}).map(([pid,d])=>({ name:(players[pid]||{}).name||'?', t:d.t, pts:d.pts }))
+    .sort((a,b)=>a.t-b.t);
+}
+function showPlayerPuzzle(g){
+  const m = g.puzzle||{};
+  $('ppzName').textContent = P.name;
+  $('ppzScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayPuzzle');
+  if (m.phase==='play'){
+    if (P.puzStartAt !== m.startAt){
+      P.puzStartAt = m.startAt; P.puzEndAt = m.endAt; P.puzDur = m.dur; P.puzN = m.n; P.puzPhoto = m.photo;
+      P.puzOrder = puzzleShuffle(m.n); P.puzSel = null; P.puzSolved = false; P.puzPoints = m.points;
+      $('puzRefPl').src = m.photo;
+      $('ppzBanner').textContent = '';
+      renderPuzGrid($('puzGridPl'), m.photo, m.n, P.puzOrder, null, false);
+      clearInterval($('ppzTimerBar')._int);
+      puzzleCountdown($('ppzTimerBar'), null, m.endAt, m.dur, ()=>{
+        if (!P.puzSolved){ $('ppzBanner').textContent = '⏱ TEMPO SCADUTO!!!'; $('ppzBanner').style.color='var(--red)';
+          document.querySelectorAll('#puzGridPl .puzTile').forEach(t=>t.classList.add('solved')); }
+      });
+    }
+  } else {
+    clearInterval(($('ppzTimerBar')||{})._int);
+  }
+  // classifica in tempo reale: la stessa che vede la regia sul videoproiettore
+  renderPuzRanking($('ppzRanking'), buildSolveRanking(m.solves, g.players||{}));
+}
+function puzzleTap(i){
+  if (P.puzSolved || !P.puzOrder) return;
+  if (P.puzSel === null) { P.puzSel = i; }
+  else if (P.puzSel === i) { P.puzSel = null; }
+  else {
+    [P.puzOrder[P.puzSel], P.puzOrder[i]] = [P.puzOrder[i], P.puzOrder[P.puzSel]];
+    P.puzSel = null;
+    if (navigator.vibrate) navigator.vibrate(20);
+    if (P.puzOrder.every((v,k)=>v===k)) {
+      P.puzSolved = true;
+      const elapsed = Math.max(0, serverNow() - P.puzStartAt);
+      const pts = puzzlePts(P.puzDur, elapsed, P.puzPoints);
+      P.ref.child('puzzle/solves/'+P.id).set({ t: Math.round(elapsed), pts });
+      $('ppzBanner').style.color='var(--lime)';
+      $('ppzBanner').textContent = `🏆 RISOLTO! +${pts} PUNTI`;
+      confetti(); if (navigator.vibrate) navigator.vibrate([80,50,120]);
+    }
+  }
+  renderPuzGrid($('puzGridPl'), P.puzPhoto, P.puzN, P.puzOrder, P.puzSel, P.puzSolved);
+}
+function showPlayerAnagram(g){
+  const m = g.anagram||{};
+  $('paName').textContent = P.name;
+  $('paScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayAnagram');
+  if (m.phase==='play'){
+    if (P.anaStartAt !== m.startAt){
+      P.anaStartAt = m.startAt; P.anaAnswered = false; P.anaPattern = m.pattern||null;
+      $('paClue').textContent = m.text ? '💡 '+m.text : '';
+      renderBoxes($('paScramble'), anaBuildScramblePattern(m.scramble), m.scramble);
+      document.querySelectorAll('#paScramble .qBox').forEach(b=>b.classList.add('scramble'));
+      renderBoxes($('paBoxes'), P.anaPattern, '');
+      $('paInput').value=''; $('paInput').disabled=false;
+      $('paSent').style.display='none';
+      $('paResultBox').style.display='none';
+      setTimeout(()=>$('paInput').focus(), 300);
+    }
+    clearInterval(P.anaInt);
+    P.anaInt = setInterval(()=>{
+      const left = Math.max(0, (m.startAt||0) + (m.timer||30)*1000 - serverNow());
+      $('paTimerBar').style.width = (left/((m.timer||30)*1000)*100)+'%';
+      if (left<=0) clearInterval(P.anaInt);
+    },100);
+  } else {
+    // fase risultato: stesso trattamento di una domanda vera — esito personale + classifica,
+    // così chi segue dallo smartphone vede tutto quello che vede il videoproiettore
+    clearInterval(P.anaInt); $('paTimerBar').style.width='0%';
+    const rv = m.reveal || {};
+    if (P.anaResultAt !== m.startAt) {
+      P.anaResultAt = m.startAt;
+      const r = (rv.results||{})[P.id];
+      const msg = $('paFbMsg'), pts = $('paFbPts');
+      if (!r) { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='TEMPO SCADUTO ⏱'; pts.textContent = 'Era: '+(rv.correctText||'').toUpperCase(); }
+      else if (r.none) { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='NON HAI RISPOSTO ⏱'; pts.textContent = r.pts+' PUNTI'; }
+      else if (r.ok) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='GIUSTA! 🎩'; pts.textContent='+'+r.pts+' PUNTI'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
+      else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='SBAGLIATA 💥'; pts.textContent = (r.pts<0?r.pts+' PUNTI · ':'')+'Era: '+(rv.correctText||'').toUpperCase(); }
+      renderLead($('paLead'), g.players||{});
+      $('paResultBox').style.display='block';
+    } else {
+      // aggiorno la classifica anche dopo un'approvazione manuale della regia
+      renderLead($('paLead'), g.players||{});
+    }
+  }
+}
+$('paInput').addEventListener('input', ()=>{ if (P.anaPattern) renderBoxes($('paBoxes'), P.anaPattern, $('paInput').value); });
+$('paInput').addEventListener('keydown', e=>{ if (e.key==='Enter') sendAnaAnswer(); });
+function sendAnaAnswer(){
+  const v = $('paInput').value.trim();
+  if (!v || P.anaAnswered) return; P.anaAnswered = true;
+  $('paInput').disabled = true;
+  P.ref.child('anagram/answers/'+P.id).set({ a:v, t: Date.now()-P.anaStartAt });
+  $('paSent').style.display='block';
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+function showPlayerWordSearch(g){
+  const m = g.wordsearch||{};
+  $('pwsName').textContent = P.name;
+  $('pwsScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayWordSearch');
+  if (m.phase==='play'){
+    if (P.wsStartAt !== m.startAt){
+      P.wsStartAt = m.startAt; P.wsEndAt = m.endAt; P.wsDur = m.dur; P.wsGrid = m.grid; P.wsSize = m.size;
+      P.wsWord = m.word; P.wsPoints = m.points; P.wsSolved = false; wsClearSel();
+      $('pwsClue').textContent = m.clue ? '💡 '+m.clue : '';
+      $('pwsBanner').textContent = '';
+      renderWsGrid($('wsGridPl'), m.grid, m.size);
+      clearInterval(($('pwsTimerBar')||{})._int);
+      puzzleCountdown($('pwsTimerBar'), null, m.endAt, m.dur, ()=>{
+        if (!P.wsSolved){ $('pwsBanner').style.color='var(--red)'; $('pwsBanner').textContent = '⏱ TEMPO SCADUTO!!! Era: '+P.wsWord;
+          $('wsGridPl').querySelectorAll('.wsTile').forEach(t=>t.classList.add('found')); }
+      });
+    }
+  } else {
+    clearInterval(($('pwsTimerBar')||{})._int);
+  }
+  renderWsRanking($('pwsRanking'), buildSolveRanking(m.solves, g.players||{}));
+}
+function wsCellAt(clientX, clientY){
+  const el = document.elementFromPoint(clientX, clientY);
+  const tile = el && el.closest ? el.closest('.wsTile') : null;
+  if (!tile || tile.parentElement !== $('wsGridPl')) return null;
+  return { r:+tile.dataset.r, c:+tile.dataset.c };
+}
+function wsPath(){
+  if (!P.wsStart || !P.wsCur) return [];
+  const dr = Math.sign(P.wsCur.r-P.wsStart.r), dc = Math.sign(P.wsCur.c-P.wsStart.c);
+  const len = Math.max(Math.abs(P.wsCur.r-P.wsStart.r), Math.abs(P.wsCur.c-P.wsStart.c))+1;
+  const path = [];
+  for (let k=0;k<len;k++) path.push({ r:P.wsStart.r+dr*k, c:P.wsStart.c+dc*k });
+  return path;
+}
+function wsRenderSel(){
+  const path = wsPath();
+  const set = new Set(path.map(p=>p.r+'_'+p.c));
+  $('wsGridPl').querySelectorAll('.wsTile').forEach(t=>{
+    if (!t.classList.contains('found')) t.classList.toggle('sel', set.has(t.dataset.r+'_'+t.dataset.c));
+  });
+}
+function wsClearSel(){
+  P.wsStart=null; P.wsCur=null; P.wsSelecting=false;
+  const g = $('wsGridPl'); if (g) g.querySelectorAll('.wsTile').forEach(t=>t.classList.remove('sel'));
+}
+function wsPointerDown(e){
+  if (!P.wsGrid || P.wsSolved) return;
+  const cell = wsCellAt(e.clientX, e.clientY); if (!cell) return;
+  P.wsSelecting = true; P.wsStart = cell; P.wsCur = cell;
+  wsRenderSel(); e.preventDefault();
+}
+function wsPointerMove(e){
+  if (!P.wsSelecting) return;
+  const cell = wsCellAt(e.clientX, e.clientY); if (!cell) return;
+  const dr = cell.r-P.wsStart.r, dc = cell.c-P.wsStart.c;
+  const adr = Math.abs(dr), adc = Math.abs(dc);
+  if (dr===0 || dc===0 || adr===adc){ P.wsCur = cell; wsRenderSel(); }
+}
+function wsPointerUp(){
+  if (!P.wsSelecting) return;
+  P.wsSelecting = false;
+  wsCheckSelection();
+}
+function wsCheckSelection(){
+  const path = wsPath();
+  if (path.length<2 || !P.wsGrid){ wsClearSel(); return; }
+  const letters = path.map(p=> (P.wsGrid[p.r]||'')[p.c]||'').join('');
+  const rev = [...letters].reverse().join('');
+  if (letters===P.wsWord || rev===P.wsWord){
+    P.wsSolved = true;
+    const elapsed = Math.max(0, serverNow()-P.wsStartAt);
+    const pts = puzzlePts(P.wsDur, elapsed, P.wsPoints);
+    P.ref.child('wordsearch/solves/'+P.id).set({ t:Math.round(elapsed), pts });
+    document.querySelectorAll('#wsGridPl .wsTile').forEach(t=>{ t.classList.remove('sel'); });
+    path.forEach(p=>{ const t=document.querySelector(`#wsGridPl .wsTile[data-r="${p.r}"][data-c="${p.c}"]`); if(t) t.classList.add('found'); });
+    $('pwsBanner').style.color='var(--lime)';
+    $('pwsBanner').textContent = `🏆 TROVATA! +${pts} PUNTI`;
+    confetti(); if (navigator.vibrate) navigator.vibrate([80,50,120]);
+  } else {
+    wsClearSel(); if (navigator.vibrate) navigator.vibrate(15);
+  }
+}
+$('wsGridPl').addEventListener('pointerdown', wsPointerDown);
+document.addEventListener('pointermove', wsPointerMove);
+document.addEventListener('pointerup', wsPointerUp);
+function showPlayerTapTap(g){
+  const m = g.taptap||{};
+  $('ptpName').textContent = P.name;
+  $('ptpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayTapTap');
+  if (m.phase==='play'){
+    if (P.tapStartAt !== m.startAt){
+      P.tapStartAt = m.startAt; P.tapEndAt = m.endAt; P.tapSecs = m.secs;
+      P.tapN = 0; P.tapSynced = 0; P.tapDone = false;
+      $('ptpCount').textContent = '0';
+      $('ptpBtn').classList.remove('dim');
+      $('ptpResultBox').style.display='none';
+      clearInterval(P.tapInt);
+      P.tapInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('ptpTimerBar').style.width = (left/((m.secs||20)*1000)*100)+'%';
+        if (left<=0){
+          clearInterval(P.tapInt);
+          if (!P.tapDone){ P.tapDone = true; $('ptpBtn').classList.add('dim'); tapSync(true); }
+        }
+      },100);
+      clearInterval(P.tapSyncInt);
+      P.tapSyncInt = setInterval(()=> tapSync(false), 250);
+    }
+  } else if (m.phase==='result') {
+    clearInterval(P.tapInt); clearInterval(P.tapSyncInt);
+    $('ptpTimerBar').style.width='0%'; $('ptpBtn').classList.add('dim');
+    const rv = m.results || {};
+    const rk = (rv.ranking||[]);
+    const idx = rk.findIndex(r=>r.pid===P.id);
+    const mine = idx>=0 ? rk[idx] : null;
+    const msg = $('ptpFbMsg'), pts = $('ptpFbPts');
+    if (!mine) { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='NON HAI TOCCATO IL PULSANTE'; pts.textContent='+0'; }
+    else if (idx===0) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='🥇 HAI VINTO TU!'; pts.textContent='+'+mine.pts+' PUNTI · '+mine.n+' tap'; if(navigator.vibrate) navigator.vibrate([80,50,120]); }
+    else if (mine.pts>0) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent=(idx+1)+'° POSTO!'; pts.textContent='+'+mine.pts+' PUNTI · '+mine.n+' tap'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
+    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent=(idx+1)+'° POSTO'; pts.textContent=mine.n+' tap · fuori dal podio'; }
+    renderTapRanking($('ptpLead'), rk, m.prizes||[], false);
+    $('ptpResultBox').style.display='block';
+  }
+}
+function tapSync(force){
+  if (!P.ref || P.tapN === P.tapSynced) { if(!force) return; }
+  P.tapSynced = P.tapN;
+  P.ref.child('taptap/counts/'+P.id).set(P.tapN);
+}
+function tapHit(){
+  if (P.tapDone) return;
+  P.tapN = (P.tapN||0)+1;
+  $('ptpCount').textContent = P.tapN;
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+function showPlayerGrad(g){
+  const m = g.grad||{};
+  $('pgName').textContent = P.name;
+  $('pgScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayGrad');
+  if (m.phase==='vote'){
+    if (P.gradEndAt !== m.endAt){
+      P.gradEndAt = m.endAt; P.gradSecs = m.secs; P.gradVoted = false;
+      $('pgTitle').textContent = m.title;
+      $('pgOpts').innerHTML = (m.opts||[]).map((o,i)=>
+        `<button class="gradBtn" style="${gradButtonStyle(i)}" onclick="voteGrad(${i})">${esc(o)}</button>`).join('');
+      $('pgSent').style.display='none'; $('pgResultBox').style.display='none';
+    }
+    clearInterval(P.gradInt);
+    P.gradInt = setInterval(()=>{
+      const left = Math.max(0, (m.endAt||0) - serverNow());
+      $('pgTimerBar').style.width = (left/((m.secs||30)*1000)*100)+'%';
+      if (left<=0) clearInterval(P.gradInt);
+    },100);
+  } else if (m.phase==='result') {
+    clearInterval(P.gradInt); $('pgTimerBar').style.width='0%';
+    document.querySelectorAll('#pgOpts .gradBtn').forEach(b=>b.classList.add('dim'));
+    const rv = m.results || {};
+    const r = (rv.resultsByPid||{})[P.id];
+    const msg = $('pgFbMsg'), pts = $('pgFbPts');
+    if (!r) { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='NON HAI VOTATO'; pts.textContent='+0'; }
+    else if (r.ok) { msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='HAI VOTATO IL PIÙ GRADITO! 🎩'; pts.textContent='+'+r.pts+' PUNTI'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
+    else { msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent='ALTRI HANNO VINTO IL GRADIMENTO'; pts.textContent='+0'; }
+    renderGradBars($('gradBarsPl'), m.opts||[], rv.counts||[], rv.tot||0);
+    $('pgResultBox').style.display='block';
+  }
+}
+function voteGrad(i){
+  if (P.gradVoted) return;
+  P.gradVoted = true;
+  P.ref.child('grad/votes/'+P.id).set(i);
+  document.querySelectorAll('#pgOpts .gradBtn').forEach((b,k)=>{ b.classList.toggle('sel', k===i); b.classList.toggle('dim', k!==i); });
+  $('pgSent').style.display='block';
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+function showPlayerSeed(g){
+  clearInterval(P.timerInt);
+  const m = g.seed||{};
+  $('psName').textContent = P.name;
+  $('psScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  renderSeedTable($('seedTablePl'), m.revealed||[]);
+  const betting = m.phase==='bet';
+  if (betting && P.seedRound !== m.round) { P.seedRound = m.round; P.seedBet = null; }
+  const btnIds = ['psHeart','psDiamond','psClub','psSpade'];
+  btnIds.forEach((id,k)=>{
+    const b = $(id);
+    b.classList.toggle('sel', P.seedBet===k);
+    b.classList.toggle('dim', !betting || (P.seedBet!=null && P.seedBet!==k));
+  });
+  if (betting){
+    $('psStatus').textContent = `TURNO ${m.round+1} DI 4 — CHE SEME VINCERÀ?`;
+    $('psFb').style.display = P.seedBet!=null ? 'block' : 'none';
+    if (P.seedBet!=null) { $('psFb').style.color='var(--cyan)'; $('psFb').textContent='SCOMMESSA PIAZZATA! 🎰'; }
+    clearInterval(P.seedInt);
+    P.seedInt = setInterval(()=>{
+      const left = Math.max(0, (m.endAt||0) - serverNow());
+      $('psTimerBar').style.width = (left/((m.secs||10)*1000)*100)+'%';
+      if (left<=0) clearInterval(P.seedInt);
+    },100);
+  } else {
+    clearInterval(P.seedInt);
+    $('psTimerBar').style.width='0%';
+    const lr = m.lastResult;
+    if (m.phase==='flip' && lr){
+      const r = (lr.results||{})[P.id];
+      $('psStatus').textContent = `IL SEME VINCENTE ERA ${SUITS[lr.win]}!`;
+      $('psFb').style.display='block';
+      if (!r) { $('psFb').style.color='var(--muted)'; $('psFb').textContent='NON HAI SCOMMESSO'; }
+      else if (r.ok) { $('psFb').style.color='var(--lime)'; $('psFb').textContent='INDOVINATO! +'+r.pts;
+        if (P.seedFbAt !== lr.at) { P.seedFbAt = lr.at; if(navigator.vibrate) navigator.vibrate([60,40,60]); } }
+      else { $('psFb').style.color='var(--red)'; $('psFb').textContent='SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
+    } else {
+      $('psStatus').textContent = 'OCCHI SUL TAVOLO...';
+      $('psFb').style.display='none';
+    }
+  }
+  showScreen('scrPlaySeed');
+}
+function betSeed(k){
+  if (P.seedBet!=null) return;
+  P.seedBet = k;
+  P.ref.child('seed/bets/'+P.id).set(k);
+  const btnIds = ['psHeart','psDiamond','psClub','psSpade'];
+  btnIds.forEach((id,i)=>{ $(id).classList.toggle('sel', i===k); $(id).classList.toggle('dim', i!==k); });
+  $('psFb').style.display='block'; $('psFb').style.color='var(--cyan)'; $('psFb').textContent='SCOMMESSA PIAZZATA! 🎰';
+  if (navigator.vibrate) navigator.vibrate(40);
 }
 function showPlayerCards(g){
   clearInterval(P.timerInt);
@@ -2334,6 +3215,9 @@ function showPlayerTombola(g){
     $('ptCard').innerHTML = '';
     $('ptMsg').textContent = '⏳ CARTELLE GIÀ DISTRIBUITE — SI GIOCA ALLA PROSSIMA!';
   }
+  // stessa vista del videoproiettore: numeri estratti e premi, utile anche a chi segue da un'altra sala
+  renderTomDrawn($('ptDrawn'), drawn);
+  renderTomPrizes($('ptPrizes'), t.prizes||{}, t.won||{});
   showScreen('scrPlayTombola');
 }
 function showPlayerVoto(g){
@@ -2553,6 +3437,9 @@ function showPlayerFb(g){
   const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
   const pos = arr.findIndex(p=>p.id===P.id)+1;
   $('pfRank').innerHTML = pos>0 ? `SEI <b style="color:var(--gold)">${pos}°</b> SU ${arr.length} · ${( (g.players||{})[P.id]||{} ).score||0} PUNTI` : '';
+  const rv = g.reveal||{};
+  if (rv.stats && rv.stats.counts && rv.opts) renderStats($('pfStats'), rv.opts, rv.stats, rv.corrects||[]);
+  else $('pfStats').innerHTML='';
   showScreen('scrPlayFb');
 }
 function showPlayerEnd(g){
@@ -3029,6 +3916,311 @@ function hiloFlip(){
 }
 
 /* ================================================================
+   TAP TAP — motore condiviso + regia
+================================================================ */
+const TAP_MEDALS = ['🥇','🥈','🥉','4°','5°'];
+function renderTapRanking(el, rows, prizes, live){
+  if (!rows.length){ el.innerHTML = '<div class="byline">Ancora nessun tap...</div>'; return; }
+  el.innerHTML = rows.map((r,i)=> `<div class="tapRankRow">
+      <span class="medal">${TAP_MEDALS[i]||((i+1)+'°')}</span>
+      <span class="grow">${esc(r.name)}</span>
+      ${(!live && i<5) ? `<span class="pz">+${prizes[i]||0}</span>` : ''}
+      <span class="n">${r.n} tap</span>
+    </div>`).join('');
+}
+
+/* ================================================================
+   TAP TAP — REGIA HOST
+================================================================ */
+let TAP = {};
+$('tapSecs').innerHTML = [10,15,20,30,45,60].map(t=>`<option value="${t}" ${t===20?'selected':''}>${t} secondi</option>`).join('');
+const TAP_DEFAULTS = [1000,700,500,300,200];
+function openTapTap(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(TAP.timerInt); clearInterval(TAP.pollInt);
+  G.ref.child('taptap/counts').off();
+  $('tapPrizeInputs').innerHTML = TAP_MEDALS.map((m,k)=>`
+    <div class="tapPrizeRow"><span class="medal">${m}</span>
+      <input type="number" id="tapPz${k}" value="${TAP_DEFAULTS[k]}" min="0" style="width:110px; text-align:center"></div>`).join('');
+  G.ref.update({ status:'taptap', taptap:{ phase:'idle' } });
+  $('tapSetup').style.display='block'; $('tapLive').style.display='none';
+  pjSend({type:'tapState', msg:'SI PREPARANO I POLPASTRELLI...'});
+  showScreen('scrTapTap');
+}
+function tapStart(){
+  const secs = +$('tapSecs').value;
+  const prizes = TAP_MEDALS.map((_,k)=> Math.max(0,+$('tapPz'+k).value||0));
+  const startAt = serverNow()+800, endAt = startAt + secs*1000;
+  TAP = { prizes, secs, startAt, endAt };
+  G.ref.update({ status:'taptap', taptap:{ phase:'play', secs, prizes, startAt, endAt, counts:null, results:null } });
+  G.ref.child('taptap/counts').remove();
+  $('tapSetup').style.display='none'; $('tapLive').style.display='block';
+  $('tapMsg').textContent = '👆 PICCHIA IL PULSANTE DAL TELEFONO!';
+  $('tapBtnAgain').style.display='none';
+  renderTapRanking($('tapRanking'), [], prizes, true);
+  pjSend({type:'tapStart', secs, startAt, endAt});
+  G.ref.child('taptap/counts').on('value', s=>{
+    G.ref.child('players').once('value', ps=>{
+      const players = ps.val()||{};
+      const rows = Object.entries(s.val()||{}).map(([pid,n])=>({name:(players[pid]||{}).name||'?', n}))
+        .sort((a,b)=>b.n-a.n);
+      renderTapRanking($('tapRanking'), rows, prizes, true);
+      pjSend({type:'tapRank', rows: rows.slice(0,8)});
+    });
+  });
+  clearInterval(TAP.timerInt);
+  TAP.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('tapTimerBar').style.width = (left/(secs*1000)*100)+'%';
+    if (left<=0) { clearInterval(TAP.timerInt); tapFinish(); }
+  }, 100);
+}
+function tapFinish(){
+  G.ref.child('taptap/counts').off();
+  G.ref.child('taptap/counts').once('value').then(s=>{
+    const counts = s.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const ranking = Object.entries(counts).map(([pid,n])=>({pid, name:(players[pid]||{}).name||'?', n}))
+        .sort((a,b)=>b.n-a.n);
+      const updates = {};
+      ranking.forEach((r,i)=>{
+        const pts = i<5 ? (TAP.prizes[i]||0) : 0;
+        r.pts = pts;
+        if (pts>0 && players[r.pid]) updates['players/'+r.pid+'/score'] = (players[r.pid].score||0) + pts;
+      });
+      G.ref.update({ ...updates, 'taptap/phase':'result', 'taptap/results':{ ranking, at:Date.now() } });
+      renderTapRanking($('tapRanking'), ranking, TAP.prizes, false);
+      $('tapMsg').textContent = ranking.length ? `🏆 ${ranking[0].name} VINCE CON ${ranking[0].n} TAP!` : 'NESSUNO HA TOCCATO IL PULSANTE!';
+      $('tapBtnAgain').style.display='';
+      pjSend({type:'tapEnd', ranking, prizes:TAP.prizes});
+      if (ranking.length) confetti();
+    });
+  });
+}
+
+/* ================================================================
+   CLASSIFICA DI GRADIMENTO — motore condiviso + regia
+================================================================ */
+const GRAD_COLORS = [
+  ['#ff5db1','#c2185b'], ['#4df6ff','#00838f'], ['#ccff66','#558b00'], ['#ffd76e','#b06e00'],
+  ['#c893ff','#6a1fb0'], ['#ff9a6b','#b34700'], ['#8affc1','#0a8f52'], ['#ff8ac8','#a3125c']
+];
+function gradButtonStyle(i){
+  const [a,b] = GRAD_COLORS[i % GRAD_COLORS.length];
+  return `background:linear-gradient(180deg,${a},${b})`;
+}
+function renderGradBars(el, opts, counts, tot){
+  const max = Math.max(1, ...counts);
+  const winners = counts.map((c,i)=>({c,i})).filter(x=>x.c===max && x.c>0).map(x=>x.i);
+  renderStats(el, opts, {counts, tot}, tot>0?winners:[]);
+  return winners;
+}
+
+/* ================================================================
+   CLASSIFICA DI GRADIMENTO — REGIA HOST
+================================================================ */
+let GRAD = {};
+$('gradPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
+$('gradSecs').innerHTML = [15,20,30,45,60,90].map(t=>`<option value="${t}" ${t===30?'selected':''}>${t} secondi</option>`).join('');
+function gradRenderOptsList(vals){
+  const list = vals && vals.length ? vals : ['',''];
+  $('gradOptsList').innerHTML = list.map((v,k)=>`
+    <div class="gradOptRow"><span class="sym" style="min-width:24px">${k+1}.</span>
+      <input type="text" class="gradOptInput" data-k="${k}" value="${esc(v)}" placeholder="Es. Opzione ${k+1}" maxlength="40">
+      <button class="btn small ghost" type="button" onclick="gradRemoveOpt(${k})" ${list.length<=2?'disabled':''}>🗑</button>
+    </div>`).join('');
+}
+function gradAddOpt(){
+  const vals = [...document.querySelectorAll('.gradOptInput')].map(i=>i.value);
+  vals.push('');
+  gradRenderOptsList(vals);
+}
+function gradRemoveOpt(k){
+  const vals = [...document.querySelectorAll('.gradOptInput')].map(i=>i.value);
+  if (vals.length<=2) return;
+  vals.splice(k,1);
+  gradRenderOptsList(vals);
+}
+function openGrad(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(GRAD.timerInt);
+  G.ref.child('grad/votes').off();
+  G.ref.update({ status:'grad', grad:{ phase:'idle' } });
+  $('gradTitleIn').value=''; gradRenderOptsList(['','']);
+  $('gradSetup').style.display='block'; $('gradLive').style.display='none';
+  pjSend({type:'gradState', msg:'SI PREPARA LA VOTAZIONE...'});
+  showScreen('scrGrad');
+}
+function gradStart(){
+  const title = $('gradTitleIn').value.trim();
+  if (!title) return alert('Scrivi il titolo della votazione!');
+  const opts = [...document.querySelectorAll('.gradOptInput')].map(i=>i.value.trim()).filter(Boolean);
+  if (opts.length < 2) return alert('Servono almeno 2 opzioni da mettere al voto!');
+  const points = getPoints('gradPoints','gradPointsMan');
+  const secs = +$('gradSecs').value;
+  const startAt = serverNow()+800, endAt = startAt + secs*1000;
+  GRAD = { title, opts, points, secs, endAt };
+  G.ref.update({ status:'grad', grad:{ phase:'vote', title, opts, points, secs, endAt, votes:null, results:null } });
+  G.ref.child('grad/votes').remove();
+  $('gradSetup').style.display='none'; $('gradLive').style.display='block';
+  $('gradTitleHost').textContent = title;
+  $('gradMsg').textContent = '📊 VOTAZIONI APERTE!';
+  $('gradWinHost').textContent=''; $('gradBtnAgain').style.display='none';
+  renderGradBars($('gradBarsHost'), opts, opts.map(()=>0), 0);
+  pjSend({type:'gradStart', title, opts, endAt, secs});
+  G.ref.child('grad/votes').on('value', s=>{
+    const votes = Object.values(s.val()||{});
+    const counts = opts.map((_,i)=> votes.filter(v=>v===i).length);
+    renderGradBars($('gradBarsHost'), opts, counts, votes.length);
+    $('gradMsg').textContent = `📊 VOTAZIONI APERTE! · ${votes.length} ${votes.length===1?'voto':'voti'}`;
+  });
+  clearInterval(GRAD.timerInt);
+  GRAD.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('gradTimerBar').style.width = (left/(secs*1000)*100)+'%';
+    if (left<=0) { clearInterval(GRAD.timerInt); gradReveal(); }
+  }, 100);
+}
+function gradReveal(){
+  G.ref.child('grad/votes').off();
+  G.ref.child('grad/votes').once('value').then(s=>{
+    const votesObj = s.val()||{};
+    const opts = GRAD.opts;
+    const counts = opts.map((_,i)=> Object.values(votesObj).filter(v=>v===i).length);
+    const tot = Object.values(votesObj).length;
+    const max = Math.max(0, ...counts);
+    const winners = counts.map((c,i)=>({c,i})).filter(x=>x.c===max && max>0).map(x=>x.i);
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const results = {}, updates = {};
+      for (const pid in votesObj){
+        const ok = winners.includes(votesObj[pid]);
+        const pts = ok ? GRAD.points : 0;
+        results[pid] = { ok, pts, vote:votesObj[pid] };
+        if (ok && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + pts;
+      }
+      G.ref.update({ ...updates, 'grad/phase':'result', 'grad/results':{ counts, tot, winners, resultsByPid:results } });
+      renderGradBars($('gradBarsHost'), opts, counts, tot);
+      const order = opts.map((o,i)=>({o,i,c:counts[i]})).sort((a,b)=>b.c-a.c);
+      $('gradMsg').textContent = tot ? `🏆 CLASSIFICA FINALE — ${tot} ${tot===1?'voto':'voti'} totali` : 'NESSUN VOTO RICEVUTO';
+      $('gradWinHost').textContent = winners.length ? `👑 ${winners.map(i=>opts[i]).join(', ')}` : '';
+      $('gradBtnAgain').style.display='';
+      pjSend({type:'gradEnd', opts, counts, tot, winners});
+    });
+  });
+}
+
+/* ================================================================
+   IL SEME VINCENTE — motore condiviso + regia
+================================================================ */
+function renderSeedTable(el, revealed){
+  if (!el._sbuilt){
+    el._sbuilt = true;
+    el.innerHTML = [0,1,2,3].map(i=>`<div class="pcard" data-i="${i}"><div class="pcardIn">
+      <div class="pcFace pcBack">🎩</div>
+      <div class="pcFace pcFront seedFace"><div class="st"></div></div>
+    </div></div>`).join('');
+  }
+  el.querySelectorAll('.pcard').forEach((c,i)=>{
+    const suitIdx = (revealed||[])[i];
+    if (suitIdx!=null){
+      const red = suitIdx < 2;
+      const fr = c.querySelector('.pcFront');
+      fr.className = 'pcFace pcFront seedFace ' + (red?'red':'black');
+      fr.querySelector('.st').textContent = SUITS[suitIdx];
+      c.classList.add('flip');
+    } else c.classList.remove('flip');
+  });
+}
+function resetSeedTable(el){ el._sbuilt = false; renderSeedTable(el, []); }
+
+/* ================================================================
+   IL SEME VINCENTE — REGIA HOST
+================================================================ */
+let SEED = {};
+$('seedPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
+$('seedSecs').innerHTML = [10,15,20,30,45,60].map(t=>`<option value="${t}" ${t===10?'selected':''}>${t} secondi</option>`).join('');
+function openSeed(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(SEED.timerInt);
+  G.ref.update({ status:'seed', seed:{ phase:'idle', round:0, revealed:null, lastResult:null } });
+  $('seedSetup').style.display='block'; $('seedLive').style.display='none';
+  pjSend({type:'seedState', revealed:[], msg:'SI MESCOLANO I QUATTRO SEMI...'});
+  showScreen('scrSeed');
+}
+function seedDeal(){
+  SEED.points = getPoints('seedPoints','seedPointsMan');
+  SEED.pen = Math.max(0, +($('seedPen')||{value:0}).value||0);
+  SEED.secs = +$('seedSecs').value;
+  SEED.round = 0; SEED.revealed = [];
+  G.ref.update({ 'seed/phase':'ready', 'seed/round':0, 'seed/points':SEED.points, 'seed/revealed':null, 'seed/lastResult':null });
+  G.ref.child('seed/bets').remove();
+  $('seedSetup').style.display='none'; $('seedLive').style.display='block';
+  $('seedMsg').textContent = '🃏 4 carte coperte! Apri le scommesse per il turno 1';
+  $('seedCounts').innerHTML=''; $('seedTimerBar').style.width='100%';
+  $('seedBtnBet').style.display=''; $('seedBtnBet').textContent='🃏 APRI SCOMMESSE — TURNO 1';
+  $('seedBtnAgain').style.display='none';
+  resetSeedTable($('seedTableHost'));
+  pjSend({type:'seedState', revealed:[], msg:'4 CARTE COPERTE... QUALE SEME VINCERÀ?'});
+}
+function seedBet(){
+  const endAt = serverNow() + SEED.secs*1000;
+  SEED.endAt = endAt;
+  G.ref.update({ 'seed/phase':'bet', 'seed/round':SEED.round, 'seed/endAt':endAt, 'seed/secs':SEED.secs });
+  G.ref.child('seed/bets').remove();
+  $('seedBtnBet').style.display='none';
+  $('seedMsg').textContent = `🃏 SCOMMESSE APERTE — TURNO ${SEED.round+1} DI 4`;
+  pjSend({type:'seedBet', round:SEED.round, endAt, secs:SEED.secs, revealed:SEED.revealed});
+  G.ref.child('seed/bets').on('value', s2=>{
+    const v = Object.values(s2.val()||{}); const c=[0,0,0,0];
+    v.forEach(x=>{ if(c[x]!==undefined) c[x]++; });
+    $('seedCounts').innerHTML = c.map((n,i)=>`<div class="vc" style="color:${i<2?'#ff6b6b':'#fff'}">${SUITS[i]} ${n}</div>`).join('');
+  });
+  clearInterval(SEED.timerInt);
+  SEED.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('seedTimerBar').style.width = (left/(SEED.secs*1000)*100)+'%';
+    if (left<=0) { clearInterval(SEED.timerInt); seedFlip(); }
+  }, 100);
+}
+function seedFlip(){
+  G.ref.child('seed/bets').off();
+  const win = Math.floor(Math.random()*4); // seme vincente: 25% di possibilità, indipendente a ogni turno
+  G.ref.child('seed/bets').once('value').then(bs=>{
+    const bets = bs.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const results = {}, updates = {};
+      const c=[0,0,0,0];
+      for (const pid in bets){
+        if (c[bets[pid]]!==undefined) c[bets[pid]]++;
+        const ok = bets[pid]===win;
+        const pts = ok ? SEED.points : -(SEED.pen||0);
+        results[pid] = { ok, pts, bet:bets[pid] };
+        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
+      }
+      SEED.revealed.push(win);
+      updates['seed/phase'] = 'flip';
+      updates['seed/revealed'] = SEED.revealed;
+      updates['seed/lastResult'] = { round:SEED.round, win, results, at:Date.now() };
+      G.ref.update(updates);
+      renderSeedTable($('seedTableHost'), SEED.revealed);
+      $('seedMsg').textContent = `IL SEME VINCENTE ERA ${SUITS[win]}! +${SEED.points} a chi l'ha indovinato`;
+      pjSend({type:'seedFlip', revealed:SEED.revealed, win, counts:c, pts:SEED.points, round:SEED.round});
+      SEED.round++;
+      if (SEED.round < 4){
+        $('seedBtnBet').style.display='';
+        $('seedBtnBet').textContent = `🃏 APRI SCOMMESSE — TURNO ${SEED.round+1}`;
+      } else {
+        $('seedMsg').textContent += ' · MANCHE FINITA! 🃏';
+        $('seedBtnAgain').style.display='';
+      }
+    });
+  });
+}
+
+/* ================================================================
    PRECISIONE SVIZZERA — motore + regia
 ================================================================ */
 const SWISS_MAX = 12000;
@@ -3362,6 +4554,408 @@ function tombolaDraw(){
 }
 
 /* ================================================================
+   PUZZLE — motore condiviso + regia
+================================================================ */
+function puzzlePts(dur, elapsed, points){
+  const frac = Math.max(0, 1 - elapsed/dur);
+  return Math.round(points*(0.5+0.5*frac)/10)*10;
+}
+function puzzleShuffle(n){
+  const a = Array.from({length:n*n},(_,i)=>i);
+  for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  // evita che nasca già risolto per puro caso
+  if (a.every((v,i)=>v===i)) { [a[0],a[1]]=[a[1],a[0]]; }
+  return a;
+}
+function renderPuzGrid(el, photo, n, order, selIdx, solved){
+  el.style.gridTemplateColumns = `repeat(${n},1fr)`;
+  if (el.children.length !== n*n) el.innerHTML = Array.from({length:n*n},(_,i)=>`<div class="puzTile" onclick="puzzleTap(${i})"></div>`).join('');
+  [...el.children].forEach((tile,i)=>{
+    const piece = order[i];
+    const col = piece % n, row = Math.floor(piece/n);
+    const pct = n>1 ? 100/(n-1) : 0;
+    tile.style.backgroundImage = `url(${photo})`;
+    tile.style.backgroundSize = `${n*100}% ${n*100}%`;
+    tile.style.backgroundPosition = `${col*pct}% ${row*pct}%`;
+    tile.classList.toggle('sel', selIdx===i);
+    tile.classList.toggle('solved', !!solved);
+  });
+}
+function puzzleCountdown(barEl, msgEl, endAt, dur, onExpire){
+  clearInterval(barEl._int);
+  barEl.style.background=''; let boomed=false, lastSec=null;
+  barEl._int = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    barEl.style.width = (left/dur*100)+'%';
+    const secs = Math.ceil(left/1000);
+    if (left<=10500 && left>0){
+      barEl.style.background='linear-gradient(90deg,#ff3b3b,#ff8a3b)';
+      if (secs!==lastSec){ lastSec=secs; beepHz(secs<=3?1400:950,90); if(navigator.vibrate) navigator.vibrate(25); }
+    }
+    if (left<=0 && !boomed){
+      boomed=true; clearInterval(barEl._int); barEl.style.width='0%';
+      if (msgEl){ msgEl.style.position='relative'; explodeFx(msgEl);
+        msgEl.innerHTML = '<span class="countNum go" style="font-size:clamp(26px,6vw,60px)">TEMPO SCADUTO!!!</span>'; }
+      if (onExpire) onExpire();
+    }
+  },100);
+}
+function renderPuzRanking(el, rows){
+  el.innerHTML = rows.length ? rows.map((r,i)=>
+    `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(r.name)} — ${(r.t/1000).toFixed(1)}s <span class="pts">+${r.pts}</span></div>`).join('')
+    : '<div class="byline">Ancora nessuno ha risolto...</div>';
+}
+
+/* ================================================================
+   PUZZLE — REGIA HOST
+================================================================ */
+let PUZ = { rows:[] };
+$('puzPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
+$('puzTime').innerHTML = [30,45,60,90,120,180,240].map(t=>`<option value="${t}" ${t===60?'selected':''}>${t} secondi</option>`).join('');
+$('puzFile').addEventListener('change', e=>{
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 4*1024*1024) { alert('⚠️ Foto troppo grande (max 4 MB).'); e.target.value=''; return; }
+  const r = new FileReader();
+  r.onload = ()=>{ window._puzPhoto = r.result; $('puzPreview').src = r.result; $('puzPreview').style.display='block'; };
+  r.readAsDataURL(f);
+});
+function openPuzzle(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(($('puzTimerBar')||{})._int);
+  G.ref.child('puzzle/solves').off();
+  G.ref.update({ status:'puzzle', puzzle:{ phase:'idle' } });
+  $('puzSetup').style.display='block'; $('puzLive').style.display='none';
+  pjSend({type:'puzzleState', msg:'SI PREPARA IL PUZZLE...'});
+  showScreen('scrPuzzle');
+}
+function puzzleStart(){
+  if (!window._puzPhoto) return alert('Carica prima una foto!');
+  const n = +$('puzDiff').value;
+  const points = getPoints('puzPoints','puzPointsMan');
+  const dur = +$('puzTime').value * 1000;
+  const startAt = serverNow() + 800;
+  const endAt = startAt + dur;
+  PUZ = { n, points, dur, startAt, endAt, photo: window._puzPhoto, rows: [] };
+  G.ref.update({ 'puzzle/phase':'play', 'puzzle/photo':PUZ.photo, 'puzzle/n':n, 'puzzle/points':points,
+    'puzzle/startAt':startAt, 'puzzle/endAt':endAt, 'puzzle/dur':dur, 'puzzle/solves':null });
+  G.ref.child('puzzle/solves').remove();
+  $('puzSetup').style.display='none'; $('puzLive').style.display='block';
+  $('puzRefHost').src = PUZ.photo;
+  $('puzMsg').textContent = `🧩 ${n*n} PEZZI — SI RISOLVE DAL TELEFONO!`;
+  $('puzBtnAgain').style.display='none';
+  renderPuzRanking($('puzRanking'), []);
+  pjSend({type:'puzzleStart', photo:PUZ.photo, n, startAt, endAt, dur});
+  puzzleCountdown($('puzTimerBar'), $('puzMsg'), endAt, dur, puzzleFinish);
+  PUZ.credited = new Set();
+  G.ref.child('puzzle/solves').on('value', snap=>{
+    const solves = snap.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      let changed = false;
+      for (const pid in solves){
+        if (PUZ.credited.has(pid)) continue;
+        PUZ.credited.add(pid); changed = true;
+        const data = solves[pid], p = players[pid];
+        if (p) G.ref.child('players/'+pid+'/score').transaction(v=>(v||0)+data.pts);
+        PUZ.rows.push({ name: p?p.name:'?', t:data.t, pts:data.pts });
+      }
+      if (changed){
+        PUZ.rows.sort((a,b)=>a.t-b.t);
+        renderPuzRanking($('puzRanking'), PUZ.rows);
+        pjSend({type:'puzzleRank', rows:PUZ.rows});
+      }
+    });
+  });
+}
+function puzzleFinish(){
+  $('puzMsg').innerHTML = '<span style="color:var(--red)">⏱ TEMPO SCADUTO!!!</span>';
+  $('puzBtnAgain').style.display='';
+  pjSend({type:'puzzleEnd', rows:PUZ.rows});
+}
+
+/* ================================================================
+   ANAGRAMMA — motore condiviso (standalone + scaletta quiz)
+================================================================ */
+function shuffleLetters(word){
+  const groups = (word||'').trim().split(/\s+/).filter(Boolean).map(w=>[...w.toUpperCase()]);
+  groups.forEach(letters=>{
+    // rimescolo finché non è diverso dall'originale (se possibile)
+    const orig = letters.join('');
+    for (let t=0;t<20;t++){
+      for (let i=letters.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [letters[i],letters[j]]=[letters[j],letters[i]]; }
+      if (letters.join('')!==orig || letters.length<2) break;
+    }
+  });
+  return groups.map(g=>g.join('')).join(' ');
+}
+
+let ANA = {};
+$('anaPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
+$('anaTimer').innerHTML = TIMES.map(t=>`<option value="${t}" ${t===30?'selected':''}>${t} secondi</option>`).join('');
+function anaAutoScramble(force){
+  const w = $('anaWord').value.trim();
+  if (!w) { $('anaScramble').value=''; return; }
+  if (force || !$('anaScramble')._touched) $('anaScramble').value = shuffleLetters(w);
+}
+$('anaScramble').addEventListener('input', ()=>{ $('anaScramble')._touched = true; });
+
+function openAnagram(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(($('anaTimerBar')||{})._int);
+  G.ref.child('anagram/answers').off();
+  G.anaInQuiz = false;
+  $('anaBtnBackRow').style.display='';
+  $('anaWord').value=''; $('anaClue').value=''; $('anaScramble').value=''; $('anaScramble')._touched=false;
+  $('anaHint').value=0; $('anaPenWrong').value=0; $('anaPenNone').value=0;
+  G.ref.update({ status:'anagram', anagram:{ phase:'idle' } });
+  $('anaSetup').style.display='block'; $('anaLive').style.display='none';
+  pjSend({type:'anaState', msg:'SI PREPARA L\'ANAGRAMMA...'});
+  showScreen('scrAnagram');
+}
+function anagramStart(){
+  const word = $('anaWord').value.trim();
+  if (!word) return alert('Scrivi la parola giusta!');
+  const scramble = ($('anaScramble').value.trim() || shuffleLetters(word)).toUpperCase();
+  const q = { text: $('anaClue').value.trim(), type:'anagram', accepted: word,
+    hint: Math.max(0,+$('anaHint').value||0), penWrong: Math.max(0,+$('anaPenWrong').value||0),
+    penNone: Math.max(0,+$('anaPenNone').value||0), points: getPoints('anaPoints','anaPointsMan'),
+    timer: +$('anaTimer').value, scramble };
+  G.anaInQuiz = false;
+  runAnagram(q);
+}
+/* Motore di gioco condiviso — usato sia dal minigioco standalone sia dalla scaletta quiz */
+function runAnagram(q){
+  clearInterval(($('anaTimerBar')||{})._int);
+  const pattern = buildPattern(q.accepted, q.hint||0);
+  const startAt = serverNow()+800, endAt = startAt + q.timer*1000;
+  ANA = { q, startAt, endAt, closed:false };
+  G.ref.update({ status:'anagram', anagram:{ phase:'play', text:q.text, scramble:q.scramble, pattern,
+    points:q.points, timer:q.timer, startAt, reveal:null } });
+  G.ref.child('anagram/answers').remove();
+  $('anaSetup').style.display='none'; $('anaLive').style.display='block'; $('anaBtnBackRow').style.display = G.anaInQuiz?'none':'';
+  $('anaClueHost').textContent = q.text ? '💡 '+q.text : '';
+  renderBoxes($('anaScrambleHost'), anaBuildScramblePattern(q.scramble), q.scramble);
+  document.querySelectorAll('#anaScrambleHost .qBox').forEach(b=>b.classList.add('scramble'));
+  $('anaAnswered').textContent = '0 risposte';
+  $('anaRevealBox').style.display='none'; $('anaBtnNext').style.display='none';
+  pjSend({type:'anaStart', text:q.text, scramble:q.scramble, startAt, endAt, dur:q.timer*1000});
+  G.ref.child('anagram/answers').on('value', s=>{
+    const n = s.numChildren(); $('anaAnswered').textContent = n + (n===1?' risposta':' risposte');
+    G.ref.child('players').once('value', ps=>{ if (n>0 && n>=ps.numChildren() && !ANA.closed) closeAnagram(); });
+  });
+  clearInterval($('anaTimerBar')._int);
+  $('anaTimerBar')._int = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('anaTimerBar').style.width = (left/(q.timer*1000)*100)+'%';
+    if (left<=0) closeAnagram();
+  },100);
+  showScreen('scrAnagram');
+}
+function anaBuildScramblePattern(scramble){
+  const words = (scramble||'').trim().split(/\s+/).filter(Boolean);
+  return { w: words.map(w=>w.length), h: [] };
+}
+function closeAnagram(){
+  if (ANA.closed) return; ANA.closed = true;
+  clearInterval($('anaTimerBar')._int);
+  G.ref.child('anagram/answers').off();
+  const q = ANA.q;
+  G.ref.child('anagram/answers').once('value').then(s=>{
+    const ans = s.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const accepted = (q.accepted||'').split(',').map(norm).filter(Boolean);
+      const results = {}, pending = [];
+      for (const pid in ans){
+        const a = ans[pid]; const ok = accepted.includes(norm(a.a));
+        const pts = ok ? calcPts(q, a.t) : -(q.penWrong||0);
+        results[pid] = { ok, pts, a:a.a, t:a.t };
+        if (players[pid]) players[pid].score = Math.max(0,(players[pid].score||0)+pts);
+        if (!ok && players[pid]) pending.push({ pid, name:players[pid].name, a:a.a, t:a.t });
+      }
+      if ((q.penNone||0) > 0) for (const pid in players) if (!ans[pid]){
+        results[pid] = { ok:false, pts:-q.penNone, none:true };
+        players[pid].score = Math.max(0,(players[pid].score||0)-q.penNone);
+      }
+      const updates = { 'anagram/phase':'result', 'anagram/reveal':{ correctText:q.accepted, results } };
+      for (const pid in players) updates['players/'+pid+'/score'] = players[pid].score||0;
+      G.ref.update(updates);
+      showAnagramReveal(q, players, pending, results);
+    });
+  });
+}
+function showAnagramReveal(q, players, pending, results){
+  $('anaAnswerText').textContent = '✔ '+q.accepted.toUpperCase();
+  const pbox = $('anaPending'); pbox.innerHTML='';
+  pending.forEach(p=>{
+    const d = document.createElement('div'); d.className='openAnsRow';
+    d.innerHTML = `<span style="color:var(--gold)">${esc(p.name)}:</span><span class="grow">"${esc(p.a)}"</span>`;
+    const b = document.createElement('button'); b.className='btn small lm'; b.textContent='✔ Giusta';
+    b.onclick = ()=>{
+      const pts = calcPts(q, p.t); b.disabled = true; b.textContent = '+'+pts;
+      const delta = pts + (q.penWrong||0);
+      G.ref.child('players/'+p.pid+'/score').transaction(v=>Math.max(0,(v||0)+delta));
+      G.ref.child('anagram/reveal/results/'+p.pid).update({ok:true, pts});
+      G.ref.child('players').once('value', ps=>{
+        const arr = renderLead($('anaLead'), ps.val()||{});
+        pjSend({type:'anaRank', lead: arr.slice(0,10).map(x=>({name:x.name, score:x.score||0}))});
+      });
+    };
+    d.appendChild(b); pbox.appendChild(d);
+  });
+  const leadArr = renderLead($('anaLead'), players);
+  $('anaRevealBox').style.display='block';
+  $('anaBtnNext').textContent = G.anaInQuiz ? ((G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda') : '🔁 Un altro anagramma';
+  $('anaBtnNext').style.display='';
+  pjSend({type:'anaReveal', correctText:q.accepted, lead: leadArr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
+}
+function anagramNextClick(){ if (G && G.anaInQuiz) nextQuestion(); else openAnagram(); }
+/* Anagramma giocato come domanda della scaletta quiz */
+function playAnagramQuestion(q){
+  cancelLiveQuestion();
+  G.anaInQuiz = true;
+  runAnagram(q);
+}
+
+/* ================================================================
+   TROVA LA PAROLA — motore condiviso + regia
+================================================================ */
+function wsGenerate(word, size){
+  const letters = (word||'').toUpperCase().replace(/[^A-Z]/g,'');
+  if (!letters.length || letters.length > size) return null;
+  const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+  for (let attempt=0; attempt<300; attempt++){
+    const [dr,dc] = dirs[Math.floor(Math.random()*dirs.length)];
+    const r0 = Math.floor(Math.random()*size), c0 = Math.floor(Math.random()*size);
+    const r1 = r0+dr*(letters.length-1), c1 = c0+dc*(letters.length-1);
+    if (r1<0||r1>=size||c1<0||c1>=size) continue;
+    const grid = Array.from({length:size},()=>Array(size).fill(null));
+    for (let k=0;k<letters.length;k++) grid[r0+dr*k][c0+dc*k] = letters[k];
+    const AZ='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let r=0;r<size;r++) for (let c=0;c<size;c++) if(!grid[r][c]) grid[r][c] = AZ[Math.floor(Math.random()*AZ.length)];
+    return { grid: grid.map(row=>row.join('')), word: letters };
+  }
+  return null;
+}
+function renderWsGrid(el, grid, size){
+  el.style.gridTemplateColumns = `repeat(${size},1fr)`;
+  el.innerHTML = grid.map((row,r)=> [...row].map((ch,c)=>`<div class="wsTile" data-r="${r}" data-c="${c}">${ch}</div>`).join('')).join('');
+}
+function renderWsRanking(el, rows){
+  el.innerHTML = rows.length ? rows.map((r,i)=>
+    `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(r.name)} — ${(r.t/1000).toFixed(1)}s <span class="pts">+${r.pts}</span></div>`).join('')
+    : '<div class="byline">Ancora nessuno l\'ha trovata...</div>';
+}
+
+/* ================================================================
+   TROVA LA PAROLA — REGIA HOST
+================================================================ */
+let WS = { rows:[] };
+$('wsPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
+$('wsTime').innerHTML = [30,45,60,90,120,180,240].map(t=>`<option value="${t}" ${t===60?'selected':''}>${t} secondi</option>`).join('');
+function openWordSearch(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(($('wsTimerBar')||{})._int);
+  G.ref.child('wordsearch/solves').off();
+  G.wsInQuiz = false;
+  $('wsBtnBackRow').style.display='';
+  G.ref.update({ status:'wordsearch', wordsearch:{ phase:'idle' } });
+  $('wsSetup').style.display='block'; $('wsLive').style.display='none';
+  pjSend({type:'wsState', msg:'SI PREPARA LA GRIGLIA...'});
+  showScreen('scrWordSearch');
+}
+function wsAgainClick(){ if (G && G.wsInQuiz) nextQuestion(); else openWordSearch(); }
+/* Trova la Parola giocata come domanda della scaletta quiz */
+function playWsQuestion(q){
+  cancelLiveQuestion();
+  const size = q.wsSize || 10;
+  const placed = wsGenerate(q.wsWord||'', size);
+  if (!placed){
+    alert('⚠️ La parola "'+(q.wsWord||'')+'" non entra nella griglia impostata: domanda saltata.');
+    return nextQuestion();
+  }
+  const points = q.points||500, dur = (q.timer||60)*1000, penNone = q.penNone||0;
+  const startAt = serverNow()+800, endAt = startAt+dur;
+  G.wsInQuiz = true;
+  WS = { word:placed.word, size, points, dur, startAt, endAt, rows:[], credited:new Set(), penNone, inQuiz:true };
+  G.ref.update({ status:'wordsearch', wordsearch:{ phase:'play', grid:placed.grid, size, word:placed.word,
+    clue:q.wsClue||'', points, startAt, endAt, dur, solves:null } });
+  G.ref.child('wordsearch/solves').remove();
+  $('wsSetup').style.display='none'; $('wsLive').style.display='block';
+  $('wsBtnBackRow').style.display='none';
+  $('wsClueHost').textContent = q.wsClue ? '💡 '+q.wsClue : '';
+  renderWsGrid($('wsGridHost'), placed.grid, size);
+  $('wsMsg').textContent = `DOMANDA ${G.qi+1}/${G.quiz.questions.length} · 🔤 SI CERCA DAL TELEFONO!`;
+  $('wsBtnAgain').textContent = (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
+  $('wsBtnAgain').style.display='none';
+  renderWsRanking($('wsRanking'), []);
+  pjSend({type:'wsStart', grid:placed.grid, size, clue:q.wsClue||'', startAt, endAt, dur});
+  puzzleCountdown($('wsTimerBar'), $('wsMsg'), endAt, dur, wordsearchFinish);
+  wsListenSolves();
+  showScreen('scrWordSearch');
+}
+function wordsearchStart(){
+  const wordIn = $('wsWord').value.trim();
+  if (!wordIn) return alert('Scrivi la parola da nascondere!');
+  const size = +$('wsSize').value;
+  const clue = $('wsClue').value.trim();
+  const points = getPoints('wsPoints','wsPointsMan');
+  const dur = +$('wsTime').value * 1000;
+  const placed = wsGenerate(wordIn, size);
+  if (!placed) return alert('La parola è troppo lunga per questa griglia: scegli una griglia più grande o una parola più corta.');
+  const startAt = serverNow() + 800, endAt = startAt + dur;
+  G.wsInQuiz = false;
+  WS = { word:placed.word, size, points, dur, startAt, endAt, rows:[], credited:new Set(), penNone:0 };
+  G.ref.update({ 'wordsearch/phase':'play', 'wordsearch/grid':placed.grid, 'wordsearch/size':size,
+    'wordsearch/word':placed.word, 'wordsearch/clue':clue, 'wordsearch/points':points,
+    'wordsearch/startAt':startAt, 'wordsearch/endAt':endAt, 'wordsearch/dur':dur, 'wordsearch/solves':null });
+  G.ref.child('wordsearch/solves').remove();
+  $('wsSetup').style.display='none'; $('wsLive').style.display='block';
+  $('wsClueHost').textContent = clue ? '💡 '+clue : '';
+  renderWsGrid($('wsGridHost'), placed.grid, size);
+  $('wsMsg').textContent = `🔤 SI CERCA "${'?'.repeat(placed.word.length)}" DAL TELEFONO!`;
+  $('wsBtnAgain').style.display='none';
+  renderWsRanking($('wsRanking'), []);
+  pjSend({type:'wsStart', grid:placed.grid, size, clue, startAt, endAt, dur});
+  puzzleCountdown($('wsTimerBar'), $('wsMsg'), endAt, dur, wordsearchFinish);
+  wsListenSolves();
+}
+function wsListenSolves(){
+  G.ref.child('wordsearch/solves').on('value', snap=>{
+    const solves = snap.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      let changed = false;
+      for (const pid in solves){
+        if (WS.credited.has(pid)) continue;
+        WS.credited.add(pid); changed = true;
+        const data = solves[pid], p = players[pid];
+        if (p) G.ref.child('players/'+pid+'/score').transaction(v=>(v||0)+data.pts);
+        WS.rows.push({ name: p?p.name:'?', t:data.t, pts:data.pts });
+      }
+      if (changed){
+        WS.rows.sort((a,b)=>a.t-b.t);
+        renderWsRanking($('wsRanking'), WS.rows);
+        pjSend({type:'wsRank', rows:WS.rows});
+      }
+    });
+  });
+}
+function wordsearchFinish(){
+  const finalWord = WS.word;
+  setTimeout(()=>{ $('wsMsg').innerHTML = `⏱ TEMPO SCADUTO!!! <span style="color:var(--gold)">La parola era: ${finalWord}</span>`; }, 1700);
+  $('wsBtnAgain').style.display='';
+  if (WS.inQuiz && WS.penNone > 0) {
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{}, updates = {};
+      for (const pid in players) if (!WS.credited.has(pid)) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)-WS.penNone);
+      if (Object.keys(updates).length) G.ref.update(updates);
+    });
+  }
+  pjSend({type:'wsEnd', rows:WS.rows, word:finalWord});
+}
+
+/* ================================================================
    TIMER GIGANTE CON BOMBA (condiviso host / proiettore / telefono)
 ================================================================ */
 function runBigTimer(sfx, title, endAt){
@@ -3455,8 +5049,14 @@ function modalGames(){
       <button class="btn lm" onclick="openSimon()">🎨 Simon</button>
       <button class="btn" onclick="openVoto()">🌡 Votometro</button>
       <button class="btn cy" onclick="openTimer()">⏱ Timer</button>
+      <button class="btn mg" onclick="openPuzzle()">🧩 Puzzle</button>
+      <button class="btn cy" onclick="openWordSearch()">🔤 Trova la Parola</button>
+      <button class="btn" onclick="openAnagram()">🔤➰ Anagramma</button>
       <button class="btn lm" onclick="openTombola()">🎱 Tombola</button>
       <button class="btn mg" onclick="openCards()">🎴 Carta Rossa, Carta Nera</button>
+      <button class="btn" onclick="openSeed()">🃏 Il Seme Vincente</button>
+      <button class="btn lm" onclick="openGrad()">📊 Classifica di Gradimento</button>
+      <button class="btn mg" style="grid-column:1/-1" onclick="openTapTap()">👆 Tap Tap</button>
       <button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>
       <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
       <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
@@ -3883,14 +5483,23 @@ function backToQuiz(title){
   G.ref.child('simon/answers').off();
   clearInterval(DICE.timerInt); clearInterval(SIM.timerInt); clearInterval(VOTO.timerInt);
   const hc = $('timerClockHost'); if (hc) clearInterval(hc._int);
+  const pb = $('puzTimerBar'); if (pb) clearInterval(pb._int);
+  const wb = $('wsTimerBar'); if (wb) clearInterval(wb._int);
+  const ab = $('anaTimerBar'); if (ab) clearInterval(ab._int);
+  G.ref.child('puzzle/solves').off();
+  G.ref.child('wordsearch/solves').off();
+  G.ref.child('anagram/answers').off();
   G.ref.child('voto/votes').off();
-  clearInterval(CARDS.timerInt); clearInterval(HILO.timerInt); clearInterval(WH.timerInt); clearTimeout(SW.revealTO);
+  clearInterval(CARDS.timerInt); clearInterval(HILO.timerInt); clearInterval(WH.timerInt); clearTimeout(SW.revealTO); clearInterval(SEED.timerInt); clearInterval(GRAD.timerInt); clearInterval(TAP.timerInt);
+  G.ref.child('seed/bets').off();
+  G.ref.child('grad/votes').off();
+  G.ref.child('taptap/counts').off();
   const swc = $('swissClockHost'); if (swc) clearInterval(swc._int);
   G.ref.child('cards/bets').off();
   G.ref.child('swiss/press').off();
   G.ref.child('hilo/bets').off();
   G.ref.child('wheels/bets').off();
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null });
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -4073,6 +5682,84 @@ function pjRoute(m){
          <span class="pts" style="color:${r.pts>=0?'var(--lime)':'var(--red)'}">${r.pts>=0?'+':''}${r.pts}</span></div>`).join('');
       if (m.rows && m.rows.length) confetti();
     }
+    else if (m.type==='tapState') {
+      showScreen('scrPjTapTap');
+      $('pjTapMsg').textContent = m.msg||''; $('pjTapRanking').innerHTML='';
+      $('pjTapTimerBar').style.width='100%';
+    }
+    else if (m.type==='tapStart') {
+      showScreen('scrPjTapTap');
+      $('pjTapMsg').textContent = 'PICCHIATE IL PULSANTE DAL TELEFONO!';
+      $('pjTapRanking').innerHTML='';
+      clearInterval(window._pjTapInt);
+      window._pjTapInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjTapTimerBar').style.width = (left/(m.secs*1000)*100)+'%';
+        if (left<=0) clearInterval(window._pjTapInt);
+      },100);
+    }
+    else if (m.type==='tapRank') {
+      renderTapRanking($('pjTapRanking'), m.rows||[], [], true);
+    }
+    else if (m.type==='tapEnd') {
+      clearInterval(window._pjTapInt); $('pjTapTimerBar').style.width='0%';
+      renderTapRanking($('pjTapRanking'), m.ranking||[], m.prizes||[], false);
+      $('pjTapMsg').textContent = (m.ranking&&m.ranking.length) ? `🏆 ${m.ranking[0].name} VINCE CON ${m.ranking[0].n} TAP!` : 'NESSUNO HA TOCCATO IL PULSANTE!';
+      if (m.ranking && m.ranking.length) confetti();
+    }
+    else if (m.type==='gradState') {
+      showScreen('scrPjGrad');
+      $('pjGradTitle').textContent=''; $('pjGradMsg').textContent = m.msg||'';
+      $('gradBarsPj').innerHTML=''; $('pjGradWin').textContent='';
+      $('pjGradTimerBar').style.width='100%';
+    }
+    else if (m.type==='gradStart') {
+      showScreen('scrPjGrad');
+      $('pjGradTitle').textContent = m.title;
+      $('pjGradMsg').textContent = '📊 VOTAZIONI APERTE!';
+      $('pjGradWin').textContent='';
+      renderGradBars($('gradBarsPj'), m.opts, m.opts.map(()=>0), 0);
+      clearInterval(window._pjGradInt);
+      window._pjGradInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjGradTimerBar').style.width = (left/(m.secs*1000)*100)+'%';
+        if (left<=0) clearInterval(window._pjGradInt);
+      },100);
+    }
+    else if (m.type==='gradEnd') {
+      clearInterval(window._pjGradInt); $('pjGradTimerBar').style.width='0%';
+      renderGradBars($('gradBarsPj'), m.opts, m.counts, m.tot);
+      $('pjGradMsg').textContent = m.tot ? `🏆 CLASSIFICA FINALE — ${m.tot} ${m.tot===1?'voto':'voti'}` : 'NESSUN VOTO RICEVUTO';
+      $('pjGradWin').textContent = m.winners.length ? `👑 ${m.winners.map(i=>m.opts[i]).join(', ')}` : '';
+      if (m.tot) confetti();
+    }
+    else if (m.type==='seedState') {
+      showScreen('scrPjSeed');
+      resetSeedTable($('seedTablePj'));
+      renderSeedTable($('seedTablePj'), m.revealed||[]);
+      $('pjSeedMsg').textContent = m.msg||''; $('pjSeedCounts').innerHTML='';
+      $('pjSeedTimerBar').style.width='100%';
+    }
+    else if (m.type==='seedBet') {
+      showScreen('scrPjSeed');
+      renderSeedTable($('seedTablePj'), m.revealed||[]);
+      $('pjSeedMsg').textContent = `🃏 TURNO ${m.round+1} DI 4 — QUALE SEME VINCERÀ?`;
+      $('pjSeedCounts').innerHTML='';
+      clearInterval(window._pjSeedInt);
+      window._pjSeedInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjSeedTimerBar').style.width = (left/(m.secs*1000)*100)+'%';
+        if (left<=0) clearInterval(window._pjSeedInt);
+      },100);
+    }
+    else if (m.type==='seedFlip') {
+      clearInterval(window._pjSeedInt);
+      $('pjSeedTimerBar').style.width='0%';
+      renderSeedTable($('seedTablePj'), m.revealed||[]);
+      $('pjSeedMsg').textContent = `${SUITS[m.win]} È IL SEME VINCENTE! +${m.pts}`;
+      $('pjSeedCounts').innerHTML = m.counts.map((n,i)=>`<div class="vc" style="color:${i<2?'#ff6b6b':'#fff'}">${SUITS[i]} ${n}</div>`).join('');
+      if (m.round>=3) confetti();
+    }
     else if (m.type==='cardsState') {
       showScreen('scrPjCards');
       resetCardTable($('cardsTablePj'));
@@ -4113,6 +5800,78 @@ function pjRoute(m){
       $('pjTomBanner').style.display='flex';
       explodeFx($('pjTomBanner'));
       setTimeout(()=>{ $('pjTomBanner').style.display='none'; }, 5200);
+    }
+    else if (m.type==='anaState') {
+      showScreen('scrPjAnagram');
+      $('pjAnaClue').textContent=''; $('pjAnaScramble').innerHTML=''; $('pjAnaAnswer').style.display='none'; $('pjAnaLead').innerHTML='';
+      $('pjAnaTimerBar').style.width='100%';
+    }
+    else if (m.type==='anaStart') {
+      showScreen('scrPjAnagram');
+      $('pjAnaClue').textContent = m.text ? '💡 '+m.text : '';
+      renderBoxes($('pjAnaScramble'), anaBuildScramblePattern(m.scramble), m.scramble);
+      document.querySelectorAll('#pjAnaScramble .qBox').forEach(b=>b.classList.add('scramble'));
+      $('pjAnaAnswer').style.display='none'; $('pjAnaLead').innerHTML='';
+      clearInterval(window._pjAnaInt);
+      window._pjAnaInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjAnaTimerBar').style.width = (left/m.dur*100)+'%';
+        if (left<=0) clearInterval(window._pjAnaInt);
+      },100);
+    }
+    else if (m.type==='anaReveal') {
+      clearInterval(window._pjAnaInt); $('pjAnaTimerBar').style.width='0%';
+      $('pjAnaAnswer').textContent = '✔ '+(m.correctText||'').toUpperCase();
+      $('pjAnaAnswer').style.display='block';
+      $('pjAnaLead').innerHTML = (m.lead||[]).map((p,i)=>
+        `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score}</span></div>`).join('');
+      confetti();
+    }
+    else if (m.type==='anaRank') {
+      $('pjAnaLead').innerHTML = (m.lead||[]).map((p,i)=>
+        `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score}</span></div>`).join('');
+    }
+    else if (m.type==='wsState') {
+      showScreen('scrPjWordSearch');
+      $('pjWsMsg').textContent = m.msg||''; $('pjWsRanking').innerHTML=''; $('wsGridPj').innerHTML='';
+      $('pjWsTimerBar').style.width='100%'; $('pjWsTimerBar').style.background='';
+    }
+    else if (m.type==='wsStart') {
+      showScreen('scrPjWordSearch');
+      $('pjWsClue').textContent = m.clue ? '💡 '+m.clue : '';
+      renderWsGrid($('wsGridPj'), m.grid, m.size);
+      $('pjWsMsg').textContent = '🔤 CERCATELA DAL TELEFONO — ORIZZONTALE, VERTICALE O DIAGONALE!';
+      $('pjWsRanking').innerHTML='';
+      puzzleCountdown($('pjWsTimerBar'), $('pjWsMsg'), m.endAt, m.dur, ()=>{});
+    }
+    else if (m.type==='wsRank') {
+      renderWsRanking($('pjWsRanking'), m.rows||[]);
+      if (m.rows && m.rows.length) confetti();
+    }
+    else if (m.type==='wsEnd') {
+      clearInterval($('pjWsTimerBar')._int);
+      renderWsRanking($('pjWsRanking'), m.rows||[]);
+      setTimeout(()=>{ $('pjWsMsg').innerHTML = `⏱ TEMPO SCADUTO!!! <span style="color:var(--gold)">La parola era: ${m.word}</span>`; }, 1700);
+    }
+    else if (m.type==='puzzleState') {
+      showScreen('scrPjPuzzle');
+      $('pjPuzMsg').textContent = m.msg||''; $('pjPuzRanking').innerHTML='';
+      $('pjPuzTimerBar').style.width='100%'; $('pjPuzTimerBar').style.background='';
+    }
+    else if (m.type==='puzzleStart') {
+      showScreen('scrPjPuzzle');
+      $('puzRefPj').src = m.photo;
+      $('pjPuzMsg').textContent = '🧩 RICOMPONETE LA FOTO DAL TELEFONO!';
+      $('pjPuzRanking').innerHTML='';
+      puzzleCountdown($('pjPuzTimerBar'), $('pjPuzMsg'), m.endAt, m.dur, ()=>{});
+    }
+    else if (m.type==='puzzleRank') {
+      renderPuzRanking($('pjPuzRanking'), m.rows||[]);
+      if (m.rows && m.rows.length) confetti();
+    }
+    else if (m.type==='puzzleEnd') {
+      clearInterval($('pjPuzTimerBar')._int);
+      renderPuzRanking($('pjPuzRanking'), m.rows||[]);
     }
     else if (m.type==='timerStart') {
       showScreen('scrPjTimer');
