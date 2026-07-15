@@ -690,7 +690,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v7.8</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v7.9</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2125,7 +2125,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 78; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 79; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -5926,7 +5926,8 @@ function memoOpenGuess(){
   const target = MEMO.cards[MEMO.targetIdx];
   const endAt = serverNow()+800+MEMO.secs*1000, startAt = serverNow()+800;
   MEMO.startAt = startAt; MEMO.endAt = endAt;
-  G.ref.update({ 'memo/phase':'guess', 'memo/startAt':startAt, 'memo/endAt':endAt });
+  // la carta bersaglio va scritta anche nel nodo di gioco vero e proprio: il telefono ascolta quello, non il canale del proiettore
+  G.ref.update({ 'memo/phase':'guess', 'memo/startAt':startAt, 'memo/endAt':endAt, 'memo/target':target });
   $('memoMsg').textContent = '🧠 DOVE SI TROVAVA QUESTA CARTA?';
   $('memoTargetHost').style.display='flex';
   memoSetTargetFace($('memoTargetCardHost'), target);
