@@ -104,6 +104,12 @@ option{background:var(--bg2);}
 .ansBtn.win{animation:winPulse 1s infinite alternate;}
 @keyframes winPulse{from{filter:brightness(1)}to{filter:brightness(1.35); transform:scale(1.03)}}
 
+.qCard{cursor:grab;}
+.qCard:active{cursor:grabbing;}
+.qCard.dragging{opacity:.35;}
+.qCard.dragOver{border-top:3px solid var(--lime);}
+.qCard .idx{cursor:grab;}
+
 /* ===== SELEZIONE MULTIPLA / CASELLE / SONDAGGIO ===== */
 .ansBtn.sel{outline:5px solid var(--gold); box-shadow:0 2px 0 rgba(0,0,0,.5), 0 0 30px rgba(255,201,60,.85); transform:translateY(5px);}
 .qBoxes{display:flex; flex-direction:column; gap:8px; align-items:center; margin-top:12px;}
@@ -664,7 +670,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v7.2</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v7.3</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -705,7 +711,12 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <!-- ==================== HOST: EDITOR SINGOLA DOMANDA ==================== -->
 <div class="screen" id="scrQEdit">
   <div class="panel" style="max-width:720px">
-    <div class="brand center"><div class="t1" style="font-size:26px" id="qeTitle">DOMANDA</div></div>
+    <div class="row" style="justify-content:center; align-items:center; gap:14px">
+      <button class="btn small ghost" id="qeBtnPrev" onclick="qeGoto(-1)" title="Domanda precedente (freccia sinistra)">◀</button>
+      <div class="brand center" style="margin:0"><div class="t1" style="font-size:26px" id="qeTitle">DOMANDA</div>
+        <div class="byline" id="qePosLabel" style="margin-top:2px"></div></div>
+      <button class="btn small ghost" id="qeBtnNext" onclick="qeGoto(1)" title="Domanda successiva (freccia destra)">▶</button>
+    </div>
     <div class="label">Testo della domanda (visibile solo sullo schermo del presentatore)</div>
     <textarea id="qeText" rows="2" placeholder="Es. Chi canta 'My Way'?"></textarea>
 
@@ -2049,7 +2060,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 72; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 73; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2285,23 +2296,45 @@ function editQuiz(i){ curQuiz = JSON.parse(JSON.stringify(quizzes[i])); curQuiz.
 function delQuiz(i){ if(confirm('Eliminare "'+quizzes[i].title+'"?')){ quizzes.splice(i,1); persist(); loadQuizList(); } }
 function persist(){ try{ localStorage.setItem(LSKEY, JSON.stringify(quizzes)); }catch(e){ alert('⚠️ Memoria piena: i file audio/foto occupano troppo spazio. Usa file più piccoli o esporta il quiz in JSON.'); } }
 
+const QE_TYPE_LABEL = { mult:'Multipla', open:'Aperta', wordsearch:'🔤 Trova parola', anagram:'🔤➰ Anagramma' };
 function renderEdQuestions(){
   const box = $('edQList'); box.innerHTML=''; $('edCount').textContent = curQuiz.questions.length;
   curQuiz.questions.forEach((q,i)=>{
     const d = document.createElement('div'); d.className='qCard';
-    const tags = `<span class="tag ${q.type==='mult'?'mult':'open'}">${q.type==='mult'?'Multipla':'Aperta'}</span>` +
+    d.draggable = true; d.tabIndex = 0; d.dataset.i = i;
+    const tagClass = q.type==='mult' ? 'mult' : (q.type==='wordsearch'||q.type==='anagram' ? 'media' : 'open');
+    const tags = `<span class="tag ${tagClass}">${QE_TYPE_LABEL[q.type]||q.type}</span>` +
       (q.media && q.media.kind!=='none' ? ` <span class="tag media">${q.media.kind==='photo'?'📷':'🎵'}</span>` : '');
-    d.innerHTML = `<div class="idx">${i+1}</div>
+    d.innerHTML = `<div class="idx">☰ ${i+1}</div>
       <div class="grow"><b>${esc(q.text).slice(0,60)||'(senza testo)'}</b><br>${tags}
         <small style="color:var(--muted)"> ${q.points} pt · ${q.timer}s</small></div>
       <button class="btn small cy" onclick="openQEditor(${i})">✎</button>
+      <button class="btn small ghost" onclick="moveQTop(${i})" title="Porta in cima">⏫</button>
       <button class="btn small ghost" onclick="moveQ(${i},-1)">▲</button>
       <button class="btn small ghost" onclick="moveQ(${i},1)">▼</button>
+      <button class="btn small ghost" onclick="moveQBottom(${i})" title="Porta in fondo">⏬</button>
       <button class="btn small ghost" onclick="delQ(${i})">🗑</button>`;
+    // apertura rapida con Invio quando la riga è selezionata (tab/click)
+    d.addEventListener('keydown', e=>{ if (e.key==='Enter'){ e.preventDefault(); openQEditor(i); } });
+    // trascinamento col mouse per riordinare
+    d.addEventListener('dragstart', e=>{ d.classList.add('dragging'); e.dataTransfer.setData('text/plain', String(i)); e.dataTransfer.effectAllowed='move'; });
+    d.addEventListener('dragend', ()=>{ d.classList.remove('dragging'); document.querySelectorAll('.qCard.dragOver').forEach(x=>x.classList.remove('dragOver')); });
+    d.addEventListener('dragover', e=>{ e.preventDefault(); d.classList.add('dragOver'); });
+    d.addEventListener('dragleave', ()=> d.classList.remove('dragOver'));
+    d.addEventListener('drop', e=>{
+      e.preventDefault(); d.classList.remove('dragOver');
+      const from = +e.dataTransfer.getData('text/plain'), to = +d.dataset.i;
+      if (from===to || isNaN(from)) return;
+      const [moved] = curQuiz.questions.splice(from,1);
+      curQuiz.questions.splice(to,0,moved);
+      renderEdQuestions();
+    });
     box.appendChild(d);
   });
 }
 function moveQ(i,dir){ const j=i+dir; if(j<0||j>=curQuiz.questions.length)return; [curQuiz.questions[i],curQuiz.questions[j]]=[curQuiz.questions[j],curQuiz.questions[i]]; renderEdQuestions(); }
+function moveQTop(i){ if(i<=0)return; const [q]=curQuiz.questions.splice(i,1); curQuiz.questions.unshift(q); renderEdQuestions(); }
+function moveQBottom(i){ if(i>=curQuiz.questions.length-1)return; const [q]=curQuiz.questions.splice(i,1); curQuiz.questions.push(q); renderEdQuestions(); }
 function delQ(i){ curQuiz.questions.splice(i,1); renderEdQuestions(); }
 
 /* Valori predefiniti per velocizzare la redazione — modificabili in ogni momento, valgono solo per le domande NUOVE.
@@ -2343,6 +2376,7 @@ function openQEditor(i){
   qeRenderOpts(q, true); // true = carica SEMPRE i dati salvati di QUESTA domanda, mai i campi rimasti dalla precedente
   window._qeMedia = q.media && q.media.data ? {...q.media} : {kind:q.media.kind||'none'};
   $('qeFile').value=''; qeTypeChanged(); qeMediaChanged(true);
+  qeUpdateNavButtons();
   showScreen('scrQEdit');
 }
 function qeRenderOpts(q, fresh){
@@ -2466,9 +2500,10 @@ function renderMediaPreview(compressInfo){
     else b.innerHTML = `<div class="pill">🎵 ${esc(m.name||'audio')}</div><audio controls src="${m.data}"></audio>`;
   }
 }
-function saveQuestion(){
+/* Legge e valida i campi dell'editor: torna l'oggetto domanda pronto, o null se manca qualcosa (con avviso già mostrato) */
+function qeBuildQuestion(){
   const text = $('qeText').value.trim();
-  if (!text) return alert('Scrivi il testo della domanda!');
+  if (!text) { alert('Scrivi il testo della domanda!'); return null; }
   const type = $('qeType').value;
   const n = +$('qeNumOpts').value;
   const opts = Array.from({length:n},(_,k)=>($('qeOpt'+k)||{value:''}).value.trim());
@@ -2480,27 +2515,60 @@ function saveQuestion(){
     penWrong: Math.max(0,+$('qePenWrong').value||0),
     penNone: Math.max(0,+$('qePenNone').value||0),
     points:getPoints('qePoints','qePointsMan'), timer:+$('qeTimer').value };
-  if (type==='mult' && opts.filter(o=>o).length<2) return alert('Servono almeno 2 opzioni compilate!');
-  if (type==='mult' && !corrects.length) return alert('Spunta almeno una risposta giusta!');
-  if (type==='mult' && corrects.some(k=>!opts[k])) return alert('Una risposta spuntata come giusta è vuota!');
-  if (type==='open' && !q.accepted) return alert('Inserisci almeno una risposta accettata!');
+  if (type==='mult' && opts.filter(o=>o).length<2) { alert('Servono almeno 2 opzioni compilate!'); return null; }
+  if (type==='mult' && !corrects.length) { alert('Spunta almeno una risposta giusta!'); return null; }
+  if (type==='mult' && corrects.some(k=>!opts[k])) { alert('Una risposta spuntata come giusta è vuota!'); return null; }
+  if (type==='open' && !q.accepted) { alert('Inserisci almeno una risposta accettata!'); return null; }
   if (type==='wordsearch'){
     q.wsWord = $('qeWsWord').value.trim();
     q.wsClue = $('qeWsClue').value.trim();
     q.wsSize = +$('qeWsSize').value;
-    if (!q.wsWord) return alert('Scrivi la parola da nascondere nella griglia!');
+    if (!q.wsWord) { alert('Scrivi la parola da nascondere nella griglia!'); return null; }
     const letters = q.wsWord.toUpperCase().replace(/[^A-Z]/g,'');
-    if (!letters.length) return alert('La parola deve contenere almeno una lettera (A-Z)!');
-    if (letters.length > q.wsSize) return alert('La parola è troppo lunga per la griglia scelta: aumenta la dimensione o accorcia la parola.');
+    if (!letters.length) { alert('La parola deve contenere almeno una lettera (A-Z)!'); return null; }
+    if (letters.length > q.wsSize) { alert('La parola è troppo lunga per la griglia scelta: aumenta la dimensione o accorcia la parola.'); return null; }
   }
   if (type==='anagram'){
     const word = $('qeAnaWord').value.trim();
-    if (!word) return alert('Scrivi la parola giusta!');
+    if (!word) { alert('Scrivi la parola giusta!'); return null; }
     q.accepted = word;
     q.scramble = ($('qeAnaScramble').value.trim() || shuffleLetters(word)).toUpperCase();
   }
+  return q;
+}
+function saveQuestion(){
+  const q = qeBuildQuestion(); if (!q) return;
   if (curQIdx>=0) curQuiz.questions[curQIdx]=q; else curQuiz.questions.push(q);
   renderEdQuestions(); showScreen('scrEditor');
+}
+/* Salva la domanda corrente e passa a quella precedente/successiva SENZA uscire dall'editor */
+function qeGoto(dir){
+  const q = qeBuildQuestion(); if (!q) return;
+  const wasNew = curQIdx < 0;
+  if (curQIdx>=0) curQuiz.questions[curQIdx]=q; else curQuiz.questions.push(q);
+  const fromIdx = wasNew ? curQuiz.questions.length-1 : curQIdx;
+  const target = fromIdx + dir;
+  if (target < 0 || target >= curQuiz.questions.length) { renderEdQuestions(); return; } // ai bordi: resta qui, ma salva comunque
+  openQEditor(target);
+}
+/* Scorciatoie da tastiera nell'editor domanda: frecce per cambiare domanda, Invio per salvare, Esc per uscire.
+   Le frecce non interferiscono con la scrittura nei campi (lì servono per muovere il cursore). */
+document.addEventListener('keydown', e=>{
+  const scr = document.querySelector('.screen.active');
+  if (!scr || scr.id !== 'scrQEdit') return;
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  const inTextField = tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT';
+  if (e.key==='Escape'){ e.preventDefault(); showScreen('scrEditor'); return; }
+  if (e.key==='Enter' && tag!=='TEXTAREA'){ e.preventDefault(); saveQuestion(); return; }
+  if (e.key==='ArrowLeft' && !inTextField){ e.preventDefault(); qeGoto(-1); return; }
+  if (e.key==='ArrowRight' && !inTextField){ e.preventDefault(); qeGoto(1); return; }
+});
+function qeUpdateNavButtons(){
+  const total = curQuiz.questions.length;
+  const pos = curQIdx>=0 ? curQIdx : total; // una domanda nuova è "dopo" l'ultima
+  $('qeBtnPrev').disabled = pos<=0;
+  $('qeBtnNext').disabled = curQIdx<0 || curQIdx>=total-1;
+  $('qePosLabel').textContent = curQIdx>=0 ? `${curQIdx+1} di ${total}` : `nuova · ${total} salvate`;
 }
 function saveQuiz(andPlay){
   const t = $('edTitle').value.trim();
