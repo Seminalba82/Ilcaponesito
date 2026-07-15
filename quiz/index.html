@@ -690,7 +690,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v7.5</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v7.8</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -803,14 +803,12 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div id="qeWsBox" style="display:none">
       <div class="label">Parola da nascondere nella griglia</div>
       <input type="text" id="qeWsWord" placeholder="Es. GANGSTER" maxlength="20">
-      <div class="label mt">Indizio (facoltativo)</div>
-      <input type="text" id="qeWsClue" placeholder="Es. Malvivente in giacca e cappello" maxlength="80">
       <div class="row mt">
         <div class="grow"><div class="label">Dimensione griglia</div>
           <select id="qeWsSize"><option value="8">8×8</option><option value="10" selected>10×10</option><option value="12">12×12</option></select>
         </div>
       </div>
-      <div class="label" style="text-transform:none; letter-spacing:0">🔤 La parola verrà scritta MAIUSCOLA, senza spazi né accenti, nascosta in orizzontale/verticale/diagonale. I giocatori la cercano passando il dito sulla griglia sul telefono. Punti a chi la trova più veloce; "chi non risponde perde" si applica a chi non la trova in tempo.</div>
+      <div class="label" style="text-transform:none; letter-spacing:0">🔤 Il "Testo della domanda" scritto in alto funge da indizio (es. "Malvivente in giacca e cappello") — è quello che vedranno i giocatori. La parola verrà scritta MAIUSCOLA, senza spazi né accenti, nascosta in orizzontale/verticale/diagonale. Punti a chi la trova più veloce; "chi non risponde perde" si applica a chi non la trova in tempo.</div>
     </div>
 
     <div class="row mt">
@@ -1706,7 +1704,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 
 <!-- ==================== HOST: MEMO ==================== -->
 <div class="screen" id="scrMemo">
-  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🧠 MEMO</div></div>
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🔍 TROVA LA CARTA</div></div>
   <div class="panel mt" style="max-width:520px" id="memoSetup">
     <div class="label">Velocità di scopertura delle carte</div>
     <select id="memoSpeed">
@@ -1733,7 +1731,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div class="timerWrap mt" style="max-width:460px; display:none" id="memoTimerWrapHost"><div class="timerBar" id="memoTimerBar"></div></div>
     <div class="lead mt" id="memoLead" style="max-width:460px; width:100%"></div>
     <div class="row mt" style="justify-content:center">
-      <button class="btn cy" id="memoBtnAgain" onclick="openMemo()" style="display:none">🔁 Un altro Memo</button>
+      <button class="btn cy" id="memoBtnAgain" onclick="openMemo()" style="display:none">🔁 Un'altra sfida</button>
     </div>
   </div>
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
@@ -1741,7 +1739,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 
 <!-- ==================== PROIETTORE: MEMO ==================== -->
 <div class="screen" id="scrPjMemo">
-  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🧠 MEMO</div></div>
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🔍 TROVA LA CARTA</div></div>
   <div class="miniMsg" id="pjMemoMsg" style="font-size:clamp(20px,3.2vw,36px)">👀 GUARDATE BENE...</div>
   <div class="memoGrid big" id="memoGridPj"></div>
   <div class="memoTarget" id="memoTargetPj" style="display:none">
@@ -1785,13 +1783,12 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div class="row mt">
       <div class="grow"><div class="label">Tempo a disposizione</div><select id="mcSecs"></select></div>
     </div>
-    <div class="label mt" style="text-transform:none; letter-spacing:0">🃏 Griglia condivisa: tutti possono toccare le carte in contemporanea. Chi trova una coppia si aggiudica i punti — si può giocare finché il tempo non scade o le coppie finiscono.</div>
+    <div class="label mt" style="text-transform:none; letter-spacing:0">🃏 Ogni telefono riceve la SUA griglia personale, mescolata in modo diverso da telefono a telefono — ognuno gioca per conto proprio, punti per ogni coppia trovata, finché il tempo non scade.</div>
     <button class="btn mg mt" style="width:100%" onclick="mcStart()">🃏 VIA A MEMO LE COPPIE!</button>
   </div>
   <div id="mcLive" style="display:none; width:100%" class="center">
     <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="mcTimerBar"></div></div>
     <div class="miniMsg" id="mcMsg"></div>
-    <div class="mcGrid" id="mcGridHost"></div>
     <div class="lead mt" id="mcLead" style="max-width:460px; width:100%"></div>
     <div class="row mt" style="justify-content:center">
       <button class="btn cy" id="mcBtnAgain" onclick="openMemoCoppie()" style="display:none">🔁 Un'altra partita</button>
@@ -1800,13 +1797,12 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
 </div>
 
-<!-- ==================== PROIETTORE: MEMO LE COPPIE ==================== -->
+<!-- ==================== PROIETTORE: MEMO LE COPPIE (solo titolo e conto alla rovescia) ==================== -->
 <div class="screen" id="scrPjMemoCoppie">
-  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🃏 MEMO LE COPPIE</div></div>
-  <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjMcTimerBar"></div></div>
+  <div class="brand"><div class="t1" style="font-size:clamp(30px,5vw,60px)">🃏 MEMO LE COPPIE</div></div>
+  <div class="byline mt center" style="font-size:clamp(16px,2.4vw,22px)">OGNI TELEFONO HA LA SUA GRIGLIA — TROVATE TUTTE LE COPPIE!</div>
+  <div class="timerWrap mt" style="max-width:760px"><div class="timerBar" id="pjMcTimerBar"></div></div>
   <div class="miniMsg" id="pjMcMsg" style="font-size:clamp(18px,3vw,30px)"></div>
-  <div class="mcGrid big" id="mcGridPj"></div>
-  <div class="lead mt" id="pjMcLead" style="max-width:600px; width:100%"></div>
 </div>
 
 <!-- ==================== PLAYER: MEMO LE COPPIE ==================== -->
@@ -2129,7 +2125,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 75; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 78; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2436,7 +2432,6 @@ function openQEditor(i){
   $('qePenWrong').value = q.penWrong||0;
   $('qePenNone').value = q.penNone||0;
   $('qeWsWord').value = q.wsWord||'';
-  $('qeWsClue').value = q.wsClue||'';
   $('qeWsSize').value = q.wsSize||10;
   $('qeAnaWord').value = q.type==='anagram' ? (q.accepted||'') : '';
   $('qeAnaScramble').value = q.scramble||''; $('qeAnaScramble')._touched = !!q.scramble;
@@ -2590,7 +2585,6 @@ function qeBuildQuestion(){
   if (type==='open' && !q.accepted) { alert('Inserisci almeno una risposta accettata!'); return null; }
   if (type==='wordsearch'){
     q.wsWord = $('qeWsWord').value.trim();
-    q.wsClue = $('qeWsClue').value.trim();
     q.wsSize = +$('qeWsSize').value;
     if (!q.wsWord) { alert('Scrivi la parola da nascondere nella griglia!'); return null; }
     const letters = q.wsWord.toUpperCase().replace(/[^A-Z]/g,'');
@@ -3469,65 +3463,62 @@ function showPlayerMemoCoppie(g){
   if (m.phase==='play'){
     const isNewRound = P.mcStartAt !== m.startAt;
     if (isNewRound){
-      P.mcStartAt = m.startAt; P.mcDeck = m.deck; P.mcPoints = m.points;
-      P.mcPick1 = null; P.mcBusy = false;
+      // ogni telefono genera la SUA griglia, mescolata per conto proprio: mai uguale a quella di un altro
+      P.mcStartAt = m.startAt; P.mcPoints = m.points; P.mcNPairs = m.nPairs;
+      P.mcDeck = mcBuildDeck(m.nPairs);
+      P.mcSolved = new Set(); P.mcPick1 = null; P.mcBusy = false; P.mcSubmitted = false;
       $('pmcStatus').textContent = '🃏 TOCCA DUE CARTE PER TROVARE LE COPPIE!';
-      renderMcGrid($('mcGridPl'), m.deck, m.solved||{}, Object.keys(m.reserved||{}).map(Number), false);
+      renderMcGrid($('mcGridPl'), P.mcDeck, P.mcSolved, false);
       document.querySelectorAll('#mcGridPl .mcCard').forEach((c,i)=>{ c.onclick = ()=> mcTap(i); });
       clearInterval(P.mcInt);
       P.mcInt = setInterval(()=>{
         const left = Math.max(0, (m.endAt||0) - serverNow());
         $('pmcTimerBar').style.width = (left/((m.secs||60)*1000)*100)+'%';
-        if (left<=0) clearInterval(P.mcInt);
+        if (left<=0){ clearInterval(P.mcInt); mcSubmitResult(); }
       },100);
-    } else {
-      renderMcGrid($('mcGridPl'), m.deck, m.solved||{}, Object.keys(m.reserved||{}).map(Number), false);
     }
   } else if (m.phase==='result'){
     clearInterval(P.mcInt); $('pmcTimerBar').style.width='0%';
+    mcSubmitResult();
     document.querySelectorAll('#mcGridPl .mcCard').forEach(c=>{ c.onclick=null; c.classList.add('locked'); });
-    renderMcGrid($('mcGridPl'), m.deck, m.solved||{}, [], false);
-    const found = Object.keys(m.solved||{}).length/2;
-    $('pmcStatus').textContent = found>=(m.deck.length/2) ? '🏆 GRIGLIA COMPLETATA!' : '⏱ TEMPO SCADUTO!';
+    const found = P.mcSolved ? P.mcSolved.size/2 : 0;
+    $('pmcStatus').textContent = found>=P.mcNPairs ? `🏆 GRIGLIA COMPLETATA! ${found}/${P.mcNPairs} coppie` : `⏱ TEMPO SCADUTO! ${found}/${P.mcNPairs} coppie trovate`;
   }
 }
+function mcSubmitResult(){
+  if (P.mcSubmitted || !P.mcDeck) return;
+  P.mcSubmitted = true;
+  const found = P.mcSolved ? P.mcSolved.size/2 : 0;
+  P.ref.child('memocoppie/results/'+P.id).set({ found, doneAt: found>=P.mcNPairs ? Date.now() : null });
+}
 function mcTap(i){
-  if (P.mcBusy || P.mcPick1===i) return;
-  const g = P._lastGame || {};
-  const m = g.memocoppie || {};
-  if ((m.solved||{})[i]!=null || (m.reserved||{})[i]!=null) return; // già presa o risolta
+  if (P.mcBusy || P.mcPick1===i || (P.mcSolved && P.mcSolved.has(i))) return;
   if (P.mcPick1 === null){
-    P.ref.child('memocoppie/reserved/'+i).transaction(cur=> cur==null ? P.id : undefined).then(res=>{
-      if (!res.committed) return; // qualcun altro l'ha appena presa
-      P.mcPick1 = i;
-      if (navigator.vibrate) navigator.vibrate(20);
-    });
+    P.mcPick1 = i;
+    renderMcGrid($('mcGridPl'), P.mcDeck, P.mcSolved, false);
+    document.querySelectorAll('#mcGridPl .mcCard')[i].classList.add('flip');
+    if (navigator.vibrate) navigator.vibrate(20);
   } else {
     const pick1 = P.mcPick1;
-    P.ref.child('memocoppie/reserved/'+i).transaction(cur=> cur==null ? P.id : undefined).then(res=>{
-      if (!res.committed) return;
-      P.mcBusy = true;
-      const match = P.mcDeck[pick1].pid === P.mcDeck[i].pid;
-      if (match){
-        const pts = P.mcPoints;
-        const updates = {};
-        updates['memocoppie/solved/'+pick1] = P.mcDeck[pick1].pid;
-        updates['memocoppie/solved/'+i] = P.mcDeck[i].pid;
-        updates['memocoppie/solvedBy/'+P.mcDeck[pick1].pid] = { pid:P.id, name:P.name, at:Date.now() };
-        updates['memocoppie/reserved/'+pick1] = null;
-        updates['memocoppie/reserved/'+i] = null;
-        P.ref.update(updates);
-        P.ref.child('players/'+P.id+'/score').transaction(v=>(v||0)+pts);
+    P.mcBusy = true;
+    document.querySelectorAll('#mcGridPl .mcCard')[i].classList.add('flip');
+    const match = P.mcDeck[pick1].pid === P.mcDeck[i].pid;
+    if (match){
+      P.mcSolved.add(pick1); P.mcSolved.add(i);
+      renderMcGrid($('mcGridPl'), P.mcDeck, P.mcSolved, false);
+      P.ref.child('players/'+P.id+'/score').transaction(v=>(v||0)+P.mcPoints);
+      P.mcPick1 = null; P.mcBusy = false;
+      if (navigator.vibrate) navigator.vibrate([80,50,120]);
+      // aggiorno subito il conteggio coppie per la classifica in regia, senza aspettare la fine
+      P.ref.child('memocoppie/results/'+P.id).set({ found: P.mcSolved.size/2, doneAt: P.mcSolved.size/2>=P.mcNPairs ? Date.now() : null });
+      if (P.mcSolved.size/2 >= P.mcNPairs){ $('pmcStatus').textContent = '🏆 GRIGLIA COMPLETATA! Aspetta gli altri...'; }
+    } else {
+      if (navigator.vibrate) navigator.vibrate(15);
+      setTimeout(()=>{
+        renderMcGrid($('mcGridPl'), P.mcDeck, P.mcSolved, false);
         P.mcPick1 = null; P.mcBusy = false;
-        if (navigator.vibrate) navigator.vibrate([80,50,120]);
-      } else {
-        setTimeout(()=>{
-          P.ref.child('memocoppie/reserved/'+pick1).remove();
-          P.ref.child('memocoppie/reserved/'+i).remove();
-          P.mcPick1 = null; P.mcBusy = false;
-        }, 1100);
-      }
-    });
+      }, 1000);
+    }
   }
 }
 function showPlayerMemo(g){
@@ -4810,7 +4801,7 @@ function openTapTap(){
   clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
   G.ref.child('memo/guesses').off();
   clearInterval(MC.timerInt);
-  G.ref.child('memocoppie/reserved').off(); G.ref.child('memocoppie/solved').off();
+  G.ref.child('memocoppie/results').off();
   $('tapPrizeInputs').innerHTML = TAP_MEDALS.map((m,k)=>`
     <div class="tapPrizeRow"><span class="medal">${m}</span>
       <input type="number" id="tapPz${k}" value="${TAP_DEFAULTS[k]}" min="0" style="width:110px; text-align:center"></div>`).join('');
@@ -4852,7 +4843,7 @@ function tapFinish(){
   clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
   G.ref.child('memo/guesses').off();
   clearInterval(MC.timerInt);
-  G.ref.child('memocoppie/reserved').off(); G.ref.child('memocoppie/solved').off();
+  G.ref.child('memocoppie/results').off();
   G.ref.child('taptap/counts').once('value').then(s=>{
     const counts = s.val()||{};
     G.ref.child('players').once('value').then(ps=>{
@@ -5760,17 +5751,17 @@ function playWsQuestion(q){
   G.wsInQuiz = true;
   WS = { word:placed.word, size, points, dur, startAt, endAt, rows:[], credited:new Set(), penNone, inQuiz:true };
   G.ref.update({ status:'wordsearch', wordsearch:{ phase:'play', grid:placed.grid, size, word:placed.word,
-    clue:q.wsClue||'', points, startAt, endAt, dur, solves:null } });
+    clue:q.text||'', points, startAt, endAt, dur, solves:null } });
   G.ref.child('wordsearch/solves').remove();
   $('wsSetup').style.display='none'; $('wsLive').style.display='block';
   $('wsBtnBackRow').style.display='none';
-  $('wsClueHost').textContent = q.wsClue ? '💡 '+q.wsClue : '';
+  $('wsClueHost').textContent = q.text ? '💡 '+q.text : '';
   renderWsGrid($('wsGridHost'), placed.grid, size);
   $('wsMsg').textContent = `DOMANDA ${G.qi+1}/${G.quiz.questions.length} · 🔤 SI CERCA DAL TELEFONO!`;
   $('wsBtnAgain').textContent = (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
   $('wsBtnAgain').style.display='none';
   renderWsRanking($('wsRanking'), []);
-  pjSend({type:'wsStart', grid:placed.grid, size, clue:q.wsClue||'', startAt, endAt, dur});
+  pjSend({type:'wsStart', grid:placed.grid, size, clue:q.text||'', startAt, endAt, dur});
   puzzleCountdown($('wsTimerBar'), $('wsMsg'), endAt, dur, wordsearchFinish);
   wsListenSolves();
   showScreen('scrWordSearch');
@@ -5907,7 +5898,7 @@ function openMemo(){
   clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
   G.ref.child('memo/guesses').off();
   clearInterval(MC.timerInt);
-  G.ref.child('memocoppie/reserved').off(); G.ref.child('memocoppie/solved').off();
+  G.ref.child('memocoppie/results').off();
   G.ref.update({ status:'memo', memo:{ phase:'idle' } });
   $('memoSetup').style.display='block'; $('memoLive').style.display='none';
   pjSend({type:'memoState', msg:'SI MESCOLANO LE CARTE...'});
@@ -5993,7 +5984,8 @@ function mcBuildDeck(nPairs){
   return deck;
 }
 function mcGridClass(nCards){ return nCards===20?'g20':(nCards===36?'g36':'g48'); }
-function renderMcGrid(el, deck, solved, reservedIdx, big){
+/* Griglia PERSONALE del singolo telefono: ogni giocatore ha il proprio mazzo mescolato, tutto locale, niente da condividere */
+function renderMcGrid(el, deck, solvedSet, big){
   const n = deck.length;
   el.className = 'mcGrid ' + mcGridClass(n) + (big?' big':'');
   if (el._n !== n){
@@ -6004,17 +5996,17 @@ function renderMcGrid(el, deck, solved, reservedIdx, big){
     </div></div>`).join('');
   }
   el.querySelectorAll('.mcCard').forEach((cardEl,i)=>{
-    const isSolved = solved && solved[i]!=null;
-    const isReserved = reservedIdx && reservedIdx.includes(i);
+    const isSolved = solvedSet && solvedSet.has(i);
     cardEl.querySelector('.mcSym').textContent = deck[i].sym;
-    cardEl.classList.toggle('flip', isSolved || isReserved);
+    cardEl.classList.toggle('flip', isSolved); // le coppie trovate restano scoperte; le altre si girano solo "a mano" quando toccate
     cardEl.classList.toggle('solved', isSolved);
     cardEl.classList.toggle('locked', isSolved);
   });
 }
 
 /* ================================================================
-   MEMO LE COPPIE — REGIA HOST
+   MEMO LE COPPIE — REGIA HOST (il proiettore mostra solo titolo e conto alla rovescia:
+   ogni telefono gioca sulla propria griglia personale, mescolata in modo diverso da telefono a telefono)
 ================================================================ */
 let MC = {};
 $('mcPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
@@ -6025,10 +6017,10 @@ $('mcSecs').innerHTML = [20,30,40,50,60,90,120,180,240,300].map(t=>{
 function openMemoCoppie(){
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(MC.timerInt);
-  G.ref.child('memocoppie/reserved').off(); G.ref.child('memocoppie/solved').off();
+  G.ref.child('memocoppie/results').off();
   G.ref.update({ status:'memocoppie', memocoppie:{ phase:'idle' } });
   $('mcSetup').style.display='block'; $('mcLive').style.display='none';
-  pjSend({type:'mcState', msg:'SI MESCOLANO LE CARTE...'});
+  pjSend({type:'mcState', msg:'SI PREPARANO LE CARTE...'});
   showScreen('scrMemoCoppie');
 }
 function mcStart(){
@@ -6036,38 +6028,22 @@ function mcStart(){
   const nPairs = nCards/2;
   const points = getPoints('mcPoints','mcPointsMan');
   const secs = +$('mcSecs').value;
-  const deck = mcBuildDeck(nPairs);
   const startAt = serverNow()+800, endAt = startAt + secs*1000;
-  MC = { deck, nPairs, points, secs, startAt, endAt, solved:{}, solvedBy:{}, credited:{} };
-  G.ref.update({ status:'memocoppie', memocoppie:{ phase:'play', deck, nPairs, points, secs, startAt, endAt,
-    reserved:null, solved:null, solvedBy:null } });
-  G.ref.child('memocoppie/reserved').remove(); G.ref.child('memocoppie/solved').remove();
+  MC = { nPairs, points, secs, startAt, endAt, credited:new Set(), rows:[] };
+  G.ref.update({ status:'memocoppie', memocoppie:{ phase:'play', nPairs, points, secs, startAt, endAt, results:null } });
+  G.ref.child('memocoppie/results').remove();
   $('mcSetup').style.display='none'; $('mcLive').style.display='block';
-  $('mcMsg').textContent = `🃏 0 / ${nPairs} coppie trovate`;
+  $('mcMsg').textContent = `🃏 Ogni telefono ha la sua griglia da ${nPairs} coppie — via!`;
   $('mcLead').innerHTML=''; $('mcBtnAgain').style.display='none';
-  renderMcGrid($('mcGridHost'), deck, {}, [], false);
-  pjSend({type:'mcStart', deck, startAt, endAt, secs});
-  G.ref.child('memocoppie/reserved').on('value', s=>{
-    MC.lastReserved = s.val()||{};
-    renderMcGrid($('mcGridHost'), deck, MC.solved||{}, Object.keys(MC.lastReserved).map(Number), false);
-    pjSend({type:'mcReserved', reserved: Object.keys(MC.lastReserved).map(Number)});
-  });
-  G.ref.child('memocoppie/solved').on('value', s=>{
-    const solved = s.val()||{};
-    MC.solved = solved;
-    renderMcGrid($('mcGridHost'), deck, solved, Object.keys(MC.lastReserved||{}).map(Number), false);
-    const found = Object.keys(solved).length/2;
-    $('mcMsg').textContent = `🃏 ${found} / ${nPairs} coppie trovate`;
-    G.ref.child('memocoppie/solvedBy').once('value', sb=>{
-      const solvedBy = sb.val()||{};
-      const rows = Object.values(solvedBy).reduce((acc,w)=>{
-        const r = acc.find(x=>x.name===w.name); if (r) r.n++; else acc.push({name:w.name, n:1});
-        return acc;
-      }, []).sort((a,b)=>b.n-a.n);
-      $('mcLead').innerHTML = rows.map((r,i)=>`<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(r.name)} <span class="pts">${r.n} coppie</span></div>`).join('');
-      pjSend({type:'mcSolved', solved, rows});
+  pjSend({type:'mcStart', nPairs, startAt, endAt, secs});
+  G.ref.child('memocoppie/results').on('value', s=>{
+    const results = s.val()||{};
+    G.ref.child('players').once('value', ps=>{
+      const players = ps.val()||{};
+      const rows = Object.entries(results).map(([pid,r])=>({name:(players[pid]||{}).name||'?', found:r.found, done:!!r.doneAt}))
+        .sort((a,b)=>b.found-a.found);
+      $('mcLead').innerHTML = rows.map((r,i)=>`<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(r.name)} <span class="pts">${r.found}/${MC.nPairs}${r.done?' ✔':''}</span></div>`).join('');
     });
-    if (found >= nPairs) { clearInterval(MC.timerInt); mcFinish(); }
   });
   clearInterval(MC.timerInt);
   MC.timerInt = setInterval(()=>{
@@ -6079,14 +6055,13 @@ function mcStart(){
 function mcFinish(){
   if (MC.finished) return; MC.finished = true;
   clearInterval(MC.timerInt);
-  G.ref.child('memocoppie/reserved').off(); G.ref.child('memocoppie/solved').off();
+  G.ref.child('memocoppie/results').off();
   G.ref.update({ 'memocoppie/phase':'result' });
   $('mcTimerBar').style.width='0%';
-  const found = Object.keys(MC.solved||{}).length/2;
-  $('mcMsg').textContent = found>=MC.nPairs ? '🏆 GRIGLIA COMPLETATA!' : '⏱ TEMPO SCADUTO!';
+  $('mcMsg').textContent = '⏱ TEMPO SCADUTO! Ecco chi ha trovato più coppie:';
   $('mcBtnAgain').style.display='';
   confetti();
-  pjSend({type:'mcEnd', found, total:MC.nPairs});
+  pjSend({type:'mcEnd'});
 }
 
 /* ================================================================
@@ -6234,7 +6209,7 @@ function modalGames(){
       <button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>
       <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
       <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
-      <button class="btn lm" onclick="openMemo()">🧠 Memo</button>
+      <button class="btn lm" onclick="openMemo()">🔍 Trova la Carta</button>
       <button class="btn" style="grid-column:1/-1" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>
     </div>`);
 }
@@ -6681,7 +6656,7 @@ function backToQuiz(title){
   clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
   G.ref.child('memo/guesses').off();
   clearInterval(MC.timerInt);
-  G.ref.child('memocoppie/reserved').off(); G.ref.child('memocoppie/solved').off();
+  G.ref.child('memocoppie/results').off();
   const swc = $('swissClockHost'); if (swc) clearInterval(swc._int);
   G.ref.child('cards/bets').off();
   G.ref.child('swiss/press').off();
@@ -7008,35 +6983,21 @@ function pjRoute(m){
     }
     else if (m.type==='mcState') {
       showScreen('scrPjMemoCoppie');
-      $('pjMcMsg').textContent = m.msg||''; $('mcGridPj').innerHTML=''; $('mcGridPj')._n=0;
-      $('pjMcTimerBar').style.width='100%'; $('pjMcLead').innerHTML='';
+      $('pjMcMsg').textContent = m.msg||''; $('pjMcTimerBar').style.width='100%';
     }
     else if (m.type==='mcStart') {
       showScreen('scrPjMemoCoppie');
-      renderMcGrid($('mcGridPj'), m.deck, {}, [], true);
-      $('pjMcMsg').textContent = `🃏 0 / ${m.deck.length/2} coppie trovate`;
-      $('pjMcLead').innerHTML='';
+      $('pjMcMsg').textContent = `🃏 ${m.nPairs} coppie da trovare — a chi tocca prima!`;
       clearInterval(window._pjMcInt);
       window._pjMcInt = setInterval(()=>{
         const left = Math.max(0, m.endAt - serverNow());
         $('pjMcTimerBar').style.width = (left/(m.secs*1000)*100)+'%';
         if (left<=0) clearInterval(window._pjMcInt);
       },100);
-      window._pjMcDeck = m.deck;
-    }
-    else if (m.type==='mcReserved') {
-      renderMcGrid($('mcGridPj'), window._pjMcDeck||[], window._pjMcSolved||{}, m.reserved||[], true);
-    }
-    else if (m.type==='mcSolved') {
-      window._pjMcSolved = m.solved;
-      renderMcGrid($('mcGridPj'), window._pjMcDeck||[], m.solved||{}, [], true);
-      const found = Object.keys(m.solved||{}).length/2;
-      $('pjMcMsg').textContent = `🃏 ${found} / ${(window._pjMcDeck||[]).length/2} coppie trovate`;
-      $('pjMcLead').innerHTML = (m.rows||[]).map((r,i)=>`<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(r.name)} <span class="pts">${r.n} coppie</span></div>`).join('');
     }
     else if (m.type==='mcEnd') {
       clearInterval(window._pjMcInt); $('pjMcTimerBar').style.width='0%';
-      $('pjMcMsg').textContent = m.found>=m.total ? '🏆 GRIGLIA COMPLETATA!' : '⏱ TEMPO SCADUTO!';
+      $('pjMcMsg').textContent = '⏱ TEMPO SCADUTO!';
       confetti();
     }
     else if (m.type==='seedState') {
