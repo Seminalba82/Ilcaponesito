@@ -690,7 +690,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v8.0</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v8.1</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2125,7 +2125,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 80; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 81; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2277,21 +2277,33 @@ function modalPoints(){
     const players = s.val()||{};
     let html = `<div class="label">Valore punti</div>
       <input type="number" id="ptsVal" value="100" step="10" min="0" style="text-align:center;font-family:'Bungee';font-size:22px;color:var(--gold)">
-      <div class="label mt">Tocca ➕ o ➖ accanto alla squadra</div>`;
+      <div class="label mt">Tocca ➕ o ➖ accanto alla squadra. Tocca ✎ per rinominare (utile se qualcuno scrive nomi o parole scorrette: appena lo cambi tu, non può più riscriverlo)</div>`;
     for (const pid in players)
-      html += `<div class="ptRow"><span>${esc(players[pid].name)}</span><span class="sc" id="sc_${pid}">${players[pid].score||0}</span>
+      html += `<div class="ptRow"><span class="grow">${esc(players[pid].name)}</span><span class="sc" id="sc_${pid}">${players[pid].score||0}</span>
+        <button class="btn small cy" onclick="renamePlayer('${pid}')" title="Rinomina">✎</button>
         <button class="btn small lm" onclick="adjPoints('${pid}',1)">➕</button>
         <button class="btn small mg" onclick="adjPoints('${pid}',-1)">➖</button></div>`;
     html += `<div class="row mt"><input type="text" id="newTeamName" class="grow" placeholder="Nome nuova squadra/concorrente" maxlength="24">
       <button class="btn small lm" onclick="addManualTeam()">➕</button></div>
       <div class="label" style="text-transform:none;letter-spacing:0">Le squadre manuali partecipano senza smartphone: ricevono punti da te e dal Votometro.</div>`;
-    openModal('± PUNTI MANUALI', html);
+    openModal('± PUNTI E PARTECIPANTI', html);
   });
 }
 function addManualTeam(){
   const name = ($('newTeamName')||{value:''}).value.trim();
   if (!name) return;
   ensureManualPlayer(name, ()=> modalPoints());
+}
+function renamePlayer(pid){
+  if (!G) return;
+  G.ref.child('players/'+pid+'/name').once('value').then(s=>{
+    const cur = s.val()||'';
+    const nn = prompt('Nuovo nome per questo partecipante:\n(utile se ha scritto qualcosa di inopportuno — da questo momento non potrà più riscriverlo)', cur);
+    if (nn === null) return; // annullato
+    const clean = nn.trim().slice(0,24);
+    if (!clean) return alert('Il nome non può essere vuoto!');
+    G.ref.child('players/'+pid+'/name').set(clean).then(()=> modalPoints());
+  });
 }
 function adjPoints(pid, sign){
   const v = Math.abs(+($('ptsVal').value||0)); if(!v) return;
