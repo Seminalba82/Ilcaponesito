@@ -690,7 +690,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v7.9</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v8.0</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -988,11 +988,11 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div><div class="label">O scrivili</div><input type="number" id="miniPointsMan" class="ptsManual" placeholder="—" min="10" step="10"></div>
       <div class="grow"><div class="label">Se sbaglia perde</div><input type="number" id="miniPen" value="0" min="0" style="text-align:center"></div>
     <div><div class="label">Velocità</div><select id="miniSpeed" style="width:150px">
-      <option value="750">🐌 Molto lenta</option>
       <option value="560">Lenta</option>
       <option value="420" selected>Normale</option>
       <option value="300">Veloce</option>
       <option value="200">⚡ Fulmine</option>
+      <option value="120">🚀 Turbo</option>
     </select></div>
     <button class="btn mg" id="miniBtnGo" onclick="miniShuffle()">🎲 NASCONDI E MESCOLA</button>
     <button class="btn lm" id="miniBtnReveal" onclick="miniReveal()" style="display:none">👁 RIVELA</button>
@@ -1968,11 +1968,11 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <!-- ==================== PLAYER: SIMON ==================== -->
 <div class="screen" id="scrPlaySimon" style="align-items:center; justify-content:center">
   <div class="row" style="width:100%; justify-content:space-between">
-    <div class="pill" id="psName" style="color:var(--gold)"></div>
-    <div class="pill" id="psScore"></div>
+    <div class="pill" id="smpName" style="color:var(--gold)"></div>
+    <div class="pill" id="smpScore"></div>
   </div>
-  <div class="timerWrap mt"><div class="timerBar" id="psTimerBar"></div></div>
-  <div class="byline mt" id="psStatus">GUARDA E ASCOLTA LA SEQUENZA...</div>
+  <div class="timerWrap mt"><div class="timerBar" id="smpTimerBar"></div></div>
+  <div class="byline mt" id="smpStatus">GUARDA E ASCOLTA LA SEQUENZA...</div>
   <div class="simonWrap"><div class="simonBoard" id="psStage"></div><div class="simonHub">🎩</div></div>
   <div class="seqDots" id="psDots"></div>
   <div class="feedback mt" id="psSent" style="display:none; color:var(--cyan); font-size:22px">SEQUENZA INVIATA! 🎼</div>
@@ -2031,11 +2031,11 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <!-- ==================== PLAYER: TELECOMANDO ==================== -->
 <div class="screen" id="scrPlayMini" style="align-items:center; justify-content:center">
   <div class="row" style="width:100%; justify-content:space-between">
-    <div class="pill" id="pmName" style="color:var(--gold)"></div>
-    <div class="pill" id="pmScore"></div>
+    <div class="pill" id="bslName" style="color:var(--gold)"></div>
+    <div class="pill" id="bslScore"></div>
   </div>
   <div class="miniStage" id="pmStage" style="height:210px"></div>
-  <div class="byline mt" id="pmStatus">SOTTO QUALE BUSSOLOTTO È LA PALLINA?</div>
+  <div class="byline mt" id="bslStatus">SOTTO QUALE BUSSOLOTTO È LA PALLINA?</div>
   <div class="remote">
     <button class="rBtn rA" id="pmA" onclick="voteMini('A')">A</button>
     <button class="rBtn rB" id="pmB" onclick="voteMini('B')">B</button>
@@ -2125,7 +2125,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 79; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 80; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3902,15 +3902,15 @@ function voteVoto(v){
 function showPlayerSimon(g){
   clearInterval(P.timerInt);
   const m = g.simon||{};
-  $('psName').textContent = P.name;
-  $('psScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  $('smpName').textContent = P.name;
+  $('smpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
   buildSimon($('psStage'), i=> playerSimonTap(i));
   if (m.phase==='show') {
     if (P.simRound !== m.round) { P.simRound = m.round; P.simSeq = []; P.simSent = false; P.simShown = false; P.simLen = (m.seq||[]).length; }
     $('psStage')._wedges.forEach(w=> w.disabled = true);
-    $('psStatus').textContent = '👀 GUARDA E ASCOLTA LA SEQUENZA...';
+    $('smpStatus').textContent = '👀 GUARDA E ASCOLTA LA SEQUENZA...';
     $('psDots').innerHTML=''; $('psSent').style.display='none';
-    $('psTimerBar').style.width='100%';
+    $('smpTimerBar').style.width='100%';
     showScreen('scrPlaySimon');
     if (!P.simShown) { P.simShown = true; simonPlaySeq($('psStage'), m.seq||[]); }
   }
@@ -3918,12 +3918,12 @@ function showPlayerSimon(g){
     if (P.simRound !== m.round) { P.simRound = m.round; P.simSeq = []; P.simSent = false; P.simLen = (m.seq||[]).length; }
     P.simLen = (m.seq||[]).length;
     $('psStage')._wedges.forEach(w=> w.disabled = P.simSent);
-    $('psStatus').textContent = P.simSent ? 'SEQUENZA INVIATA — INCROCIA LE DITA!' : '🎼 TOCCA GLI SPICCHI NELLO STESSO ORDINE ('+P.simSeq.length+'/'+P.simLen+')';
+    $('smpStatus').textContent = P.simSent ? 'SEQUENZA INVIATA — INCROCIA LE DITA!' : '🎼 TOCCA GLI SPICCHI NELLO STESSO ORDINE ('+P.simSeq.length+'/'+P.simLen+')';
     showScreen('scrPlaySimon');
     clearInterval(P.simInt);
     P.simInt = setInterval(()=>{
       const left = Math.max(0, (m.endAt||0) - serverNow());
-      $('psTimerBar').style.width = (left/10000*100)+'%';
+      $('smpTimerBar').style.width = (left/10000*100)+'%';
       if (left<=0) clearInterval(P.simInt);
     },100);
   }
@@ -3947,13 +3947,13 @@ function playerSimonTap(i){
   simonFlash($('psStage'), i, 240);
   P.simSeq.push(i);
   $('psDots').innerHTML = seqDotsHtml(P.simSeq);
-  $('psStatus').textContent = '🎼 TOCCA GLI SPICCHI NELLO STESSO ORDINE ('+P.simSeq.length+'/'+P.simLen+')';
+  $('smpStatus').textContent = '🎼 TOCCA GLI SPICCHI NELLO STESSO ORDINE ('+P.simSeq.length+'/'+P.simLen+')';
   if (navigator.vibrate) navigator.vibrate(25);
   if (P.simSeq.length >= P.simLen) {
     P.simSent = true;
     P.ref.child('simon/answers/'+P.id).set({ s: P.simSeq.join(',') });
     $('psSent').style.display='block';
-    $('psStatus').textContent = 'SEQUENZA INVIATA — INCROCIA LE DITA!';
+    $('smpStatus').textContent = 'SEQUENZA INVIATA — INCROCIA LE DITA!';
     $('psStage')._wedges.forEach(w=> w.disabled = true);
   }
 }
@@ -4007,15 +4007,15 @@ function showPlayerMini(g){
   const m = g.mini||{};
   if (m.phase==='watch' || m.phase==='vote') {
     if (P.miniRound !== m.round) { P.miniRound = m.round; P.miniVoted = null; P.miniAnimRound = P.miniAnimRound; }
-    $('pmName').textContent = P.name;
-    $('pmScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+    $('bslName').textContent = P.name;
+    $('bslScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
     const voting = m.phase==='vote';
     ['A','B','C'].forEach(L=>{
       const b = $('pm'+L);
       b.classList.toggle('sel', P.miniVoted===L);
       b.classList.toggle('dim', !voting || (!!P.miniVoted && P.miniVoted!==L));
     });
-    $('pmStatus').textContent = voting ? '🗳 VOTA: SOTTO QUALE POSIZIONE È LA PALLINA?' : '👀 OCCHIO ALLA PALLINA...';
+    $('bslStatus').textContent = voting ? '🗳 VOTA: SOTTO QUALE POSIZIONE È LA PALLINA?' : '👀 OCCHIO ALLA PALLINA...';
     $('pmSent').style.display = P.miniVoted ? 'block' : 'none';
     showScreen('scrPlayMini');
     if (m.phase==='watch' && m.plan && P.miniAnimRound !== m.round) {
