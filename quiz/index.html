@@ -440,6 +440,13 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   -webkit-background-clip:text; background-clip:text; color:transparent;
   filter:drop-shadow(0 0 24px rgba(255,201,60,.7)) drop-shadow(0 6px 0 rgba(61,37,0,.9));}
 
+#pjPhotoOverlay{display:none; position:fixed; inset:0; z-index:64; background:#000;
+  align-items:center; justify-content:center; padding:16px;}
+#pjPhotoOverlay img{max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; box-shadow:0 0 60px rgba(255,201,60,.15);}
+#plPhotoOverlay{display:none; position:fixed; inset:0; z-index:64; background:#000;
+  align-items:center; justify-content:center; padding:10px;}
+#plPhotoOverlay img{max-width:100%; max-height:100%; object-fit:contain; border-radius:6px;}
+
 #pjMsgOverlay{display:none; position:fixed; inset:0; z-index:66; background:rgba(5,2,10,.94); backdrop-filter:blur(6px);
   align-items:center; justify-content:center; padding:40px; text-align:center;}
 #pjMsgText2{font-family:'Bungee'; font-size:clamp(40px,9vw,120px); line-height:1.1; word-break:break-word;
@@ -516,6 +523,19 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .rnBtn.sel{outline:4px solid var(--gold); transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,.5), 0 0 30px rgba(255,201,60,.8);}
 .hlAlta{background:linear-gradient(180deg,#ccff66,#8fd400); color:#1c2a00; box-shadow:0 9px 0 #4a7000,0 0 26px rgba(182,255,46,.5);}
 .hlBassa{background:linear-gradient(180deg,#4df6ff,#00a8c2); color:#00232a; box-shadow:0 9px 0 #00636e,0 0 26px rgba(0,240,255,.5);}
+
+/* ===== MEMO ===== */
+.memoGrid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:100%; max-width:520px; margin:14px auto 0; perspective:1200px;}
+.memoGrid.big{max-width:820px; gap:14px;}
+.memoGrid.small{max-width:340px; gap:6px;}
+.memoCard{aspect-ratio:5/7; cursor:pointer;}
+.memoCard.locked{cursor:default;}
+.memoCard .pcardIn{width:100%; height:100%;}
+.memoCard.sel .pcBack{outline:4px solid var(--gold); box-shadow:0 0 22px rgba(255,201,60,.8);}
+.memoCard.showIdx .pcBack{outline:4px solid var(--magenta); box-shadow:0 0 26px rgba(255,46,154,.85);}
+.memoTarget{display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:10px;}
+.memoTarget .pcard{width:min(28vw,110px); aspect-ratio:5/7;}
+.memoTarget .lbl{font-family:'Bungee'; font-size:clamp(14px,2.6vw,20px); color:var(--gold); text-shadow:0 0 12px rgba(255,201,60,.5); text-align:center;}
 
 /* ===== LA RUOTA GIRA PER TUTTI ===== */
 .bigWheelBox{width:min(78vw,420px); position:relative; margin:16px auto 0; padding-top:28px;}
@@ -644,7 +664,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v6.6</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v7.0</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -652,6 +672,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <button class="btn mg" onclick="newQuiz()">✚ Crea nuovo quiz</button>
     <button class="btn cy" onclick="importQuiz()">⬆ Importa quiz</button>
     <button class="btn lm" onclick="modalCampionato()">🏆 Campionato serate</button>
+    <button class="btn" onclick="modalMerge()">🔀 Fondi quiz</button>
   </div>
   <div class="panel mtb" style="max-width:640px">
     <div class="label">I tuoi quiz salvati</div>
@@ -906,6 +927,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <button class="hb" onclick="modalGames()" style="border-color:var(--gold); color:var(--gold)">🕹 GIOCHI</button>
   <button class="hb" onclick="modalModules()" style="border-color:var(--cyan); color:var(--cyan)">🧩 MODULI</button>
   <button class="hb" id="hbMsg" onclick="modalPjMsg()">💬 Messaggio → 📺</button>
+  <button class="hb" id="hbPhoto" onclick="modalPjPhoto()">📷 Pubblica Foto</button>
   <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
   <button class="hb" onclick="openProjector()">📺 Apri proiettore</button>
   <button class="hb" id="hbQOnly" onclick="toggleQOnly()">🔍 Solo domanda</button>
@@ -1650,6 +1672,73 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
   <div class="lead mt" id="pwsRanking" style="width:100%; max-width:380px"></div>
 </div>
 
+<!-- ==================== HOST: MEMO ==================== -->
+<div class="screen" id="scrMemo">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🧠 MEMO</div></div>
+  <div class="panel mt" style="max-width:520px" id="memoSetup">
+    <div class="label">Velocità di scopertura delle carte</div>
+    <select id="memoSpeed">
+      <option value="1600">🐢 Lentissima</option>
+      <option value="1100" selected>🚶 Lenta</option>
+      <option value="750">🏃 Normale</option>
+      <option value="500">⚡ Veloce</option>
+      <option value="320">🚀 Velocissima</option>
+    </select>
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti (a chi indovina la posizione)</div><select id="memoPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="memoPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Secondi per rispondere</div><select id="memoSecs"></select></div>
+    </div>
+    <div class="label mt" style="text-transform:none; letter-spacing:0">🧠 8 carte diverse, scoperte una alla volta e poi ricoperte. Poi spunta una carta bersaglio: chi ricorda sotto quale carta si trovava vince i punti — più veloce risponde, più punti fa!</div>
+    <button class="btn mg mt" style="width:100%" onclick="memoStart()">🧠 VIA AL MEMO!</button>
+  </div>
+  <div id="memoLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="memoMsg">👀 GUARDATE BENE...</div>
+    <div class="memoGrid" id="memoGridHost"></div>
+    <div class="memoTarget" id="memoTargetHost" style="display:none">
+      <div class="lbl">TROVA QUESTA CARTA:</div>
+      <div class="pcard flip" id="memoTargetCardHost"><div class="pcardIn"><div class="pcFace pcFront"><div class="rk"></div><div class="st"></div></div></div></div>
+    </div>
+    <div class="timerWrap mt" style="max-width:460px; display:none" id="memoTimerWrapHost"><div class="timerBar" id="memoTimerBar"></div></div>
+    <div class="lead mt" id="memoLead" style="max-width:460px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="memoBtnAgain" onclick="openMemo()" style="display:none">🔁 Un altro Memo</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: MEMO ==================== -->
+<div class="screen" id="scrPjMemo">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🧠 MEMO</div></div>
+  <div class="miniMsg" id="pjMemoMsg" style="font-size:clamp(20px,3.2vw,36px)">👀 GUARDATE BENE...</div>
+  <div class="memoGrid big" id="memoGridPj"></div>
+  <div class="memoTarget" id="memoTargetPj" style="display:none">
+    <div class="lbl" style="font-size:clamp(18px,3vw,28px)">TROVA QUESTA CARTA:</div>
+    <div class="pcard flip" id="memoTargetCardPj" style="width:min(20vw,140px)"><div class="pcardIn"><div class="pcFace pcFront"><div class="rk"></div><div class="st"></div></div></div></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:640px; display:none" id="memoTimerWrapPj"><div class="timerBar" id="pjMemoTimerBar"></div></div>
+  <div class="lead mt" id="pjMemoLead" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: MEMO ==================== -->
+<div class="screen" id="scrPlayMemo" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="pmName" style="color:var(--gold)"></div>
+    <div class="pill" id="pmScore"></div>
+  </div>
+  <div class="byline mt" id="pmStatus">👀 GUARDATE BENE...</div>
+  <div class="memoTarget" id="memoTargetPl" style="display:none">
+    <div class="lbl">TROVA QUESTA CARTA:</div>
+    <div class="pcard flip" id="memoTargetCardPl" style="width:min(30vw,120px)"><div class="pcardIn"><div class="pcFace pcFront"><div class="rk"></div><div class="st"></div></div></div></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:380px; display:none" id="memoTimerWrapPl"><div class="timerBar" id="pmTimerBar"></div></div>
+  <div class="memoGrid small" id="memoGridPl"></div>
+  <div class="feedback mt" id="pmFb" style="display:none; font-size:22px"></div>
+</div>
+
 <!-- ==================== HOST: TIMER ==================== -->
 <div class="screen" id="scrTimer">
   <div class="brand"><div class="t1" style="font-size:clamp(22px,4vw,38px)">⏱ TIMER</div></div>
@@ -1695,8 +1784,10 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 
 <!-- ==================== PROIETTORE: OVERLAY MESSAGGIO ==================== -->
 <div id="pjMsgOverlay"><div id="pjMsgText2"></div></div>
+<div id="pjPhotoOverlay"><img id="pjPhotoImg" src=""></div>
 <div id="plLeadOverlay"><div class="brand"><div class="t1" id="plLeadTitle"></div></div><div id="plLeadRows"></div></div>
 <div id="plMsgOverlay"><div id="plMsgText"></div></div>
+<div id="plPhotoOverlay"><img id="plPhotoImg" src=""></div>
 
 <!-- ==================== COUNTDOWN (host / proiettore / telefono) ==================== -->
 <div class="screen" id="scrCount"><div class="countStage" id="countHost"></div></div>
@@ -1957,7 +2048,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 66; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 70; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2161,6 +2252,34 @@ function loadQuizList(){
   });
 }
 function newQuiz(){ curQuiz = { title:'', questions:[] }; curQuiz._idx = -1; $('edTitle').value=''; renderEdQuestions(); showScreen('scrEditor'); }
+/* ================================================================
+   FONDI QUIZ — unisce più quiz salvati in uno solo, pronto da tagliare/riordinare
+================================================================ */
+function modalMerge(){
+  if (quizzes.length < 2) { alert('Servono almeno 2 quiz salvati per poterli fondere insieme!'); return; }
+  const rows = quizzes.map((q,i)=>`
+    <label style="display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid rgba(157,77,255,.15); cursor:pointer">
+      <input type="checkbox" class="mergeChk" data-i="${i}" style="width:22px; height:22px; accent-color:var(--lime); flex-shrink:0">
+      <span class="grow"><b>${esc(q.title)}</b><br><small style="color:var(--muted)">${q.questions.length} domande</small></span>
+    </label>`).join('');
+  openModal('🔀 FONDI QUIZ', `
+    <div class="label" style="text-transform:none; letter-spacing:0">Spunta due o più quiz: le domande verranno unite in un unico quiz, nell'ordine in cui appaiono qui sotto. Potrai poi rinominarlo, riordinare le domande con ▲▼ e togliere quelle che non vuoi con 🗑, prima di salvarlo o lanciarlo direttamente.</div>
+    <div class="mt" style="max-height:340px; overflow-y:auto">${rows}</div>
+    <button class="btn mg mt" style="width:100%" onclick="mergeGo()">🔀 FONDI I QUIZ SELEZIONATI</button>`);
+}
+function mergeGo(){
+  const idxs = [...document.querySelectorAll('.mergeChk:checked')].map(c=>+c.dataset.i);
+  if (idxs.length < 2) return alert('Seleziona almeno 2 quiz da fondere!');
+  const titles = idxs.map(i=>quizzes[i].title);
+  const questions = [];
+  idxs.forEach(i=>{ quizzes[i].questions.forEach(q=> questions.push(JSON.parse(JSON.stringify(q)))); });
+  curQuiz = { title: titles.join(' + ').slice(0,60), questions };
+  curQuiz._idx = -1; // quiz nuovo: si salva come voce a parte, gli originali restano intatti
+  $('edTitle').value = curQuiz.title;
+  renderEdQuestions();
+  closeModal();
+  showScreen('scrEditor');
+}
 function editQuiz(i){ curQuiz = JSON.parse(JSON.stringify(quizzes[i])); curQuiz._idx = i; $('edTitle').value = curQuiz.title; renderEdQuestions(); showScreen('scrEditor'); }
 function delQuiz(i){ if(confirm('Eliminare "'+quizzes[i].title+'"?')){ quizzes.splice(i,1); persist(); loadQuizList(); } }
 function persist(){ try{ localStorage.setItem(LSKEY, JSON.stringify(quizzes)); }catch(e){ alert('⚠️ Memoria piena: i file audio/foto occupano troppo spazio. Usa file più piccoli o esporta il quiz in JSON.'); } }
@@ -2240,6 +2359,45 @@ function qeAnaAutoScramble(force){
   if (force || !$('qeAnaScramble')._touched) $('qeAnaScramble').value = shuffleLetters(w);
 }
 $('qeAnaScramble').addEventListener('input', ()=>{ $('qeAnaScramble')._touched = true; });
+/* ================================================================
+   COMPRESSIONE FOTO — ridimensiona e converte in JPEG di qualità,
+   così le foto si vedono bene ma non appesantiscono il database
+================================================================ */
+function compressImageFile(file, opts){
+  opts = opts || {};
+  const maxDim = opts.maxDim || 1280;     // lato lungo massimo: nitido su proiettore, leggero sui dati
+  let quality = opts.quality || 0.82;     // JPEG: qualità visiva alta con peso molto ridotto rispetto a PNG
+  const maxBytes = opts.maxBytes || 550*1024; // tetto morbido: se serve, scala la qualità per rientrarci
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > maxDim || h > maxDim){
+        if (w >= h){ h = Math.round(h * maxDim/w); w = maxDim; }
+        else { w = Math.round(w * maxDim/h); h = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); // sfondo bianco per eventuali PNG trasparenti
+      ctx.drawImage(img, 0, 0, w, h);
+      let dataUrl = canvas.toDataURL('image/jpeg', quality);
+      let tries = 0;
+      while (dataUrl.length*0.75 > maxBytes && quality > 0.4 && tries < 6){
+        quality -= 0.12; tries++;
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
+      resolve({ dataUrl, width:w, height:h, quality: Math.round(quality*100),
+        origBytes:file.size, bytes: Math.round(dataUrl.length*0.75) });
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Immagine non valida')); };
+    img.src = url;
+  });
+}
+function fmtKB(bytes){ return bytes>=1024*1024 ? (bytes/1024/1024).toFixed(1)+' MB' : Math.round(bytes/1024)+' KB'; }
+
 function qeMediaChanged(keep){
   const k = $('qeMedia').value;
   $('qeMediaBox').style.display = k==='none'?'none':'block';
@@ -2250,16 +2408,29 @@ function qeMediaChanged(keep){
 }
 $('qeFile').addEventListener('change', e=>{
   const f = e.target.files[0]; if(!f) return;
-  if (f.size > 4*1024*1024) { alert('⚠️ File troppo grande (max 4 MB). Per la musica taglia uno spezzone MP3 corto.'); e.target.value=''; return; }
+  const kind = $('qeMedia').value;
+  if (kind === 'photo'){
+    if (f.size > 20*1024*1024) { alert('⚠️ Foto troppo grande (max 20 MB prima della compressione).'); e.target.value=''; return; }
+    $('qeMediaPreview').innerHTML = '<div class="byline">🗜 Comprimo la foto...</div>';
+    compressImageFile(f, {maxDim:1280, quality:0.82, maxBytes:550*1024}).then(res=>{
+      window._qeMedia = {kind:'photo', data:res.dataUrl, name:f.name};
+      renderMediaPreview(res);
+    }).catch(()=>{ alert('⚠️ Non sono riuscito a leggere questa immagine, riprova con un\'altra foto.'); $('qeMediaPreview').innerHTML=''; });
+    return;
+  }
+  if (f.size > 4*1024*1024) { alert('⚠️ File audio troppo grande (max 4 MB). Taglia uno spezzone più corto.'); e.target.value=''; return; }
   const r = new FileReader();
-  r.onload = ()=>{ window._qeMedia = {kind:$('qeMedia').value, data:r.result, name:f.name}; renderMediaPreview(); };
+  r.onload = ()=>{ window._qeMedia = {kind:'audio', data:r.result, name:f.name}; renderMediaPreview(); };
   r.readAsDataURL(f);
 });
-function renderMediaPreview(){
+function renderMediaPreview(compressInfo){
   const b = $('qeMediaPreview'); b.innerHTML='';
   const m = window._qeMedia;
   if (m && m.data) {
-    if (m.kind==='photo') b.innerHTML = `<img src="${m.data}" class="hostMedia" style="max-height:160px">`;
+    if (m.kind==='photo') {
+      b.innerHTML = `<img src="${m.data}" class="hostMedia" style="max-height:160px">`;
+      if (compressInfo) b.innerHTML += `<div class="byline" style="margin-top:6px">🗜 ${fmtKB(compressInfo.origBytes)} → <b style="color:var(--lime)">${fmtKB(compressInfo.bytes)}</b> · ${compressInfo.width}×${compressInfo.height}px, qualità ${compressInfo.quality}%</div>`;
+    }
     else b.innerHTML = `<div class="pill">🎵 ${esc(m.name||'audio')}</div><audio controls src="${m.data}"></audio>`;
   }
 }
@@ -2374,6 +2545,7 @@ function nextQuestion(){
   G.closed = false;
   if (leadOv.on) sendLeadOverlay({on:false});
   if (msgOv.on) sendPjMsg(false);
+  if (photoOv.on) sendPjPhoto(false);
   if (q.type==='wordsearch') { playWsQuestion(q); return; }
   if (q.type==='anagram') { playAnagramQuestion(q); return; }
   // scrive su DB solo ciò che serve ai telefoni (niente media, niente testo domanda)
@@ -2646,6 +2818,11 @@ function plApplyMsg(v){
   if (v && v.on && v.text) { $('plMsgText').textContent = v.text; ov.style.display='flex'; }
   else ov.style.display='none';
 }
+function plApplyPhoto(v){
+  const ov = $('plPhotoOverlay');
+  if (v && v.on && v.data) { $('plPhotoImg').src = v.data; ov.style.display='flex'; }
+  else ov.style.display='none';
+}
 function listenGame(){
   if (!P._overlaysBound) {
     P._overlaysBound = true;
@@ -2653,6 +2830,7 @@ function listenGame(){
     // così chi segue dallo smartphone in un'altra sala non si perde nulla
     P.ref.child('projLead').on('value', s=> plApplyLead(s.val()||{}));
     P.ref.child('projMsg').on('value', s=> plApplyMsg(s.val()||{}));
+    P.ref.child('projPhoto').on('value', s=> plApplyPhoto(s.val()||{}));
   }
   P.ref.on('value', s=>{
     const g = s.val();
@@ -2674,6 +2852,7 @@ function listenGame(){
     else if (g.status==='wheels') showPlayerWheels(g);
     else if (g.status==='hilo') showPlayerHiLo(g);
     else if (g.status==='swiss') showPlayerSwiss(g);
+    else if (g.status==='memo') showPlayerMemo(g);
     else if (g.status==='ruota') showPlayerRuota(g);
     else if (g.status==='taptap') showPlayerTapTap(g);
     else if (g.status==='grad') showPlayerGrad(g);
@@ -3111,6 +3290,63 @@ function wsCheckSelection(){
 $('wsGridPl').addEventListener('pointerdown', wsPointerDown);
 document.addEventListener('pointermove', wsPointerMove);
 document.addEventListener('pointerup', wsPointerUp);
+function showPlayerMemo(g){
+  const m = g.memo||{};
+  $('pmName').textContent = P.name;
+  $('pmScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayMemo');
+  if (m.phase==='show'){
+    if (P.memoShowAt !== m.showStartAt){
+      P.memoShowAt = m.showStartAt; P.memoGuessed = false; P.memoStartAt = null;
+      $('pmStatus').textContent = '👀 GUARDATE BENE, MEMORIZZATE LE CARTE!';
+      $('memoTargetPl').style.display='none'; $('memoTimerWrapPl').style.display='none';
+      $('pmFb').style.display='none';
+      renderMemoGrid($('memoGridPl'), 8, m.cards, -1, -1, false);
+      memoRunReveal($('memoGridPl'), 8, m.cards, m.showStartAt, m.speed, ()=>{
+        $('pmStatus').textContent = 'PRONTI A RISPONDERE...';
+      });
+    }
+  } else if (m.phase==='guess'){
+    if (P.memoStartAt !== m.startAt){
+      P.memoStartAt = m.startAt; P.memoGuessed = false;
+      $('pmStatus').textContent = '🧠 TOCCA LA CASELLA GIUSTA!';
+      $('memoTargetPl').style.display='flex';
+      memoSetTargetFace($('memoTargetCardPl'), m.target);
+      $('memoTimerWrapPl').style.display='block'; $('pmFb').style.display='none';
+      renderMemoGrid($('memoGridPl'), 8, [], -1, -1, false);
+      document.querySelectorAll('#memoGridPl .memoCard').forEach((c,i)=>{
+        c.classList.remove('locked','sel');
+        c.onclick = ()=> guessMemo(i);
+      });
+      clearInterval(P.memoInt);
+      P.memoInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('pmTimerBar').style.width = (left/((m.secs||15)*1000)*100)+'%';
+        if (left<=0) clearInterval(P.memoInt);
+      },100);
+    }
+  } else if (m.phase==='result'){
+    clearInterval(P.memoInt); $('memoTimerWrapPl').style.display='none';
+    document.querySelectorAll('#memoGridPl .memoCard').forEach(c=> c.classList.add('locked'));
+    renderMemoGrid($('memoGridPl'), 8, m.cards, -1, m.targetIdx, true);
+    if (P.memoResultAt !== m.startAt){
+      P.memoResultAt = m.startAt;
+      const r = (m.results||{})[P.id];
+      $('pmFb').style.display='block';
+      if (!r) { $('pmFb').style.color='var(--muted)'; $('pmFb').textContent='NON HAI RISPOSTO'; }
+      else if (r.ok) { $('pmFb').style.color='var(--lime)'; $('pmFb').textContent='INDOVINATO! +'+r.pts; if(navigator.vibrate) navigator.vibrate([70,50,100]); }
+      else { $('pmFb').style.color='var(--red)'; $('pmFb').textContent='SBAGLIATO 💥'; }
+      $('pmStatus').textContent = `LA CARTA ERA IN POSIZIONE ${m.targetIdx+1}!`;
+    }
+  }
+}
+function guessMemo(i){
+  if (P.memoGuessed) return;
+  P.memoGuessed = true;
+  P.ref.child('memo/guesses/'+P.id).set({ idx:i, t: serverNow()-P.memoStartAt });
+  document.querySelectorAll('#memoGridPl .memoCard').forEach((c,k)=>{ c.classList.toggle('sel', k===i); c.classList.add('locked'); });
+  if (navigator.vibrate) navigator.vibrate(40);
+}
 function showPlayerRuota(g){
   const m = g.ruota||{};
   showScreen('scrPlayRuota');
@@ -4331,6 +4567,8 @@ function openTapTap(){
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(TAP.timerInt); clearInterval(TAP.pollInt);
   G.ref.child('taptap/counts').off();
+  clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
+  G.ref.child('memo/guesses').off();
   $('tapPrizeInputs').innerHTML = TAP_MEDALS.map((m,k)=>`
     <div class="tapPrizeRow"><span class="medal">${m}</span>
       <input type="number" id="tapPz${k}" value="${TAP_DEFAULTS[k]}" min="0" style="width:110px; text-align:center"></div>`).join('');
@@ -4369,6 +4607,8 @@ function tapStart(){
 }
 function tapFinish(){
   G.ref.child('taptap/counts').off();
+  clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
+  G.ref.child('memo/guesses').off();
   G.ref.child('taptap/counts').once('value').then(s=>{
     const counts = s.val()||{};
     G.ref.child('players').once('value').then(ps=>{
@@ -5006,10 +5246,15 @@ $('puzPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)
 $('puzTime').innerHTML = [30,45,60,90,120,180,240].map(t=>`<option value="${t}" ${t===60?'selected':''}>${t} secondi</option>`).join('');
 $('puzFile').addEventListener('change', e=>{
   const f = e.target.files[0]; if (!f) return;
-  if (f.size > 4*1024*1024) { alert('⚠️ Foto troppo grande (max 4 MB).'); e.target.value=''; return; }
-  const r = new FileReader();
-  r.onload = ()=>{ window._puzPhoto = r.result; $('puzPreview').src = r.result; $('puzPreview').style.display='block'; };
-  r.readAsDataURL(f);
+  if (f.size > 20*1024*1024) { alert('⚠️ Foto troppo grande (max 20 MB prima della compressione).'); e.target.value=''; return; }
+  // il puzzle si vede grande sul proiettore: lato lungo un filo più alto per mantenere i pezzi leggibili
+  compressImageFile(f, {maxDim:1500, quality:0.82, maxBytes:700*1024}).then(res=>{
+    window._puzPhoto = res.dataUrl;
+    $('puzPreview').src = res.dataUrl; $('puzPreview').style.display='block';
+    let info = $('puzPreviewInfo');
+    if (!info){ info = document.createElement('div'); info.id='puzPreviewInfo'; info.className='byline'; $('puzPreview').insertAdjacentElement('afterend', info); }
+    info.textContent = `🗜 ${fmtKB(res.origBytes)} → ${fmtKB(res.bytes)} · ${res.width}×${res.height}px`;
+  }).catch(()=> alert('⚠️ Non sono riuscito a leggere questa immagine, riprova con un\'altra foto.'));
 });
 function openPuzzle(){
   if (!G) return alert('Avvia prima una partita!');
@@ -5348,6 +5593,150 @@ function wordsearchFinish(){
 }
 
 /* ================================================================
+   MEMO — motore condiviso + regia
+================================================================ */
+function memoDeck8(){
+  const deck = []; for (let s2=0;s2<4;s2++) for (let r=0;r<13;r++) deck.push({s:s2,r});
+  const cards = [];
+  for (let i=0;i<8;i++) cards.push(deck.splice(Math.floor(Math.random()*deck.length),1)[0]);
+  return cards;
+}
+function renderMemoGrid(el, n, cards, showIdx, targetIdx, revealTarget){
+  if (el._n !== n){
+    el._n = n;
+    el.innerHTML = Array.from({length:n},(_,i)=>`<div class="memoCard" data-i="${i}"><div class="pcardIn">
+      <div class="pcFace pcBack">🎩</div>
+      <div class="pcFace pcFront"><div class="rk"></div><div class="st"></div></div>
+    </div></div>`).join('');
+  }
+  el.querySelectorAll('.memoCard').forEach((c,i)=>{
+    const isOpen = (i===showIdx) || (revealTarget && i===targetIdx);
+    const card = cards[i];
+    if (isOpen && card){
+      const red = card.s < 2;
+      const fr = c.querySelector('.pcFront');
+      fr.className = 'pcFace pcFront ' + (red?'red':'black');
+      fr.querySelector('.rk').textContent = RANKS[card.r];
+      fr.querySelector('.st').textContent = SUITS[card.s];
+      c.querySelector('.pcardIn').classList.add('flip');
+    } else {
+      c.querySelector('.pcardIn').classList.remove('flip');
+    }
+    c.classList.toggle('showIdx', i===showIdx);
+  });
+}
+function memoSetTargetFace(el, card){
+  const red = card.s < 2;
+  const fr = el.querySelector('.pcFront');
+  fr.className = 'pcFace pcFront ' + (red?'red':'black');
+  fr.querySelector('.rk').textContent = RANKS[card.r];
+  fr.querySelector('.st').textContent = SUITS[card.s];
+}
+function memoRunReveal(el, n, cards, startAt, speed, onDone){
+  clearInterval(el._memoInt);
+  let last = -1;
+  el._memoInt = setInterval(()=>{
+    const elapsed = serverNow() - startAt;
+    if (elapsed < 0) return;
+    const idx = Math.floor(elapsed/speed);
+    if (idx !== last){
+      last = idx;
+      if (idx >= n){
+        clearInterval(el._memoInt);
+        renderMemoGrid(el, n, cards, -1, -1, false);
+        if (onDone) onDone();
+      } else {
+        renderMemoGrid(el, n, cards, idx, -1, false);
+      }
+    }
+  }, 50);
+}
+
+/* ================================================================
+   MEMO — REGIA HOST
+================================================================ */
+let MEMO = {};
+$('memoPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
+$('memoSecs').innerHTML = [10,15,20,30,45].map(t=>`<option value="${t}" ${t===15?'selected':''}>${t} secondi</option>`).join('');
+function openMemo(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal();
+  clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
+  G.ref.child('memo/guesses').off();
+  G.ref.update({ status:'memo', memo:{ phase:'idle' } });
+  $('memoSetup').style.display='block'; $('memoLive').style.display='none';
+  pjSend({type:'memoState', msg:'SI MESCOLANO LE CARTE...'});
+  showScreen('scrMemo');
+}
+function memoStart(){
+  const speed = +$('memoSpeed').value;
+  const points = getPoints('memoPoints','memoPointsMan');
+  const secs = +$('memoSecs').value;
+  const cards = memoDeck8();
+  const targetIdx = Math.floor(Math.random()*8);
+  const showStartAt = serverNow()+800;
+  MEMO = { cards, targetIdx, speed, points, secs, credited:new Set(), rows:[] };
+  G.ref.update({ status:'memo', memo:{ phase:'show', cards, showStartAt, speed, targetIdx, points, secs, guesses:null, results:null } });
+  G.ref.child('memo/guesses').remove();
+  $('memoSetup').style.display='none'; $('memoLive').style.display='block';
+  $('memoMsg').textContent = '👀 GUARDATE BENE, MEMORIZZATE LE CARTE!';
+  $('memoTargetHost').style.display='none'; $('memoTimerWrapHost').style.display='none';
+  $('memoLead').innerHTML=''; $('memoBtnAgain').style.display='none';
+  renderMemoGrid($('memoGridHost'), 8, cards, -1, -1, false);
+  pjSend({type:'memoShow', cards, showStartAt, speed});
+  memoRunReveal($('memoGridHost'), 8, cards, showStartAt, speed, memoOpenGuess);
+}
+function memoOpenGuess(){
+  const target = MEMO.cards[MEMO.targetIdx];
+  const endAt = serverNow()+800+MEMO.secs*1000, startAt = serverNow()+800;
+  MEMO.startAt = startAt; MEMO.endAt = endAt;
+  G.ref.update({ 'memo/phase':'guess', 'memo/startAt':startAt, 'memo/endAt':endAt });
+  $('memoMsg').textContent = '🧠 DOVE SI TROVAVA QUESTA CARTA?';
+  $('memoTargetHost').style.display='flex';
+  memoSetTargetFace($('memoTargetCardHost'), target);
+  $('memoTimerWrapHost').style.display='block';
+  pjSend({type:'memoGuess', target, startAt, endAt, secs:MEMO.secs});
+  G.ref.child('memo/guesses').on('value', s=>{
+    $('memoMsg').textContent = `🧠 DOVE SI TROVAVA QUESTA CARTA? · ${s.numChildren()} risposte`;
+  });
+  clearInterval(MEMO.timerInt);
+  MEMO.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('memoTimerBar').style.width = (left/(MEMO.secs*1000)*100)+'%';
+    if (left<=0){ clearInterval(MEMO.timerInt); memoReveal(); }
+  }, 100);
+}
+function memoReveal(){
+  G.ref.child('memo/guesses').off();
+  G.ref.child('memo/guesses').once('value').then(s=>{
+    const guesses = s.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const results = {}, updates = {};
+      for (const pid in guesses){
+        const g2 = guesses[pid];
+        const ok = g2.idx === MEMO.targetIdx;
+        const pts = ok ? puzzlePts(MEMO.secs*1000, g2.t, MEMO.points) : 0;
+        results[pid] = { ok, pts, idx:g2.idx };
+        if (pts>0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+pts);
+      }
+      G.ref.update({ ...updates, 'memo/phase':'result', 'memo/results':results });
+      renderMemoGrid($('memoGridHost'), 8, MEMO.cards, -1, MEMO.targetIdx, true);
+      $('memoTimerWrapHost').style.display='none';
+      const rows = Object.entries(results).filter(([,r])=>r.ok).map(([pid,r])=>({name:(players[pid]||{}).name||'?', pts:r.pts}))
+        .sort((a,b)=>b.pts-a.pts);
+      $('memoMsg').textContent = rows.length ? `🏆 CARTA IN POSIZIONE ${MEMO.targetIdx+1}!` : `😅 NESSUNO L'HA RICORDATA — ERA IN POSIZIONE ${MEMO.targetIdx+1}`;
+      $('memoLead').innerHTML = rows.length ? rows.map((r,i)=>
+        `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(r.name)} <span class="pts">+${r.pts}</span></div>`).join('')
+        : '<div class="byline">Nessuno ha indovinato la posizione</div>';
+      $('memoBtnAgain').style.display='';
+      confetti();
+      pjSend({type:'memoResult', cards:MEMO.cards, targetIdx:MEMO.targetIdx, rows});
+    });
+  });
+}
+
+/* ================================================================
    TIMER GIGANTE CON BOMBA (condiviso host / proiettore / telefono)
 ================================================================ */
 function runBigTimer(sfx, title, endAt){
@@ -5431,6 +5820,48 @@ function sendPjMsg(on){
 }
 
 /* ================================================================
+   PUBBLICA FOTO SU PROIETTORE E TELEFONI
+================================================================ */
+let photoOv = { on:false, data:null };
+function modalPjPhoto(){
+  openModal('📷 PUBBLICA FOTO', `
+    <div class="label" style="text-transform:none; letter-spacing:0">Mostra una foto a schermo intero su videoproiettore e telefoni — utile per far vedere un'immagine prima di lanciare una domanda.</div>
+    <input type="file" id="pjPhotoFile" accept="image/*" class="mt">
+    <div id="pjPhotoModalPreview" class="mt"></div>
+    <div class="row mt">
+      <button class="btn mg grow" id="pjPhotoBtnShow" onclick="sendPjPhoto(true)" ${photoOv.data?'':'disabled'}>📺 MOSTRA</button>
+      <button class="btn ghost" onclick="sendPjPhoto(false)">🚫 Nascondi</button>
+    </div>`);
+  if (photoOv.data) $('pjPhotoModalPreview').innerHTML = `<img src="${photoOv.data}" style="max-height:140px; border-radius:8px">`;
+}
+document.addEventListener('change', e=>{
+  if (e.target && e.target.id === 'pjPhotoFile'){
+    const f = e.target.files[0]; if (!f) return;
+    if (f.size > 20*1024*1024) { alert('⚠️ Foto troppo grande (max 20 MB prima della compressione).'); e.target.value=''; return; }
+    $('pjPhotoModalPreview').innerHTML = '<div class="byline">🗜 Comprimo la foto...</div>';
+    $('pjPhotoBtnShow').disabled = true;
+    compressImageFile(f, {maxDim:1600, quality:0.85, maxBytes:750*1024}).then(res=>{
+      photoOv.data = res.dataUrl;
+      $('pjPhotoModalPreview').innerHTML = `<img src="${res.dataUrl}" style="max-height:140px; border-radius:8px">
+        <div class="byline mt">🗜 ${fmtKB(res.origBytes)} → ${fmtKB(res.bytes)} · ${res.width}×${res.height}px</div>`;
+      $('pjPhotoBtnShow').disabled = false;
+    }).catch(()=>{ alert('⚠️ Non sono riuscito a leggere questa immagine, riprova con un\'altra foto.'); $('pjPhotoModalPreview').innerHTML=''; });
+  }
+});
+function sendPjPhoto(on){
+  if (on && !photoOv.data) return alert('Carica prima una foto!');
+  photoOv.on = !!on;
+  $('hbPhoto').classList.toggle('on', photoOv.on);
+  const payload = { on:photoOv.on, data: photoOv.on ? photoOv.data : null };
+  if (bc) { try{ bc.postMessage({type:'photoOverlay', ...payload}); }catch(e){} }
+  if (G && G.ref) G.ref.child('projPhoto').set(payload).catch(()=>{
+    // se la foto è troppo pesante per una singola scrittura, tento un fallback ancora più compresso
+    if (photoOv.on) alert('⚠️ Foto troppo pesante per essere pubblicata, riprova con un\'altra immagine.');
+  });
+  closeModal();
+}
+
+/* ================================================================
    GIOCHI e MODULI — due menu separati
 ================================================================ */
 function modalGames(){
@@ -5450,6 +5881,7 @@ function modalGames(){
       <button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>
       <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
       <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
+      <button class="btn lm" style="grid-column:1/-1" onclick="openMemo()">🧠 Memo</button>
     </div>`);
 }
 function modalModules(){
@@ -5892,12 +6324,14 @@ function backToQuiz(title){
   G.ref.child('seed/bets').off();
   G.ref.child('grad/votes').off();
   G.ref.child('taptap/counts').off();
+  clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
+  G.ref.child('memo/guesses').off();
   const swc = $('swissClockHost'); if (swc) clearInterval(swc._int);
   G.ref.child('cards/bets').off();
   G.ref.child('swiss/press').off();
   G.ref.child('hilo/bets').off();
   G.ref.child('wheels/bets').off();
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null });
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -5942,6 +6376,7 @@ function initProjector(){
     base.child('projQr').on('value', s=>{ pjApplyQr(s.val()||{}); });
     base.child('projLead').on('value', s=>{ pjApplyLead(s.val()||{}); });
     base.child('projMsg').on('value', s=>{ pjApplyMsg(s.val()||{}); });
+    base.child('projPhoto').on('value', s=>{ pjApplyPhoto(s.val()||{}); });
   } else if (!gcode) {
     $('pjWaitMsg').textContent = '⚠️ Manca il codice partita nel link: usa ?proj=1&g=CODICE';
   }
@@ -5949,6 +6384,11 @@ function initProjector(){
 function pjApplyMsg(v){
   const ov = $('pjMsgOverlay');
   if (v && v.on && v.text) { $('pjMsgText2').textContent = v.text; ov.style.display='flex'; }
+  else ov.style.display='none';
+}
+function pjApplyPhoto(v){
+  const ov = $('pjPhotoOverlay');
+  if (v && v.on && v.data) { $('pjPhotoImg').src = v.data; ov.style.display='flex'; }
   else ov.style.display='none';
 }
 function pjApplyLead(v){
@@ -5975,6 +6415,7 @@ function pjRoute(m){
     if (m.type==='qrOverlay') { pjApplyQr({on:m.on, url:m.url}); return; }
     if (m.type==='leadOverlay') { pjApplyLead(m); return; }
     if (m.type==='msgOverlay') { pjApplyMsg(m); return; }
+    if (m.type==='photoOverlay') { pjApplyPhoto(m); return; }
     if (m.type==='lobby') {
       $('pjLobbyTitle').textContent = m.title;
       $('pjLobbyCode').textContent = m.code;
@@ -6175,6 +6616,39 @@ function pjRoute(m){
       $('pjGradMsg').textContent = m.tot ? `🏆 CLASSIFICA FINALE — ${m.tot} ${m.tot===1?'voto':'voti'}` : 'NESSUN VOTO RICEVUTO';
       $('pjGradWin').textContent = m.winners.length ? `👑 ${m.winners.map(i=>m.opts[i]).join(', ')}` : '';
       if (m.tot) confetti();
+    }
+    else if (m.type==='memoState') {
+      showScreen('scrPjMemo');
+      $('pjMemoMsg').textContent = m.msg||''; $('memoGridPj').innerHTML=''; $('memoGridPj')._n=0;
+      $('memoTargetPj').style.display='none'; $('memoTimerWrapPj').style.display='none'; $('pjMemoLead').innerHTML='';
+    }
+    else if (m.type==='memoShow') {
+      showScreen('scrPjMemo');
+      $('pjMemoMsg').textContent = '👀 GUARDATE BENE, MEMORIZZATE LE CARTE!';
+      $('memoTargetPj').style.display='none'; $('memoTimerWrapPj').style.display='none'; $('pjMemoLead').innerHTML='';
+      renderMemoGrid($('memoGridPj'), 8, m.cards, -1, -1, false);
+      memoRunReveal($('memoGridPj'), 8, m.cards, m.showStartAt, m.speed, ()=>{});
+    }
+    else if (m.type==='memoGuess') {
+      $('pjMemoMsg').textContent = '🧠 DOVE SI TROVAVA QUESTA CARTA?';
+      $('memoTargetPj').style.display='flex';
+      memoSetTargetFace($('memoTargetCardPj'), m.target);
+      $('memoTimerWrapPj').style.display='block';
+      clearInterval(window._pjMemoInt);
+      window._pjMemoInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjMemoTimerBar').style.width = (left/(m.secs*1000)*100)+'%';
+        if (left<=0) clearInterval(window._pjMemoInt);
+      },100);
+    }
+    else if (m.type==='memoResult') {
+      clearInterval(window._pjMemoInt); $('memoTimerWrapPj').style.display='none';
+      renderMemoGrid($('memoGridPj'), 8, m.cards, -1, m.targetIdx, true);
+      $('pjMemoMsg').textContent = m.rows.length ? `🏆 CARTA IN POSIZIONE ${m.targetIdx+1}!` : `😅 ERA IN POSIZIONE ${m.targetIdx+1}`;
+      $('pjMemoLead').innerHTML = m.rows.length ? m.rows.map((r,i)=>
+        `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(r.name)} <span class="pts">+${r.pts}</span></div>`).join('')
+        : '<div class="byline">Nessuno ha indovinato la posizione</div>';
+      if (m.rows.length) confetti();
     }
     else if (m.type==='seedState') {
       showScreen('scrPjSeed');
