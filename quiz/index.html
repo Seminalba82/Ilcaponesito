@@ -690,7 +690,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v8.1</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v8.2</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2125,7 +2125,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 81; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 82; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2136,7 +2136,48 @@ function serverNow(){ return Date.now() + svOffset; }
 
 /* ---------- utilità ---------- */
 const $ = id => document.getElementById(id);
-function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); window.scrollTo(0,0); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active'); window.scrollTo(0,0);
+  // sul videoproiettore ogni schermata viene ingrandita automaticamente per riempire il 16:9 —
+  // su regia e telefoni questo blocco non fa nulla (resta il layout centrato di sempre)
+  if (document.body.classList.contains('proj')) { setTimeout(pjFitScreen, 30); pjWatchActiveScreen(); }
+}
+let pjFitObserver = null;
+function pjFitScreen(){
+  if (!document.body.classList.contains('proj')) return;
+  const el = document.querySelector('.screen.active');
+  if (!el) return;
+  el.style.transform = 'none'; el.style.position = 'static'; el.style.minHeight = 'auto';
+  el.style.left = ''; el.style.top = '';
+  // uso setTimeout invece di requestAnimationFrame: il proiettore spesso gira su un secondo schermo
+  // "non a fuoco" per il sistema operativo, e i browser rallentano/sospendono requestAnimationFrame
+  // in quel caso — setTimeout resta affidabile anche lì.
+  setTimeout(()=>{
+    const natW = el.scrollWidth, natH = el.scrollHeight;
+    if (!natW || !natH) return;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    // margine del 3% ai bordi, tetto di sicurezza a 2.6x per non esagerare su proiettori molto grandi da vicino
+    const scale = Math.min((vw*0.97)/natW, (vh*0.97)/natH, 2.6);
+    el.style.position = 'absolute';
+    el.style.left = Math.max(0, (vw - natW*scale)/2) + 'px';
+    el.style.top = Math.max(0, (vh - natH*scale)/2) + 'px';
+    el.style.transformOrigin = 'top left';
+    el.style.transform = `scale(${scale})`;
+  }, 20);
+}
+function pjWatchActiveScreen(){
+  if (pjFitObserver) pjFitObserver.disconnect();
+  const el = document.querySelector('.screen.active');
+  if (!el) return;
+  let t;
+  // il contenuto della schermata cambia spesso (domande, classifiche, immagini...): ricalcolo la scala ogni volta che succede.
+  // NON sorveglio "style": è proprio quello che pjFitScreen modifica per applicare la scala, altrimenti si innescherebbe
+  // da sola in un ciclo infinito (si osserva da sola cambiare, e ricalcola all'infinito senza mai fermarsi).
+  pjFitObserver = new MutationObserver(()=>{ clearTimeout(t); t=setTimeout(pjFitScreen, 80); });
+  pjFitObserver.observe(el, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['src'] });
+}
+window.addEventListener('resize', ()=>{ if (document.body.classList.contains('proj')) pjFitScreen(); });
 function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
 function randCode(){ const A='ABCDEFGHJKLMNPQRSTUVWXYZ'; let c=''; for(let i=0;i<4;i++) c+=A[Math.floor(Math.random()*A.length)]; return c; }
@@ -6707,13 +6748,13 @@ function initProjector(){
   if (bc) { bc.onmessage = e=> pjRoute(e.data); bc.postMessage({type:'hello'}); }
   if (gcode && fbOK) {
     db.ref('.info/connected').on('value', s=>{ pjDiagState.fb = s.val() ? '✓ connesso' : 'connessione…'; pjDiag(); });
+    const base = db.ref('caponequiz/games/'+gcode); // dichiarata PRIMA di essere usata: era il bug che bloccava il proiettore
     base.child('ver').on('value', s=>{
       if (s.val() && s.val() > APP_V && !sessionStorage.getItem('capone_pj_reloaded')) {
         sessionStorage.setItem('capone_pj_reloaded','1');
         location.replace(location.pathname + '?proj=1&g=' + gcode + '&r=' + Date.now());
       }
     });
-    const base = db.ref('caponequiz/games/'+gcode);
     base.child('proj').on('value', s=>{ const m = s.val(); if (m) pjRoute(m); else { pjDiagState.last='nodo proj vuoto'; pjDiag(); } },
       err=>{ pjDiagState.fb='✗ LETTURA NEGATA (regole!)'; pjDiag(); });
     base.child('projMode').on('value', s=>{ const v = s.val(); pjQOnly = !!(v && v.qOnly); applyPjMode(); });
