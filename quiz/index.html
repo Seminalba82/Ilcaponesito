@@ -664,7 +664,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v7.0</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v7.2</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -785,11 +785,11 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     <div class="row mt">
       <div class="grow">
         <div class="label">Punti in palio</div>
-        <select id="qePoints"></select>
+        <select id="qePoints" onchange="qePointsChanged()"></select>
       </div>
       <div>
         <div class="label">O scrivili</div>
-        <input type="number" id="qePointsMan" class="ptsManual" placeholder="—" min="10" step="10">
+        <input type="number" id="qePointsMan" class="ptsManual" placeholder="—" min="10" step="10" oninput="qePointsChanged()">
       </div>
       <div class="grow">
         <div class="label">Tempo per rispondere</div>
@@ -798,10 +798,11 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
     </div>
     <div class="row mt">
       <div class="grow"><div class="label">Chi sbaglia perde</div>
-        <input type="number" id="qePenWrong" value="0" min="0" style="text-align:center"></div>
+        <input type="number" id="qePenWrong" value="0" min="0" style="text-align:center" oninput="qePenTouched('wrong')"></div>
       <div class="grow"><div class="label">Chi non risponde perde</div>
-        <input type="number" id="qePenNone" value="0" min="0" style="text-align:center"></div>
+        <input type="number" id="qePenNone" value="0" min="0" style="text-align:center" oninput="qePenTouched('none')"></div>
     </div>
+    <div class="label" style="text-transform:none; letter-spacing:0">💡 Le due penalità sono agganciate in percentuale ai punti: se aumenti i punti, si aggiornano da sole mantenendo la stessa proporzione.</div>
 
     <div class="row mtb">
       <button class="btn ghost" onclick="showScreen('scrEditor')">✕ Annulla</button>
@@ -2048,7 +2049,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 70; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 72; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2303,9 +2304,23 @@ function renderEdQuestions(){
 function moveQ(i,dir){ const j=i+dir; if(j<0||j>=curQuiz.questions.length)return; [curQuiz.questions[i],curQuiz.questions[j]]=[curQuiz.questions[j],curQuiz.questions[i]]; renderEdQuestions(); }
 function delQ(i){ curQuiz.questions.splice(i,1); renderEdQuestions(); }
 
+/* Valori predefiniti per velocizzare la redazione — modificabili in ogni momento, valgono solo per le domande NUOVE.
+   I punti scalano da soli in base alla posizione della domanda nella scaletta: 1-10=300, 11-20=1000, 21+=2000. */
+const QE_DEFAULT_TIMER = { mult:15, open:20, wordsearch:40, anagram:30 };
+const QE_PEN_WRONG_PCT = 200/300, QE_PEN_NONE_PCT = 150/300; // 66,7% e 50%, le stesse proporzioni di riferimento
+function qeDefaultPointsForPosition(pos){ return pos<=10 ? 300 : (pos<=20 ? 1000 : 2000); }
+let qePctWrong = QE_PEN_WRONG_PCT;
+let qePctNone = QE_PEN_NONE_PCT;
 function openQEditor(i){
   curQIdx = i;
-  const q = i>=0 ? curQuiz.questions[i] : { text:'', type:'mult', media:{kind:'none'}, opts:['','','',''], corrects:[0], accepted:'', points:100, timer:20, penWrong:0, penNone:0, hint:0, wsWord:'', wsClue:'', wsSize:10, scramble:'' };
+  const posDefault = qeDefaultPointsForPosition((i>=0 ? i : curQuiz.questions.length) + 1);
+  const q = i>=0 ? curQuiz.questions[i] : { text:'', type:'mult', media:{kind:'none'}, opts:['','','',''], corrects:[0], accepted:'',
+    points:posDefault, timer:QE_DEFAULT_TIMER.mult, penWrong:Math.round(posDefault*QE_PEN_WRONG_PCT/10)*10, penNone:Math.round(posDefault*QE_PEN_NONE_PCT/10)*10,
+    hint:0, wsWord:'', wsClue:'', wsSize:10, scramble:'' };
+  // le percentuali si ricalcolano da QUESTA domanda: se ha punti/penalità propri le rispetto,
+  // altrimenti uso le percentuali di base — così ogni domanda mantiene coerenti i suoi rapporti
+  qePctWrong = (q.points>0 && q.penWrong>0) ? q.penWrong/q.points : QE_PEN_WRONG_PCT;
+  qePctNone = (q.points>0 && q.penNone>0) ? q.penNone/q.points : QE_PEN_NONE_PCT;
   if (!q.corrects) q.corrects = [q.correct||0]; // migrazione domande vecchie
   $('qeTitle').textContent = i>=0 ? 'DOMANDA '+(i+1) : 'NUOVA DOMANDA';
   $('qeText').value = q.text; $('qeType').value = q.type; $('qeMedia').value = q.media.kind;
@@ -2325,18 +2340,20 @@ function openQEditor(i){
   $('qeAnaScramble').value = q.scramble||''; $('qeAnaScramble')._touched = !!q.scramble;
   $('qeNumOpts').value = Math.min(5, Math.max(2, (q.opts||[]).length||4));
   window._qeQ = q;
-  qeRenderOpts(q);
+  qeRenderOpts(q, true); // true = carica SEMPRE i dati salvati di QUESTA domanda, mai i campi rimasti dalla precedente
   window._qeMedia = q.media && q.media.data ? {...q.media} : {kind:q.media.kind||'none'};
   $('qeFile').value=''; qeTypeChanged(); qeMediaChanged(true);
   showScreen('scrQEdit');
 }
-function qeRenderOpts(q){
+function qeRenderOpts(q, fresh){
   q = (q && q.opts) ? q : (window._qeQ||{opts:[],corrects:[0]});
-  // conservo il testo già digitato quando cambio il numero di opzioni
+  // "fresh" = si sta aprendo una domanda (nuova o diversa da prima): uso SEMPRE i suoi dati salvati.
+  // Senza "fresh" = la regia sta solo cambiando il numero di opzioni della domanda che ha già davanti:
+  // in quel caso conservo quello che ha già scritto nei campi, per non fargli perdere il lavoro.
   const prev = [];
-  for (let k=0;k<5;k++){ const el=$('qeOpt'+k); prev[k] = el ? el.value : (q.opts[k]||''); }
+  for (let k=0;k<5;k++){ const el=$('qeOpt'+k); prev[k] = (!fresh && el) ? el.value : (q.opts[k]||''); }
   const prevChk = [];
-  for (let k=0;k<5;k++){ const c=document.querySelector('#qeOpts input[data-k="'+k+'"]'); prevChk[k] = c ? c.checked : (q.corrects||[]).includes(k); }
+  for (let k=0;k<5;k++){ const c=document.querySelector('#qeOpts input[data-k="'+k+'"]'); prevChk[k] = (!fresh && c) ? c.checked : (q.corrects||[]).includes(k); }
   const n = +$('qeNumOpts').value;
   $('qeOpts').innerHTML = Array.from({length:n},(_,k)=>`
     <div class="row mt">
@@ -2352,6 +2369,21 @@ function qeTypeChanged(){
   $('qeWsBox').style.display = t==='wordsearch' ? 'block' : 'none';
   $('qeAnaBox').style.display = t==='anagram' ? 'block' : 'none';
   $('qeHintBox').style.display = (t==='open' || t==='anagram') ? 'block' : 'none';
+  // solo per una domanda NUOVA (mai salvata): il tempo si adegua da solo al tipo scelto
+  if (curQIdx === -1 && QE_DEFAULT_TIMER[t]) $('qeTimer').value = QE_DEFAULT_TIMER[t];
+}
+/* Punti e penalità agganciati in percentuale: cambiando i punti, le due penalità si aggiornano da sole */
+function qePointsChanged(){
+  const points = getPoints('qePoints','qePointsMan');
+  if (!points) return;
+  $('qePenWrong').value = Math.round(points*qePctWrong/10)*10;
+  $('qePenNone').value = Math.round(points*qePctNone/10)*10;
+}
+function qePenTouched(which){
+  const points = getPoints('qePoints','qePointsMan');
+  if (!points) return;
+  if (which==='wrong') qePctWrong = Math.max(0, (+$('qePenWrong').value||0)) / points;
+  else qePctNone = Math.max(0, (+$('qePenNone').value||0)) / points;
 }
 function qeAnaAutoScramble(force){
   const w = $('qeAnaWord').value.trim();
