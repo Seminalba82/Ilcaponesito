@@ -690,7 +690,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v8.4</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v8.5</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2125,7 +2125,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 84; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 85; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2148,23 +2148,24 @@ function pjFitScreen(){
   if (!document.body.classList.contains('proj')) return;
   const el = document.querySelector('.screen.active');
   if (!el) return;
-  el.style.transform = 'none'; el.style.position = 'static'; el.style.minHeight = 'auto';
-  el.style.left = ''; el.style.top = '';
-  // uso setTimeout invece di requestAnimationFrame: il proiettore spesso gira su un secondo schermo
-  // "non a fuoco" per il sistema operativo, e i browser rallentano/sospendono requestAnimationFrame
-  // in quel caso — setTimeout resta affidabile anche lì.
-  setTimeout(()=>{
-    const natW = el.scrollWidth, natH = el.scrollHeight;
-    if (!natW || !natH) return;
-    const vw = window.innerWidth, vh = window.innerHeight;
-    // margine del 3% ai bordi, tetto di sicurezza a 2.6x per non esagerare su proiettori molto grandi da vicino
-    const scale = Math.min((vw*0.97)/natW, (vh*0.97)/natH, 2.6);
-    el.style.position = 'absolute';
-    el.style.left = Math.max(0, (vw - natW*scale)/2) + 'px';
-    el.style.top = Math.max(0, (vh - natH*scale)/2) + 'px';
-    el.style.transformOrigin = 'top left';
-    el.style.transform = `scale(${scale})`;
-  }, 20);
+  // IMPORTANTE: rimetto "position:static" PRIMA di misurare, ogni singola volta — se misurassi mentre è ancora
+  // "position:absolute" da un calcolo precedente, il browser la restringe al contenuto (come un blocchetto a sé,
+  // non più nel flusso naturale della pagina) e la misura risulterebbe più stretta del vero. Chiamando questa
+  // funzione più volte di fila (ad ogni cambio schermata/animazione) l'errore si accumulava un pochino a ogni
+  // giro, fino a schiacciare tutto di lato — esattamente il difetto notato. Ora rimisuro sempre da capo, pulito.
+  // Tutto in un unico blocco SENZA setTimeout: il browser disegna solo il risultato finale, mai lo stato intermedio.
+  el.style.minHeight = 'auto';
+  el.style.position = 'static';
+  const natW = el.scrollWidth, natH = el.scrollHeight;
+  if (!natW || !natH) { el.style.position = 'absolute'; return; }
+  const vw = window.innerWidth, vh = window.innerHeight;
+  // margine del 3% ai bordi, tetto di sicurezza a 2.6x per non esagerare su proiettori molto grandi da vicino
+  const scale = Math.min((vw*0.97)/natW, (vh*0.97)/natH, 2.6);
+  el.style.position = 'absolute';
+  el.style.left = Math.max(0, (vw - natW*scale)/2) + 'px';
+  el.style.top = Math.max(0, (vh - natH*scale)/2) + 'px';
+  el.style.transformOrigin = 'top left';
+  el.style.transform = `scale(${scale})`;
 }
 function pjWatchActiveScreen(){
   if (pjFitObserver) pjFitObserver.disconnect();
