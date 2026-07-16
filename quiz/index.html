@@ -690,7 +690,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v8.2</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v8.4</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2125,7 +2125,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 82; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 84; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2174,7 +2174,17 @@ function pjWatchActiveScreen(){
   // il contenuto della schermata cambia spesso (domande, classifiche, immagini...): ricalcolo la scala ogni volta che succede.
   // NON sorveglio "style": è proprio quello che pjFitScreen modifica per applicare la scala, altrimenti si innescherebbe
   // da sola in un ciclo infinito (si osserva da sola cambiare, e ricalcola all'infinito senza mai fermarsi).
-  pjFitObserver = new MutationObserver(()=>{ clearTimeout(t); t=setTimeout(pjFitScreen, 80); });
+  // IGNORO anche gli aggiornamenti che toccano SOLO il numero/barra del countdown: cambiano 10 volte al secondo
+  // durante una domanda ma non modificano mai le dimensioni naturali dello schermo — ricalcolare per loro
+  // serviva solo a creare uno sfarfallio continuo, inutile e fastidioso.
+  const isTimerOnly = (mutations)=> mutations.every(m=>{
+    const n = m.target.nodeType===3 ? m.target.parentElement : m.target; // i nodi di testo non hanno .closest
+    return n && n.closest && n.closest('#pjTimerNum, #pjTimerBar, .timerBar');
+  });
+  pjFitObserver = new MutationObserver((mutations)=>{
+    if (isTimerOnly(mutations)) return;
+    clearTimeout(t); t=setTimeout(pjFitScreen, 80);
+  });
   pjFitObserver.observe(el, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['src'] });
 }
 window.addEventListener('resize', ()=>{ if (document.body.classList.contains('proj')) pjFitScreen(); });
@@ -6738,7 +6748,7 @@ let pjTimerInt = null, pjQOnly = false, pjCur = null;
 let pjDiagState = { code:'—', fb:'…', msgs:0, last:'—' };
 function pjDiag(){
   $('pjDiag').style.display='block';
-  $('pjDiag').textContent = `v4.0 · partita: ${pjDiagState.code} · firebase: ${pjDiagState.fb} · msg ricevuti: ${pjDiagState.msgs} (${pjDiagState.last})`;
+  $('pjDiag').textContent = `v${(APP_V/10).toFixed(1)} · partita: ${pjDiagState.code} · firebase: ${pjDiagState.fb} · msg ricevuti: ${pjDiagState.msgs} (${pjDiagState.last})`;
 }
 function initProjector(){
   document.body.classList.add('proj');
