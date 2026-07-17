@@ -700,7 +700,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v9.7</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v9.8</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -909,6 +909,9 @@ body.suspense-on #pfRank{ display:none !important; }
     <button class="btn lm" id="btnSaveCamp" onclick="saveCampionato()">💾 Salva nel campionato serate</button>
     <button class="btn cy" onclick="location.href=location.pathname">🏠 Torna alla home</button>
   </div>
+  <div class="row mtb">
+    <button class="btn ghost" id="btnPodResume" style="display:none" onclick="backToQuiz()">↩ Torna al quiz (riprendi da dove eri)</button>
+  </div>
 </div>
 
 <!-- ==================== PLAYER: JOIN ==================== -->
@@ -974,6 +977,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <button class="hb" onclick="openProjector()">📺 Apri proiettore</button>
   <button class="hb" id="hbPreview" onclick="togglePreview()">👁 Anteprima proiettore</button>
   <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
+  <button class="hb" onclick="openInterimPodium()">🏆 Podio</button>
   <button class="hb" onclick="btnEndQuiz()">🏁 Termina quiz</button>
   </div>
 </div>
@@ -2138,7 +2142,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 97; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 98; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3077,6 +3081,22 @@ function podiumRevealNext(){
   podStage++;
   podiumUpdateBtn();
 }
+/* Podio "intermedio": lo stesso spettacolo del podio finale, ma NON termina la partita — utile per spezzare
+   il quiz in più round e riprendere esattamente da dove si era interrotti. */
+function openInterimPodium(){
+  if (!G) return;
+  G.ref.child('players').once('value').then(ps=>{
+    const players = ps.val()||{};
+    const arr = Object.entries(players).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
+    renderPodiumBuild($('podium'), $('podLead'), arr);
+    renderLead($('podLead'), players);
+    podStage = 0; podiumUpdateBtn();
+    $('btnPodResume').style.display = '';
+    pjSend({type:'podium', top3: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})),
+      lead: arr.map(p=>({name:p.name, score:p.score||0}))});
+    showScreen('scrPodium');
+  });
+}
 function endQuiz(){
   if (leadOv.on) sendLeadOverlay({on:false});
   G.ref.child('players').once('value').then(ps=>{
@@ -3086,6 +3106,7 @@ function endQuiz(){
     renderPodiumBuild($('podium'), $('podLead'), arr);
     renderLead($('podLead'), players);
     podStage = 0; podiumUpdateBtn();
+    $('btnPodResume').style.display = 'none';
     pjSend({type:'podium', top3: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})),
       lead: arr.map(p=>({name:p.name, score:p.score||0}))});
     showScreen('scrPodium');
