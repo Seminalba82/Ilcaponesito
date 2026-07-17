@@ -221,6 +221,7 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .ptRow{display:flex; align-items:center; gap:8px; padding:8px 10px; margin-top:8px; border-radius:14px; font-weight:900;
   background:rgba(0,0,0,.35); border:1px solid rgba(157,77,255,.3);}
 .ptRow .sc{margin-left:auto; font-family:'Bungee'; color:var(--cyan); font-size:14px; min-width:60px; text-align:right;}
+.ptsRowInput{padding:8px 6px !important; font-size:14px !important; border-radius:10px !important; flex-shrink:0;}
 
 /* ===== ANTEPRIMA PROIETTORE SU PC ===== */
 #projPreview{position:fixed; right:14px; bottom:74px; width:360px; height:212px; z-index:55; display:none;
@@ -692,7 +693,7 @@ body.proj .screen.active{padding-bottom:22px; justify-content:center; max-width:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v9.0</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v9.1</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2127,7 +2128,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 90; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 91; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2343,18 +2344,26 @@ function modalLead(){
       `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score||0}</span></div>`).join('') || '<div class="byline">Nessuna squadra collegata.</div>');
   });
 }
+let ptsSortMode = null; // null = ordine di iscrizione, 'alpha' = alfabetico, 'score' = punteggio decrescente
 function modalPoints(){
   if (!G) return;
   G.ref.child('players').once('value', s=>{
     const players = s.val()||{};
-    let html = `<div class="label">Valore punti</div>
-      <input type="number" id="ptsVal" value="100" step="10" min="0" style="text-align:center;font-family:'Bungee';font-size:22px;color:var(--gold)">
-      <div class="label mt">Tocca ➕ o ➖ accanto alla squadra. Tocca ✎ per rinominare (utile se qualcuno scrive nomi o parole scorrette: appena lo cambi tu, non può più riscriverlo)</div>`;
-    for (const pid in players)
-      html += `<div class="ptRow"><span class="grow">${esc(players[pid].name)}</span><span class="sc" id="sc_${pid}">${players[pid].score||0}</span>
+    let entries = Object.entries(players);
+    if (ptsSortMode==='alpha') entries.sort((a,b)=> a[1].name.localeCompare(b[1].name, 'it'));
+    else if (ptsSortMode==='score') entries.sort((a,b)=> (b[1].score||0)-(a[1].score||0));
+    let html = `<div class="row">
+        <button class="btn small ${ptsSortMode==='alpha'?'lm':'ghost'}" onclick="ptsSortMode='alpha'; modalPoints();">🔤 A-Z</button>
+        <button class="btn small ${ptsSortMode==='score'?'lm':'ghost'}" onclick="ptsSortMode='score'; modalPoints();">🔽 Punteggio</button>
+      </div>
+      <div class="label mt" style="text-transform:none; letter-spacing:0">Scrivi i punti nella casella di ogni squadra, poi tocca ➕ per aggiungerli o ➖ per toglierli. ✎ per rinominare. 🗑 per eliminare chi si ritira dalla serata.</div>`;
+    for (const [pid,p] of entries)
+      html += `<div class="ptRow"><span class="grow">${esc(p.name)}</span><span class="sc" id="sc_${pid}">${p.score||0}</span>
+        <input type="number" class="ptsRowInput" id="ptsRow_${pid}" placeholder="pt" min="0" step="10" style="width:78px; text-align:center">
+        <button class="btn small lm" onclick="adjPointsRow('${pid}',1)">➕</button>
+        <button class="btn small mg" onclick="adjPointsRow('${pid}',-1)">➖</button>
         <button class="btn small cy" onclick="renamePlayer('${pid}')" title="Rinomina">✎</button>
-        <button class="btn small lm" onclick="adjPoints('${pid}',1)">➕</button>
-        <button class="btn small mg" onclick="adjPoints('${pid}',-1)">➖</button></div>`;
+        <button class="btn small ghost" onclick="deletePlayer('${pid}')" title="Elimina">🗑</button></div>`;
     html += `<div class="row mt"><input type="text" id="newTeamName" class="grow" placeholder="Nome nuova squadra/concorrente" maxlength="24">
       <button class="btn small lm" onclick="addManualTeam()">➕</button></div>
       <div class="label" style="text-transform:none;letter-spacing:0">Le squadre manuali partecipano senza smartphone: ricevono punti da te e dal Votometro.</div>`;
@@ -2365,6 +2374,14 @@ function addManualTeam(){
   const name = ($('newTeamName')||{value:''}).value.trim();
   if (!name) return;
   ensureManualPlayer(name, ()=> modalPoints());
+}
+function deletePlayer(pid){
+  if (!G) return;
+  G.ref.child('players/'+pid+'/name').once('value').then(s=>{
+    const name = s.val()||'';
+    if (!confirm('Eliminare definitivamente "'+name+'" dalla partita?\nUtile se si e ritirato/a o e andato/a via prima della fine della serata.')) return;
+    G.ref.child('players/'+pid).remove().then(()=> modalPoints());
+  });
 }
 function renamePlayer(pid){
   if (!G) return;
@@ -2377,8 +2394,8 @@ function renamePlayer(pid){
     G.ref.child('players/'+pid+'/name').set(clean).then(()=> modalPoints());
   });
 }
-function adjPoints(pid, sign){
-  const v = Math.abs(+($('ptsVal').value||0)); if(!v) return;
+function adjPointsRow(pid, sign){
+  const v = Math.abs(+($('ptsRow_'+pid).value||0)); if(!v) return;
   G.ref.child('players/'+pid+'/score').transaction(x=>Math.max(0,(x||0)+sign*v)).then(r=>{
     const ns = r.snapshot.val();
     const el = $('sc_'+pid); if (el){ el.textContent = ns; el.style.color = sign>0?'var(--lime)':'var(--red)'; setTimeout(()=>el.style.color='',600); }
