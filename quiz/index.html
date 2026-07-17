@@ -346,8 +346,8 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 #pjLeadOverlay{display:none; position:fixed; inset:0; z-index:65; background:rgba(5,2,10,.94); backdrop-filter:blur(6px);
   flex-direction:column; align-items:center; justify-content:center; padding:30px; overflow:auto;}
 #pjLeadOverlay .brand{margin-bottom:10px;}
-#pjLeadRows{width:100%; max-width:720px;}
-#pjLeadRows .leadRow{font-size:clamp(16px,2.4vw,26px); padding:14px 22px;}
+#pjLeadRows{width:100%; max-width:min(90vw, 1400px);}
+#pjLeadRows .leadRow{font-size:clamp(16px,2.4vw,40px); padding:14px 22px;}
 
 /* ===== VOTOMETRO ===== */
 .votoLabel{font-weight:900; letter-spacing:5px; font-size:clamp(13px,2vw,18px); color:var(--muted); text-align:center;}
@@ -663,7 +663,9 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 
 /* ===== SCHERMO PROIETTORE ===== */
 body.proj{overflow:hidden;}
-body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:center;}
+/* niente più max-width qui: il calcolo dinamico in JS (pjFitScreen) misura ora la vera larghezza del contenuto,
+   non più gonfiata artificialmente da un vecchio limite fisso — quello era la causa del formato "piccolo". */
+body.proj .screen.active{padding-bottom:22px; justify-content:center;}
 #pjQText{font-weight:900; font-size:clamp(34px,6vw,84px); text-align:center; line-height:1.12;
   text-shadow:0 4px 0 rgba(0,0,0,.6), 0 0 40px rgba(157,77,255,.5); margin:20px 0;}
 #pjOpts .ansBtn{min-height:120px; font-size:clamp(20px,2.6vw,34px); pointer-events:none;}
@@ -690,7 +692,7 @@ body.proj .screen.active{padding-bottom:22px; max-width:1400px; justify-content:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v8.6</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v8.9</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2125,7 +2127,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 86; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 89; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2141,7 +2143,11 @@ function showScreen(id){
   $(id).classList.add('active'); window.scrollTo(0,0);
   // sul videoproiettore ogni schermata viene ingrandita automaticamente per riempire il 16:9 —
   // su regia e telefoni questo blocco non fa nulla (resta il layout centrato di sempre)
-  if (document.body.classList.contains('proj')) { setTimeout(pjFitScreen, 30); pjWatchActiveScreen(); }
+  if (document.body.classList.contains('proj')) {
+    pjFitScreen(); // subito, nello stesso istante: il browser disegna solo il risultato già scalato, mai la versione piccola grezza
+    setTimeout(pjFitScreen, 100); // rete di sicurezza per contenuti che si caricano un attimo dopo (es. immagini)
+    pjWatchActiveScreen();
+  }
 }
 let pjFitObserver = null;
 function pjFitScreen(){
@@ -2160,12 +2166,24 @@ function pjFitScreen(){
   if (!natW || !natH) { el.style.position = 'absolute'; return; }
   const vw = window.innerWidth, vh = window.innerHeight;
   // margine del 3% ai bordi, tetto di sicurezza a 2.6x per non esagerare su proiettori molto grandi da vicino
-  const scale = Math.min((vw*0.97)/natW, (vh*0.97)/natH, 2.6);
+  let scale = Math.min((vw*0.97)/natW, (vh*0.97)/natH, 2.6);
   el.style.position = 'absolute';
   el.style.left = Math.max(0, (vw - natW*scale)/2) + 'px';
   el.style.top = Math.max(0, (vh - natH*scale)/2) + 'px';
   el.style.transformOrigin = 'top left';
   el.style.transform = `scale(${scale})`;
+  // CONTROLLO FINALE: alcuni contenuti (griglie che vanno a capo, es. Tombola) si riorganizzano in modo diverso
+  // a seconda della larghezza disponibile — la misura "naturale" presa prima potrebbe non bastare più una volta
+  // che il vero layout finale si assesta. Verifico il risultato DAVVERO renderizzato e, se sfora lo schermo,
+  // riduco la scala di conseguenza. Nessun lampo visibile: siamo sempre nello stesso blocco sincrono.
+  const rect = el.getBoundingClientRect();
+  if (rect.width > vw*0.99 || rect.height > vh*0.99){
+    const correction = Math.min((vw*0.97)/rect.width, (vh*0.97)/rect.height);
+    scale = scale * correction;
+    el.style.left = Math.max(0, (vw - natW*scale)/2) + 'px';
+    el.style.top = Math.max(0, (vh - natH*scale)/2) + 'px';
+    el.style.transform = `scale(${scale})`;
+  }
 }
 function pjWatchActiveScreen(){
   if (pjFitObserver) pjFitObserver.disconnect();
