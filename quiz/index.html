@@ -707,7 +707,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v10.0</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v10.1</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2152,7 +2152,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 100; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 101; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3050,6 +3050,7 @@ function showReveal(q, correctText, players, pending, results, stats){
   const leadArr = renderLead($('hrLead'), players);
   pjSend({type:'reveal', correctText, sym: q.type==='mult'?SYMS[corrects[0]]:null,
     stats: q.type==='mult'?stats:null, opts: q.type==='mult'?q.opts:null, corrects: q.type==='mult'?corrects:null,
+    suspense: suspenseMode,
     lead: leadArr.map(p=>({name:p.name, score:p.score||0}))});
   $('btnNext').textContent = (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
   showScreen('scrHostReveal');
@@ -5701,7 +5702,7 @@ $('puzTime').innerHTML = [30,45,60,90,120,180,240].map(t=>`<option value="${t}" 
 let puzzleGallery = {}; // {id: dataUrl} — galleria persistente delle foto puzzle, sincronizzata con Firebase
 function loadPuzzleGallery(){
   if (!G) return;
-  G.ref.child('puzzleGallery/photos').once('value').then(s=>{
+  galleryRef('puzzle').once('value').then(s=>{
     puzzleGallery = s.val() || {};
     renderPuzzleGallery();
   });
@@ -5722,7 +5723,7 @@ function selectPuzzlePhoto(id){
 function deletePuzzleGalleryPhoto(id){
   if (!confirm('Eliminare questa foto dalla galleria del puzzle?\nSe la usi spesso, tienila — questo la toglie per sempre.')) return;
   delete puzzleGallery[id];
-  if (G && G.ref) G.ref.child('puzzleGallery/photos/'+id).remove();
+  if (G && G.ref) galleryRef('puzzle').child(id).remove();
   renderPuzzleGallery();
 }
 $('puzFile').addEventListener('change', e=>{
@@ -5737,7 +5738,7 @@ function uploadPuzzlePhotosSequentially(files, idx, total){
   if (f.size > 20*1024*1024){ uploadPuzzlePhotosSequentially(files, idx+1, total); return; }
   // il puzzle si vede grande sul proiettore: lato lungo un filo più alto per mantenere i pezzi leggibili
   compressImageFile(f, {maxDim:1500, quality:0.82, maxBytes:700*1024}).then(res=>{
-    const ref = G.ref.child('puzzleGallery/photos').push(res.dataUrl);
+    const ref = galleryRef('puzzle').push(res.dataUrl);
     puzzleGallery[ref.key] = res.dataUrl;
     window._puzPhoto = res.dataUrl; // l'ultima caricata è subito pronta all'uso
     $('puzPreview').src = res.dataUrl; $('puzPreview').style.display='block';
@@ -6406,6 +6407,7 @@ function sendPjMsg(on){
 /* ================================================================
    PUBBLICA FOTO SU PROIETTORE E TELEFONI
 ================================================================ */
+function galleryRef(kind){ return db.ref('caponequiz/galleries/'+(G?G.code:'x')+'/'+kind); }
 let photoOv = { on:false, data:null };
 let photoGallery = {}; // {id: dataUrl} — cache locale della galleria, sincronizzata con Firebase
 let photoSeq = { active:false, ids:[], idx:0, intervalMs:3000, timer:null };
@@ -6413,7 +6415,7 @@ let photoSeq = { active:false, ids:[], idx:0, intervalMs:3000, timer:null };
 function modalPjPhoto(){
   openModal('📷 PUBBLICA FOTO', `<div class="byline" style="text-transform:none">Carico la galleria...</div>`);
   if (!G) return;
-  G.ref.child('photoGallery/photos').once('value').then(s=>{
+  galleryRef('photo').once('value').then(s=>{
     photoGallery = s.val() || {};
     renderPhotoModal();
   });
@@ -6455,7 +6457,7 @@ function uploadPhotosSequentially(files, idx, total){
   $('pjPhotoUploadStatus').textContent = `🗜 Comprimo e carico foto ${idx+1} di ${total}...`;
   if (f.size > 20*1024*1024){ uploadPhotosSequentially(files, idx+1, total); return; }
   compressImageFile(f, {maxDim:1600, quality:0.85, maxBytes:750*1024}).then(res=>{
-    const ref = G.ref.child('photoGallery/photos').push(res.dataUrl);
+    const ref = galleryRef('photo').push(res.dataUrl);
     photoGallery[ref.key] = res.dataUrl;
     renderPhotoModal();
   }).catch(()=>{}).then(()=> uploadPhotosSequentially(files, idx+1, total));
@@ -6463,7 +6465,7 @@ function uploadPhotosSequentially(files, idx, total){
 function deleteGalleryPhoto(id){
   if (!confirm('Eliminare questa foto dalla galleria?')) return;
   delete photoGallery[id];
-  if (G && G.ref) G.ref.child('photoGallery/photos/'+id).remove();
+  if (G && G.ref) galleryRef('photo').child(id).remove();
   photoSeq.ids = photoSeq.ids.filter(x=>x!==id);
   renderPhotoModal();
 }
@@ -6988,6 +6990,7 @@ function backToQuiz(title){
     $('btnNext').textContent = G.qi < 0 ? '▶ Prima domanda'
       : (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
     pjSend({type:'reveal', title: title || 'CLASSIFICA', correctText:'', sym:null,
+      suspense: suspenseMode,
       lead: arr.map(p=>({name:p.name, score:p.score||0}))});
     showScreen('scrHostReveal');
   });
@@ -7566,7 +7569,7 @@ function pjRoute(m){
       $('pjRevealTitle').textContent = m.title || 'RISPOSTA GIUSTA';
       $('pjAnswer').innerHTML = (m.sym?`<span class="sym">${m.sym}</span> `:'')+esc(m.correctText||'');
       if (m.stats && m.opts) renderStats($('pjStats'), m.opts, m.stats, m.corrects||[]); else $('pjStats').innerHTML='';
-      $('pjLead').innerHTML = (m.lead||[]).map((p,i)=>
+      $('pjLead').innerHTML = m.suspense ? '' : (m.lead||[]).map((p,i)=>
         `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score}</span></div>`).join('');
       showScreen('scrPjReveal');
     }
