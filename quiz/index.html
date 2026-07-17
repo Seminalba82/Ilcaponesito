@@ -667,9 +667,9 @@ body.proj{overflow:hidden;}
 /* niente più max-width qui: il calcolo dinamico in JS (pjFitScreen) misura ora la vera larghezza del contenuto,
    non più gonfiata artificialmente da un vecchio limite fisso — quello era la causa del formato "piccolo". */
 body.proj .screen.active{padding-bottom:22px; justify-content:center; max-width:none; margin:0; width:fit-content;}
-/* MODALITÀ SUSPENSE: sui telefoni nasconde punteggio totale e posizione (id che finiscono in "Score" o "Pts"),
-   lasciando visibile il verdetto giusto/sbagliato della singola domanda o gioco. */
-body.suspense-on [id$="Score"], body.suspense-on [id$="Pts"]{ visibility:hidden !important; }
+/* MODALITÀ SUSPENSE: nasconde SOLO l'anteprima "sei 1° su... punti" mostrata dopo domande/minigiochi.
+   Punteggio e punti guadagnati restano sempre visibili — quelli non spoilerano la classifica finale. */
+body.suspense-on #pfRank{ display:none !important; }
 #pjQText{font-weight:900; font-size:clamp(34px,6vw,84px); text-align:center; line-height:1.12;
   text-shadow:0 4px 0 rgba(0,0,0,.6), 0 0 40px rgba(157,77,255,.5); margin:20px 0;}
 #pjOpts .ansBtn{min-height:120px; font-size:clamp(20px,2.6vw,34px); pointer-events:none;}
@@ -696,7 +696,7 @@ body.suspense-on [id$="Score"], body.suspense-on [id$="Pts"]{ visibility:hidden 
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v9.4</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v9.5</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2135,7 +2135,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 94; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 95; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3327,9 +3327,9 @@ function showPlayerHiLo(g){
       $('phStatus').textContent = `IL ${lr.rank} ERA PIÙ ${lr.esito.toUpperCase()} DEL ${lr.prevRank}!`;
       $('phFb').style.display='block';
       if (!r){ $('phFb').style.color='var(--muted)'; $('phFb').textContent='NON HAI SCOMMESSO'; }
-      else if (r.ok){ $('phFb').style.color='var(--lime)'; $('phFb').textContent = g.suspense ? 'INDOVINATO! 🎉' : 'INDOVINATO! +'+r.pts;
+      else if (r.ok){ $('phFb').style.color='var(--lime)'; $('phFb').textContent='INDOVINATO! +'+r.pts;
         if (P.hiloFbAt !== lr.at){ P.hiloFbAt = lr.at; if(navigator.vibrate) navigator.vibrate([60,40,60]); } }
-      else { $('phFb').style.color='var(--red)'; $('phFb').textContent = g.suspense ? 'SBAGLIATO 💥' : 'SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
+      else { $('phFb').style.color='var(--red)'; $('phFb').textContent='SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
     } else {
       $('phStatus').textContent = prev ? `COMANDA IL ${RANKS[prev.r]} — OCCHI SUL TAVOLO...` : 'OCCHI SUL TAVOLO...';
       $('phFb').style.display='none';
@@ -3701,7 +3701,7 @@ function showPlayerMemo(g){
       const r = (m.results||{})[P.id];
       $('pmFb').style.display='block';
       if (!r) { $('pmFb').style.color='var(--muted)'; $('pmFb').textContent='NON HAI RISPOSTO'; }
-      else if (r.ok) { $('pmFb').style.color='var(--lime)'; $('pmFb').textContent = g.suspense ? 'INDOVINATO! 🎉' : 'INDOVINATO! +'+r.pts; if(navigator.vibrate) navigator.vibrate([70,50,100]); }
+      else if (r.ok) { $('pmFb').style.color='var(--lime)'; $('pmFb').textContent='INDOVINATO! +'+r.pts; if(navigator.vibrate) navigator.vibrate([70,50,100]); }
       else { $('pmFb').style.color='var(--red)'; $('pmFb').textContent='SBAGLIATO 💥'; }
       $('pmStatus').textContent = `LA CARTA ERA IN POSIZIONE ${m.targetIdx+1}!`;
     }
@@ -3878,9 +3878,9 @@ function showPlayerSeed(g){
       $('psStatus').textContent = `IL SEME VINCENTE ERA ${SUITS[lr.win]}!`;
       $('psFb').style.display='block';
       if (!r) { $('psFb').style.color='var(--muted)'; $('psFb').textContent='NON HAI SCOMMESSO'; }
-      else if (r.ok) { $('psFb').style.color='var(--lime)'; $('psFb').textContent = g.suspense ? 'INDOVINATO! 🎉' : 'INDOVINATO! +'+r.pts;
+      else if (r.ok) { $('psFb').style.color='var(--lime)'; $('psFb').textContent='INDOVINATO! +'+r.pts;
         if (P.seedFbAt !== lr.at) { P.seedFbAt = lr.at; if(navigator.vibrate) navigator.vibrate([60,40,60]); } }
-      else { $('psFb').style.color='var(--red)'; $('psFb').textContent = g.suspense ? 'SBAGLIATO 💥' : 'SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
+      else { $('psFb').style.color='var(--red)'; $('psFb').textContent='SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
     } else {
       $('psStatus').textContent = 'OCCHI SUL TAVOLO...';
       $('psFb').style.display='none';
@@ -3929,9 +3929,9 @@ function showPlayerCards(g){
       $('pcStatus').textContent = `LA CARTA ERA ${lr.col.toUpperCase()}!`;
       $('pcFb').style.display='block';
       if (!r) { $('pcFb').style.color='var(--muted)'; $('pcFb').textContent='NON HAI SCOMMESSO'; }
-      else if (r.ok) { $('pcFb').style.color='var(--lime)'; $('pcFb').textContent = g.suspense ? 'INDOVINATO! 🎉' : 'INDOVINATO! +'+r.pts;
+      else if (r.ok) { $('pcFb').style.color='var(--lime)'; $('pcFb').textContent='INDOVINATO! +'+r.pts;
         if (P.cardsFbAt !== lr.at) { P.cardsFbAt = lr.at; if(navigator.vibrate) navigator.vibrate([60,40,60]); } }
-      else { $('pcFb').style.color='var(--red)'; $('pcFb').textContent = g.suspense ? 'SBAGLIATO 💥' : 'SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
+      else { $('pcFb').style.color='var(--red)'; $('pcFb').textContent='SBAGLIATO'+(r.pts<0?' '+r.pts:'')+' 💥'; }
     } else {
       $('pcStatus').textContent = 'OCCHI SUL TAVOLO...';
       $('pcFb').style.display='none';
@@ -4203,6 +4203,12 @@ function showPlayerEnd(g){
   const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
   const pos = arr.findIndex(p=>p.id===P.id)+1;
   showScreen('scrWait');
+  if (g.suspense){
+    // niente spoiler: l'esito lo scoprono tutti insieme quando la regia lo mostra sul maxischermo
+    $('waitMsg').textContent = '🏁 PARTITA FINITA!';
+    $('waitSub').innerHTML = 'Guarda il maxischermo per scoprire la classifica finale... 🎩';
+    return;
+  }
   $('waitMsg').textContent = pos===1 ? '👑 HAI VINTO, BOSS!' : pos===2 ? '🥈 SECONDO POSTO!' : pos===3 ? '🥉 TERZO POSTO!' : 'PARTITA FINITA!';
   $('waitSub').innerHTML = `Sei arrivato <b style="color:var(--gold)">${pos}°</b> con ${((g.players||{})[P.id]||{}).score||0} punti · Grazie per aver giocato 🎩`;
   if (pos<=3) confetti();
