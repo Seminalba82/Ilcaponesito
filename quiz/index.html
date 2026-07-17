@@ -224,6 +224,13 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .ptsRowInput{padding:8px 6px !important; font-size:14px !important; border-radius:10px !important; flex-shrink:0;}
 
 /* ===== ANTEPRIMA PROIETTORE SU PC ===== */
+/* ===== GALLERIA FOTO (Pubblica Foto) ===== */
+.pgGrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(84px,1fr)); gap:8px; max-height:280px; overflow-y:auto;}
+.pgThumb{position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; border:2px solid rgba(157,77,255,.35); cursor:pointer;}
+.pgThumb img{width:100%; height:100%; object-fit:cover; display:block;}
+.pgThumb:hover{border-color:var(--cyan);}
+.pgDel{position:absolute; top:2px; right:2px; width:22px; height:22px; border-radius:50%; border:0; background:rgba(0,0,0,.7); color:#fff; font-size:12px; cursor:pointer; z-index:2;}
+
 #projPreview{position:fixed; right:14px; bottom:74px; width:360px; height:212px; z-index:55; display:none;
   border:3px solid var(--cyan); border-radius:14px; overflow:hidden; background:#000;
   box-shadow:0 0 26px rgba(0,240,255,.55), 0 14px 30px rgba(0,0,0,.7);}
@@ -700,7 +707,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v9.8</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v10.0</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1536,8 +1543,11 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrPuzzle">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🧩 PUZZLE</div></div>
   <div class="panel mt" style="max-width:520px" id="puzSetup">
-    <div class="label">Carica la foto del puzzle</div>
-    <input type="file" id="puzFile" accept="image/*">
+    <div class="label">Galleria foto puzzle — caricane quante vuoi, restano pronte anche per le prossime serate</div>
+    <input type="file" id="puzFile" accept="image/*" multiple>
+    <div id="puzUploadStatus" class="byline mt" style="display:none; text-transform:none"></div>
+    <div class="pgGrid mt" id="puzGallery"></div>
+    <div class="label mt">Foto selezionata per questo puzzle:</div>
     <img id="puzPreview" style="display:none; max-height:180px; border-radius:10px; margin-top:8px">
     <div class="row mt">
       <div class="grow"><div class="label">Difficoltà</div>
@@ -2142,7 +2152,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 98; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 100; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -5688,18 +5698,53 @@ function renderPuzRanking(el, rows){
 let PUZ = { rows:[] };
 $('puzPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 $('puzTime').innerHTML = [30,45,60,90,120,180,240].map(t=>`<option value="${t}" ${t===60?'selected':''}>${t} secondi</option>`).join('');
+let puzzleGallery = {}; // {id: dataUrl} — galleria persistente delle foto puzzle, sincronizzata con Firebase
+function loadPuzzleGallery(){
+  if (!G) return;
+  G.ref.child('puzzleGallery/photos').once('value').then(s=>{
+    puzzleGallery = s.val() || {};
+    renderPuzzleGallery();
+  });
+}
+function renderPuzzleGallery(){
+  const box = $('puzGallery'); if (!box) return;
+  const ids = Object.keys(puzzleGallery);
+  box.innerHTML = ids.map(id => `
+    <div class="pgThumb" data-id="${id}">
+      <img src="${puzzleGallery[id]}" onclick="selectPuzzlePhoto('${id}')" title="Tocca per usarla in questo puzzle">
+      <button class="pgDel" onclick="deletePuzzleGalleryPhoto('${id}')" title="Elimina dalla galleria">🗑</button>
+    </div>`).join('') || '<div class="byline" style="text-transform:none">Nessuna foto salvata ancora — caricane qualcuna qui sopra, resterà pronta anche la prossima volta.</div>';
+}
+function selectPuzzlePhoto(id){
+  window._puzPhoto = puzzleGallery[id];
+  $('puzPreview').src = puzzleGallery[id]; $('puzPreview').style.display='block';
+}
+function deletePuzzleGalleryPhoto(id){
+  if (!confirm('Eliminare questa foto dalla galleria del puzzle?\nSe la usi spesso, tienila — questo la toglie per sempre.')) return;
+  delete puzzleGallery[id];
+  if (G && G.ref) G.ref.child('puzzleGallery/photos/'+id).remove();
+  renderPuzzleGallery();
+}
 $('puzFile').addEventListener('change', e=>{
-  const f = e.target.files[0]; if (!f) return;
-  if (f.size > 20*1024*1024) { alert('⚠️ Foto troppo grande (max 20 MB prima della compressione).'); e.target.value=''; return; }
+  const files = [...e.target.files]; if (!files.length) return;
+  uploadPuzzlePhotosSequentially(files, 0, files.length);
+});
+function uploadPuzzlePhotosSequentially(files, idx, total){
+  if (idx >= files.length){ $('puzUploadStatus').style.display='none'; $('puzFile').value=''; return; }
+  const f = files[idx];
+  $('puzUploadStatus').style.display='block';
+  $('puzUploadStatus').textContent = `🗜 Comprimo e salvo foto ${idx+1} di ${total}...`;
+  if (f.size > 20*1024*1024){ uploadPuzzlePhotosSequentially(files, idx+1, total); return; }
   // il puzzle si vede grande sul proiettore: lato lungo un filo più alto per mantenere i pezzi leggibili
   compressImageFile(f, {maxDim:1500, quality:0.82, maxBytes:700*1024}).then(res=>{
-    window._puzPhoto = res.dataUrl;
+    const ref = G.ref.child('puzzleGallery/photos').push(res.dataUrl);
+    puzzleGallery[ref.key] = res.dataUrl;
+    window._puzPhoto = res.dataUrl; // l'ultima caricata è subito pronta all'uso
     $('puzPreview').src = res.dataUrl; $('puzPreview').style.display='block';
-    let info = $('puzPreviewInfo');
-    if (!info){ info = document.createElement('div'); info.id='puzPreviewInfo'; info.className='byline'; $('puzPreview').insertAdjacentElement('afterend', info); }
-    info.textContent = `🗜 ${fmtKB(res.origBytes)} → ${fmtKB(res.bytes)} · ${res.width}×${res.height}px`;
-  }).catch(()=> alert('⚠️ Non sono riuscito a leggere questa immagine, riprova con un\'altra foto.'));
-});
+    renderPuzzleGallery();
+  }).catch(()=> alert('⚠️ Non sono riuscito a leggere questa immagine, riprova con un\'altra foto.'))
+    .then(()=> uploadPuzzlePhotosSequentially(files, idx+1, total));
+}
 function openPuzzle(){
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(($('puzTimerBar')||{})._int);
@@ -5708,6 +5753,7 @@ function openPuzzle(){
   $('puzSetup').style.display='block'; $('puzLive').style.display='none';
   pjSend({type:'puzzleState', msg:'SI PREPARA IL PUZZLE...'});
   showScreen('scrPuzzle');
+  loadPuzzleGallery();
 }
 function puzzleStart(){
   if (!window._puzPhoto) return alert('Carica prima una foto!');
@@ -6361,42 +6407,102 @@ function sendPjMsg(on){
    PUBBLICA FOTO SU PROIETTORE E TELEFONI
 ================================================================ */
 let photoOv = { on:false, data:null };
+let photoGallery = {}; // {id: dataUrl} — cache locale della galleria, sincronizzata con Firebase
+let photoSeq = { active:false, ids:[], idx:0, intervalMs:3000, timer:null };
+
 function modalPjPhoto(){
+  openModal('📷 PUBBLICA FOTO', `<div class="byline" style="text-transform:none">Carico la galleria...</div>`);
+  if (!G) return;
+  G.ref.child('photoGallery/photos').once('value').then(s=>{
+    photoGallery = s.val() || {};
+    renderPhotoModal();
+  });
+}
+function renderPhotoModal(){
+  const ids = Object.keys(photoGallery);
+  const grid = ids.map(id => `
+    <div class="pgThumb" data-id="${id}">
+      <img src="${photoGallery[id]}" onclick="publishSinglePhoto('${id}')" title="Tocca per pubblicarla da sola">
+      <button class="pgDel" onclick="deleteGalleryPhoto('${id}')" title="Elimina dalla galleria">🗑</button>
+    </div>`).join('') || '<div class="byline" style="text-transform:none">Nessuna foto ancora caricata — aggiungine qualcuna qui sotto (anche più di una insieme, es. tutti gli sponsor).</div>';
+
   openModal('📷 PUBBLICA FOTO', `
-    <div class="label" style="text-transform:none; letter-spacing:0">Mostra una foto a schermo intero su videoproiettore e telefoni — utile per far vedere un'immagine prima di lanciare una domanda.</div>
-    <input type="file" id="pjPhotoFile" accept="image/*" class="mt">
-    <div id="pjPhotoModalPreview" class="mt"></div>
+    <div class="label" style="text-transform:none; letter-spacing:0">Carica quante foto vuoi — poi tocca una foto per pubblicarla da sola, oppure avvia la sequenza per farle scorrere tutte, sul proiettore e su ogni telefono.</div>
+    <input type="file" id="pjPhotoFile" accept="image/*" multiple class="mt">
+    <div id="pjPhotoUploadStatus" class="byline mt" style="display:none; text-transform:none"></div>
+    <div class="pgGrid mt" id="pgGrid">${grid}</div>
+    <div class="label mt">Sequenza (mostra tutte le foto della galleria a rotazione)</div>
     <div class="row mt">
-      <button class="btn mg grow" id="pjPhotoBtnShow" onclick="sendPjPhoto(true)" ${photoOv.data?'':'disabled'}>📺 MOSTRA</button>
-      <button class="btn ghost" onclick="sendPjPhoto(false)">🚫 Nascondi</button>
-    </div>`);
-  if (photoOv.data) $('pjPhotoModalPreview').innerHTML = `<img src="${photoOv.data}" style="max-height:140px; border-radius:8px">`;
+      <div class="grow"><div class="label">Cambio foto ogni</div><select id="pjSeqInterval"></select></div>
+      <button class="btn mg" id="pjSeqBtn" onclick="togglePhotoSequence()">${photoSeq.active?'⏹ FERMA SEQUENZA':'▶ AVVIA SEQUENZA'}</button>
+    </div>
+    <div class="row mt"><button class="btn ghost grow" onclick="sendPjPhoto(false)">🚫 Nascondi tutto</button></div>`);
+  const sel = $('pjSeqInterval');
+  const opts = [1,2,3,4,5,7,10,15,20,30,45,60];
+  const curSec = photoSeq.intervalMs/1000;
+  sel.innerHTML = opts.map(s=>`<option value="${s}" ${s===curSec?'selected':''}>${s} second${s>1?'i':'o'}</option>`).join('');
 }
 document.addEventListener('change', e=>{
   if (e.target && e.target.id === 'pjPhotoFile'){
-    const f = e.target.files[0]; if (!f) return;
-    if (f.size > 20*1024*1024) { alert('⚠️ Foto troppo grande (max 20 MB prima della compressione).'); e.target.value=''; return; }
-    $('pjPhotoModalPreview').innerHTML = '<div class="byline">🗜 Comprimo la foto...</div>';
-    $('pjPhotoBtnShow').disabled = true;
-    compressImageFile(f, {maxDim:1600, quality:0.85, maxBytes:750*1024}).then(res=>{
-      photoOv.data = res.dataUrl;
-      $('pjPhotoModalPreview').innerHTML = `<img src="${res.dataUrl}" style="max-height:140px; border-radius:8px">
-        <div class="byline mt">🗜 ${fmtKB(res.origBytes)} → ${fmtKB(res.bytes)} · ${res.width}×${res.height}px</div>`;
-      $('pjPhotoBtnShow').disabled = false;
-    }).catch(()=>{ alert('⚠️ Non sono riuscito a leggere questa immagine, riprova con un\'altra foto.'); $('pjPhotoModalPreview').innerHTML=''; });
+    const files = [...e.target.files]; if (!files.length) return;
+    uploadPhotosSequentially(files, 0, files.length);
   }
 });
-function sendPjPhoto(on){
+function uploadPhotosSequentially(files, idx, total){
+  if (idx >= files.length){ $('pjPhotoUploadStatus').style.display='none'; $('pjPhotoFile').value=''; return; }
+  const f = files[idx];
+  $('pjPhotoUploadStatus').style.display='block';
+  $('pjPhotoUploadStatus').textContent = `🗜 Comprimo e carico foto ${idx+1} di ${total}...`;
+  if (f.size > 20*1024*1024){ uploadPhotosSequentially(files, idx+1, total); return; }
+  compressImageFile(f, {maxDim:1600, quality:0.85, maxBytes:750*1024}).then(res=>{
+    const ref = G.ref.child('photoGallery/photos').push(res.dataUrl);
+    photoGallery[ref.key] = res.dataUrl;
+    renderPhotoModal();
+  }).catch(()=>{}).then(()=> uploadPhotosSequentially(files, idx+1, total));
+}
+function deleteGalleryPhoto(id){
+  if (!confirm('Eliminare questa foto dalla galleria?')) return;
+  delete photoGallery[id];
+  if (G && G.ref) G.ref.child('photoGallery/photos/'+id).remove();
+  photoSeq.ids = photoSeq.ids.filter(x=>x!==id);
+  renderPhotoModal();
+}
+function publishSinglePhoto(id){
+  stopPhotoSequence();
+  photoOv.data = photoGallery[id];
+  sendPjPhoto(true, true);
+  renderPhotoModal();
+}
+function togglePhotoSequence(){
+  if (photoSeq.active){ stopPhotoSequence(); sendPjPhoto(false, true); renderPhotoModal(); return; }
+  const ids = Object.keys(photoGallery);
+  if (!ids.length) return alert('Carica prima almeno una foto!');
+  const secs = +$('pjSeqInterval').value || 3;
+  photoSeq.active = true; photoSeq.ids = ids; photoSeq.idx = 0; photoSeq.intervalMs = secs*1000;
+  showSeqPhoto();
+  clearInterval(photoSeq.timer);
+  photoSeq.timer = setInterval(()=>{ photoSeq.idx = (photoSeq.idx+1) % photoSeq.ids.length; showSeqPhoto(); }, photoSeq.intervalMs);
+  renderPhotoModal();
+}
+function showSeqPhoto(){
+  photoOv.data = photoGallery[photoSeq.ids[photoSeq.idx]];
+  sendPjPhoto(true, true);
+}
+function stopPhotoSequence(){
+  clearInterval(photoSeq.timer);
+  photoSeq.timer = null; photoSeq.active = false;
+}
+function sendPjPhoto(on, keepOpen){
   if (on && !photoOv.data) return alert('Carica prima una foto!');
+  if (!on) stopPhotoSequence();
   photoOv.on = !!on;
   $('hbPhoto').classList.toggle('on', photoOv.on);
   const payload = { on:photoOv.on, data: photoOv.on ? photoOv.data : null };
   if (bc) { try{ bc.postMessage({type:'photoOverlay', ...payload}); }catch(e){} }
   if (G && G.ref) G.ref.child('projPhoto').set(payload).catch(()=>{
-    // se la foto è troppo pesante per una singola scrittura, tento un fallback ancora più compresso
     if (photoOv.on) alert('⚠️ Foto troppo pesante per essere pubblicata, riprova con un\'altra immagine.');
   });
-  closeModal();
+  if (!keepOpen) closeModal();
 }
 
 /* ================================================================
