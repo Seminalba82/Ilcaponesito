@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TOMBOLA BY IL CAPONE QUIZ</title>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#0b0614; --bg2:#150a26; --panel:#1c1033;
+  --magenta:#ff2e9a; --cyan:#00f0ff; --lime:#b6ff2e; --gold:#ffc93c; --viola:#9d4dff;
+  --red:#ff3b3b; --white:#ffffff; --muted:#b9a8d9;
+  --r:22px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Outfit',sans-serif; color:var(--white);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(157,77,255,.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(0,240,255,.18), transparent 60%),
+    radial-gradient(700px 400px at 50% 50%, rgba(255,46,154,.10), transparent 70%),
+    var(--bg);
+  min-height:100%; overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.35;
+  background-image:linear-gradient(rgba(157,77,255,.12) 1px,transparent 1px),
+                   linear-gradient(90deg, rgba(157,77,255,.12) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse at 50% 45%, black 30%, transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 45%, black 30%, transparent 75%);
+}
+.screen{display:none; position:relative; z-index:1; min-height:100vh; padding:22px; max-width:1100px; margin:0 auto;}
+.screen.active{display:flex; flex-direction:column; align-items:center;}
+
+.btn{
+  font-family:'Bungee',cursive; font-size:16px; color:#1a0b00; cursor:pointer; border:none;
+  padding:14px 24px; border-radius:18px; position:relative; text-transform:uppercase; letter-spacing:1px;
+  background:linear-gradient(180deg,#ffe08a,var(--gold));
+  box-shadow:0 7px 0 #8a5f00, 0 10px 0 rgba(0,0,0,.45), 0 14px 30px rgba(255,201,60,.35);
+  transition:transform .08s, box-shadow .08s; user-select:none;
+}
+.btn:active{transform:translateY(6px); box-shadow:0 1px 0 #8a5f00, 0 3px 0 rgba(0,0,0,.45), 0 6px 14px rgba(255,201,60,.25);}
+.btn.cy{background:linear-gradient(180deg,#9ffbff,var(--cyan)); box-shadow:0 7px 0 #007e8a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,240,255,.35); color:#00232a;}
+.btn.cy:active{box-shadow:0 1px 0 #007e8a,0 3px 0 rgba(0,0,0,.45),0 6px 14px rgba(0,240,255,.25);}
+.btn.mg{background:linear-gradient(180deg,#ff8ac6,var(--magenta)); box-shadow:0 7px 0 #8a0050,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(255,46,154,.4); color:#fff;}
+.btn.mg:active{box-shadow:0 1px 0 #8a0050,0 3px 0 rgba(0,0,0,.45),0 6px 14px rgba(255,46,154,.3);}
+.btn.lm{background:linear-gradient(180deg,#e2ff9a,var(--lime)); box-shadow:0 7px 0 #5d8a00,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(182,255,46,.35); color:#1c2a00;}
+.btn.lm:active{box-shadow:0 1px 0 #5d8a00,0 3px 0 rgba(0,0,0,.45),0 6px 14px rgba(182,255,46,.25);}
+.btn.ghost{background:transparent; color:var(--muted); box-shadow:inset 0 0 0 2px rgba(185,168,217,.4); font-size:13px; padding:10px 18px;}
+.btn.ghost:active{transform:translateY(2px);}
+.btn.small{font-size:12px; padding:9px 15px; border-radius:14px; box-shadow:0 5px 0 rgba(0,0,0,.5);}
+.btn:disabled{opacity:.4; pointer-events:none;}
+
+.panel{
+  width:100%; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)), var(--panel);
+  border:1px solid rgba(157,77,255,.35); border-radius:var(--r); padding:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.label{font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); margin:12px 0 6px;}
+input[type=text],input[type=number]{
+  width:100%; font-family:'Outfit',sans-serif; font-size:17px; font-weight:600; color:#fff;
+  background:rgba(11,6,20,.8); border:2px solid rgba(157,77,255,.4); border-radius:14px; padding:13px 15px; outline:none;
+}
+input:focus{border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,240,255,.2), 0 0 18px rgba(0,240,255,.25);}
+
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+.grow{flex:1;}
+.center{text-align:center;}
+.mt{margin-top:16px;} .mtb{margin-top:26px;}
+.pill{font-family:'Bungee'; font-size:13px; color:var(--lime); text-shadow:0 0 10px rgba(182,255,46,.6);}
+.playersLobby{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:14px;}
+.pChip{font-weight:900; padding:9px 16px; border-radius:99px; font-size:14px;
+  background:linear-gradient(180deg,rgba(157,77,255,.35),rgba(157,77,255,.15));
+  border:2px solid var(--viola); box-shadow:0 0 16px rgba(157,77,255,.5); animation:pop .3s;}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.gameCode{font-family:'Bungee'; font-size:clamp(36px,8vw,72px); letter-spacing:10px; color:var(--lime);
+  text-shadow:0 0 24px rgba(182,255,46,.7),0 6px 0 #3f5e00; text-align:center;}
+#qrBox,#qrBoxPj{background:#fff; padding:12px; border-radius:16px; box-shadow:0 0 30px rgba(0,240,255,.5), 0 10px 0 rgba(0,0,0,.4); display:inline-block;}
+.warn{background:rgba(255,59,59,.12); border:2px solid var(--red); border-radius:14px; padding:14px; font-weight:700; font-size:14px; color:#ffb3b3;}
+.byline{font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--muted); font-size:clamp(10px,2vw,13px); margin-top:6px; text-align:center;}
+.byline b{color:var(--cyan); text-shadow:0 0 10px rgba(0,240,255,.7);}
+.leadRow{display:flex; align-items:center; gap:12px; padding:9px 16px; margin-top:8px; border-radius:14px;
+  background:linear-gradient(90deg, rgba(157,77,255,.2), rgba(157,77,255,.05));
+  border:1px solid rgba(157,77,255,.35); font-weight:900; font-size:14px; max-width:420px;}
+.leadRow .pts{margin-left:auto; font-family:'Bungee'; color:var(--cyan); font-size:13px;}
+.modeRow{display:flex; gap:10px; margin-top:8px;}
+.modeBtn{flex:1; font-family:'Bungee'; font-size:12px; text-align:center; padding:12px 8px; border-radius:14px; cursor:pointer;
+  background:rgba(0,0,0,.4); border:2px solid rgba(157,77,255,.4); color:var(--muted); transition:all .15s;}
+.modeBtn.sel{border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 14px rgba(0,240,255,.4); background:rgba(0,240,255,.1);}
+
+/* ===== TOMBOLA ===== */
+.tomTitle{font-family:'Bungee'; font-size:clamp(22px,4vw,44px); color:var(--gold); text-align:center;
+  text-shadow:0 0 18px rgba(255,201,60,.6), 0 4px 0 #7a4b00;}
+.tomTitle small{display:block; font-family:'Outfit'; font-weight:900; font-size:.34em; letter-spacing:3px; color:var(--muted); text-shadow:none;}
+.tomLayout{display:flex; gap:16px; width:100%; max-width:1250px; align-items:flex-start; justify-content:center; flex-wrap:wrap;}
+.tabellone{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; flex:1 1 640px; max-width:820px;}
+.tomBlock{display:grid; grid-template-columns:repeat(5,1fr); gap:4px; background:rgba(11,6,20,.75);
+  border:2px solid rgba(157,77,255,.4); border-radius:12px; padding:6px;}
+.tomN{aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:8px;
+  font-family:'Bungee'; font-size:clamp(11px,1.5vw,20px); color:#6d5f8f;
+  background:rgba(0,0,0,.4); border:1px solid rgba(157,77,255,.2); transition:all .25s;}
+.tomN.hit{color:#2a1a00; background:linear-gradient(180deg,#ffe08a,var(--gold)); border-color:#7a4b00;
+  box-shadow:0 0 14px rgba(255,201,60,.7), 0 2px 0 #7a4b00; animation:pop .35s;}
+.tomN.last{outline:3px solid var(--magenta); box-shadow:0 0 20px rgba(255,46,154,.9); transform:scale(1.12); z-index:2;}
+.tomPrizes{flex:0 0 240px; display:flex; flex-direction:column; gap:8px;}
+.tomPrize{background:rgba(11,6,20,.75); border:2px solid rgba(157,77,255,.4); border-radius:12px; padding:8px 12px;}
+.tomPrize .lv{font-family:'Bungee'; font-size:15px; color:var(--cyan);}
+.tomPrize .pz{font-weight:900; font-size:13px; color:var(--gold);}
+.tomPrize .wn{font-weight:700; font-size:12px; color:var(--lime);}
+.tomPrize.won{border-color:var(--lime); box-shadow:0 0 14px rgba(182,255,46,.4);}
+.tomDrawn{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:12px; min-height:40px;}
+.tomBall{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'Bungee'; font-size:15px; color:#2a1a00;
+  background:radial-gradient(circle at 35% 30%, #fff, #ffd76e 45%, #c98a00); box-shadow:0 3px 0 rgba(0,0,0,.5), 0 0 10px rgba(255,201,60,.4);}
+.tomBall.new{transform:scale(1.25); outline:3px solid var(--magenta); box-shadow:0 0 20px rgba(255,46,154,.9); animation:pop .4s;}
+.tomBig{font-family:'Bungee'; font-size:clamp(60px,12vw,120px); color:var(--lime); text-align:center;
+  text-shadow:0 0 30px rgba(182,255,46,.8), 0 6px 0 #3f5e00; min-height:1.1em; line-height:1;}
+#tomBanner{display:none; position:fixed; inset:0; z-index:68; background:rgba(5,2,10,.93); backdrop-filter:blur(6px);
+  flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;}
+#tomBanner.on{display:flex;}
+.cartella{display:grid; grid-template-columns:repeat(9,1fr); gap:4px; background:#0d5c31;
+  border:6px solid #5b3a1e; border-radius:14px; padding:8px; box-shadow:0 10px 0 rgba(0,0,0,.5), 0 0 26px rgba(18,163,82,.35); width:100%;}
+.carN{aspect-ratio:5/4; display:flex; align-items:center; justify-content:center; border-radius:6px;
+  font-family:'Bungee'; font-size:clamp(13px,3.6vmin,24px); color:#2a1a00;
+  background:linear-gradient(180deg,#fff8e0,#f2e3b8); border:1px solid #c9b06a;}
+.carN.empty{background:rgba(0,0,0,.28); border-color:transparent;}
+.carN.hit{color:#fff; background:radial-gradient(circle at 35% 30%, #ff7a95, #c2183d 70%); border-color:#6e0e21;
+  box-shadow:0 0 12px rgba(255,46,154,.8); animation:pop .35s;}
+.carN.markable{outline:3px dashed var(--cyan); cursor:pointer; animation:blink 1s infinite;}
+@keyframes blink{0%,100%{outline-color:var(--cyan)}50%{outline-color:transparent}}
+.rotWrap{width:100%; max-width:460px;}
+#pjWait{display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; text-align:center;}
+#pjWait.on{display:flex;}
+</style>
+</head>
+<body>
+
+<!-- ==================== HOST ==================== -->
+<div class="screen" id="scrHost">
+  <div class="tomTitle">TOMBOLA<small>BY IL CAPONE QUIZ · DI ALBERTO SEMINERIO</small></div>
+  <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
+    ⚠️ <b>Firebase non raggiungibile.</b> Controlla la connessione e ricarica la pagina.
+  </div>
+  <div class="row mtb" style="justify-content:center; gap:26px">
+    <div class="center"><div id="qrBox"></div><div class="label center mt">INQUADRA PER GIOCARE</div></div>
+    <div class="center">
+      <div class="label center">CODICE PARTITA</div>
+      <div class="gameCode" id="hostCode">····</div>
+      <div class="label center mt">Giocatori collegati: <span id="hostCount" class="pill">0</span></div>
+    </div>
+  </div>
+  <div class="playersLobby" id="hostPlayers"></div>
+  <div class="row mt" style="justify-content:center">
+    <button class="btn small ghost" onclick="openProjector()">📺 Apri proiettore</button>
+    <button class="btn small ghost" onclick="copyPlayerLink()">🔗 Copia link giocatori</button>
+  </div>
+
+  <!-- SETUP -->
+  <div class="panel mtb" style="max-width:640px" id="tomSetup">
+    <div class="label">Premi per ogni combinazione (punti + eventuale premio extra: birre, gadget...)</div>
+    <div id="tomPrizeInputs"></div>
+    <div class="label mt">Marcatura numeri sullo smartphone</div>
+    <div class="modeRow">
+      <div class="modeBtn sel" id="modeAuto" onclick="setMode('auto')">⚡ AUTOMATICA</div>
+      <div class="modeBtn" id="modeManual" onclick="setMode('manual')">👆 MANUALE</div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="tombolaStart()">🎱 GENERA LE CARTELLE E VIA!</button>
+    <div class="label mt" style="text-transform:none; letter-spacing:0">Ogni partecipante collegato riceve una cartella unica sul telefono. Chi entra dopo l'avvio non ha la cartella per questa partita.</div>
+  </div>
+
+  <!-- LIVE -->
+  <div id="tomLive" style="display:none; width:100%">
+    <div class="tomBig" id="tomLastNum">—</div>
+    <div class="row" style="justify-content:center">
+      <button class="btn mg" id="tomBtnDraw" onclick="tombolaDraw()">🎱 ESTRAI NUMERO</button>
+    </div>
+    <div class="tomDrawn" id="tomDrawnHost"></div>
+    <div class="tomLayout mt">
+      <div class="tabellone" id="tomBoardHost"></div>
+      <div class="tomPrizes" id="tomPrizesHost"></div>
+    </div>
+    <div class="mtb" style="width:100%; max-width:420px" id="hostLead"></div>
+    <div class="row mtb"><button class="btn ghost" onclick="newRound()">↩ Nuova partita (stessi giocatori)</button></div>
+  </div>
+</div>
+
+<!-- ==================== PLAYER: JOIN ==================== -->
+<div class="screen" id="scrJoin">
+  <div class="tomTitle">TOMBOLA<small>BY IL CAPONE QUIZ · DI ALBERTO SEMINERIO</small></div>
+  <div class="panel mtb" style="max-width:420px">
+    <div class="label">Il tuo nome</div>
+    <input type="text" id="joinName" maxlength="18" placeholder="Es. Lucky Luciano">
+    <button class="btn mg mt" style="width:100%" onclick="joinGame()">🎩 ENTRA IN PARTITA</button>
+    <div id="joinErr" class="warn mt" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ==================== PLAYER: ATTESA ==================== -->
+<div class="screen" id="scrWait">
+  <div class="tomTitle">TOMBOLA<small>BY IL CAPONE QUIZ</small></div>
+  <div class="panel mtb center" style="max-width:420px">
+    <div class="label" style="font-size:16px; letter-spacing:1px; text-transform:none" id="waitMsg">Sei dentro!</div>
+    <div class="label mt" style="text-transform:none; letter-spacing:0" id="waitSub">Guarda lo schermo... si parte tra poco</div>
+  </div>
+</div>
+
+<!-- ==================== PLAYER: CARTELLA ==================== -->
+<div class="screen" id="scrPlayer" style="justify-content:center">
+  <div class="rotWrap" id="playerRot">
+    <div class="tomTitle" style="font-size:clamp(16px,4vmin,26px)">TOMBOLA<small>BY IL CAPONE QUIZ</small></div>
+    <div class="row mt" style="justify-content:space-between">
+      <div class="pill" id="ptName" style="color:var(--gold)"></div>
+      <div class="pill" id="ptLast" style="color:var(--lime)"></div>
+    </div>
+    <div class="cartella mt" id="ptCard"></div>
+    <div class="byline mt center" id="ptMsg" style="letter-spacing:2px"></div>
+    <div class="mt center" style="width:100%; max-width:420px; margin:10px auto 0">
+      <div class="label center">ULTIMI NUMERI ESTRATTI</div>
+      <div class="tomDrawn" id="ptDrawn"></div>
+      <div class="label center mt">PREMI IN PALIO</div>
+      <div class="tomPrizes" id="ptPrizes" style="max-width:340px; margin:0 auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PROIETTORE ==================== -->
+<div class="screen" id="scrProj">
+  <div id="pjWait">
+    <div class="tomTitle" style="font-size:clamp(30px,6vw,64px)">TOMBOLA<small style="font-size:.3em">BY IL CAPONE QUIZ · DI ALBERTO SEMINERIO</small></div>
+    <div class="row mtb" style="justify-content:center; gap:30px">
+      <div id="qrBoxPj"></div>
+      <div class="center">
+        <div class="label center">CODICE PARTITA</div>
+        <div class="gameCode" id="pjCode">····</div>
+        <div class="label center mt">Giocatori collegati: <span id="pjCount" class="pill">0</span></div>
+      </div>
+    </div>
+  </div>
+  <div id="pjLive" style="display:none; width:100%">
+    <div class="tomTitle" style="font-size:clamp(24px,4vw,48px)">TOMBOLA<small>BY IL CAPONE QUIZ</small></div>
+    <div class="tomLayout mt">
+      <div class="tabellone" id="tomBoardPj"></div>
+      <div class="tomPrizes" id="tomPrizesPj"></div>
+    </div>
+    <div class="tomDrawn" id="tomDrawnPj"></div>
+  </div>
+</div>
+<div id="tomBanner">
+  <div class="tomTitle" id="tbLevel" style="font-size:clamp(34px,7vw,90px)"></div>
+  <div class="byline mt" style="font-size:clamp(14px,2vw,22px)">DALLE CARTELLE DI</div>
+  <div class="tomTitle" id="tbNames" style="font-size:clamp(28px,5.5vw,60px); color:var(--white)"></div>
+  <div class="pill mt" id="tbPrize" style="font-size:clamp(16px,2.4vw,28px)"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const firebaseConfig = {
+  apiKey: "AIzaSyAVTrq0PCEH7HK5VEHK88m7b-Qgdf9nGmE",
+  authDomain: "il-capone-quiz.firebaseapp.com",
+  databaseURL: "https://il-capone-quiz-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "il-capone-quiz",
+};
+let db = null, fbOK = true;
+try { firebase.initializeApp(firebaseConfig); db = firebase.database(); } catch(e){ fbOK = false; }
+
+function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+function randCode(){ const A='ABCDEFGHJKLMNPQRSTUVWXYZ'; let c=''; for(let i=0;i<4;i++) c+=A[Math.floor(Math.random()*A.length)]; return c; }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active'); window.scrollTo(0,0);
+  if (document.body.classList.contains('proj')) { pjFitScreen(); setTimeout(pjFitScreen,100); pjWatchActiveScreen(); }
+}
+let pjFitObserver = null;
+function pjFitScreen(){
+  if (!document.body.classList.contains('proj')) return;
+  const el = document.querySelector('.screen.active');
+  if (!el) return;
+  el.style.minHeight='auto'; el.style.position='static'; el.style.margin='0';
+  const natW = el.scrollWidth, natH = el.scrollHeight;
+  if (!natW || !natH) { el.style.position='absolute'; return; }
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let scale = Math.min((vw*0.97)/natW, (vh*0.97)/natH, 2.6);
+  el.style.position='absolute'; el.style.margin='0';
+  el.style.left = Math.max(0,(vw-natW*scale)/2)+'px';
+  el.style.top = Math.max(0,(vh-natH*scale)/2)+'px';
+  el.style.transformOrigin='top left';
+  el.style.transform = `scale(${scale})`;
+  const rect = el.getBoundingClientRect();
+  if (rect.width > vw*0.99 || rect.height > vh*0.99){
+    const correction = Math.min((vw*0.97)/rect.width, (vh*0.97)/rect.height);
+    scale = scale*correction;
+    el.style.left = Math.max(0,(vw-natW*scale)/2)+'px';
+    el.style.top = Math.max(0,(vh-natH*scale)/2)+'px';
+    el.style.transform = `scale(${scale})`;
+  }
+}
+function pjWatchActiveScreen(){
+  if (pjFitObserver) pjFitObserver.disconnect();
+  const el = document.querySelector('.screen.active');
+  if (!el) return;
+  let t;
+  pjFitObserver = new MutationObserver(()=>{ clearTimeout(t); t=setTimeout(pjFitScreen,80); });
+  pjFitObserver.observe(el, { childList:true, subtree:true, characterData:true, attributes:true });
+}
+window.addEventListener('resize', ()=>{ if (document.body.classList.contains('proj')) pjFitScreen(); });
+
+/* ================================================================
+   MOTORE TOMBOLA — cartelle, tabellone, render (uguale al gioco originale)
+================================================================ */
+const TOM_LEVELS = [['ambo',2,'AMBO'],['terno',3,'TERNO'],['quaterna',4,'QUATERNA'],['cinquina',5,'CINQUINA'],['tombola',15,'TOMBOLA']];
+const TOM_DEFAULTS = { ambo:100, terno:200, quaterna:300, cinquina:500, tombola:1000 };
+function genCartella(){
+  const counts = Array(9).fill(1); let extra = 6;
+  while (extra>0){ const c = Math.floor(Math.random()*9); if (counts[c]<3){ counts[c]++; extra--; } }
+  const rowsOf = Array.from({length:9},()=>[]), cap=[5,5,5];
+  const order = [...Array(9).keys()].sort((a,b)=>counts[b]-counts[a]);
+  for (const c of order){
+    const rows = [0,1,2].sort((a,b)=> (cap[b]-cap[a]) || Math.random()-.5).slice(0,counts[c]);
+    rows.forEach(r=>{ cap[r]--; rowsOf[c].push(r); });
+  }
+  if (cap.some(x=>x!==0)) return genCartella();
+  const grid = [Array(9).fill(0),Array(9).fill(0),Array(9).fill(0)];
+  for (let c=0;c<9;c++){
+    const lo = c===0?1:c*10, hi = c===8?90:c*10+9;
+    const pool = []; for(let n=lo;n<=hi;n++) pool.push(n);
+    const picked = [];
+    for (let k=0;k<counts[c];k++) picked.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+    picked.sort((a,b)=>a-b);
+    rowsOf[c].sort((a,b)=>a-b).forEach((r,idx)=> grid[r][c]=picked[idx]);
+  }
+  return grid;
+}
+function renderTabellone(el, drawnSet, lastN){
+  if (!el._built){
+    el._built = true;
+    let html='';
+    for (let b=0;b<6;b++){
+      html += '<div class="tomBlock">';
+      for (let n=b*15+1;n<=b*15+15;n++) html += `<div class="tomN" data-n="${n}">${n}</div>`;
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  }
+  el.querySelectorAll('.tomN').forEach(c=>{
+    const n = +c.dataset.n;
+    c.classList.toggle('hit', drawnSet.has(n));
+    c.classList.toggle('last', n===lastN);
+  });
+}
+function renderTomPrizes(el, prizes, won){
+  el.innerHTML = [...TOM_LEVELS].reverse().map(([k,,label])=>{
+    const p = prizes[k]||{}, w = (won||{})[k];
+    return `<div class="tomPrize ${w?'won':''}"><div class="lv">${label}</div>
+      <div class="pz">${p.pts||0} punti${p.txt?' + '+esc(p.txt):''}</div>
+      ${w?`<div class="wn">✔ ${esc((w.names||[]).join(', '))}</div>`:''}</div>`;
+  }).join('');
+}
+function renderTomDrawn(el, drawn){
+  const last15 = (drawn||[]).slice(-15);
+  el.innerHTML = last15.map((n,i)=>`<div class="tomBall ${i===last15.length-1?'new':''}">${n}</div>`).join('');
+}
+function renderCartella(el, grid, drawnSet, markMode, markedSet){
+  el.innerHTML = grid.map(row=> row.map(n=>{
+    if (!n) return '<div class="carN empty"></div>';
+    const isDrawn = drawnSet.has(n);
+    const isHit = markMode==='manual' ? (markedSet && markedSet.has(n)) : isDrawn;
+    const markable = markMode==='manual' && isDrawn && !isHit;
+    return `<div class="carN ${isHit?'hit':''} ${markable?'markable':''}" ${markMode==='manual'?`onclick="tapNumber(${n})"`:''}>${n}</div>`;
+  }).join('')).join('');
+}
+
+/* ================================================================
+   HOST — REGIA
+================================================================ */
+let G = null, TOM = {};
+function hostInit(){
+  if (!fbOK) { $('fbWarn').style.display='block'; return; }
+  const code = randCode();
+  G = { code, ref: db.ref('caponetombola/games/'+code) };
+  G.ref.set({ status:'lobby', markMode:'auto', created:Date.now() });
+  G.ref.onDisconnect().remove();
+  $('hostCode').textContent = code;
+  const url = location.origin + location.pathname + '?g=' + code;
+  G.url = url;
+  $('qrBox').innerHTML=''; new QRCode($('qrBox'), { text:url, width:190, height:190, colorDark:'#0b0614' });
+  G.ref.child('players').on('value', s=>{
+    const p = s.val()||{}; const arr = Object.values(p);
+    $('hostCount').textContent = arr.length;
+    $('hostPlayers').innerHTML = arr.map(x=>`<div class="pChip">${esc(x.name)}</div>`).join('');
+  });
+  renderPrizeInputs();
+  showScreen('scrHost');
+}
+function renderPrizeInputs(){
+  $('tomPrizeInputs').innerHTML = [...TOM_LEVELS].reverse().map(([k,,label])=>`
+    <div class="row mt"><b style="font-family:'Bungee'; min-width:110px; color:var(--cyan); font-size:14px">${label}</b>
+      <input type="number" id="tomPts_${k}" value="${TOM_DEFAULTS[k]}" min="0" style="width:90px; text-align:center">
+      <input type="text" id="tomTxt_${k}" class="grow" placeholder="Premio extra (es. birra media 🍺)" maxlength="30"></div>`).join('');
+}
+let curMode = 'auto';
+function setMode(m){
+  curMode = m;
+  $('modeAuto').classList.toggle('sel', m==='auto');
+  $('modeManual').classList.toggle('sel', m==='manual');
+}
+function tombolaStart(){
+  const prizes = {};
+  TOM_LEVELS.forEach(([k])=> prizes[k] = { pts: Math.max(0,+$('tomPts_'+k).value||0), txt: $('tomTxt_'+k).value.trim() });
+  G.ref.child('players').once('value').then(ps=>{
+    const players = ps.val()||{};
+    const cards = {}, seen = new Set();
+    for (const pid in players){
+      let grid, key;
+      do { grid = genCartella(); key = grid.flat().filter(Boolean).join(','); } while (seen.has(key));
+      seen.add(key);
+      cards[pid] = { r: grid };
+    }
+    TOM = { prizes, cards, drawn:[], won:{}, remaining: Array.from({length:90},(_,i)=>i+1) };
+    G.ref.update({ status:'play', markMode:curMode, tombola:{ prizes, cards, drawn:null, won:null, lastWin:null } });
+    $('tomSetup').style.display='none'; $('tomLive').style.display='block';
+    $('tomLastNum').textContent='—'; $('tomBtnDraw').disabled=false;
+    renderTabellone($('tomBoardHost'), new Set(), null);
+    renderTomPrizes($('tomPrizesHost'), prizes, {});
+    renderTomDrawn($('tomDrawnHost'), []);
+    renderLead(players);
+  });
+}
+function renderLead(players){
+  const arr = Object.values(players||{}).sort((a,b)=>(b.score||0)-(a.score||0));
+  $('hostLead').innerHTML = arr.length ? ('<div class="label center">CLASSIFICA PREMI</div>' + arr.map(p=>
+    `<div class="leadRow">${esc(p.name)}<span class="pts">${p.score||0} pt</span></div>`).join('')) : '';
+}
+function tombolaDraw(){
+  if (!TOM.remaining || !TOM.remaining.length) return;
+  const idx = Math.floor(Math.random()*TOM.remaining.length);
+  const n = TOM.remaining.splice(idx,1)[0];
+  TOM.drawn.push(n);
+  const drawnSet = new Set(TOM.drawn);
+  const newWins = [];
+  G.ref.child('players').once('value').then(ps=>{
+    const players = ps.val()||{};
+    const updates = { 'tombola/drawn': TOM.drawn };
+    for (const [k, need, label] of TOM_LEVELS){
+      if (TOM.won[k]) continue;
+      const winners = [];
+      for (const pid in TOM.cards){
+        const grid = TOM.cards[pid].r;
+        const hit = k==='tombola'
+          ? grid.flat().filter(x=>x && drawnSet.has(x)).length >= 15
+          : grid.some(row=> row.filter(x=>x && drawnSet.has(x)).length >= need);
+        if (hit) winners.push(pid);
+      }
+      if (winners.length){
+        const names = winners.map(pid=> (players[pid]||{}).name||'?');
+        const p = TOM.prizes[k];
+        TOM.won[k] = { names, pids:Object.fromEntries(winners.map(w=>[w,1])), pts:p.pts, txt:p.txt };
+        updates['tombola/won/'+k] = TOM.won[k];
+        updates['tombola/lastWin'] = { level:k, label, names, pts:p.pts, txt:p.txt, at:Date.now() };
+        winners.forEach(pid=>{ if (players[pid]) { updates['players/'+pid+'/score'] = (players[pid].score||0) + p.pts; players[pid].score=(players[pid].score||0)+p.pts; } });
+        newWins.push({ level:k, label, names, pts:p.pts, txt:p.txt });
+      }
+    }
+    G.ref.update(updates);
+    $('tomLastNum').textContent = n;
+    renderTabellone($('tomBoardHost'), drawnSet, n);
+    renderTomPrizes($('tomPrizesHost'), TOM.prizes, TOM.won);
+    renderTomDrawn($('tomDrawnHost'), TOM.drawn);
+    renderLead(players);
+    if (TOM.won.tombola || !TOM.remaining.length) $('tomBtnDraw').disabled = true;
+  });
+}
+function newRound(){
+  if (!confirm('Iniziare una nuova tombola con gli stessi giocatori collegati?')) return;
+  G.ref.update({ status:'lobby', tombola:null });
+  $('tomSetup').style.display='block'; $('tomLive').style.display='none';
+  $('tomBoardHost')._built = false;
+  renderPrizeInputs();
+}
+function openProjector(){
+  const url = location.pathname + '?proj=1&g=' + G.code;
+  const w = window.open(url, 'tombolaProj', 'width=1280,height=740');
+  if (!w) alert('Il browser ha bloccato la finestra. Apri manualmente questo link sul computer collegato al proiettore:\n\n' + location.origin + url);
+}
+function copyPlayerLink(){
+  navigator.clipboard && navigator.clipboard.writeText(G.url);
+  alert('Link copiato:\n' + G.url);
+}
+
+/* ================================================================
+   PLAYER
+================================================================ */
+let P = null;
+function initPlayer(code){
+  if (!fbOK) { showScreen('scrJoin'); $('joinErr').style.display='block'; $('joinErr').textContent='⚠️ App non raggiungibile.'; return; }
+  P = { code: code.toUpperCase(), marked: new Set() };
+  $('joinName').addEventListener('keydown', e=>{ if(e.key==='Enter') joinGame(); });
+  if (!tryResume()) showScreen('scrJoin');
+}
+function joinGame(){
+  const name = $('joinName').value.trim();
+  if (!name) return;
+  const gref = db.ref('caponetombola/games/'+P.code);
+  gref.child('status').once('value').then(s=>{
+    if (!s.exists()) { $('joinErr').style.display='block'; $('joinErr').textContent='⚠️ Partita non trovata. Controlla il codice o riscansiona il QR.'; return; }
+    gref.child('players').once('value').then(ps=>{
+      const taken = Object.values(ps.val()||{}).some(p=> norm(p.name)===norm(name));
+      if (taken) { $('joinErr').style.display='block'; $('joinErr').textContent='🎩 "'+name+'" è già in partita! Scegli un altro nome.'; return; }
+      $('joinErr').style.display='none';
+      P.ref = gref;
+      const pref = gref.child('players').push({ name, score:0 });
+      P.id = pref.key; P.name = name;
+      try{ localStorage.setItem('tombola_sess_'+P.code, JSON.stringify({id:P.id, name})); }catch(e){}
+      listenGame();
+    });
+  });
+}
+function tryResume(){
+  let sess = null;
+  try{ sess = JSON.parse(localStorage.getItem('tombola_sess_'+P.code)||'null'); }catch(e){}
+  if (!sess) return false;
+  const gref = db.ref('caponetombola/games/'+P.code);
+  gref.child('players/'+sess.id).once('value').then(sn=>{
+    if (sn.exists()) { P.ref = gref; P.id = sess.id; P.name = sess.name; listenGame(); }
+    else { $('joinName').value = sess.name || ''; showScreen('scrJoin'); }
+  });
+  return true;
+}
+function tapNumber(n){
+  if (!P._lastGame) return;
+  const drawn = (P._lastGame.tombola||{}).drawn||[];
+  if (!drawn.includes(n)) return;
+  if (P.marked.has(n)) P.marked.delete(n); else P.marked.add(n);
+  if (navigator.vibrate) navigator.vibrate(20);
+  showPlayerTombola(P._lastGame);
+}
+function listenGame(){
+  P.ref.on('value', s=>{
+    const g = s.val();
+    P._lastGame = g;
+    if (!g) { showScreen('scrWait'); $('waitMsg').textContent='PARTITA CHIUSA'; $('waitSub').textContent='Grazie per aver giocato!'; P.ref.off(); try{ localStorage.removeItem('tombola_sess_'+P.code); }catch(e){} return; }
+    if (g.status==='lobby') { showScreen('scrWait'); $('waitMsg').textContent='SEI DENTRO, '+P.name.toUpperCase()+'! 🎩'; $('waitSub').textContent='Guarda lo schermo... si parte tra poco'; }
+    else if (g.status==='play') showPlayerTombola(g);
+  });
+}
+function showPlayerTombola(g){
+  const t = g.tombola||{};
+  $('ptName').textContent = P.name;
+  const drawn = t.drawn||[];
+  const drawnSet = new Set(drawn);
+  $('ptLast').textContent = drawn.length ? 'N° '+drawn[drawn.length-1] : 'SI COMINCIA...';
+  const card = (t.cards||{})[P.id];
+  const mode = g.markMode||'auto';
+  if (card && card.r) {
+    renderCartella($('ptCard'), card.r, drawnSet, mode, P.marked);
+    const countedSet = mode==='manual' ? P.marked : drawnSet;
+    const mine = card.r.flat().filter(x=>x && countedSet.has(x)).length;
+    let msg = mode==='manual' ? ('SEGNATI A MANO '+mine+' SU 15') : ('SEGNATI '+mine+' SU 15');
+    const lw = t.lastWin;
+    if (lw && lw.pids && lw.pids[P.id]) {
+      msg = '🎉 '+lw.label+'! +'+lw.pts+' PUNTI'+(lw.txt?' + '+lw.txt:'');
+      if (P.tomWinAt !== lw.at) { P.tomWinAt = lw.at; if (navigator.vibrate) navigator.vibrate([120,60,120,60,200]); }
+    } else if (lw && P.tomLwAt !== lw.at) { P.tomLwAt = lw.at; msg = lw.label+' di '+(lw.names||[]).join(', ')+'!'; }
+    else if (lw) msg = lw.label+' di '+(lw.names||[]).join(', ')+' · '+msg;
+    $('ptMsg').textContent = msg;
+  } else {
+    $('ptCard').innerHTML = '';
+    $('ptMsg').textContent = '⏳ CARTELLE GIÀ DISTRIBUITE — SI GIOCA ALLA PROSSIMA!';
+  }
+  renderTomDrawn($('ptDrawn'), drawn);
+  renderTomPrizes($('ptPrizes'), t.prizes||{}, t.won||{});
+  showScreen('scrPlayer');
+}
+
+/* ================================================================
+   PROIETTORE (?proj=1&g=CODICE)
+================================================================ */
+let pjLastWinAt = null, pjBannerTimeout = null;
+function initProjector(code){
+  document.body.classList.add('proj');
+  if (!fbOK) { $('pjWait').classList.add('on'); return; }
+  const url = location.origin + location.pathname + '?g=' + code;
+  $('qrBoxPj').innerHTML=''; new QRCode($('qrBoxPj'), { text:url, width:220, height:220, colorDark:'#0b0614' });
+  $('pjCode').textContent = code;
+  const ref = db.ref('caponetombola/games/'+code);
+  ref.child('players').on('value', s=>{ $('pjCount').textContent = Object.keys(s.val()||{}).length; });
+  ref.on('value', s=> projRender(s.val()));
+  showScreen('scrProj');
+}
+function projRender(g){
+  if (!g) { $('pjWait').classList.add('on'); $('pjLive').style.display='none'; return; }
+  if (g.status==='lobby') { $('pjWait').classList.add('on'); $('pjLive').style.display='none'; }
+  else if (g.status==='play') {
+    $('pjWait').classList.remove('on'); $('pjLive').style.display='block';
+    const t = g.tombola||{};
+    const drawn = t.drawn||[]; const drawnSet = new Set(drawn);
+    renderTabellone($('tomBoardPj'), drawnSet, drawn.length?drawn[drawn.length-1]:null);
+    renderTomPrizes($('tomPrizesPj'), t.prizes||{}, t.won||{});
+    renderTomDrawn($('tomDrawnPj'), drawn);
+    const lw = t.lastWin;
+    if (lw && lw.at !== pjLastWinAt) {
+      pjLastWinAt = lw.at;
+      $('tbLevel').textContent = '🎉 ' + lw.label + '!';
+      $('tbNames').textContent = (lw.names||[]).join(', ');
+      $('tbPrize').textContent = lw.pts + ' punti' + (lw.txt ? ' + ' + lw.txt : '');
+      $('tomBanner').classList.add('on');
+      clearTimeout(pjBannerTimeout);
+      pjBannerTimeout = setTimeout(()=> $('tomBanner').classList.remove('on'), 4200);
+    }
+  }
+  pjFitScreen();
+}
+
+/* ================================================================
+   AVVIO / ROUTER
+================================================================ */
+const params = new URLSearchParams(location.search);
+const gp = params.get('g');
+if (params.get('proj') && gp) initProjector(gp.toUpperCase());
+else if (gp) initPlayer(gp);
+else hostInit();
+</script>
+</body>
+</html>
