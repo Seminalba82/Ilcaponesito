@@ -231,6 +231,36 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .pgThumb:hover{border-color:var(--cyan);}
 .pgDel{position:absolute; top:2px; right:2px; width:22px; height:22px; border-radius:50%; border:0; background:rgba(0,0,0,.7); color:#fff; font-size:12px; cursor:pointer; z-index:2;}
 
+/* ===== CORSA DEI CAVALLI ===== */
+.hrsTrack{position:relative; width:100%; max-width:900px; margin:14px auto 0; border-radius:16px; overflow:hidden;
+  background:linear-gradient(180deg,#3d2b18 0%,#5a3d20 55%,#3d2b18 100%); border:3px solid var(--gold);
+  box-shadow:0 0 30px rgba(255,201,60,.25), inset 0 0 40px rgba(0,0,0,.5);}
+.hrsTrack::before{content:''; position:absolute; inset:0; background-image:repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 2px, transparent 2px 40px); pointer-events:none;}
+.hrsLane{position:relative; height:15%; border-bottom:2px dashed rgba(255,255,255,.14); min-height:52px;}
+.hrsLane:last-child{border-bottom:none;}
+.hrsName{position:absolute; left:8px; top:4px; font-size:clamp(9px,1.6vw,13px); font-weight:900; color:var(--gold); text-shadow:0 1px 3px #000; z-index:3; letter-spacing:.5px;}
+.hrsHorse{position:absolute; left:0; top:50%; font-size:clamp(24px,4.2vw,42px); transform:translateY(-50%) scaleX(-1); z-index:2; filter:drop-shadow(0 4px 5px rgba(0,0,0,.55)); will-change:left;}
+.hrsHorse .gallop{display:inline-block; animation:hrsGallop .28s ease-in-out infinite alternate;}
+@keyframes hrsGallop{ from{transform:translateY(0) rotate(0deg);} to{transform:translateY(-7px) rotate(-4deg);} }
+.hrsFinish{position:absolute; right:5%; top:0; bottom:0; width:10px; z-index:1;
+  background:repeating-linear-gradient(45deg,#fff 0 7px,#111 7px 14px); box-shadow:0 0 10px #fff;}
+.hrsCountdown{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:10;
+  font-family:'Bungee'; font-size:clamp(60px,14vw,160px); color:var(--gold); text-shadow:0 0 30px rgba(255,201,60,.8), 0 6px 0 #000;
+  background:rgba(0,0,0,.35);}
+.hrsPickGrid{display:grid; grid-template-columns:repeat(auto-fit, minmax(110px,1fr)); gap:10px; width:100%; max-width:760px; margin:14px auto 0;}
+.hrsPick{padding:14px 8px; border-radius:16px; border:3px solid rgba(255,201,60,.35); background:rgba(0,0,0,.32);
+  cursor:pointer; text-align:center; transition:transform .1s, border-color .15s;}
+.hrsPick:active{transform:scale(.96);}
+.hrsPick .ico{font-size:clamp(30px,6vw,46px); display:block;}
+.hrsPick .nm{font-family:'Bungee'; font-size:clamp(11px,2.4vw,15px); color:var(--white); margin-top:4px; word-break:break-word;}
+.hrsPick.mine{border-color:var(--lime); box-shadow:0 0 22px rgba(182,242,46,.65); background:rgba(182,242,46,.1);}
+.hrsPick .cnt{font-size:11px; color:var(--cyan); margin-top:2px;}
+.hypeWrap{width:100%; max-width:320px; margin:14px auto 0; text-align:center;}
+.hypeBarOuter{width:100%; height:30px; border-radius:16px; background:rgba(0,0,0,.55); border:2px solid var(--magenta);
+  overflow:hidden; box-shadow:0 0 16px rgba(255,46,154,.35);}
+.hypeBarFill{height:100%; width:2%; border-radius:16px; background:linear-gradient(90deg,var(--lime),var(--gold),var(--red)); transition:width .07s linear;}
+.hypeLabel{font-size:11px; letter-spacing:2px; color:var(--muted); margin-top:6px; font-weight:800;}
+
 #projPreview{position:fixed; right:14px; bottom:74px; width:360px; height:212px; z-index:55; display:none;
   border:3px solid var(--cyan); border-radius:14px; overflow:hidden; background:#000;
   box-shadow:0 0 26px rgba(0,240,255,.55), 0 14px 30px rgba(0,0,0,.7);}
@@ -707,7 +737,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v10.1</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v10.2</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1793,6 +1823,63 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="feedback mt" id="pmFb" style="display:none; font-size:22px"></div>
 </div>
 
+<!-- ==================== HOST: CORSA DEI CAVALLI ==================== -->
+<div class="screen" id="scrHorses">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🐎 CORSA DEI CAVALLI</div></div>
+  <div class="panel mt" style="max-width:560px" id="hrsSetup">
+    <div class="label">Quanti cavalli?</div>
+    <select id="hrsCount" onchange="hrsRenderNameInputs()">
+      <option value="3">3 cavalli</option>
+      <option value="4" selected>4 cavalli</option>
+      <option value="5">5 cavalli</option>
+      <option value="6">6 cavalli</option>
+    </select>
+    <div class="label mt">Nomi dei cavalli</div>
+    <div id="hrsNameInputs"></div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti a chi indovina</div><select id="hrsPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="hrsPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="hrsStart()">🐎 APRI LE SCOMMESSE!</button>
+  </div>
+  <div id="hrsLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="hrsMsg">🎰 SCOMMESSE APERTE — TOCCA UN CAVALLO DAL TELEFONO!</div>
+    <div class="hrsTrack" id="hrsTrackHost"></div>
+    <div class="lead mt" id="hrsBetCounts" style="max-width:600px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn mg" id="hrsBtnGo" onclick="hrsGo()">🏁 CHIUDI SCOMMESSE E VIA!</button>
+    </div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="hrsBtnAgain" onclick="openHorses()" style="display:none">🔁 Un'altra corsa</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: CORSA DEI CAVALLI ==================== -->
+<div class="screen" id="scrPjHorses">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🐎 CORSA DEI CAVALLI</div></div>
+  <div class="miniMsg" id="pjHrsMsg" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div class="hrsTrack big" id="hrsTrackPj" style="max-width:1200px; min-height:60vh"></div>
+  <div class="lead mt" id="pjHrsResult" style="max-width:700px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: CORSA DEI CAVALLI ==================== -->
+<div class="screen" id="scrPlayHorses" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="hrspName" style="color:var(--gold)"></div>
+    <div class="pill" id="hrspScore"></div>
+  </div>
+  <div class="byline mt" id="hrspStatus">🎰 SU QUALE CAVALLO SCOMMETTI?</div>
+  <div class="hrsPickGrid" id="hrsPickGrid"></div>
+  <div class="hrsTrack mt" id="hrsTrackPl" style="min-height:220px"></div>
+  <div class="hypeWrap" id="hypeWrap" style="display:none">
+    <div class="hypeBarOuter"><div class="hypeBarFill" id="hypeBarFill"></div></div>
+    <div class="hypeLabel">🎤 GRIDA IL NOME DEL TUO CAVALLO!</div>
+  </div>
+  <div class="feedback mt" id="hrspFb" style="display:none; font-size:22px"></div>
+</div>
+
 <!-- ==================== HOST: MEMO LE COPPIE ==================== -->
 <div class="screen" id="scrMemoCoppie">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🃏 MEMO LE COPPIE</div></div>
@@ -2152,7 +2239,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 101; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 102; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3220,6 +3307,7 @@ function listenGame(){
     if (!g) { showScreen('scrWait'); $('waitMsg').textContent='PARTITA CHIUSA'; $('waitSub').textContent='Grazie per aver giocato!'; P.ref.off(); try{ localStorage.removeItem('capone_sess_'+P.code); sessionStorage.removeItem('capone_reloaded'); }catch(e){} return; }
     const me = (g.players||{})[P.id] || {score:0};
     $('pqScore').textContent = (me.score||0)+' pt';
+    if (g.status!=='horses' && typeof stopHypeMic==='function') stopHypeMic();
     if (g.status==='lobby') { showScreen('scrWait'); $('waitMsg').textContent='SEI DENTRO, '+P.name.toUpperCase()+'! 🎩'; $('waitSub').textContent='Guarda lo schermo... si parte tra poco'; }
     else if (g.status==='question') showPlayerQ(g.current);
     else if (g.status==='reveal') showPlayerFb(g);
@@ -3241,6 +3329,7 @@ function listenGame(){
     else if (g.status==='anagram') showPlayerAnagram(g);
     else if (g.status==='wordsearch') showPlayerWordSearch(g);
     else if (g.status==='puzzle') showPlayerPuzzle(g);
+    else if (g.status==='horses') showPlayerHorses(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -3506,6 +3595,101 @@ function showPlayerPuzzle(g){
   }
   // classifica in tempo reale: la stessa che vede la regia sul videoproiettore
   renderPuzRanking($('ppzRanking'), buildSolveRanking(m.solves, g.players||{}));
+}
+/* ================================================================
+   CORSA DEI CAVALLI — telefono (+ barra "urla" del microfono, tutta locale)
+================================================================ */
+function showPlayerHorses(g){
+  const m = g.horses||{};
+  $('hrspName').textContent = P.name;
+  $('hrspScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayHorses');
+  if (m.phase==='bet'){
+    const sig = 'bet:'+(m.names||[]).join(',');
+    if (P.hrsSig !== sig){
+      P.hrsSig = sig; P.hrsMyBet = null;
+      $('hrspStatus').textContent = '🎰 SU QUALE CAVALLO SCOMMETTI?';
+      $('hrspFb').style.display='none';
+      renderHrsPickGrid(m.names);
+      $('hrsTrackPl')._n = null;
+      renderHorseTrack($('hrsTrackPl'), m.names, null, 0);
+      startHypeMic();
+    }
+  } else if (m.phase==='countdown'){
+    const sig = 'cd:'+m.countdownAt;
+    if (P.hrsSig !== sig){
+      P.hrsSig = sig;
+      $('hrspStatus').textContent = P.hrsMyBet!=null ? `HAI SCOMMESSO SU ${esc((m.names||[])[P.hrsMyBet]||'')}!` : 'NON HAI SCOMMESSO QUESTA VOLTA...';
+      document.querySelectorAll('#hrsPickGrid .hrsPick').forEach(el=> el.onclick=null);
+      runHrsCountdown($('hrsTrackPl'), m.countdownAt, ()=>{});
+    }
+  } else if (m.phase==='race'){
+    const sig = 'race:'+(m.race||{}).startAt;
+    if (P.hrsSig !== sig){
+      P.hrsSig = sig;
+      $('hrspStatus').textContent = '🏇 VIA! GRIDA FORTE!';
+      runHrsAnimation($('hrsTrackPl'), m.names, m.race, ()=>{});
+    }
+  } else if (m.phase==='result'){
+    stopHypeMic();
+    const sig = 'res:'+m.winnerIdx;
+    if (P.hrsSig !== sig){
+      P.hrsSig = sig;
+      const won = P.hrsMyBet === m.winnerIdx;
+      $('hrspStatus').textContent = `🏆 HA VINTO ${esc((m.names||[])[m.winnerIdx]||'')}!`;
+      $('hrspFb').style.display='block';
+      if (P.hrsMyBet==null){ $('hrspFb').style.color='var(--muted)'; $('hrspFb').textContent='NON HAI SCOMMESSO'; }
+      else if (won){ $('hrspFb').style.color='var(--lime)'; $('hrspFb').textContent='HAI VINTO! 🎉'; if(navigator.vibrate) navigator.vibrate([80,50,120]); }
+      else { $('hrspFb').style.color='var(--red)'; $('hrspFb').textContent='HAI PERSO 💥'; }
+    }
+  }
+}
+function renderHrsPickGrid(names){
+  $('hrsPickGrid').innerHTML = (names||[]).map((nm,i)=>`<div class="hrsPick" data-i="${i}" onclick="hrsBet(${i})">
+    <span class="ico">🐎</span><div class="nm">${esc(nm)}</div></div>`).join('');
+}
+function hrsBet(idx){
+  if (P.hrsMyBet!=null) return; // già scommesso in questo turno, non si cambia
+  P.hrsMyBet = idx;
+  P.ref.child('horses/bets/'+P.id).set(idx);
+  document.querySelectorAll('#hrsPickGrid .hrsPick').forEach((el,i)=> el.classList.toggle('mine', i===idx));
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+// Barra "urla il nome del cavallo": legge SOLO il volume del microfono, in locale sul telefono.
+// Non registra, non salva e non invia MAI l'audio da nessuna parte — serve solo a far animare la barra
+// e spingere la gente a gridare per divertimento. Zero dati consumati.
+let hrsAudioCtx=null, hrsAnalyser=null, hrsMicStream=null, hrsMicRaf=null;
+function startHypeMic(){
+  if (hrsMicStream){ $('hypeWrap').style.display='block'; return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return; // browser non supportato: niente barra, nessun problema
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    hrsMicStream = stream;
+    hrsAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const source = hrsAudioCtx.createMediaStreamSource(stream);
+    hrsAnalyser = hrsAudioCtx.createAnalyser();
+    hrsAnalyser.fftSize = 256;
+    source.connect(hrsAnalyser);
+    $('hypeWrap').style.display='block';
+    const data = new Uint8Array(hrsAnalyser.frequencyBinCount);
+    const loop = ()=>{
+      if (!hrsAnalyser) return;
+      hrsAnalyser.getByteFrequencyData(data);
+      let sum=0; for (let i=0;i<data.length;i++) sum+=data[i];
+      const avg = sum/data.length;
+      const pct = Math.min(100, Math.round((avg/70)*100));
+      const fill = $('hypeBarFill'); if (fill) fill.style.width = Math.max(2,pct)+'%';
+      hrsMicRaf = requestAnimationFrame(loop);
+    };
+    loop();
+  }).catch(()=>{ /* permesso negato o nessun microfono: nessun problema, la barra resta semplicemente nascosta */ });
+}
+function stopHypeMic(){
+  if (hrsMicRaf) cancelAnimationFrame(hrsMicRaf);
+  hrsMicRaf = null;
+  if (hrsMicStream){ hrsMicStream.getTracks().forEach(t=>t.stop()); hrsMicStream=null; }
+  if (hrsAudioCtx){ try{ hrsAudioCtx.close(); }catch(e){} hrsAudioCtx=null; }
+  hrsAnalyser = null;
+  const w = $('hypeWrap'); if (w) w.style.display='none';
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -6230,6 +6414,151 @@ function memoReveal(){
 }
 
 /* ================================================================
+   CORSA DEI CAVALLI — motore condiviso (host/proiettore/telefono)
+================================================================ */
+function hrsFinishTime(rank, nHorses, duration){
+  const spread = nHorses>1 ? rank/(nHorses-1) : 0;
+  return duration * (0.58 + spread*0.37); // il primo taglia il traguardo al 58% della durata, l'ultimo al 95%
+}
+function hrsProgress(idx, plan, t){
+  const rank = plan.finishOrder.indexOf(idx);
+  const finishAt = hrsFinishTime(rank, plan.finishOrder.length, plan.duration);
+  const lin = Math.min(1, t/finishAt);
+  const seed = plan.seeds[idx];
+  // un'oscillazione organica che si smorza avvicinandosi al traguardo, per un'andatura che sembra vera
+  const wobble = Math.sin(t/380 + seed*6.283)*0.05*(1-lin) + Math.sin(t/130 + seed*3.14)*0.015*(1-lin);
+  return Math.max(0, Math.min(1, lin + wobble));
+}
+function renderHorseTrack(el, names, plan, t){
+  if (!el) return;
+  if (el._n !== names.length){
+    el._n = names.length;
+    el.innerHTML = names.map((nm,i)=>`<div class="hrsLane" data-i="${i}">
+      <div class="hrsName">${esc(nm)}</div>
+      <div class="hrsHorse" id="${el.id}_h${i}"><span class="gallop">🐎</span></div>
+    </div>`).join('') + '<div class="hrsFinish"></div>';
+  }
+  if (!plan) return;
+  for (let i=0;i<names.length;i++){
+    const p = hrsProgress(i, plan, t);
+    const h = document.getElementById(el.id+'_h'+i);
+    if (h) h.style.left = (p*86)+'%';
+  }
+}
+function runHrsCountdown(el, countdownAt, onDone){
+  let overlay = el.querySelector('.hrsCountdown');
+  if (!overlay){ overlay = document.createElement('div'); overlay.className='hrsCountdown'; el.appendChild(overlay); }
+  clearInterval(el._cdInt);
+  el._cdInt = setInterval(()=>{
+    const t = serverNow() - countdownAt;
+    if (t < 0) return;
+    if (t < 3000) overlay.textContent = String(3 - Math.floor(t/1000));
+    else if (t < 3800) overlay.textContent = 'VIA!! 🏁';
+    else { clearInterval(el._cdInt); overlay.remove(); if (onDone) onDone(); }
+  }, 100);
+}
+function runHrsAnimation(el, names, plan, onDone){
+  clearInterval(el._raceInt);
+  el._raceInt = setInterval(()=>{
+    const t = serverNow() - plan.startAt;
+    if (t < 0) return;
+    renderHorseTrack(el, names, plan, t);
+    const lastFinish = hrsFinishTime(names.length-1, names.length, plan.duration);
+    if (t >= lastFinish + 400){ clearInterval(el._raceInt); if (onDone) onDone(); }
+  }, 50);
+}
+
+/* ================================================================
+   CORSA DEI CAVALLI — regia
+================================================================ */
+function hrsRenderNameInputs(){
+  const n = +($('hrsCount').value||4);
+  const defaults = ['Fulmine','Ombra','Tuono','Freccia','Lampo','Furia'];
+  $('hrsNameInputs').innerHTML = Array.from({length:n},(_,i)=>
+    `<input type="text" class="hrsNameIn mt" data-i="${i}" placeholder="Nome cavallo ${i+1}" maxlength="16" value="${defaults[i]||('Cavallo '+(i+1))}">`
+  ).join('');
+}
+let HRS = {};
+function openHorses(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval(HRS.timerInt);
+  G.ref.child('horses/bets').off();
+  G.ref.update({ status:'horses', horses:{ phase:'idle' } });
+  $('hrsSetup').style.display='block'; $('hrsLive').style.display='none';
+  if (!$('hrsPoints').innerHTML) $('hrsPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===2?'selected':''}>${(k+1)*100} punti</option>`).join('');
+  hrsRenderNameInputs();
+  pjSend({type:'horsesState', msg:'SI PREPARANO I CAVALLI...'});
+  showScreen('scrHorses');
+}
+function hrsStart(){
+  const names = [...document.querySelectorAll('.hrsNameIn')].map((inp,i)=> inp.value.trim() || ('Cavallo '+(i+1)));
+  const points = getPoints('hrsPoints','hrsPointsMan');
+  HRS = { names, points, credited:false };
+  G.ref.child('horses/bets').remove();
+  G.ref.update({ status:'horses', horses:{ phase:'bet', names, points } });
+  $('hrsSetup').style.display='none'; $('hrsLive').style.display='block';
+  $('hrsMsg').style.display='block'; $('hrsMsg').textContent = '🎰 SCOMMESSE APERTE — TOCCA UN CAVALLO DAL TELEFONO!';
+  $('hrsBetCounts').innerHTML=''; $('hrsBtnAgain').style.display='none'; $('hrsBtnGo').style.display=''; $('hrsBtnGo').disabled=false;
+  $('hrsTrackHost')._n = null;
+  renderHorseTrack($('hrsTrackHost'), names, null, 0);
+  pjSend({type:'horsesBet', names});
+  G.ref.child('horses/bets').on('value', s=>{
+    const bets = s.val()||{};
+    const counts = names.map((nm,i)=> Object.values(bets).filter(b=>b===i).length);
+    $('hrsBetCounts').innerHTML = names.map((nm,i)=>
+      `<div class="leadRow"><span class="pos">🐎</span> ${esc(nm)} <span class="pts">${counts[i]} scommesse</span></div>`).join('');
+  });
+}
+function hrsGo(){
+  G.ref.child('horses/bets').off();
+  $('hrsBtnGo').disabled = true;
+  const countdownAt = serverNow()+400;
+  G.ref.update({ 'horses/phase':'countdown', 'horses/countdownAt':countdownAt });
+  pjSend({type:'horsesCountdown', countdownAt});
+  $('hrsMsg').style.display='none';
+  runHrsCountdown($('hrsTrackHost'), countdownAt, ()=> hrsLaunchRace());
+}
+function hrsLaunchRace(){
+  const n = HRS.names.length;
+  const order = [...Array(n).keys()];
+  for (let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
+  const seeds = Array.from({length:n},()=>Math.random());
+  const duration = 6500;
+  const startAt = serverNow()+300;
+  const plan = { finishOrder:order, seeds, duration, startAt };
+  HRS.plan = plan;
+  G.ref.update({ 'horses/phase':'race', 'horses/race':plan });
+  pjSend({type:'horsesRace', plan, names:HRS.names});
+  runHrsAnimation($('hrsTrackHost'), HRS.names, plan, ()=> hrsFinishRace(plan));
+}
+function hrsFinishRace(plan){
+  if (HRS.credited) return; HRS.credited = true;
+  const winnerIdx = plan.finishOrder[0];
+  G.ref.child('horses/bets').once('value').then(bs=>{
+    const bets = bs.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const updates = {}; const winners = [];
+      for (const pid in bets){
+        if (bets[pid]===winnerIdx && players[pid]){
+          updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+HRS.points);
+          winners.push(players[pid].name);
+        }
+      }
+      updates['horses/phase'] = 'result'; updates['horses/winnerIdx'] = winnerIdx; updates['horses/winners'] = winners;
+      G.ref.update(updates);
+      $('hrsMsg').style.display='block'; $('hrsMsg').textContent = `🏆 HA VINTO ${HRS.names[winnerIdx].toUpperCase()}!`;
+      $('hrsBetCounts').innerHTML = winners.length
+        ? `<div class="label" style="text-transform:none">🏆 Vincitori: ${winners.map(esc).join(', ')}</div>`
+        : '<div class="byline">Nessuno aveva scommesso sul cavallo vincente!</div>';
+      $('hrsBtnAgain').style.display='';
+      confetti();
+      pjSend({type:'horsesResult', winnerIdx, winnerName:HRS.names[winnerIdx], winners});
+    });
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -6528,7 +6857,8 @@ function modalGames(){
       <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
       <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
       <button class="btn lm" onclick="openMemo()">🔍 Trova la Carta</button>
-      <button class="btn" style="grid-column:1/-1" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>
+      <button class="btn" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>
+      <button class="btn mg" style="grid-column:1/-1" onclick="openHorses()">🐎 Corsa dei Cavalli</button>
     </div>`);
 }
 function modalModules(){
@@ -6980,7 +7310,9 @@ function backToQuiz(title){
   G.ref.child('swiss/press').off();
   G.ref.child('hilo/bets').off();
   G.ref.child('wheels/bets').off();
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null });
+  G.ref.child('horses/bets').off();
+  clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -7572,6 +7904,32 @@ function pjRoute(m){
       $('pjLead').innerHTML = m.suspense ? '' : (m.lead||[]).map((p,i)=>
         `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score}</span></div>`).join('');
       showScreen('scrPjReveal');
+    }
+    else if (m.type==='horsesState') {
+      showScreen('scrPjHorses');
+      $('pjHrsMsg').textContent = m.msg||''; $('hrsTrackPj').innerHTML=''; $('hrsTrackPj')._n=null; $('pjHrsResult').innerHTML='';
+    }
+    else if (m.type==='horsesBet') {
+      showScreen('scrPjHorses');
+      $('pjHrsMsg').textContent = '🎰 SCOMMESSE APERTE!'; $('pjHrsResult').innerHTML='';
+      $('hrsTrackPj')._n = null;
+      renderHorseTrack($('hrsTrackPj'), m.names, null, 0);
+      window._pjHrsNames = m.names;
+    }
+    else if (m.type==='horsesCountdown') {
+      $('pjHrsMsg').textContent = '';
+      runHrsCountdown($('hrsTrackPj'), m.countdownAt, ()=>{});
+    }
+    else if (m.type==='horsesRace') {
+      window._pjHrsNames = m.names;
+      runHrsAnimation($('hrsTrackPj'), m.names, m.plan, ()=>{});
+    }
+    else if (m.type==='horsesResult') {
+      $('pjHrsMsg').textContent = `🏆 HA VINTO ${(m.winnerName||'').toUpperCase()}!`;
+      $('pjHrsResult').innerHTML = (m.winners||[]).length
+        ? `<div class="label" style="text-transform:none">🏆 Vincitori: ${m.winners.map(esc).join(', ')}</div>`
+        : '<div class="byline">Nessuno aveva scommesso sul cavallo vincente!</div>';
+      confetti();
     }
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
