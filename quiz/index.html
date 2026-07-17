@@ -700,7 +700,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v9.6</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v9.7</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -962,20 +962,19 @@ body.suspense-on #pfRank{ display:none !important; }
 <div id="hostBar">
   <button id="hbToggle" onclick="toggleHostBar()">🎛 REGIA ▾</button>
   <div class="hbwrap">
-  <button class="hb" id="hbFast" onclick="toggleLeadOverlay('fast')">⚡ Più veloci → 📺</button>
-  <button class="hb" id="hbLead" onclick="toggleLeadOverlay('lead')">🏆 Classifica → 📺</button>
+  <button class="hb" id="hbSuspense" onclick="toggleSuspense()">🤫 Modalità Suspense</button>
   <button class="hb" onclick="modalPoints()">± Punti</button>
-  <button class="hb" onclick="modalQuestions()">📋 Scelta domanda</button>
-  <button class="hb" onclick="btnEndQuiz()">🏁 Termina quiz</button>
-  <button class="hb" onclick="modalGames()" style="border-color:var(--gold); color:var(--gold)">🕹 GIOCHI</button>
-  <button class="hb" onclick="modalModules()" style="border-color:var(--cyan); color:var(--cyan)">🧩 MODULI</button>
+  <button class="hb" id="hbLead" onclick="toggleLeadOverlay('lead')">🏆 Classifica → 📺</button>
+  <button class="hb" id="hbFast" onclick="toggleLeadOverlay('fast')">⚡ Più veloci → 📺</button>
   <button class="hb" id="hbMsg" onclick="modalPjMsg()">💬 Messaggio → 📺</button>
   <button class="hb" id="hbPhoto" onclick="modalPjPhoto()">📷 Pubblica Foto</button>
-  <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
+  <button class="hb" onclick="modalQuestions()">📋 Scelta domanda</button>
+  <button class="hb" onclick="modalGames()" style="border-color:var(--gold); color:var(--gold)">🕹 GIOCHI</button>
+  <button class="hb" onclick="modalModules()" style="border-color:var(--cyan); color:var(--cyan)">🧩 MODULI</button>
   <button class="hb" onclick="openProjector()">📺 Apri proiettore</button>
-  <button class="hb" id="hbQOnly" onclick="toggleQOnly()">🔍 Solo domanda</button>
-  <button class="hb" id="hbSuspense" onclick="toggleSuspense()">🤫 Modalità Suspense</button>
   <button class="hb" id="hbPreview" onclick="togglePreview()">👁 Anteprima proiettore</button>
+  <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
+  <button class="hb" onclick="btnEndQuiz()">🏁 Termina quiz</button>
   </div>
 </div>
 
@@ -2139,7 +2138,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 96; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 97; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2270,7 +2269,7 @@ document.querySelectorAll('[data-logo]').forEach(el=> el.appendChild($('tplLogo'
    SINCRONIZZAZIONE PROIETTORE (finestra 📺 + anteprima 👁)
 ================================================================ */
 const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('caponequiz3') : null;
-let lastPjMsg = null, qOnly = false;
+let lastPjMsg = null;
 function pjSend(msg){
   msg = {...msg, id: Date.now() + '_' + Math.floor(Math.random()*1e6)};
   lastPjMsg = msg;
@@ -2279,7 +2278,6 @@ function pjSend(msg){
     G.ref.child('proj').set(lastPjMsg).catch(()=>{ const m={...lastPjMsg}; delete m.photo; G.ref.child('proj').set(m); });
   }
 }
-function pjSendMode(){ if(bc) bc.postMessage({type:'mode', qOnly}); if (G && G.ref) G.ref.child('projMode').set({qOnly}); }
 function projUrl(){ return location.pathname+'?proj=1'+(G?'&g='+G.code:'')+'&v='+Date.now(); }
 function openProjector(){
   const full = location.origin + projUrl();
@@ -2290,9 +2288,8 @@ function openProjector(){
       <button class="btn small cy mt" style="width:100%" onclick="navigator.clipboard&&navigator.clipboard.writeText('${full}');this.textContent='✔ Copiato!'">📋 Copia link</button>`);
     return;
   }
-  setTimeout(()=>{ if(lastPjMsg) pjSend(lastPjMsg); pjSendMode(); }, 700);
+  setTimeout(()=>{ if(lastPjMsg) pjSend(lastPjMsg); }, 700);
 }
-function toggleQOnly(){ qOnly=!qOnly; $('hbQOnly').classList.toggle('on', qOnly); pjSendMode(); }
 /* Modalità Suspense: i telefoni smettono di mostrare punteggio totale e posizione — restano informati
    solo su giusto/sbagliato della singola domanda/gioco, finché la regia non decide di svelare le classifiche. */
 let suspenseMode = false;
@@ -2337,7 +2334,7 @@ function togglePreview(){
   const p = $('projPreview'), on = !p.classList.contains('on');
   p.classList.toggle('on', on); $('hbPreview').classList.toggle('on', on);
   if (on) {
-    $('pvFrame').src = location.origin + projUrl() + '&t=' + Date.now(); setTimeout(()=>{ if(lastPjMsg) pjSend(lastPjMsg); pjSendMode(); }, 800);
+    $('pvFrame').src = location.origin + projUrl() + '&t=' + Date.now(); setTimeout(()=>{ if(lastPjMsg) pjSend(lastPjMsg); }, 800);
     restorePvPosition(); initPvDrag();
   }
 }
@@ -2383,7 +2380,7 @@ function initPvDrag(){
   window.addEventListener('touchmove', e=>{ if(dragging){ const t=e.touches[0]; move(t.clientX, t.clientY); } }, {passive:true});
   window.addEventListener('touchend', end);
 }
-if (bc) bc.onmessage = e=>{ if (e.data && e.data.type==='hello' && lastPjMsg){ pjSend(lastPjMsg); pjSendMode(); } };
+if (bc) bc.onmessage = e=>{ if (e.data && e.data.type==='hello' && lastPjMsg){ pjSend(lastPjMsg); } };
 
 /* ================================================================
    MODALE + CLASSIFICHE + PUNTI MANUALI
@@ -6872,7 +6869,7 @@ function backToQuiz(title){
 /* ================================================================
    MODALITÀ PROIETTORE (?proj=1)
 ================================================================ */
-let pjTimerInt = null, pjQOnly = false, pjCur = null;
+let pjTimerInt = null, pjCur = null;
 let pjDiagState = { code:'—', fb:'…', msgs:0, last:'—' };
 function pjDiag(){
   $('pjDiag').style.display='block';
@@ -6895,7 +6892,6 @@ function initProjector(){
     });
     base.child('proj').on('value', s=>{ const m = s.val(); if (m) pjRoute(m); else { pjDiagState.last='nodo proj vuoto'; pjDiag(); } },
       err=>{ pjDiagState.fb='✗ LETTURA NEGATA (regole!)'; pjDiag(); });
-    base.child('projMode').on('value', s=>{ const v = s.val(); pjQOnly = !!(v && v.qOnly); applyPjMode(); });
     base.child('projQr').on('value', s=>{ pjApplyQr(s.val()||{}); });
     base.child('projLead').on('value', s=>{ pjApplyLead(s.val()||{}); });
     base.child('projMsg').on('value', s=>{ pjApplyMsg(s.val()||{}); });
@@ -6934,7 +6930,6 @@ function pjRoute(m){
     if (!m) return;
     if (m.id) { if (m.id === window._pjLastId) return; window._pjLastId = m.id; }
     pjDiagState.msgs++; pjDiagState.last = m.type; pjDiag();
-    if (m.type==='mode') { pjQOnly = m.qOnly; applyPjMode(); return; }
     if (m.type==='qrOverlay') { pjApplyQr({on:m.on, url:m.url}); return; }
     if (m.type==='leadOverlay') { pjApplyLead(m); return; }
     if (m.type==='msgOverlay') { pjApplyMsg(m); return; }
@@ -6960,7 +6955,6 @@ function pjRoute(m){
         ? (m.multi?`<div class="byline" style="grid-column:1/-1; font-size:18px; color:var(--gold)">✅ RISPOSTA MULTIPLA: PRENDILE TUTTE!</div>`:'') +
           m.opts.map((o,k)=> o?`<div class="ansBtn a${k}" style="${(m.opts.length%2===1 && k===m.opts.length-1)?'grid-column:1/-1':''}"><span class="sym">${SYMS[k]}</span>${esc(o)}</div>`:'').join('')
         : `<div class="byline" style="grid-column:1/-1; font-size:18px">✍️ SCRIVI LA RISPOSTA SUL TELEFONO</div>`;
-      applyPjMode();
       clearInterval(pjTimerInt);
       pjTimerInt = setInterval(()=>{
         const left = Math.max(0, m.startAt + m.timer*1000 - serverNow());
@@ -7461,11 +7455,6 @@ function pjRoute(m){
       podiumRevealRank($('pjPodium'), $('pjPodLead'), m.rank);
     }
 }
-function applyPjMode(){
-  $('pjOpts').style.display = pjQOnly ? 'none' : 'grid';
-  if (pjCur) $('pjQText').style.fontSize = pjQOnly ? 'clamp(44px,7.5vw,110px)' : '';
-}
-
 /* ================================================================
    AVVIO / ROUTER
 ================================================================ */
