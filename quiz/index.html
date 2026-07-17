@@ -665,7 +665,7 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 body.proj{overflow:hidden;}
 /* niente più max-width qui: il calcolo dinamico in JS (pjFitScreen) misura ora la vera larghezza del contenuto,
    non più gonfiata artificialmente da un vecchio limite fisso — quello era la causa del formato "piccolo". */
-body.proj .screen.active{padding-bottom:22px; justify-content:center;}
+body.proj .screen.active{padding-bottom:22px; justify-content:center; max-width:none; margin:0; width:fit-content;}
 #pjQText{font-weight:900; font-size:clamp(34px,6vw,84px); text-align:center; line-height:1.12;
   text-shadow:0 4px 0 rgba(0,0,0,.6), 0 0 40px rgba(157,77,255,.5); margin:20px 0;}
 #pjOpts .ansBtn{min-height:120px; font-size:clamp(20px,2.6vw,34px); pointer-events:none;}
@@ -692,7 +692,7 @@ body.proj .screen.active{padding-bottom:22px; justify-content:center;}
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v8.9</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v9.0</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2127,7 +2127,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 89; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 90; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2162,12 +2162,14 @@ function pjFitScreen(){
   // Tutto in un unico blocco SENZA setTimeout: il browser disegna solo il risultato finale, mai lo stato intermedio.
   el.style.minHeight = 'auto';
   el.style.position = 'static';
+  el.style.margin = '0';
   const natW = el.scrollWidth, natH = el.scrollHeight;
   if (!natW || !natH) { el.style.position = 'absolute'; return; }
   const vw = window.innerWidth, vh = window.innerHeight;
   // margine del 3% ai bordi, tetto di sicurezza a 2.6x per non esagerare su proiettori molto grandi da vicino
   let scale = Math.min((vw*0.97)/natW, (vh*0.97)/natH, 2.6);
   el.style.position = 'absolute';
+  el.style.margin = '0';
   el.style.left = Math.max(0, (vw - natW*scale)/2) + 'px';
   el.style.top = Math.max(0, (vh - natH*scale)/2) + 'px';
   el.style.transformOrigin = 'top left';
