@@ -693,7 +693,7 @@ body.proj .screen.active{padding-bottom:22px; justify-content:center; max-width:
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v9.2</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v9.3</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2131,7 +2131,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 92; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 93; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2291,12 +2291,12 @@ function toggleLeadOverlay(kind){
   if (leadOv.on && leadOv.kind===kind) return sendLeadOverlay({on:false});
   if (kind==='fast') {
     if (!G.lastResults) { openModal('⚡ I PIÙ VELOCI', '<div class="byline" style="letter-spacing:1px">Disponibile dopo la prima domanda.</div>'); return; }
-    const rows = Object.entries(G.lastResults).filter(([,r])=>r.ok).sort((a,b)=>a[1].t-b[1].t).slice(0,10)
+    const rows = Object.entries(G.lastResults).filter(([,r])=>r.ok).sort((a,b)=>a[1].t-b[1].t)
       .map(([pid,r],i)=>({pos:(i+1)+'°', name:(G.lastPlayers[pid]||{}).name||'?', val:(r.t/1000).toFixed(2)+'s · +'+r.pts}));
     sendLeadOverlay({on:true, kind, title:'⚡ I PIÙ VELOCI — DOMANDA '+(G.qi+1), rows});
   } else {
     G.ref.child('players').once('value', s=>{
-      const rows = Object.values(s.val()||{}).sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,15)
+      const rows = Object.values(s.val()||{}).sort((a,b)=>(b.score||0)-(a.score||0))
         .map((p,i)=>({pos:(i+1)+'°', name:p.name, val:(p.score||0)+''}));
       sendLeadOverlay({on:true, kind, title:'🏆 CLASSIFICA GENERALE', rows});
     });
@@ -2407,7 +2407,7 @@ function adjPointsRow(pid, sign){
       const players = ps.val()||{};
       if ($('scrHostReveal').classList.contains('active')) {
         const arr = renderLead($('hrLead'), players);
-        pjSend({...(lastPjMsg||{}), lead: arr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
+        pjSend({...(lastPjMsg||{}), lead: arr.map(p=>({name:p.name, score:p.score||0}))});
       }
     });
   });
@@ -2969,7 +2969,7 @@ function showReveal(q, correctText, players, pending, results, stats){
       if (G.lastResults && G.lastResults[p.pid]) { G.lastResults[p.pid].ok=true; G.lastResults[p.pid].pts=pts; }
       G.ref.child('players').once('value', ps=>{
         const arr = renderLead($('hrLead'), ps.val()||{});
-        pjSend({...(lastPjMsg||{}), lead: arr.slice(0,10).map(x=>({name:x.name, score:x.score||0}))});
+        pjSend({...(lastPjMsg||{}), lead: arr.map(x=>({name:x.name, score:x.score||0}))});
       });
     };
     d.appendChild(b); pbox.appendChild(d);
@@ -2977,13 +2977,13 @@ function showReveal(q, correctText, players, pending, results, stats){
   const leadArr = renderLead($('hrLead'), players);
   pjSend({type:'reveal', correctText, sym: q.type==='mult'?SYMS[corrects[0]]:null,
     stats: q.type==='mult'?stats:null, opts: q.type==='mult'?q.opts:null, corrects: q.type==='mult'?corrects:null,
-    lead: leadArr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
+    lead: leadArr.map(p=>({name:p.name, score:p.score||0}))});
   $('btnNext').textContent = (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
   showScreen('scrHostReveal');
 }
 function renderLead(box, players, meId){
   const arr = Object.entries(players).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
-  box.innerHTML = arr.slice(0,10).map((p,i)=>
+  box.innerHTML = arr.map((p,i)=>
     `<div class="leadRow ${p.id===meId?'me':''}"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score||0}</span></div>`).join('');
   return arr;
 }
@@ -3028,7 +3028,7 @@ function endQuiz(){
     renderLead($('podLead'), players);
     podStage = 0; podiumUpdateBtn();
     pjSend({type:'podium', top3: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})),
-      lead: arr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
+      lead: arr.map(p=>({name:p.name, score:p.score||0}))});
     showScreen('scrPodium');
     setTimeout(()=>{ if(G) G.ref.remove(); }, 15*60*1000);
   });
@@ -5792,7 +5792,7 @@ function showAnagramReveal(q, players, pending, results){
       G.ref.child('anagram/reveal/results/'+p.pid).update({ok:true, pts});
       G.ref.child('players').once('value', ps=>{
         const arr = renderLead($('anaLead'), ps.val()||{});
-        pjSend({type:'anaRank', lead: arr.slice(0,10).map(x=>({name:x.name, score:x.score||0}))});
+        pjSend({type:'anaRank', lead: arr.map(x=>({name:x.name, score:x.score||0}))});
       });
     };
     d.appendChild(b); pbox.appendChild(d);
@@ -5801,7 +5801,7 @@ function showAnagramReveal(q, players, pending, results){
   $('anaRevealBox').style.display='block';
   $('anaBtnNext').textContent = G.anaInQuiz ? ((G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda') : '🔁 Un altro anagramma';
   $('anaBtnNext').style.display='';
-  pjSend({type:'anaReveal', correctText:q.accepted, lead: leadArr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
+  pjSend({type:'anaReveal', correctText:q.accepted, lead: leadArr.map(p=>({name:p.name, score:p.score||0}))});
 }
 function anagramNextClick(){ if (G && G.anaInQuiz) nextQuestion(); else openAnagram(); }
 /* Anagramma giocato come domanda della scaletta quiz */
@@ -6795,7 +6795,7 @@ function backToQuiz(title){
     $('btnNext').textContent = G.qi < 0 ? '▶ Prima domanda'
       : (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
     pjSend({type:'reveal', title: title || 'CLASSIFICA', correctText:'', sym:null,
-      lead: arr.slice(0,10).map(p=>({name:p.name, score:p.score||0}))});
+      lead: arr.map(p=>({name:p.name, score:p.score||0}))});
     showScreen('scrHostReveal');
   });
 }
