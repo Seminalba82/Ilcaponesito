@@ -229,7 +229,11 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   box-shadow:0 0 26px rgba(0,240,255,.55), 0 14px 30px rgba(0,0,0,.7);}
 #projPreview.on{display:block;}
 #projPreview iframe{width:1280px; height:740px; border:0; transform:scale(.278); transform-origin:0 0; pointer-events:none;}
-#projPreview .pvLabel{position:absolute; top:6px; left:10px; font-size:10px; font-weight:900; letter-spacing:2px; color:var(--cyan); text-shadow:0 0 8px #000; z-index:2;}
+#projPreview .pvHandle{position:absolute; top:0; left:0; right:0; height:26px; z-index:3; cursor:grab;
+  background:linear-gradient(180deg, rgba(0,0,0,.55), transparent); display:flex; align-items:center; padding-left:10px;}
+#projPreview .pvHandle:active{cursor:grabbing;}
+#projPreview.dragging{opacity:.85; transition:none !important;}
+#projPreview .pvLabel{position:absolute; top:6px; left:10px; font-size:10px; font-weight:900; letter-spacing:2px; color:var(--cyan); text-shadow:0 0 8px #000; z-index:2; pointer-events:none;}
 
 /* ===== DOMANDA SUL TELEFONO ===== */
 .pqQ{width:100%; font-weight:900; font-size:clamp(17px,4.6vw,22px); line-height:1.25; text-align:center;
@@ -696,7 +700,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v9.5</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v9.6</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -985,7 +989,7 @@ body.suspense-on #pfRank{ display:none !important; }
 </div>
 
 <!-- ==================== ANTEPRIMA PROIETTORE ==================== -->
-<div id="projPreview"><div class="pvLabel">ANTEPRIMA PROIETTORE</div><iframe id="pvFrame"></iframe></div>
+<div id="projPreview"><div class="pvHandle" id="pvHandle" title="Trascina per spostare"></div><div class="pvLabel">✥ ANTEPRIMA PROIETTORE</div><iframe id="pvFrame"></iframe></div>
 
 <!-- ==================== HOST: MINIGIOCO BUSSOLOTTI ==================== -->
 <div class="screen" id="scrMini">
@@ -2135,7 +2139,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 95; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 96; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -2332,7 +2336,52 @@ function toggleQrOverlay(){
 function togglePreview(){
   const p = $('projPreview'), on = !p.classList.contains('on');
   p.classList.toggle('on', on); $('hbPreview').classList.toggle('on', on);
-  if (on) { $('pvFrame').src = location.origin + projUrl() + '&t=' + Date.now(); setTimeout(()=>{ if(lastPjMsg) pjSend(lastPjMsg); pjSendMode(); }, 800); }
+  if (on) {
+    $('pvFrame').src = location.origin + projUrl() + '&t=' + Date.now(); setTimeout(()=>{ if(lastPjMsg) pjSend(lastPjMsg); pjSendMode(); }, 800);
+    restorePvPosition(); initPvDrag();
+  }
+}
+/* Anteprima proiettore trascinabile: si afferra dall'impugnatura in alto, la posizione scelta resta
+   memorizzata sul PC anche alle serate successive, così non copre mai i pulsanti della regia. */
+let pvDragInit = false;
+function restorePvPosition(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('capone_pv_pos')||'null');
+    if (!saved) return;
+    const p = $('projPreview');
+    p.style.right = 'auto'; p.style.bottom = 'auto';
+    p.style.left = Math.max(0, Math.min(window.innerWidth - p.offsetWidth, saved.left)) + 'px';
+    p.style.top = Math.max(0, Math.min(window.innerHeight - p.offsetHeight, saved.top)) + 'px';
+  }catch(e){}
+}
+function initPvDrag(){
+  if (pvDragInit) return; pvDragInit = true;
+  const p = $('projPreview'), handle = $('pvHandle');
+  let dragging=false, offX=0, offY=0;
+  const start = (clientX, clientY)=>{
+    dragging = true; p.classList.add('dragging');
+    const r = p.getBoundingClientRect();
+    offX = clientX - r.left; offY = clientY - r.top;
+    p.style.right = 'auto'; p.style.bottom = 'auto';
+  };
+  const move = (clientX, clientY)=>{
+    if (!dragging) return;
+    let left = clientX - offX, top = clientY - offY;
+    left = Math.max(0, Math.min(window.innerWidth - p.offsetWidth, left));
+    top = Math.max(0, Math.min(window.innerHeight - p.offsetHeight, top));
+    p.style.left = left+'px'; p.style.top = top+'px';
+  };
+  const end = ()=>{
+    if (!dragging) return;
+    dragging = false; p.classList.remove('dragging');
+    localStorage.setItem('capone_pv_pos', JSON.stringify({ left:parseInt(p.style.left), top:parseInt(p.style.top) }));
+  };
+  handle.addEventListener('mousedown', e=>{ e.preventDefault(); start(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', e=> move(e.clientX, e.clientY));
+  window.addEventListener('mouseup', end);
+  handle.addEventListener('touchstart', e=>{ const t=e.touches[0]; start(t.clientX, t.clientY); }, {passive:true});
+  window.addEventListener('touchmove', e=>{ if(dragging){ const t=e.touches[0]; move(t.clientX, t.clientY); } }, {passive:true});
+  window.addEventListener('touchend', end);
 }
 if (bc) bc.onmessage = e=>{ if (e.data && e.data.type==='hello' && lastPjMsg){ pjSend(lastPjMsg); pjSendMode(); } };
 
