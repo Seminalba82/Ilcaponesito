@@ -231,7 +231,7 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .pgThumb:hover{border-color:var(--cyan);}
 .pgDel{position:absolute; top:2px; right:2px; width:22px; height:22px; border-radius:50%; border:0; background:rgba(0,0,0,.7); color:#fff; font-size:12px; cursor:pointer; z-index:2;}
 
-/* ===== CORSA DEI CAVALLI ===== */
+/* ===== PUBBLICHE OFFESE (corsa cavalli) ===== */
 .hrsTrack{position:relative; width:100%; max-width:900px; margin:14px auto 0; border-radius:16px; overflow:hidden;
   background:linear-gradient(180deg,#3d2b18 0%,#5a3d20 55%,#3d2b18 100%); border:3px solid var(--gold);
   box-shadow:0 0 30px rgba(255,201,60,.25), inset 0 0 40px rgba(0,0,0,.5);}
@@ -737,7 +737,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v10.2</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v10.3</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1823,9 +1823,9 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="feedback mt" id="pmFb" style="display:none; font-size:22px"></div>
 </div>
 
-<!-- ==================== HOST: CORSA DEI CAVALLI ==================== -->
+<!-- ==================== HOST: PUBBLICHE OFFESE ==================== -->
 <div class="screen" id="scrHorses">
-  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🐎 CORSA DEI CAVALLI</div></div>
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🐎 PUBBLICHE OFFESE</div></div>
   <div class="panel mt" style="max-width:560px" id="hrsSetup">
     <div class="label">Quanti cavalli?</div>
     <select id="hrsCount" onchange="hrsRenderNameInputs()">
@@ -1839,6 +1839,17 @@ body.suspense-on #pfRank{ display:none !important; }
     <div class="row mt">
       <div class="grow"><div class="label">Punti a chi indovina</div><select id="hrsPoints"></select></div>
       <div><div class="label">O scrivili</div><input type="number" id="hrsPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Durata della corsa</div>
+        <select id="hrsDuration">
+          <option value="10">10 secondi</option>
+          <option value="15" selected>15 secondi</option>
+          <option value="20">20 secondi</option>
+          <option value="25">25 secondi</option>
+          <option value="30">30 secondi</option>
+        </select>
+      </div>
     </div>
     <button class="btn mg mt" style="width:100%" onclick="hrsStart()">🐎 APRI LE SCOMMESSE!</button>
   </div>
@@ -1856,15 +1867,15 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
 </div>
 
-<!-- ==================== PROIETTORE: CORSA DEI CAVALLI ==================== -->
+<!-- ==================== PROIETTORE: PUBBLICHE OFFESE ==================== -->
 <div class="screen" id="scrPjHorses">
-  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🐎 CORSA DEI CAVALLI</div></div>
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🐎 PUBBLICHE OFFESE</div></div>
   <div class="miniMsg" id="pjHrsMsg" style="font-size:clamp(18px,3vw,30px)"></div>
   <div class="hrsTrack big" id="hrsTrackPj" style="max-width:1200px; min-height:60vh"></div>
   <div class="lead mt" id="pjHrsResult" style="max-width:700px; width:100%"></div>
 </div>
 
-<!-- ==================== PLAYER: CORSA DEI CAVALLI ==================== -->
+<!-- ==================== PLAYER: PUBBLICHE OFFESE ==================== -->
 <div class="screen" id="scrPlayHorses" style="align-items:center; justify-content:center">
   <div class="row" style="width:100%; justify-content:space-between">
     <div class="pill" id="hrspName" style="color:var(--gold)"></div>
@@ -2239,7 +2250,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 102; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 103; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3597,7 +3608,7 @@ function showPlayerPuzzle(g){
   renderPuzRanking($('ppzRanking'), buildSolveRanking(m.solves, g.players||{}));
 }
 /* ================================================================
-   CORSA DEI CAVALLI — telefono (+ barra "urla" del microfono, tutta locale)
+   PUBBLICHE OFFESE — telefono (+ barra "urla" del microfono, tutta locale)
 ================================================================ */
 function showPlayerHorses(g){
   const m = g.horses||{};
@@ -6414,7 +6425,7 @@ function memoReveal(){
 }
 
 /* ================================================================
-   CORSA DEI CAVALLI — motore condiviso (host/proiettore/telefono)
+   PUBBLICHE OFFESE — motore condiviso (host/proiettore/telefono)
 ================================================================ */
 function hrsFinishTime(rank, nHorses, duration){
   const spread = nHorses>1 ? rank/(nHorses-1) : 0;
@@ -6469,13 +6480,15 @@ function runHrsAnimation(el, names, plan, onDone){
 }
 
 /* ================================================================
-   CORSA DEI CAVALLI — regia
+   PUBBLICHE OFFESE — regia
 ================================================================ */
 function hrsRenderNameInputs(){
   const n = +($('hrsCount').value||4);
   const defaults = ['Fulmine','Ombra','Tuono','Freccia','Lampo','Furia'];
+  let saved = [];
+  try{ saved = JSON.parse(localStorage.getItem('capone_hrs_names')||'[]'); }catch(e){}
   $('hrsNameInputs').innerHTML = Array.from({length:n},(_,i)=>
-    `<input type="text" class="hrsNameIn mt" data-i="${i}" placeholder="Nome cavallo ${i+1}" maxlength="16" value="${defaults[i]||('Cavallo '+(i+1))}">`
+    `<input type="text" class="hrsNameIn mt" data-i="${i}" placeholder="Nome cavallo ${i+1}" maxlength="16" value="${esc(saved[i]||defaults[i]||('Cavallo '+(i+1)))}">`
   ).join('');
 }
 let HRS = {};
@@ -6492,8 +6505,10 @@ function openHorses(){
 }
 function hrsStart(){
   const names = [...document.querySelectorAll('.hrsNameIn')].map((inp,i)=> inp.value.trim() || ('Cavallo '+(i+1)));
+  try{ localStorage.setItem('capone_hrs_names', JSON.stringify(names)); }catch(e){}
   const points = getPoints('hrsPoints','hrsPointsMan');
-  HRS = { names, points, credited:false };
+  const durationSec = +($('hrsDuration').value||15);
+  HRS = { names, points, durationSec, credited:false };
   G.ref.child('horses/bets').remove();
   G.ref.update({ status:'horses', horses:{ phase:'bet', names, points } });
   $('hrsSetup').style.display='none'; $('hrsLive').style.display='block';
@@ -6523,7 +6538,7 @@ function hrsLaunchRace(){
   const order = [...Array(n).keys()];
   for (let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
   const seeds = Array.from({length:n},()=>Math.random());
-  const duration = 6500;
+  const duration = (HRS.durationSec||15) * 1000;
   const startAt = serverNow()+300;
   const plan = { finishOrder:order, seeds, duration, startAt };
   HRS.plan = plan;
@@ -6858,7 +6873,7 @@ function modalGames(){
       <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
       <button class="btn lm" onclick="openMemo()">🔍 Trova la Carta</button>
       <button class="btn" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>
-      <button class="btn mg" style="grid-column:1/-1" onclick="openHorses()">🐎 Corsa dei Cavalli</button>
+      <button class="btn mg" style="grid-column:1/-1" onclick="openHorses()">🐎 Pubbliche Offese</button>
     </div>`);
 }
 function modalModules(){
