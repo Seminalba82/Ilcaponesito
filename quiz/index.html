@@ -750,7 +750,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v10.6</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v10.7</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1892,6 +1892,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <div id="tfLive" style="display:none; width:100%" class="center">
     <img id="tfLivePhoto" class="tfPhoto">
     <div class="tfHint" id="tfLiveHint"></div>
+    <div class="timerWrap mt" style="max-width:400px; margin-left:auto; margin-right:auto"><div class="timerBar" id="tfTimerBar"></div></div>
     <div class="miniMsg" id="tfMsg"></div>
     <div class="lead mt" id="tfGuesses" style="max-width:600px; width:100%"></div>
     <div class="row mt" style="justify-content:center">
@@ -1909,6 +1910,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">💶 SEI TROPPO FISCALE!</div></div>
   <img id="pjTfPhoto" class="tfPhoto" style="max-width:520px; max-height:44vh">
   <div class="tfHint" id="pjTfHint" style="font-size:clamp(16px,2.6vw,26px)"></div>
+  <div class="timerWrap mt" style="max-width:600px; margin-left:auto; margin-right:auto"><div class="timerBar" id="pjTfTimerBar"></div></div>
   <div class="miniMsg" id="pjTfMsg" style="font-size:clamp(18px,3vw,30px)"></div>
   <div class="lead mt" id="pjTfResult" style="max-width:700px; width:100%"></div>
 </div>
@@ -1921,6 +1923,7 @@ body.suspense-on #pfRank{ display:none !important; }
   </div>
   <img id="tfpPhoto" class="tfPhoto">
   <div class="tfHint" id="tfpHint"></div>
+  <div class="timerWrap mt" style="max-width:280px; margin-left:auto; margin-right:auto"><div class="timerBar" id="tfpTimerBar"></div></div>
   <div class="byline mt" id="tfpStatus">💶 QUANTO COSTA SECONDO TE?</div>
   <div class="tfPriceRow">
     <input type="number" id="tfpGuess" step="0.01" min="0" placeholder="0.00" style="width:150px">
@@ -2357,7 +2360,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 106; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 107; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3881,8 +3884,16 @@ function showPlayerTFiscale(g){
       $('tfpGuess').value=''; $('tfpGuess').disabled=false;
       $('tfpBtnGuess').disabled=false; $('tfpBtnGuess').style.display='';
       $('tfpFb').style.display='none';
+      clearInterval(P.tfInt);
+      $('tfpTimerBar').style.width='100%';
+      P.tfInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('tfpTimerBar').style.width = (left/(m.durationMs||15000)*100)+'%';
+        if (left<=0){ clearInterval(P.tfInt); if (!P.tfGuessed){ $('tfpGuess').disabled=true; $('tfpBtnGuess').disabled=true; $('tfpStatus').textContent='⏱ TEMPO SCADUTO!'; } }
+      }, 100);
     }
   } else if (m.phase==='result'){
+    clearInterval(P.tfInt); $('tfpTimerBar').style.width='0%';
     const sig = 'res:'+m.roundId;
     if (P.tfSig !== sig){
       P.tfSig = sig;
@@ -6854,27 +6865,34 @@ function tfStart(){
   const points = getPoints('tfPoints','tfPointsMan');
   const durationSec = +($('tfDuration').value||15);
   const endAt = serverNow() + durationSec*1000;
+  const durationMs = durationSec*1000;
   const roundId = serverNow();
   TF = { price, margin, points, credited:false };
   tfPhotoRef().set(window._tfPhoto); // solo la foto va in un ramo separato: non intasa i telefoni ad ogni risposta
-  G.ref.update({ status:'tfiscale', tfiscale:{ phase:'bet', hintLow, hintHigh, margin, points, endAt, roundId } });
+  G.ref.update({ status:'tfiscale', tfiscale:{ phase:'bet', hintLow, hintHigh, margin, points, endAt, durationMs, roundId } });
   G.ref.child('tfiscale/guesses').remove();
   $('tfSetup').style.display='none'; $('tfLive').style.display='block';
   $('tfLivePhoto').src = window._tfPhoto;
   $('tfLiveHint').textContent = (hintLow!=null && hintHigh!=null) ? `Il prezzo si aggira tra ${hintLow.toFixed(2)}€ e ${hintHigh.toFixed(2)}€` : '';
   $('tfMsg').style.display='block'; $('tfMsg').textContent = '💶 SCOMMESSE APERTE — SCRIVI IL PREZZO DAL TELEFONO!';
   $('tfGuesses').innerHTML=''; $('tfBtnAgain').style.display='none'; $('tfBtnClose').style.display=''; $('tfBtnClose').disabled=false;
-  pjSend({type:'tfBet', photo:window._tfPhoto, hintLow, hintHigh});
+  pjSend({type:'tfBet', photo:window._tfPhoto, hintLow, hintHigh, endAt, durationMs});
   G.ref.child('tfiscale/guesses').on('value', s=>{
     const n = Object.keys(s.val()||{}).length;
     $('tfGuesses').innerHTML = `<div class="label" style="text-transform:none">Risposte ricevute: ${n}</div>`;
   });
   clearInterval(TF.timerInt);
-  TF.timerInt = setInterval(()=>{ if (serverNow() >= endAt){ clearInterval(TF.timerInt); tfClose(); } }, 200);
+  $('tfTimerBar').style.width='100%';
+  TF.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('tfTimerBar').style.width = (left/durationMs*100)+'%';
+    if (left<=0){ clearInterval(TF.timerInt); tfClose(); }
+  }, 100);
 }
 function tfClose(){
   if (TF.credited) return; TF.credited = true;
   clearInterval(TF.timerInt);
+  $('tfTimerBar').style.width='0%';
   G.ref.child('tfiscale/guesses').off();
   $('tfBtnClose').disabled = true;
   G.ref.child('tfiscale/guesses').once('value').then(gs=>{
@@ -8282,6 +8300,7 @@ function pjRoute(m){
     }
     else if (m.type==='tfState') {
       showScreen('scrPjTFiscale');
+      clearInterval(window._pjTfInt); $('pjTfTimerBar').style.width='0%';
       $('pjTfMsg').textContent = m.msg||''; $('pjTfPhoto').src=''; $('pjTfHint').textContent=''; $('pjTfResult').innerHTML='';
     }
     else if (m.type==='tfBet') {
@@ -8290,8 +8309,16 @@ function pjRoute(m){
       $('pjTfHint').textContent = (m.hintLow!=null && m.hintHigh!=null) ? `Il prezzo si aggira tra ${(+m.hintLow).toFixed(2)}€ e ${(+m.hintHigh).toFixed(2)}€` : '';
       $('pjTfMsg').textContent = '💶 SCOMMESSE APERTE!';
       $('pjTfResult').innerHTML='';
+      clearInterval(window._pjTfInt);
+      $('pjTfTimerBar').style.width='100%';
+      window._pjTfInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('pjTfTimerBar').style.width = (left/(m.durationMs||15000)*100)+'%';
+        if (left<=0) clearInterval(window._pjTfInt);
+      }, 100);
     }
     else if (m.type==='tfResult') {
+      clearInterval(window._pjTfInt); $('pjTfTimerBar').style.width='0%';
       $('pjTfMsg').textContent = `💰 IL PREZZO VERO ERA ${(+m.price).toFixed(2)}€`;
       $('pjTfResult').innerHTML = (m.results||[]).map(r=>
         `<div class="tfGuessRow ${r.diff<0.005?'exact':''}"><span>${esc(r.name)}: ${(+r.guess).toFixed(2)}€</span><span class="diff" style="color:${r.pts>0?'var(--lime)':'var(--red)'}">±${(+r.diff).toFixed(2)}€ ${r.pts>0?'+'+r.pts:''}</span></div>`).join('')
