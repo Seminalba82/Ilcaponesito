@@ -898,7 +898,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v11.3</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v11.4</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2764,7 +2764,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 113; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 114; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -8415,12 +8415,12 @@ function modalGames(){
       <button class="btn lm" onclick="openMemo()">🔍 Trova la Carta</button>
       <button class="btn" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>
       <button class="btn mg" style="grid-column:1/-1" onclick="openHorses()">🐎 Pubbliche Offese</button>
-      <button class="btn" style="grid-column:1/-1; border-color:var(--gold); color:var(--gold)" onclick="openTFiscale()">💶 Sei Troppo Fiscale!</button>
-      <button class="btn" style="grid-column:1/-1; border-color:var(--cyan); color:var(--cyan)" onclick="openToc()">🪙 Testa o Croce</button>
-      <button class="btn" style="grid-column:1/-1; border-color:var(--viola); color:var(--viola)" onclick="openCenerentola()">👠 Cenerentola</button>
-      <button class="btn" style="grid-column:1/-1; border-color:#c9975e; color:#c9975e" onclick="openPacchi()">📦 Il Gioco dei Pacchi</button>
-      <button class="btn" style="grid-column:1/-1; border-color:#d4a017; color:#d4a017" onclick="openRoulette()">🤠 Roulette Russa</button>
-      <button class="btn" style="grid-column:1/-1; border-color:#e0b84a; color:#e0b84a" onclick="openPagliuzza()">🌾 La Pagliuzza</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#6fe08f,#2e9c4f); color:#fff; box-shadow:0 7px 0 #1a5c2e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,156,79,.35)" onclick="openTFiscale()">💶 Sei Troppo Fiscale!</button>
+      <button class="btn cy" style="grid-column:1/-1" onclick="openToc()">🪙 Testa o Croce</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c9a0ff,var(--viola)); color:#fff; box-shadow:0 7px 0 #5a2a9c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.35)" onclick="openCenerentola()">👠 Cenerentola</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#d9ac6e,#8a6428); color:#fff; box-shadow:0 7px 0 #5a3d18,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,100,40,.35)" onclick="openPacchi()">📦 Il Gioco dei Pacchi</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a85838,#6b3018); color:#ffe9a8; box-shadow:0 7px 0 #3a1a0c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(107,48,24,.4)" onclick="openRoulette()">🤠 Roulette Russa</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a6428,#5a3d18); color:#ffe9a8; box-shadow:0 7px 0 #2e1e0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(90,61,24,.4)" onclick="openPagliuzza()">🌾 La Pagliuzza</button>
     </div>`);
 }
 function modalModules(){
