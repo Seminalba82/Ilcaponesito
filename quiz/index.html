@@ -425,6 +425,32 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .rdcOp{font-family:'Bungee'; font-size:clamp(16px,4vw,22px); color:var(--gold); flex-shrink:0;}
 .rdcAnswerRow{display:flex; gap:10px; align-items:center; justify-content:center; margin-top:16px;}
 .rdcAnswerRow input{width:130px; font-family:'Bungee'; font-size:24px; text-align:center; color:var(--gold);}
+
+/* ===== MASTERMIND ===== */
+.mmBoard{position:relative; width:100%; max-width:360px; margin:14px auto; border-radius:20px; padding:20px 16px;
+  background:linear-gradient(155deg,#3a2a1a 0%,#1e140c 100%); border:6px solid #5a3a1a;
+  box-shadow:inset 0 0 30px rgba(0,0,0,.55), 0 10px 24px rgba(0,0,0,.5);}
+.mmSlotsRow{display:flex; justify-content:center; gap:10px; margin-bottom:6px;}
+.mmSlot{width:20%; max-width:60px; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 38% 32%,#3a3a3a,#111 75%);
+  border:3px solid #222; box-shadow:inset 0 4px 8px rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center;
+  font-size:26px; transition:transform .2s;}
+.mmSlot.filled{animation:mmPop .25s ease-out;}
+@keyframes mmPop{ 0%{transform:scale(1.3);} 100%{transform:scale(1);} }
+.mmPeg{width:78%; height:78%; border-radius:50%; display:flex; align-items:center; justify-content:center;}
+.mmPalette{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:100%; max-width:320px; margin:14px auto 0;}
+.mmColorBtn{aspect-ratio:1; border-radius:50%; cursor:pointer; border:3px solid rgba(255,255,255,.25);
+  box-shadow:0 4px 8px rgba(0,0,0,.4), inset 0 3px 6px rgba(255,255,255,.3); transition:transform .1s;
+  display:flex; align-items:center; justify-content:center; font-size:28px;}
+.mmColorBtn:active{transform:scale(.9);}
+.mmClearBtn{width:100%; max-width:320px; margin:10px auto 0;}
+.mmResultRow{display:flex; justify-content:center; gap:8px; margin-top:4px;}
+.mmResultSlot{width:15%; max-width:44px; aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px;}
+.mmHistory{width:100%; max-width:360px; max-height:220px; overflow-y:auto; margin:10px auto 0; display:flex; flex-direction:column; gap:6px;}
+.mmHistRow{display:flex; align-items:center; justify-content:space-between; gap:8px; background:rgba(0,0,0,.3); border-radius:10px; padding:6px 10px;}
+.mmHistPegs{display:flex; gap:4px;}
+.mmHistPeg{width:20px; height:20px; border-radius:50%; box-shadow:inset 0 -2px 3px rgba(0,0,0,.4);}
+.mmHistFb{font-size:12px; font-weight:800; color:var(--cyan); white-space:nowrap;}
+.mmHistFb.solved{color:var(--lime);}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -945,7 +971,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v11.7</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.0</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2401,6 +2427,73 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="feedback mt" id="rdcpFb" style="display:none; font-size:20px"></div>
 </div>
 
+<!-- ==================== HOST: MASTERMIND ==================== -->
+<div class="screen" id="scrMastermind">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🎯 MASTERMIND</div></div>
+  <div class="panel mt" style="max-width:420px" id="mmSetup">
+    <div class="label">Componi la sequenza segreta (4 colori, nell'ordine esatto)</div>
+    <div class="mmBoard" style="max-width:100%">
+      <div class="mmSlotsRow" id="mmSetupSlots"></div>
+    </div>
+    <div class="mmPalette" id="mmSetupPalette"></div>
+    <button class="btn ghost mmClearBtn" onclick="mmSetupClear()">🗑 Cancella</button>
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti</div><select id="mmPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="mmPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Tempo per risolvere</div>
+        <select id="mmDuration">
+          <option value="30">30 secondi</option>
+          <option value="60" selected>1 minuto</option>
+          <option value="120">2 minuti</option>
+          <option value="180">3 minuti</option>
+          <option value="300">5 minuti</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="mmStart()">🎯 AVVIA MASTERMIND!</button>
+  </div>
+  <div id="mmLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="mmMsg"></div>
+    <div class="timerWrap mt" style="max-width:340px"><div class="timerBar" id="mmTimerBar"></div></div>
+    <div class="byline mt" id="mmCount"></div>
+    <div class="lead mt" id="mmResultsLive" style="max-width:500px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="mmBtnAgain" onclick="openMastermind()" style="display:none">🔁 Un'altra sequenza</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: MASTERMIND ==================== -->
+<div class="screen" id="scrPjMastermind">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🎯 MASTERMIND</div></div>
+  <div class="miniMsg" id="pjMmMsg" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="pjMmTimerBar"></div></div>
+  <div class="lead mt" id="pjMmResults" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: MASTERMIND ==================== -->
+<div class="screen" id="scrPlayMastermind" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="mmpName" style="color:var(--gold)"></div>
+    <div class="pill" id="mmpScore"></div>
+  </div>
+  <div class="byline mt" id="mmpStatus">🎯 INDOVINA LA SEQUENZA!</div>
+  <div class="timerWrap mt" style="max-width:280px"><div class="timerBar" id="mmpTimerBar"></div></div>
+  <div class="mmHistory" id="mmHistory"></div>
+  <div class="mmBoard">
+    <div class="mmSlotsRow" id="mmPlaySlots"></div>
+  </div>
+  <div class="mmPalette" id="mmPlayPalette"></div>
+  <div class="row mt" style="justify-content:center; gap:10px">
+    <button class="btn ghost" onclick="mmPlayClear()">🗑 Cancella</button>
+    <button class="btn mg" id="mmBtnConfirm" onclick="mmSubmit()" disabled>🎯 PROVA</button>
+  </div>
+  <div class="feedback mt" id="mmpFb" style="display:none; font-size:20px"></div>
+</div>
+
 <!-- ==================== HOST: SEI TROPPO FISCALE! ==================== -->
 <div class="screen" id="scrTFiscale">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">💶 SEI TROPPO FISCALE!</div></div>
@@ -2908,7 +3001,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 117; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 120; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -4060,6 +4153,7 @@ function listenGame(){
     else if (g.status==='pagliuzza') showPlayerPagliuzza(g);
     else if (g.status==='supertris') showPlayerSupertris(g);
     else if (g.status==='rdc') showPlayerRdc(g);
+    else if (g.status==='mastermind') showPlayerMastermind(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -4838,7 +4932,7 @@ function showPlayerRdc(g){
       $('rdcAnswerRow').style.display='none'; $('rdcpTimerWrap').style.display='none'; $('rdcpFb').style.display='none';
       $('rdcpAnswer').value=''; $('rdcpAnswer').disabled=false;
       $('rdcGridPl')._built=false;
-      const data = { symbols:m.symbols, totals:m.totals };
+      const data = { symbols:m.symbols, totals:m.totals, rows:m.rows };
       rdcRunReveal($('rdcGridPl'), data, m.startAt, m.stepMs, ()=>{
         $('rdcpStatus').textContent = '✍️ SCRIVI LA RISPOSTA!';
         $('rdcAnswerRow').style.display='flex';
@@ -4883,6 +4977,101 @@ function rdcSubmit(){
   document.querySelector('#rdcAnswerRow button').disabled=true;
   $('rdcpStatus').textContent = '✅ RISPOSTA INVIATA! ASPETTA GLI ALTRI...';
   if (navigator.vibrate) navigator.vibrate(40);
+}
+/* ================================================================
+   MASTERMIND — telefono
+================================================================ */
+function mmRenderHistRow(entry){
+  const pegs = entry.seq.map(c=>`<div class="mmHistPeg" style="background:${MM_COLORS[c].hex}"></div>`).join('');
+  const solved = entry.exactMatches===4;
+  const fbTxt = solved ? '🎯 RISOLTO!' : `${entry.colorMatches} giusti · ${entry.exactMatches} in posizione`;
+  return `<div class="mmHistRow"><div class="mmHistPegs">${pegs}</div><div class="mmHistFb${solved?' solved':''}">${fbTxt}</div></div>`;
+}
+function showPlayerMastermind(g){
+  const m = g.mastermind||{};
+  $('mmpName').textContent = P.name;
+  $('mmpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayMastermind');
+  if (m.phase==='bet'){
+    const sig = 'bet:'+m.roundId;
+    if (P.mmSig !== sig){
+      P.mmSig = sig; P.mmSolved = false; P.mmSeq = [null,null,null,null];
+      P.mmStartAt = serverNow();
+      $('mmpStatus').textContent = '🎯 INDOVINA LA SEQUENZA! PROVA E RIPROVA...';
+      $('mmpFb').style.display='none';
+      $('mmHistory').innerHTML='';
+      mmRenderSlots($('mmPlaySlots'), P.mmSeq);
+      mmRenderPalette($('mmPlayPalette'), 'mmPlayPick');
+      $('mmBtnConfirm').disabled=true;
+      document.querySelectorAll('#mmPlayPalette .mmColorBtn').forEach(b=>b.style.pointerEvents='');
+      if (P.mmHistRef) P.mmHistRef.off();
+      P.mmHistRef = P.ref.child('mastermind/history/'+P.id);
+      P.mmHistRef.on('child_added', snap=>{
+        const entry = snap.val();
+        $('mmHistory').insertAdjacentHTML('beforeend', mmRenderHistRow(entry));
+        $('mmHistory').scrollTop = $('mmHistory').scrollHeight;
+        if (entry.exactMatches===4 && !P.mmSolved){
+          P.mmSolved = true;
+          $('mmpStatus').textContent = '🎉 HAI TROVATO LA SEQUENZA! ASPETTA LA FINE DEL TEMPO...';
+          document.querySelectorAll('#mmPlayPalette .mmColorBtn').forEach(b=>b.style.pointerEvents='none');
+          $('mmBtnConfirm').disabled=true;
+          confetti(); if (navigator.vibrate) navigator.vibrate([80,50,150]);
+        }
+      });
+      clearInterval(P.mmInt);
+      $('mmpTimerBar').style.width='100%';
+      P.mmInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('mmpTimerBar').style.width = (left/(m.durationMs||1)*100)+'%';
+        if (left<=0){
+          clearInterval(P.mmInt);
+          $('mmBtnConfirm').disabled=true;
+          document.querySelectorAll('#mmPlayPalette .mmColorBtn').forEach(b=>b.style.pointerEvents='none');
+          if (!P.mmSolved) $('mmpStatus').textContent='⏱ TEMPO SCADUTO!';
+        }
+      }, 100);
+    }
+  } else if (m.phase==='result'){
+    const sig = 'res:'+m.roundId;
+    if (P.mmSig !== sig){
+      P.mmSig = sig;
+      clearInterval(P.mmInt); $('mmpTimerBar').style.width='0%';
+      if (P.mmHistRef) { P.mmHistRef.off(); P.mmHistRef=null; }
+      document.querySelectorAll('#mmPlayPalette .mmColorBtn').forEach(b=>b.style.pointerEvents='none');
+      $('mmBtnConfirm').disabled=true;
+      mmRenderSlots($('mmPlaySlots'), m.secret||[null,null,null,null]);
+      const mine = (m.results||[]).find(r=>r.id===P.id);
+      $('mmpStatus').textContent = '💡 LA SEQUENZA SEGRETA ERA QUESTA';
+      $('mmpFb').style.display='block';
+      if (!mine){ $('mmpFb').style.color='var(--muted)'; $('mmpFb').textContent='NON SEI RIUSCITO A RISOLVERLA'; }
+      else { $('mmpFb').style.color='var(--lime)'; $('mmpFb').textContent=`L'HAI RISOLTA! +${mine.pts} 🎉`; confetti(); }
+    }
+  }
+}
+function mmPlayPick(colorIdx){
+  if (P.mmSolved) return;
+  const i = P.mmSeq.indexOf(null);
+  if (i===-1) return;
+  P.mmSeq[i] = colorIdx;
+  mmRenderSlots($('mmPlaySlots'), P.mmSeq);
+  $('mmBtnConfirm').disabled = P.mmSeq.includes(null);
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+function mmPlayClear(){
+  if (P.mmSolved) return;
+  P.mmSeq = [null,null,null,null];
+  mmRenderSlots($('mmPlaySlots'), P.mmSeq);
+  $('mmBtnConfirm').disabled=true;
+}
+function mmSubmit(){
+  if (P.mmSolved || P.mmSeq.includes(null)) return;
+  const t = Math.max(0, serverNow() - (P.mmStartAt||serverNow()));
+  P.ref.child('mastermind/pendingAttempts').push({ pid:P.id, seq:[...P.mmSeq], t });
+  if (navigator.vibrate) navigator.vibrate(40);
+  // svuoto la riga corrente per il prossimo tentativo: lo storico resta sopra, a mostrare la strada già fatta
+  P.mmSeq = [null,null,null,null];
+  mmRenderSlots($('mmPlaySlots'), P.mmSeq);
+  $('mmBtnConfirm').disabled=true;
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -8479,19 +8668,28 @@ function stStart(){
 const RDC_SYMS = ['🍎','🍌','🍇','🍉','🍓','🥝','🍍','🥥'];
 function rdcGenerate(){
   const shuffled = [...RDC_SYMS].sort(()=>Math.random()-0.5);
-  const symbols = shuffled.slice(0,3);
-  const values = symbols.map(()=> Math.floor(Math.random()*15)+2); // ogni simbolo vale da 2 a 16
-  const totals = values.map(v=> v*3); // 3 simboli uguali sommati, sempre divisibile per 3
-  const finalAnswer = values.reduce((a,b)=>a+b,0);
-  return { symbols, totals, finalAnswer };
+  const symbols = shuffled.slice(0,3); // A, B, C
+  // tre valori interi tra 1 e 25, sempre tutti diversi tra loro
+  let vA, vB, vC;
+  do {
+    vA = Math.floor(Math.random()*25)+1;
+    vB = Math.floor(Math.random()*25)+1;
+    vC = Math.floor(Math.random()*25)+1;
+  } while (vA===vB || vB===vC || vA===vC);
+  // riga1: A+A+A · riga2: A+B+B (riprende A) · riga3: B+C+C (riprende B) · finale: A+B+C
+  const totals = [ vA*3, vA+vB*2, vB+vC*2 ];
+  const finalAnswer = vA+vB+vC;
+  const rows = [ [symbols[0],symbols[0],symbols[0]], [symbols[0],symbols[1],symbols[1]],
+                 [symbols[1],symbols[2],symbols[2]], [symbols[0],symbols[1],symbols[2]] ];
+  return { symbols, totals, finalAnswer, values:[vA,vB,vC], rows };
 }
 function rdcRevealSteps(data){
   const steps = [];
   for (let r=0;r<3;r++){
-    for (let c=0;c<3;c++) steps.push({ row:r, col:c, kind:'sym', val:data.symbols[r] });
+    for (let c=0;c<3;c++) steps.push({ row:r, col:c, kind:'sym', val:data.rows[r][c] });
     steps.push({ row:r, col:3, kind:'total', val:data.totals[r] });
   }
-  for (let c=0;c<3;c++) steps.push({ row:3, col:c, kind:'sym', val:data.symbols[c] });
+  for (let c=0;c<3;c++) steps.push({ row:3, col:c, kind:'sym', val:data.rows[3][c] });
   return steps; // NIENTE step per la cella finale (riga 3, colonna 3): resta il mistero "?" fino al risultato
 }
 function rdcBuildGrid(el){
@@ -8557,13 +8755,13 @@ function rdcStart(){
   const answerEndAt = startAt + revealMs + durationMs;
   const roundId = startAt;
   RDC = { data, points, durationMs, credited:false };
-  G.ref.update({ status:'rdc', rdc:{ phase:'reveal', symbols:data.symbols, totals:data.totals, points, startAt, stepMs, revealMs, answerDurationMs:durationMs, answerEndAt, roundId } });
+  G.ref.update({ status:'rdc', rdc:{ phase:'reveal', symbols:data.symbols, totals:data.totals, rows:data.rows, points, startAt, stepMs, revealMs, answerDurationMs:durationMs, answerEndAt, roundId } });
   G.ref.child('rdc/answers').remove();
   $('rdcSetup').style.display='none'; $('rdcLive').style.display='block';
   $('rdcMsg').textContent = '🧮 I SIMBOLI SI SVELANO...';
   $('rdcTimerWrapHost').style.display='none'; $('rdcCount').textContent=''; $('rdcBtnAgain').style.display='none';
   $('rdcGridHost')._built=false;
-  pjSend({type:'rdcReveal', symbols:data.symbols, totals:data.totals, startAt, stepMs, revealMs, answerEndAt, answerDurationMs:durationMs});
+  pjSend({type:'rdcReveal', symbols:data.symbols, totals:data.totals, rows:data.rows, startAt, stepMs, revealMs, answerEndAt, answerDurationMs:durationMs});
   rdcRunReveal($('rdcGridHost'), data, startAt, stepMs, ()=>{
     $('rdcMsg').textContent = '✍️ ORA RISPONDETE DAL TELEFONO!';
     $('rdcTimerWrapHost').style.display='block';
@@ -8607,6 +8805,139 @@ function rdcClose(){
       if (cell){ cell.textContent = RDC.data.finalAnswer; cell.classList.remove('rdcMystery'); cell.classList.add('locked'); }
       pjSend({type:'rdcResult', finalAnswer:RDC.data.finalAnswer, results});
       $('rdcBtnAgain').style.display='';
+      confetti();
+    });
+  });
+}
+
+/* ================================================================
+   MASTERMIND — motore condiviso (host/proiettore/telefono) + regia
+================================================================ */
+const MM_COLORS = [
+  {id:0, hex:'#e74c3c'}, {id:1, hex:'#2ecc71'}, {id:2, hex:'#3498db'},
+  {id:3, hex:'#f1c40f'}, {id:4, hex:'#9b59b6'}, {id:5, hex:'#e67e22'}
+];
+function mmRenderSlots(el, seq){
+  el.innerHTML = Array.from({length:4},(_,i)=>{
+    const c = seq[i];
+    const inner = c!=null ? `<div class="mmPeg" style="--pc:${MM_COLORS[c].hex}; background:var(--pc); background-image:radial-gradient(circle at 35% 30%, rgba(255,255,255,.75), rgba(255,255,255,0) 55%); box-shadow:inset 0 -4px 6px rgba(0,0,0,.35)"></div>` : '';
+    return `<div class="mmSlot${c!=null?' filled':''}" data-i="${i}">${inner}</div>`;
+  }).join('');
+}
+function mmRenderPalette(el, onClickName){
+  el.innerHTML = MM_COLORS.map(c=>
+    `<div class="mmColorBtn" style="background:${c.hex}" onclick="${onClickName}(${c.id})"></div>`).join('');
+}
+// Calcola il riscontro classico del Mastermind: quanti colori sono giusti (in totale, gestendo bene i doppioni)
+// e di questi quanti sono anche nel posto esatto.
+function mmFeedback(secret, guess){
+  let exact = 0;
+  const secretRemain = [], guessRemain = [];
+  for (let i=0;i<4;i++){
+    if (guess[i]===secret[i]) exact++;
+    else { secretRemain.push(secret[i]); guessRemain.push(guess[i]); }
+  }
+  const used = secretRemain.map(()=>false);
+  let colorOnly = 0;
+  for (let i=0;i<guessRemain.length;i++){
+    const idx = secretRemain.findIndex((c,j)=> c===guessRemain[i] && !used[j]);
+    if (idx!==-1){ used[idx]=true; colorOnly++; }
+  }
+  return { colorMatches: exact+colorOnly, exactMatches: exact };
+}
+let MM_SETUP_SEQ = [null,null,null,null];
+function mmSetupPick(colorIdx){
+  const i = MM_SETUP_SEQ.indexOf(null);
+  if (i===-1) return;
+  MM_SETUP_SEQ[i] = colorIdx;
+  mmRenderSlots($('mmSetupSlots'), MM_SETUP_SEQ);
+}
+function mmSetupClear(){
+  MM_SETUP_SEQ = [null,null,null,null];
+  mmRenderSlots($('mmSetupSlots'), MM_SETUP_SEQ);
+}
+function openMastermind(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((MM||{}).timerInt);
+  G.ref.child('mastermind/pendingAttempts').off();
+  G.ref.update({ status:'mastermind', mastermind:{ phase:'idle' } });
+  $('mmSetup').style.display='block'; $('mmLive').style.display='none';
+  if (!$('mmPoints').innerHTML) $('mmPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===3?'selected':''}>${(k+1)*100} punti</option>`).join('');
+  MM_SETUP_SEQ = [null,null,null,null];
+  mmRenderSlots($('mmSetupSlots'), MM_SETUP_SEQ);
+  mmRenderPalette($('mmSetupPalette'), 'mmSetupPick');
+  pjSend({type:'mmState'});
+  showScreen('scrMastermind');
+}
+let MM = {};
+function mmStart(){
+  if (MM_SETUP_SEQ.includes(null)) return alert('Completa tutti e 4 i colori della sequenza segreta!');
+  const secret = [...MM_SETUP_SEQ];
+  const points = getPoints('mmPoints','mmPointsMan');
+  const durationSec = +($('mmDuration').value||60);
+  const durationMs = durationSec*1000;
+  const endAt = serverNow() + durationMs;
+  const roundId = serverNow();
+  MM = { secret, points, durationMs, credited:false, solvedSet:{} };
+  G.ref.update({ status:'mastermind', mastermind:{ phase:'bet', endAt, durationMs, roundId } }); // il codice segreto resta SOLO qui in regia
+  G.ref.child('mastermind/pendingAttempts').remove();
+  G.ref.child('mastermind/history').remove();
+  G.ref.child('mastermind/solved').remove();
+  $('mmSetup').style.display='none'; $('mmLive').style.display='block';
+  $('mmMsg').textContent = '🎯 SI GIOCA! OGNUNO PROVA DAL TELEFONO...';
+  $('mmCount').textContent=''; $('mmResultsLive').innerHTML=''; $('mmBtnAgain').style.display='none';
+  pjSend({type:'mmBet', endAt, durationMs});
+  let attemptCount = 0, solvedCount = 0;
+  G.ref.child('mastermind/pendingAttempts').on('child_added', snap=>{
+    const key = snap.key, data = snap.val();
+    if (!data || !data.pid) return;
+    G.ref.child('mastermind/pendingAttempts/'+key).remove();
+    if (MM.solvedSet[data.pid]) return; // ha già risolto, ignoro tentativi ulteriori
+    const fb = mmFeedback(MM.secret, data.seq);
+    attemptCount++;
+    G.ref.child('mastermind/history/'+data.pid).push({ seq:data.seq, colorMatches:fb.colorMatches, exactMatches:fb.exactMatches, t:data.t });
+    if (fb.exactMatches===4){
+      MM.solvedSet[data.pid] = true;
+      solvedCount++;
+      G.ref.child('mastermind/solved/'+data.pid).set({ t:data.t });
+    }
+    $('mmCount').textContent = `Tentativi ricevuti: ${attemptCount} · Risolto da: ${solvedCount}`;
+  });
+  clearInterval(MM.timerInt);
+  $('mmTimerBar').style.width='100%';
+  MM.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt-serverNow());
+    $('mmTimerBar').style.width = (left/durationMs*100)+'%';
+    if (left<=0){ clearInterval(MM.timerInt); mmClose(); }
+  }, 100);
+}
+function mmClose(){
+  if (MM.credited) return; MM.credited = true;
+  clearInterval(MM.timerInt);
+  G.ref.child('mastermind/pendingAttempts').off();
+  G.ref.child('mastermind/solved').once('value').then(ss=>{
+    const solved = ss.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const updates = {}; const results = [];
+      for (const pid in solved){
+        const t = solved[pid].t;
+        const frac = Math.max(0, 1 - t/MM.durationMs);
+        const pts = Math.round(MM.points*(0.5+0.5*frac)/10)*10;
+        if (players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+pts);
+        results.push({ id:pid, name:(players[pid]||{}).name||'?', t, pts });
+      }
+      results.sort((a,b)=> a.t-b.t); // chi ha risolto prima, in cima
+      updates['mastermind/phase']='result'; updates['mastermind/secret']=MM.secret; updates['mastermind/results']=results;
+      G.ref.update(updates);
+      $('mmMsg').textContent = '💡 LA SEQUENZA SEGRETA ERA:';
+      $('mmResultsLive').innerHTML = `<div class="mmSlotsRow" style="justify-content:center; margin-bottom:10px"></div>` +
+        (results.length ? results.map(r=> `<div class="leadRow"><span class="pos">🎯</span> ${esc(r.name)} <span class="pts">+${r.pts}</span></div>`).join('')
+        : '<div class="byline">Nessuno ha risolto la sequenza in tempo!</div>');
+      $('mmResultsLive').querySelector('.mmSlotsRow').innerHTML = MM.secret.map(c=>
+        `<div class="mmSlot filled"><div class="mmPeg" style="background:${MM_COLORS[c].hex}; background-image:radial-gradient(circle at 35% 30%, rgba(255,255,255,.75), rgba(255,255,255,0) 55%)"></div></div>`).join('');
+      pjSend({type:'mmResult', secret:MM.secret, results});
+      $('mmBtnAgain').style.display='';
       confetti();
     });
   });
@@ -8921,6 +9252,7 @@ function modalGames(){
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a6428,#5a3d18); color:#ffe9a8; box-shadow:0 7px 0 #2e1e0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(90,61,24,.4)" onclick="openPagliuzza()">🌾 La Pagliuzza</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#2d8a4e,#0d4020); color:#ffe042; box-shadow:0 7px 0 #072410,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(13,64,32,.4)" onclick="openSupertris()">🎰 SUPERTRIS</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5a3d8a,#2e1a5a); color:#fff; box-shadow:0 7px 0 #180e30,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,26,90,.4)" onclick="openRdc()">🧮 La Resa dei Conti</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a4a4a,#222); color:#fff; box-shadow:0 7px 0 #0a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4)" onclick="openMastermind()">🎯 Mastermind</button>
     </div>`);
 }
 function modalModules(){
@@ -9381,6 +9713,7 @@ function backToQuiz(title){
   G.ref.child('pagliuzza/bets').off();
   G.ref.child('supertris/results').off();
   G.ref.child('rdc/answers').off();
+  G.ref.child('mastermind/pendingAttempts').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -9389,7 +9722,8 @@ function backToQuiz(title){
   clearInterval((ROU||{}).timerInt);
   clearInterval((PAG||{}).timerInt);
   clearInterval((RDC||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null });
+  clearInterval((MM||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -10181,7 +10515,7 @@ function pjRoute(m){
       $('pjRdcMsg').textContent = '🧮 I SIMBOLI SI SVELANO...';
       $('pjRdcTimerWrap').style.display='none';
       $('rdcGridPj')._built=false;
-      const data = { symbols:m.symbols, totals:m.totals };
+      const data = { symbols:m.symbols, totals:m.totals, rows:m.rows };
       rdcRunReveal($('rdcGridPj'), data, m.startAt, m.stepMs, ()=>{
         $('pjRdcMsg').textContent = '✍️ RISPONDONO DAL TELEFONO!';
         $('pjRdcTimerWrap').style.display='block';
@@ -10198,6 +10532,34 @@ function pjRoute(m){
       $('pjRdcMsg').textContent = `💡 LA RISPOSTA GIUSTA ERA ${m.finalAnswer}!`;
       const cell = document.getElementById('rdcGridPj_r3c3');
       if (cell){ cell.textContent = m.finalAnswer; cell.classList.remove('rdcMystery'); cell.classList.add('locked'); }
+      confetti();
+    }
+    else if (m.type==='mmState') {
+      showScreen('scrPjMastermind');
+      $('pjMmMsg').textContent=''; $('pjMmTimerBar').style.width='0%'; $('pjMmResults').innerHTML='';
+    }
+    else if (m.type==='mmBet') {
+      showScreen('scrPjMastermind');
+      $('pjMmMsg').textContent = '🎯 SI GIOCA! OGNUNO PROVA DAL TELEFONO...';
+      $('pjMmResults').innerHTML='';
+      clearInterval(window._pjMmInt);
+      $('pjMmTimerBar').style.width='100%';
+      window._pjMmInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('pjMmTimerBar').style.width = (left/(m.durationMs||1)*100)+'%';
+        if (left<=0) clearInterval(window._pjMmInt);
+      }, 100);
+    }
+    else if (m.type==='mmResult') {
+      clearInterval(window._pjMmInt); $('pjMmTimerBar').style.width='0%';
+      $('pjMmMsg').textContent = '💡 LA SEQUENZA SEGRETA ERA:';
+      const secretRow = `<div class="mmSlotsRow" style="justify-content:center; margin-bottom:10px">${
+        (m.secret||[]).map(c=>`<div class="mmSlot filled"><div class="mmPeg" style="background:${MM_COLORS[c].hex}; background-image:radial-gradient(circle at 35% 30%, rgba(255,255,255,.75), rgba(255,255,255,0) 55%)"></div></div>`).join('')
+      }</div>`;
+      const results = m.results||[];
+      $('pjMmResults').innerHTML = secretRow + (results.length ? results.map(r=>
+        `<div class="leadRow"><span class="pos">🎯</span> ${esc(r.name)} <span class="pts">+${r.pts}</span></div>`).join('')
+        : '<div class="byline">Nessuno ha risolto la sequenza in tempo!</div>');
       confetti();
     }
     else if (m.type==='podium') {
