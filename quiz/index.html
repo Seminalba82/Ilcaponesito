@@ -379,6 +379,52 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   background:radial-gradient(circle at 38% 32%, #9a9a9a, #444 55%, #222 85%); border:6px solid #161616;
   box-shadow:0 6px 14px rgba(0,0,0,.55), inset 0 0 14px rgba(0,0,0,.4);}
 .rouCylinder.kick{transition:transform .1s;}
+
+/* ===== SUPERTRIS ===== */
+.stTicket{position:relative; width:100%; max-width:340px; margin:14px auto; border-radius:22px; padding:16px;
+  background:linear-gradient(155deg,#1a6b3a 0%,#0d4020 100%); border:6px solid var(--gold);
+  box-shadow:0 0 30px rgba(255,201,60,.25), inset 0 0 30px rgba(0,0,0,.4);}
+.stTicket::before{content:'★ SUPERTRIS ★'; display:block; text-align:center; font-family:'Bungee'; font-size:13px;
+  color:var(--gold); letter-spacing:2px; margin-bottom:10px; text-shadow:0 0 8px rgba(255,201,60,.5);}
+.stGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+.stCell{position:relative; aspect-ratio:1; border-radius:12px; perspective:400px; cursor:pointer;}
+.stCellFoil{position:absolute; inset:0; border-radius:12px; z-index:2;
+  background:linear-gradient(135deg,#e8e8e8 0%,#fafafa 25%,#b8b8b8 50%,#f0f0f0 75%,#c8c8c8 100%);
+  display:flex; align-items:center; justify-content:center; font-size:22px; color:#888;
+  box-shadow:inset 0 0 10px rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.4);
+  transition:transform .45s cubic-bezier(.3,.9,.25,1.25), opacity .3s;}
+.stCellFoil::after{content:''; position:absolute; inset:0; border-radius:12px;
+  background:linear-gradient(115deg, transparent 40%, rgba(255,255,255,.5) 50%, transparent 60%);}
+.stCell.scratched .stCellFoil{transform:scale(0) rotate(200deg); opacity:0; pointer-events:none;}
+.stCellSymbol{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:clamp(26px,7vw,38px); transform:scale(0); transition:transform .35s .18s cubic-bezier(.3,1.5,.35,1.1); z-index:1;}
+.stCell.scratched .stCellSymbol{transform:scale(1);}
+.stCell.winline .stCellSymbol{filter:drop-shadow(0 0 10px #ffe042) drop-shadow(0 0 18px rgba(255,201,60,.7));
+  animation:stWinPulse 1s ease-in-out infinite alternate;}
+@keyframes stWinPulse{ from{transform:scale(1);} to{transform:scale(1.16);} }
+.stFlake{position:absolute; width:8px; height:8px; background:#ddd; border-radius:2px; z-index:3; opacity:0; pointer-events:none;}
+.stCell.scratched .stFlake{animation:stFlakeFly .5s ease-out forwards;}
+@keyframes stFlakeFly{ 0%{opacity:1; transform:translate(0,0) rotate(0deg);} 100%{opacity:0; transform:translate(var(--fx),var(--fy)) rotate(var(--fr));} }
+.stStatus{text-align:center; font-family:'Bungee'; font-size:14px; color:var(--gold); margin-top:12px; letter-spacing:1px;}
+.stStatus.win{color:var(--lime); text-shadow:0 0 12px rgba(182,242,46,.6);}
+.stStatus.lose{color:#ff8a8a;}
+
+/* ===== LA RESA DEI CONTI ===== */
+.rdcGrid{display:flex; flex-direction:column; gap:9px; width:100%; max-width:420px; margin:14px auto;}
+.rdcRow{display:flex; align-items:center; justify-content:center; gap:5px;}
+.rdcRow.rdcFinalRow{margin-top:8px; padding-top:12px; border-top:2px dashed rgba(255,201,60,.35);}
+.rdcCell{width:15%; max-width:56px; aspect-ratio:1; border-radius:12px; background:linear-gradient(155deg,#2a1c40,#1a1030);
+  border:2px solid var(--viola); display:flex; align-items:center; justify-content:center;
+  font-size:clamp(18px,5vw,26px); font-family:'Bungee'; color:#fff; box-shadow:0 4px 8px rgba(0,0,0,.4); transition:transform .15s;}
+.rdcCell.locked{animation:rdcLock .3s ease-out; border-color:var(--gold); box-shadow:0 0 14px rgba(255,201,60,.5);}
+@keyframes rdcLock{ 0%{transform:scale(1.3);} 100%{transform:scale(1);} }
+.rdcCell.rdcTotal{background:linear-gradient(155deg,#1a6b3a,#0d4020); border-color:var(--lime); font-size:clamp(14px,4vw,19px);}
+.rdcCell.rdcMystery{background:linear-gradient(155deg,#6b1a1a,#3a0d0d); border-color:#ff5d5d; color:#ff8a8a;
+  animation:rdcMysteryPulse 1.2s ease-in-out infinite alternate;}
+@keyframes rdcMysteryPulse{ from{box-shadow:0 0 10px rgba(255,93,93,.4);} to{box-shadow:0 0 20px rgba(255,93,93,.85);} }
+.rdcOp{font-family:'Bungee'; font-size:clamp(16px,4vw,22px); color:var(--gold); flex-shrink:0;}
+.rdcAnswerRow{display:flex; gap:10px; align-items:center; justify-content:center; margin-top:16px;}
+.rdcAnswerRow input{width:130px; font-family:'Bungee'; font-size:24px; text-align:center; color:var(--gold);}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -899,7 +945,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v11.5</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v11.7</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2257,6 +2303,104 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="pagPickGrid" id="pagPickGrid"></div>
 </div>
 
+<!-- ==================== HOST: SUPERTRIS ==================== -->
+<div class="screen" id="scrSupertris">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🎰 SUPERTRIS</div></div>
+  <div class="panel mt" style="max-width:480px" id="stSetup">
+    <div class="label">I 3 premi (uno per ogni cartella vincente)</div>
+    <div class="row">
+      <div><div class="label">1° premio</div><select id="stPrize1"></select></div>
+      <div><div class="label">2° premio</div><select id="stPrize2"></select></div>
+      <div><div class="label">3° premio</div><select id="stPrize3"></select></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="stStart()">🎰 DISTRIBUISCI LE CARTELLE!</button>
+  </div>
+  <div id="stLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg">🎰 OGNUNO GRATTA LA PROPRIA CARTELLA DAL TELEFONO!</div>
+    <div class="byline" id="stCount"></div>
+    <div class="lead mt" id="stWinnersLive" style="max-width:500px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="stBtnAgain" onclick="openSupertris()" style="display:none">🔁 Un'altra mano</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: SUPERTRIS ==================== -->
+<div class="screen" id="scrPjSupertris">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🎰 SUPERTRIS</div></div>
+  <div class="miniMsg" id="pjStMsg" style="font-size:clamp(18px,3vw,30px)">Ognuno gratta la propria cartella sul telefono!</div>
+  <div class="lead mt" id="pjStWinners" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: SUPERTRIS ==================== -->
+<div class="screen" id="scrPlaySupertris" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="stpName" style="color:var(--gold)"></div>
+    <div class="pill" id="stpScore"></div>
+  </div>
+  <div class="stTicket">
+    <div class="stGrid" id="stGrid"></div>
+  </div>
+  <div class="stStatus" id="stpStatus">GRATTA TUTTI I RIQUADRI!</div>
+</div>
+
+<!-- ==================== HOST: LA RESA DEI CONTI ==================== -->
+<div class="screen" id="scrRdc">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🧮 LA RESA DEI CONTI</div></div>
+  <div class="panel mt" style="max-width:480px" id="rdcSetup">
+    <div class="row">
+      <div class="grow"><div class="label">Punti</div><select id="rdcPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="rdcPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Tempo per rispondere</div>
+        <select id="rdcDuration">
+          <option value="15">15 secondi</option>
+          <option value="20" selected>20 secondi</option>
+          <option value="25">25 secondi</option>
+          <option value="30">30 secondi</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="rdcStart()">🧮 SVELA I SIMBOLI!</button>
+  </div>
+  <div id="rdcLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="rdcMsg"></div>
+    <div class="rdcGrid" id="rdcGridHost"></div>
+    <div class="timerWrap mt" style="max-width:340px; display:none" id="rdcTimerWrapHost"><div class="timerBar" id="rdcTimerBar"></div></div>
+    <div class="byline mt" id="rdcCount"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="rdcBtnAgain" onclick="openRdc()" style="display:none">🔁 Un altro indovinello</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: LA RESA DEI CONTI ==================== -->
+<div class="screen" id="scrPjRdc">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🧮 LA RESA DEI CONTI</div></div>
+  <div class="miniMsg" id="pjRdcMsg" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div class="rdcGrid" id="rdcGridPj" style="max-width:560px"></div>
+  <div class="timerWrap mt" style="max-width:460px; display:none" id="pjRdcTimerWrap"><div class="timerBar" id="pjRdcTimerBar"></div></div>
+</div>
+
+<!-- ==================== PLAYER: LA RESA DEI CONTI ==================== -->
+<div class="screen" id="scrPlayRdc" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="rdcpName" style="color:var(--gold)"></div>
+    <div class="pill" id="rdcpScore"></div>
+  </div>
+  <div class="byline mt" id="rdcpStatus">🧮 GUARDA IL MAXISCHERMO...</div>
+  <div class="rdcGrid" id="rdcGridPl"></div>
+  <div class="timerWrap mt" style="max-width:280px; display:none" id="rdcpTimerWrap"><div class="timerBar" id="rdcpTimerBar"></div></div>
+  <div class="rdcAnswerRow" id="rdcAnswerRow" style="display:none">
+    <input type="number" id="rdcpAnswer" placeholder="?">
+    <button class="btn mg" onclick="rdcSubmit()">✅ INVIA</button>
+  </div>
+  <div class="feedback mt" id="rdcpFb" style="display:none; font-size:20px"></div>
+</div>
+
 <!-- ==================== HOST: SEI TROPPO FISCALE! ==================== -->
 <div class="screen" id="scrTFiscale">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">💶 SEI TROPPO FISCALE!</div></div>
@@ -2764,7 +2908,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 115; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 117; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3914,6 +4058,8 @@ function listenGame(){
     else if (g.status==='pacchi') showPlayerPacchi(g);
     else if (g.status==='roulette') showPlayerRoulette(g);
     else if (g.status==='pagliuzza') showPlayerPagliuzza(g);
+    else if (g.status==='supertris') showPlayerSupertris(g);
+    else if (g.status==='rdc') showPlayerRdc(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -4616,6 +4762,126 @@ function pagPick(i){
   P.ref.child('pagliuzza/bets/'+P.id).set(i);
   document.querySelectorAll('#pagPickGrid .pagPickBtn').forEach((el,idx)=> el.classList.toggle('mine', idx===i));
   document.querySelectorAll('#pagStrawsPl .pagStraw').forEach((el,idx)=> el.classList.toggle('mine', idx===i));
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+/* ================================================================
+   SUPERTRIS — telefono
+================================================================ */
+function showPlayerSupertris(g){
+  const m = g.supertris||{};
+  $('stpName').textContent = P.name;
+  $('stpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlaySupertris');
+  if (m.phase==='active'){
+    const sig = 'act:'+m.roundId;
+    if (P.stSig !== sig){
+      P.stSig = sig;
+      const card = (m.cards||{})[P.id];
+      P.stCard = card || { grid: Array(9).fill('❓'), winLine:null, prize:0 };
+      P.stScratchedCount = 0; P.stDone = false;
+      $('stpStatus').className='stStatus'; $('stpStatus').textContent = 'GRATTA TUTTI I RIQUADRI!';
+      $('stGrid').innerHTML = Array.from({length:9},(_,i)=>`
+        <div class="stCell" id="stCell${i}" data-i="${i}" onclick="stScratch(${i})">
+          <div class="stCellFoil">🎰</div>
+          <div class="stCellSymbol">${esc(P.stCard.grid[i])}</div>
+        </div>`).join('');
+    }
+  }
+}
+function stScratch(i){
+  if (P.stDone) return;
+  const cell = $('stCell'+i);
+  if (!cell || cell.classList.contains('scratched')) return;
+  cell.classList.add('scratched');
+  // qualche scheggia decorativa in volo, per un vero effetto "grattata"
+  for (let k=0;k<5;k++){
+    const f = document.createElement('div'); f.className='stFlake';
+    const ang = Math.random()*Math.PI*2, dist=20+Math.random()*20;
+    f.style.setProperty('--fx', Math.cos(ang)*dist+'px');
+    f.style.setProperty('--fy', Math.sin(ang)*dist+'px');
+    f.style.setProperty('--fr', (Math.random()*360)+'deg');
+    f.style.left = (45+Math.random()*10)+'%'; f.style.top = (45+Math.random()*10)+'%';
+    cell.appendChild(f);
+  }
+  if (navigator.vibrate) navigator.vibrate(25);
+  P.stScratchedCount++;
+  if (P.stScratchedCount >= 9){
+    P.stDone = true;
+    const card = P.stCard;
+    if (card.winLine){
+      card.winLine.forEach(idx=>{ const c = $('stCell'+idx); if (c) c.classList.add('winline'); });
+      P.ref.child('players/'+P.id+'/score').transaction(x=> Math.max(0,(x||0)+card.prize));
+      $('stpStatus').className='stStatus win';
+      $('stpStatus').textContent = `🎉 TRIS VINCENTE! HAI VINTO ${card.prize} PUNTI!`;
+      confetti();
+      if (navigator.vibrate) navigator.vibrate([100,50,150]);
+    } else {
+      $('stpStatus').className='stStatus lose';
+      $('stpStatus').textContent = 'NIENTE DA FARE QUESTA VOLTA...';
+    }
+    P.ref.child('supertris/results/'+P.id).set(card.prize);
+  }
+}
+/* ================================================================
+   LA RESA DEI CONTI — telefono
+================================================================ */
+function showPlayerRdc(g){
+  const m = g.rdc||{};
+  $('rdcpName').textContent = P.name;
+  $('rdcpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayRdc');
+  if (m.phase==='reveal'){
+    const sig = 'rev:'+m.roundId;
+    if (P.rdcSig !== sig){
+      P.rdcSig = sig; P.rdcAnswered = false;
+      $('rdcpStatus').textContent = '🧮 I SIMBOLI SI SVELANO...';
+      $('rdcAnswerRow').style.display='none'; $('rdcpTimerWrap').style.display='none'; $('rdcpFb').style.display='none';
+      $('rdcpAnswer').value=''; $('rdcpAnswer').disabled=false;
+      $('rdcGridPl')._built=false;
+      const data = { symbols:m.symbols, totals:m.totals };
+      rdcRunReveal($('rdcGridPl'), data, m.startAt, m.stepMs, ()=>{
+        $('rdcpStatus').textContent = '✍️ SCRIVI LA RISPOSTA!';
+        $('rdcAnswerRow').style.display='flex';
+        $('rdcpTimerWrap').style.display='block';
+        P.rdcAnswerStartAt = serverNow();
+        clearInterval(P.rdcInt);
+        P.rdcInt = setInterval(()=>{
+          const left = Math.max(0, (m.answerEndAt||0)-serverNow());
+          $('rdcpTimerBar').style.width = (left/(m.answerDurationMs||1)*100)+'%';
+          if (left<=0){
+            clearInterval(P.rdcInt);
+            if (!P.rdcAnswered){ $('rdcpAnswer').disabled=true; $('rdcAnswerRow').querySelector('button').disabled=true; $('rdcpStatus').textContent='⏱ TEMPO SCADUTO!'; }
+          }
+        }, 100);
+      });
+    }
+  } else if (m.phase==='result'){
+    const sig = 'res:'+m.roundId;
+    if (P.rdcSig !== sig){
+      P.rdcSig = sig;
+      clearInterval(P.rdcInt); $('rdcpTimerWrap').style.display='none';
+      $('rdcAnswerRow').style.display='none';
+      const cell = document.getElementById('rdcGridPl_r3c3');
+      if (cell){ cell.textContent = m.finalAnswer; cell.classList.remove('rdcMystery'); cell.classList.add('locked'); }
+      const mine = (m.results||[]).find(r=>r.id===P.id);
+      $('rdcpStatus').textContent = `💡 LA RISPOSTA GIUSTA ERA ${m.finalAnswer}!`;
+      $('rdcpFb').style.display='block';
+      if (!mine){ $('rdcpFb').style.color='var(--muted)'; $('rdcpFb').textContent='NON HAI RISPOSTO'; }
+      else if (mine.correct){ $('rdcpFb').style.color='var(--lime)'; $('rdcpFb').textContent=`GIUSTO! +${mine.pts} 🎉`; confetti(); if(navigator.vibrate) navigator.vibrate([80,50,120]); }
+      else { $('rdcpFb').style.color='var(--red)'; $('rdcpFb').textContent=`SBAGLIATO (avevi scritto ${mine.v})`; }
+    }
+  }
+}
+function rdcSubmit(){
+  if (P.rdcAnswered) return;
+  const v = +($('rdcpAnswer').value);
+  if (isNaN(v) || $('rdcpAnswer').value==='') return;
+  P.rdcAnswered = true;
+  const t = Math.max(0, serverNow() - (P.rdcAnswerStartAt||serverNow()));
+  P.ref.child('rdc/answers/'+P.id).set({ v, t });
+  $('rdcpAnswer').disabled=true;
+  document.querySelector('#rdcAnswerRow button').disabled=true;
+  $('rdcpStatus').textContent = '✅ RISPOSTA INVIATA! ASPETTA GLI ALTRI...';
   if (navigator.vibrate) navigator.vibrate(40);
 }
 function puzzleTap(i){
@@ -8121,6 +8387,232 @@ function pagReveal(){
 }
 
 /* ================================================================
+   SUPERTRIS — motore condiviso + regia
+   (gratta e vinci: ogni giocatore riceve una cartella propria, solo 3 in tutto sono vincenti)
+================================================================ */
+const ST_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const ST_SYMS = ['🍒','🍋','🔔','💎','7️⃣','⭐','🍀','🎲'];
+function stCheckLine(grid){
+  for (const line of ST_LINES){
+    if (grid[line[0]] && grid[line[0]]===grid[line[1]] && grid[line[1]]===grid[line[2]]) return line;
+  }
+  return null;
+}
+function stGenerateWinningGrid(){
+  const line = ST_LINES[Math.floor(Math.random()*ST_LINES.length)];
+  const winSym = ST_SYMS[Math.floor(Math.random()*ST_SYMS.length)];
+  const grid = new Array(9).fill(null);
+  line.forEach(i=> grid[i]=winSym);
+  for (let i=0;i<9;i++) if (grid[i]===null) grid[i] = ST_SYMS[Math.floor(Math.random()*ST_SYMS.length)];
+  return { grid, winLine: line };
+}
+function stGenerateLosingGrid(){
+  // rigenero finché non esce una griglia SENZA nessun tris, per garantire che sia davvero perdente
+  let grid, tries=0;
+  do {
+    grid = Array.from({length:9},()=> ST_SYMS[Math.floor(Math.random()*ST_SYMS.length)]);
+    tries++;
+  } while (stCheckLine(grid) && tries<300);
+  return { grid, winLine: null };
+}
+function openSupertris(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal();
+  G.ref.child('supertris/results').off();
+  G.ref.update({ status:'supertris', supertris:{ phase:'idle' } });
+  $('stSetup').style.display='block'; $('stLive').style.display='none';
+  if (!$('stPrize1').innerHTML){
+    const opts = k=>Array.from({length:20},(_,i)=>`<option value="${(i+1)*100}" ${i===k?'selected':''}>${(i+1)*100} punti</option>`).join('');
+    $('stPrize1').innerHTML = opts(6); $('stPrize2').innerHTML = opts(4); $('stPrize3').innerHTML = opts(2);
+  }
+  pjSend({type:'stState'});
+  showScreen('scrSupertris');
+}
+let ST = {};
+function stStart(){
+  const prizes = [+$('stPrize1').value, +$('stPrize2').value, +$('stPrize3').value];
+  G.ref.child('players').once('value').then(ps=>{
+    const players = ps.val()||{};
+    const pids = Object.keys(players);
+    if (!pids.length) return alert('Nessun giocatore ancora in partita!');
+    const shuffled = [...pids];
+    for (let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+    const winnerCount = Math.min(3, pids.length);
+    const winnerIds = shuffled.slice(0, winnerCount);
+    const loserIds = shuffled.slice(winnerCount);
+    const cards = {};
+    winnerIds.forEach((pid, idx)=>{
+      const {grid, winLine} = stGenerateWinningGrid();
+      cards[pid] = { grid, winLine, prize: prizes[idx] };
+    });
+    loserIds.forEach(pid=>{
+      const {grid} = stGenerateLosingGrid();
+      cards[pid] = { grid, winLine:null, prize:0 };
+    });
+    const roundId = serverNow();
+    G.ref.update({ status:'supertris', supertris:{ phase:'active', cards, roundId } });
+    G.ref.child('supertris/results').remove();
+    $('stSetup').style.display='none'; $('stLive').style.display='block';
+    $('stCount').textContent = `0 su ${pids.length} hanno finito di grattare`;
+    $('stWinnersLive').innerHTML=''; $('stBtnAgain').style.display='none';
+    pjSend({type:'stBet'});
+    G.ref.child('supertris/results').on('value', s=>{
+      const results = s.val()||{};
+      const n = Object.keys(results).length;
+      $('stCount').textContent = `${n} su ${pids.length} hanno finito di grattare`;
+      const winnersEntries = Object.entries(results).filter(([pid,pts])=>pts>0);
+      G.ref.child('players').once('value').then(ps2=>{
+        const pl = ps2.val()||{};
+        $('stWinnersLive').innerHTML = winnersEntries.length
+          ? winnersEntries.map(([pid,pts])=> `<div class="leadRow"><span class="pos">🏆</span> ${esc((pl[pid]||{}).name||'?')} <span class="pts">+${pts}</span></div>`).join('')
+          : '<div class="byline">Nessuno ha ancora vinto (o finito di grattare)...</div>';
+        pjSend({type:'stResult', winners: winnersEntries.map(([pid,pts])=>({name:(pl[pid]||{}).name||'?', pts}))});
+        if (n>=pids.length) $('stBtnAgain').style.display='';
+      });
+    });
+  });
+}
+
+/* ================================================================
+   LA RESA DEI CONTI — motore condiviso (host/proiettore/telefono) + regia
+================================================================ */
+const RDC_SYMS = ['🍎','🍌','🍇','🍉','🍓','🥝','🍍','🥥'];
+function rdcGenerate(){
+  const shuffled = [...RDC_SYMS].sort(()=>Math.random()-0.5);
+  const symbols = shuffled.slice(0,3);
+  const values = symbols.map(()=> Math.floor(Math.random()*15)+2); // ogni simbolo vale da 2 a 16
+  const totals = values.map(v=> v*3); // 3 simboli uguali sommati, sempre divisibile per 3
+  const finalAnswer = values.reduce((a,b)=>a+b,0);
+  return { symbols, totals, finalAnswer };
+}
+function rdcRevealSteps(data){
+  const steps = [];
+  for (let r=0;r<3;r++){
+    for (let c=0;c<3;c++) steps.push({ row:r, col:c, kind:'sym', val:data.symbols[r] });
+    steps.push({ row:r, col:3, kind:'total', val:data.totals[r] });
+  }
+  for (let c=0;c<3;c++) steps.push({ row:3, col:c, kind:'sym', val:data.symbols[c] });
+  return steps; // NIENTE step per la cella finale (riga 3, colonna 3): resta il mistero "?" fino al risultato
+}
+function rdcBuildGrid(el){
+  if (el._built) return;
+  el._built = true;
+  el.innerHTML = [0,1,2,3].map(r=>{
+    const cells = [0,1,2].map(c=>
+      `<div class="rdcCell" id="${el.id}_r${r}c${c}">?</div><div class="rdcOp">${c<2?'+':'='}</div>`).join('');
+    const totalClass = r===3 ? 'rdcCell rdcTotal rdcMystery' : 'rdcCell rdcTotal';
+    return `<div class="rdcRow ${r===3?'rdcFinalRow':''}">${cells}<div class="${totalClass}" id="${el.id}_r${r}c3">?</div></div>`;
+  }).join('');
+}
+function rdcRevealStep(el, step){
+  const cell = document.getElementById(`${el.id}_r${step.row}c${step.col}`);
+  if (!cell) return;
+  let ticks = 0;
+  clearInterval(cell._spinInt);
+  cell._spinInt = setInterval(()=>{
+    cell.textContent = step.kind==='sym' ? RDC_SYMS[Math.floor(Math.random()*RDC_SYMS.length)] : Math.floor(Math.random()*90+10);
+    ticks++;
+    if (ticks>=7){
+      clearInterval(cell._spinInt);
+      cell.textContent = step.val;
+      cell.classList.remove('locked'); void cell.offsetWidth; cell.classList.add('locked');
+    }
+  }, 65);
+}
+function rdcRunReveal(el, data, startAt, stepMs, onDone){
+  rdcBuildGrid(el);
+  const steps = rdcRevealSteps(data);
+  el._lastIdx = -1;
+  clearInterval(el._revealInt);
+  el._revealInt = setInterval(()=>{
+    const elapsed = serverNow() - startAt;
+    if (elapsed < 0) return;
+    const idx = Math.floor(elapsed/stepMs);
+    if (idx > el._lastIdx){
+      for (let i=el._lastIdx+1; i<=Math.min(idx, steps.length-1); i++) rdcRevealStep(el, steps[i]);
+      el._lastIdx = idx;
+    }
+    if (idx >= steps.length){ clearInterval(el._revealInt); if (onDone) onDone(); }
+  }, 80);
+}
+function openRdc(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((RDC||{}).timerInt);
+  G.ref.child('rdc/answers').off();
+  G.ref.update({ status:'rdc', rdc:{ phase:'idle' } });
+  $('rdcSetup').style.display='block'; $('rdcLive').style.display='none';
+  if (!$('rdcPoints').innerHTML) $('rdcPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===2?'selected':''}>${(k+1)*100} punti</option>`).join('');
+  pjSend({type:'rdcState'});
+  showScreen('scrRdc');
+}
+let RDC = {};
+function rdcStart(){
+  const points = getPoints('rdcPoints','rdcPointsMan');
+  const durationSec = +($('rdcDuration').value||20);
+  const durationMs = durationSec*1000;
+  const data = rdcGenerate();
+  const stepMs = 550, totalSteps = 15;
+  const revealMs = stepMs*totalSteps + 400;
+  const startAt = serverNow()+300;
+  const answerEndAt = startAt + revealMs + durationMs;
+  const roundId = startAt;
+  RDC = { data, points, durationMs, credited:false };
+  G.ref.update({ status:'rdc', rdc:{ phase:'reveal', symbols:data.symbols, totals:data.totals, points, startAt, stepMs, revealMs, answerDurationMs:durationMs, answerEndAt, roundId } });
+  G.ref.child('rdc/answers').remove();
+  $('rdcSetup').style.display='none'; $('rdcLive').style.display='block';
+  $('rdcMsg').textContent = '🧮 I SIMBOLI SI SVELANO...';
+  $('rdcTimerWrapHost').style.display='none'; $('rdcCount').textContent=''; $('rdcBtnAgain').style.display='none';
+  $('rdcGridHost')._built=false;
+  pjSend({type:'rdcReveal', symbols:data.symbols, totals:data.totals, startAt, stepMs, revealMs, answerEndAt, answerDurationMs:durationMs});
+  rdcRunReveal($('rdcGridHost'), data, startAt, stepMs, ()=>{
+    $('rdcMsg').textContent = '✍️ ORA RISPONDETE DAL TELEFONO!';
+    $('rdcTimerWrapHost').style.display='block';
+    clearInterval(RDC.timerInt);
+    RDC.timerInt = setInterval(()=>{
+      const left = Math.max(0, answerEndAt-serverNow());
+      $('rdcTimerBar').style.width = (left/durationMs*100)+'%';
+      if (left<=0){ clearInterval(RDC.timerInt); rdcClose(); }
+    }, 100);
+  });
+  G.ref.child('rdc/answers').on('value', s=>{
+    const n = Object.keys(s.val()||{}).length;
+    $('rdcCount').textContent = `Risposte ricevute: ${n}`;
+  });
+}
+function rdcClose(){
+  if (RDC.credited) return; RDC.credited = true;
+  clearInterval(RDC.timerInt);
+  G.ref.child('rdc/answers').off();
+  G.ref.child('rdc/answers').once('value').then(as=>{
+    const answers = as.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const updates = {}; const results = [];
+      for (const pid in answers){
+        const a = answers[pid];
+        const correct = +a.v === RDC.data.finalAnswer;
+        let pts = 0;
+        if (correct){
+          const frac = Math.max(0, 1 - a.t/RDC.durationMs);
+          pts = Math.round(RDC.points*(0.5+0.5*frac)/10)*10;
+          if (players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+pts);
+        }
+        results.push({ id:pid, name:(players[pid]||{}).name||'?', v:a.v, correct, pts });
+      }
+      results.sort((a,b)=> b.pts-a.pts);
+      updates['rdc/phase']='result'; updates['rdc/finalAnswer']=RDC.data.finalAnswer; updates['rdc/results']=results;
+      G.ref.update(updates);
+      $('rdcMsg').textContent = `💡 LA RISPOSTA GIUSTA ERA ${RDC.data.finalAnswer}!`;
+      const cell = document.getElementById('rdcGridHost_r3c3');
+      if (cell){ cell.textContent = RDC.data.finalAnswer; cell.classList.remove('rdcMystery'); cell.classList.add('locked'); }
+      pjSend({type:'rdcResult', finalAnswer:RDC.data.finalAnswer, results});
+      $('rdcBtnAgain').style.display='';
+      confetti();
+    });
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -8427,6 +8919,8 @@ function modalGames(){
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#d9ac6e,#8a6428); color:#fff; box-shadow:0 7px 0 #5a3d18,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,100,40,.35)" onclick="openPacchi()">📦 Il Gioco dei Pacchi</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a85838,#6b3018); color:#ffe9a8; box-shadow:0 7px 0 #3a1a0c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(107,48,24,.4)" onclick="openRoulette()">🤠 Roulette Russa</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a6428,#5a3d18); color:#ffe9a8; box-shadow:0 7px 0 #2e1e0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(90,61,24,.4)" onclick="openPagliuzza()">🌾 La Pagliuzza</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#2d8a4e,#0d4020); color:#ffe042; box-shadow:0 7px 0 #072410,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(13,64,32,.4)" onclick="openSupertris()">🎰 SUPERTRIS</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5a3d8a,#2e1a5a); color:#fff; box-shadow:0 7px 0 #180e30,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,26,90,.4)" onclick="openRdc()">🧮 La Resa dei Conti</button>
     </div>`);
 }
 function modalModules(){
@@ -8885,6 +9379,8 @@ function backToQuiz(title){
   G.ref.child('pacchi/bets').off();
   G.ref.child('roulette/bets').off();
   G.ref.child('pagliuzza/bets').off();
+  G.ref.child('supertris/results').off();
+  G.ref.child('rdc/answers').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -8892,7 +9388,8 @@ function backToQuiz(title){
   clearInterval((PAC||{}).timerInt);
   clearInterval((ROU||{}).timerInt);
   clearInterval((PAG||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null });
+  clearInterval((RDC||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -9657,6 +10154,51 @@ function pjRoute(m){
         $('pjPagMsg').textContent = winners.length ? `👑 Vincitori: ${winners.map(esc).join(', ')}` : 'Nessuno aveva la pagliuzza più lunga!';
         confetti();
       }, 250+(m.lengths||[]).length*140+500);
+    }
+    else if (m.type==='stState') {
+      showScreen('scrPjSupertris');
+      $('pjStMsg').textContent = 'Ognuno gratta la propria cartella sul telefono!';
+      $('pjStWinners').innerHTML='';
+    }
+    else if (m.type==='stBet') {
+      showScreen('scrPjSupertris');
+      $('pjStMsg').textContent = '🎰 SI GRATTA!';
+      $('pjStWinners').innerHTML='';
+    }
+    else if (m.type==='stResult') {
+      const winners = m.winners||[];
+      $('pjStWinners').innerHTML = winners.length
+        ? winners.map(w=>`<div class="leadRow"><span class="pos">🏆</span> ${esc(w.name)} <span class="pts">+${w.pts}</span></div>`).join('')
+        : '';
+    }
+    else if (m.type==='rdcState') {
+      showScreen('scrPjRdc');
+      $('pjRdcMsg').textContent=''; $('pjRdcTimerWrap').style.display='none';
+      $('rdcGridPj')._built=false;
+    }
+    else if (m.type==='rdcReveal') {
+      showScreen('scrPjRdc');
+      $('pjRdcMsg').textContent = '🧮 I SIMBOLI SI SVELANO...';
+      $('pjRdcTimerWrap').style.display='none';
+      $('rdcGridPj')._built=false;
+      const data = { symbols:m.symbols, totals:m.totals };
+      rdcRunReveal($('rdcGridPj'), data, m.startAt, m.stepMs, ()=>{
+        $('pjRdcMsg').textContent = '✍️ RISPONDONO DAL TELEFONO!';
+        $('pjRdcTimerWrap').style.display='block';
+        clearInterval(window._pjRdcInt);
+        window._pjRdcInt = setInterval(()=>{
+          const left = Math.max(0, (m.answerEndAt||0) - serverNow());
+          $('pjRdcTimerBar').style.width = (left/(m.answerDurationMs||1)*100)+'%';
+          if (left<=0) clearInterval(window._pjRdcInt);
+        }, 100);
+      });
+    }
+    else if (m.type==='rdcResult') {
+      clearInterval(window._pjRdcInt); $('pjRdcTimerWrap').style.display='none';
+      $('pjRdcMsg').textContent = `💡 LA RISPOSTA GIUSTA ERA ${m.finalAnswer}!`;
+      const cell = document.getElementById('rdcGridPj_r3c3');
+      if (cell){ cell.textContent = m.finalAnswer; cell.classList.remove('rdcMystery'); cell.classList.add('locked'); }
+      confetti();
     }
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
