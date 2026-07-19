@@ -337,7 +337,9 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .pacTwineH{position:absolute; left:0; right:0; top:38%; height:8%; background:linear-gradient(90deg,#5a4023,#382512); z-index:2;}
 .pacTag{position:absolute; left:50%; top:34%; transform:translate(-50%,-50%) rotate(-8deg); width:34%; aspect-ratio:1.3;
   background:linear-gradient(155deg,#f2e2b8,#d8c088); border-radius:4px; box-shadow:0 3px 6px rgba(0,0,0,.4); z-index:3;
-  display:flex; align-items:center; justify-content:center; font-family:'Bungee'; font-size:13px; color:#7a5a20;}
+  display:flex; align-items:center; justify-content:center; font-family:'Bungee'; font-size:13px; color:#7a5a20;
+  opacity:1; transition:opacity .3s;}
+.pacBox.open .pacTag{opacity:0; pointer-events:none;}
 .pacLid{position:absolute; top:0; left:2%; right:2%; height:40%; border-radius:6px 6px 3px 3px; z-index:4;
   background:linear-gradient(155deg, #d9ac6e 0%, #b98940 45%, #8a6428 100%);
   box-shadow:0 6px 14px rgba(0,0,0,.45), inset 0 4px 8px rgba(255,255,255,.2);
@@ -357,6 +359,68 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .pacBox.mine .pacBoxBase{border:3px solid var(--lime); box-shadow:0 0 22px rgba(182,242,46,.65);}
 .pacValueGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px;}
 .pacValueGrid input{padding:10px 6px; text-align:center; font-family:'Bungee'; font-size:15px;}
+
+/* ===== ROULETTE RUSSA ===== */
+.rouTierGrid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:100%; max-width:380px; margin:12px auto 0;}
+.rouTier{padding:12px 4px; border-radius:14px; border:3px solid rgba(255,201,60,.35); background:rgba(0,0,0,.32);
+  cursor:pointer; text-align:center; transition:transform .1s;}
+.rouTier:active{transform:scale(.94);}
+.rouTier .n{font-family:'Bungee'; font-size:20px; color:var(--gold);}
+.rouTier .p{font-size:10px; color:var(--cyan); font-weight:800; margin-top:2px;}
+.rouTier.mine{border-color:var(--lime); box-shadow:0 0 20px rgba(182,242,46,.6); background:rgba(182,242,46,.1);}
+.rouScene{position:relative; width:100%; max-width:380px; margin:14px auto; border-radius:20px; padding:30px 16px 24px;
+  background:radial-gradient(ellipse at center, #4a3520 0%, #2a1c10 70%, #1a1008 100%);
+  border:8px solid #6b4a26; box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 10px 26px rgba(0,0,0,.6);
+  display:flex; flex-direction:column; align-items:center; overflow:visible;}
+.rouScene::before{content:'★'; position:absolute; top:8px; left:50%; transform:translateX(-50%); color:#d4a017; font-size:18px; text-shadow:0 0 8px rgba(212,160,23,.6);}
+.rouGunWrap{position:relative; width:100%; height:150px; display:flex; align-items:center; justify-content:center; margin-top:10px;}
+.rouCylinder{position:absolute; width:86px; height:86px; border-radius:50%; left:50%; top:50%;
+  transform:translate(-84%,-50%) rotate(0deg); transition:transform .35s cubic-bezier(.3,1.4,.5,1);
+  background:radial-gradient(circle at 40% 35%, #7a7a7a, #333 75%); border:5px solid #1a1a1a; box-shadow:0 4px 10px rgba(0,0,0,.5);}
+.rouChamber{position:absolute; width:13px; height:13px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
+  top:50%; left:50%; box-shadow:inset 0 0 4px rgba(0,0,0,.8);}
+.rouGunBody{position:relative; font-size:88px; filter:drop-shadow(0 8px 10px rgba(0,0,0,.6)); transform:scaleX(-1); z-index:2;
+  transition:transform .12s;}
+.rouGunBody.kick{transform:scaleX(-1) translateX(-10px) rotate(-6deg);}
+.rouFlag{position:absolute; left:8%; top:14%; z-index:5; transform:scale(0) rotate(-30deg); transform-origin:bottom left;
+  transition:transform .35s cubic-bezier(.3,1.7,.4,1);}
+.rouFlag.show{transform:scale(1) rotate(-8deg);}
+.rouFlag .pole{width:5px; height:60px; background:linear-gradient(180deg,#8a5a2a,#5a3a1a); border-radius:2px;}
+.rouFlag .cloth{position:absolute; left:4px; top:0; width:74px; height:46px; background:repeating-linear-gradient(45deg,#e8e8e8 0 10px,#c0392b 10px 20px);
+  border-radius:2px 10px 10px 2px; display:flex; align-items:center; justify-content:center;
+  font-family:'Bungee'; font-size:18px; color:#1a1008; text-shadow:1px 1px 0 #fff; box-shadow:0 4px 8px rgba(0,0,0,.4);}
+.rouSmoke{position:absolute; right:6%; top:38%; font-size:30px; opacity:0; z-index:4;}
+.rouSmoke.show{animation:rouSmokeUp 1s ease-out forwards;}
+@keyframes rouSmokeUp{ 0%{opacity:.9; transform:translateY(0) scale(.6);} 100%{opacity:0; transform:translateY(-40px) scale(1.6);} }
+.rouStatusWin{color:var(--lime); text-shadow:0 0 12px rgba(182,242,46,.6);}
+.rouStatusLose{color:#ff5d5d; text-shadow:0 0 12px rgba(255,93,93,.6);}
+
+/* ===== LA PAGLIUZZA LUNGA E QUELLA CORTA ===== */
+.pagScene{position:relative; width:100%; max-width:460px; margin:14px auto; border-radius:20px; padding:26px 16px 4px;
+  background:radial-gradient(ellipse at center, #3a2a1a 0%, #1e140c 75%, #120c07 100%);
+  border:8px solid #5a3a1a; box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 10px 26px rgba(0,0,0,.55);
+  display:flex; flex-direction:column; align-items:center; overflow:visible;}
+.pagStrawsRow{display:flex; justify-content:center; align-items:flex-end; gap:5px; width:100%; height:170px;
+  position:relative; z-index:2; margin-bottom:-14px; flex-wrap:nowrap;}
+.pagStraw{position:relative; width:8%; max-width:26px; min-width:14px; border-radius:7px 7px 3px 3px;
+  background:linear-gradient(90deg, #b8860f 0%, #f0d078 35%, #ffe9a8 50%, #d4a017 65%, #8a6428 100%);
+  height:22px; transition:height 1.15s cubic-bezier(.2,.85,.25,1.05), box-shadow .4s, background .4s;
+  box-shadow:0 3px 6px rgba(0,0,0,.4); cursor:pointer;}
+.pagStraw::after{content:''; position:absolute; inset:0; border-radius:7px 7px 3px 3px;
+  background:linear-gradient(90deg, transparent 44%, rgba(255,255,255,.35) 50%, transparent 56%);}
+.pagStraw.mine{outline:3px solid var(--lime); outline-offset:2px; box-shadow:0 0 16px rgba(182,242,46,.6);}
+.pagStraw.revealed.longest{background:linear-gradient(90deg,#a8790a,#ffe9a8,#fff6d9,#ffd75e,#a8790a); box-shadow:0 0 22px rgba(255,222,90,.9), 0 0 40px rgba(255,201,60,.5);}
+.pagStraw.revealed.shortest{background:linear-gradient(90deg,#7a1414,#e5544d,#ff8a80,#e5544d,#7a1414); box-shadow:0 0 22px rgba(229,57,53,.85), 0 0 36px rgba(229,57,53,.5);}
+.pagIcon{position:absolute; left:50%; top:-24px; transform:translateX(-50%); font-size:20px; opacity:0; transition:opacity .4s .3s;}
+.pagStraw.revealed .pagIcon{opacity:1;}
+.pagFistWrap{position:relative; width:100%; display:flex; justify-content:center; z-index:1;}
+.pagFist{font-size:76px; filter:drop-shadow(0 10px 12px rgba(0,0,0,.65)); transform:scaleX(-1);}
+.pagLabel{position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); font-family:'Bungee'; font-size:11px; color:var(--gold);}
+.pagPickGrid{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; width:100%; max-width:380px; margin-top:10px;}
+.pagPickBtn{padding:12px 4px; border-radius:12px; border:3px solid rgba(255,201,60,.35); background:rgba(0,0,0,.32);
+  cursor:pointer; text-align:center; font-family:'Bungee'; font-size:16px; color:var(--gold); transition:transform .1s;}
+.pagPickBtn:active{transform:scale(.94);}
+.pagPickBtn.mine{border-color:var(--lime); box-shadow:0 0 18px rgba(182,242,46,.6); background:rgba(182,242,46,.1);}
 
 #projPreview{position:fixed; right:14px; bottom:74px; width:360px; height:212px; z-index:55; display:none;
   border:3px solid var(--cyan); border-radius:14px; overflow:hidden; background:#000;
@@ -834,7 +898,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v11.0</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v11.3</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2081,6 +2145,118 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="pacGrid" id="pacGridPl"></div>
 </div>
 
+<!-- ==================== HOST: ROULETTE RUSSA ==================== -->
+<div class="screen" id="scrRoulette">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🤠 ROULETTE RUSSA</div></div>
+  <div class="panel mt" style="max-width:480px" id="rouSetup">
+    <div class="label">Premio massimo (per chi rischia 7 colpi su 8)</div>
+    <select id="rouMaxPoints"></select>
+    <div class="label mt">O scrivilo</div>
+    <input type="number" id="rouMaxPointsMan" class="ptsManual" placeholder="—" min="1">
+    <div class="label mt">Premi calcolati in automatico (in base alle probabilità vere)</div>
+    <div class="lead" id="rouTiersPreview" style="max-width:100%"></div>
+    <button class="btn mg mt" style="width:100%" onclick="rouStart()">🤠 APRI LE SCOMMESSE! (15s)</button>
+  </div>
+  <div id="rouLive" style="display:none; width:100%" class="center">
+    <div class="timerWrap" style="max-width:340px"><div class="timerBar" id="rouTimerBar"></div></div>
+    <div class="miniMsg">🤠 OGNI GIOCATORE GIOCA DAL PROPRIO TELEFONO!</div>
+    <div class="byline" id="rouCount"></div>
+    <div class="byline mt" style="text-transform:none; max-width:420px">Non c'è nulla da mostrare qui in regia: ognuno scommette e spara dal proprio smartphone, in autonomia.</div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="rouBtnAgain" onclick="openRoulette()" style="display:none">🔁 Un'altra manche</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: ROULETTE RUSSA ==================== -->
+<div class="screen" id="scrPjRoulette">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🤠 ROULETTE RUSSA</div></div>
+  <div class="miniMsg" id="pjRouMsg" style="font-size:clamp(18px,3vw,30px)">Tutto si gioca sugli smartphone dei partecipanti!</div>
+</div>
+
+<!-- ==================== PLAYER: ROULETTE RUSSA ==================== -->
+<div class="screen" id="scrPlayRoulette" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="roupName" style="color:var(--gold)"></div>
+    <div class="pill" id="roupScore"></div>
+  </div>
+  <div id="rouBetPanel" style="width:100%">
+    <div class="byline mt" id="roupBetStatus">🤠 QUANTI COLPI VUOI RISCHIARE?</div>
+    <div class="timerWrap mt" style="max-width:280px; margin-left:auto; margin-right:auto"><div class="timerBar" id="roupTimerBar"></div></div>
+    <div class="rouTierGrid" id="rouTierGrid"></div>
+  </div>
+  <div id="rouGunPanel" style="display:none; width:100%; align-items:center; flex-direction:column">
+    <div class="rouScene">
+      <div class="rouGunWrap">
+        <div class="rouCylinder" id="rouCylinder"></div>
+        <div class="rouGunBody" id="rouGunBody">🔫</div>
+        <div class="rouSmoke" id="rouSmoke">💨</div>
+        <div class="rouFlag" id="rouFlag"><div class="pole"></div><div class="cloth">BANG!</div></div>
+      </div>
+    </div>
+    <div class="byline mt" id="rouStatus"></div>
+    <button class="btn mg mt" id="rouFireBtn" onclick="rouFire()" style="font-size:20px; padding:16px 26px">🔫 SPARA!</button>
+  </div>
+</div>
+
+<!-- ==================== HOST: LA PAGLIUZZA ==================== -->
+<div class="screen" id="scrPagliuzza">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🌾 LA PAGLIUZZA</div></div>
+  <div class="panel mt" style="max-width:480px" id="pagSetup">
+    <div class="label">Quante pagliuzze?</div>
+    <select id="pagCount"><option value="8">8 pagliuzze</option><option value="9" selected>9 pagliuzze</option><option value="10">10 pagliuzze</option></select>
+    <div class="row mt">
+      <div class="grow"><div class="label">Premio (pagliuzza più lunga)</div><select id="pagPrize"></select></div>
+      <div><div class="label">O scrivilo</div><input type="number" id="pagPrizeMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Penalità (pagliuzza più corta)</div><select id="pagPenalty"></select></div>
+      <div><div class="label">O scrivila</div><input type="number" id="pagPenaltyMan" class="ptsManual" placeholder="—" min="0"></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="pagStart()">🌾 APRI LE SCELTE! (15s)</button>
+  </div>
+  <div id="pagLive" style="display:none; width:100%" class="center">
+    <div class="timerWrap" style="max-width:340px"><div class="timerBar" id="pagTimerBar"></div></div>
+    <div class="miniMsg" id="pagMsg">🌾 SCEGLI UNA PAGLIUZZA DAL TELEFONO!</div>
+    <div class="byline" id="pagCountLive"></div>
+    <div class="pagScene">
+      <div class="pagStrawsRow" id="pagStrawsHost"></div>
+      <div class="pagFistWrap"><div class="pagFist">✊</div></div>
+    </div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="pagBtnAgain" onclick="openPagliuzza()" style="display:none">🔁 Un'altra manche</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: LA PAGLIUZZA ==================== -->
+<div class="screen" id="scrPjPagliuzza">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🌾 LA PAGLIUZZA</div></div>
+  <div class="timerWrap" style="max-width:420px"><div class="timerBar" id="pjPagTimerBar"></div></div>
+  <div class="miniMsg" id="pjPagMsg" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div class="pagScene" style="max-width:640px">
+    <div class="pagStrawsRow" id="pagStrawsPj"></div>
+    <div class="pagFistWrap"><div class="pagFist">✊</div></div>
+  </div>
+</div>
+
+<!-- ==================== PLAYER: LA PAGLIUZZA ==================== -->
+<div class="screen" id="scrPlayPagliuzza" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="pagpName" style="color:var(--gold)"></div>
+    <div class="pill" id="pagpScore"></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:280px"><div class="timerBar" id="pagpTimerBar"></div></div>
+  <div class="byline mt" id="pagpStatus">🌾 SCEGLI UNA PAGLIUZZA!</div>
+  <div class="pagScene">
+    <div class="pagStrawsRow" id="pagStrawsPl"></div>
+    <div class="pagFistWrap"><div class="pagFist">✊</div></div>
+  </div>
+  <div class="pagPickGrid" id="pagPickGrid"></div>
+</div>
+
 <!-- ==================== HOST: SEI TROPPO FISCALE! ==================== -->
 <div class="screen" id="scrTFiscale">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">💶 SEI TROPPO FISCALE!</div></div>
@@ -2588,7 +2764,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 110; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 113; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3736,6 +3912,8 @@ function listenGame(){
     else if (g.status==='toc') showPlayerToc(g);
     else if (g.status==='cenerentola') showPlayerCenerentola(g);
     else if (g.status==='pacchi') showPlayerPacchi(g);
+    else if (g.status==='roulette') showPlayerRoulette(g);
+    else if (g.status==='pagliuzza') showPlayerPagliuzza(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -4284,6 +4462,154 @@ function pacPick(i){
   P.pacMyBox = i;
   P.ref.child('pacchi/bets/'+P.id).set(i);
   document.querySelectorAll('#pacGridPl .pacBox').forEach((el,idx)=> el.classList.toggle('mine', idx===i));
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+/* ================================================================
+   ROULETTE RUSSA — telefono (gioco individuale, indipendente per ogni giocatore)
+================================================================ */
+function rouRenderCylinder(el){
+  if (el._built) return;
+  el._built = true;
+  const r = 30;
+  el.innerHTML = Array.from({length:8},(_,i)=>{
+    const angle = i * 45 * Math.PI/180;
+    const x = r*Math.cos(angle), y = r*Math.sin(angle);
+    return `<div class="rouChamber" style="transform:translate(-50%,-50%) translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)"></div>`;
+  }).join('');
+}
+function showPlayerRoulette(g){
+  const m = g.roulette||{};
+  $('roupName').textContent = P.name;
+  $('roupScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayRoulette');
+  if (m.phase==='bet'){
+    const sig = 'bet:'+m.roundId;
+    if (P.rouSig !== sig){
+      P.rouSig = sig; P.rouMyBet = null; P.rouTiers = m.tiers||[];
+      $('rouBetPanel').style.display='block'; $('rouGunPanel').style.display='none';
+      $('roupBetStatus').textContent = '🤠 QUANTI COLPI VUOI RISCHIARE?';
+      $('rouTierGrid').innerHTML = (m.tiers||[]).map((pts,idx)=>{
+        const n = idx+1;
+        return `<div class="rouTier" data-n="${n}" onclick="rouPick(${n})"><div class="n">${n}</div><div class="p">${pts} pt</div></div>`;
+      }).join('');
+      clearInterval(P.rouInt);
+      $('roupTimerBar').style.width='100%';
+      P.rouInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('roupTimerBar').style.width = (left/(m.durationMs||15000)*100)+'%';
+        if (left<=0) clearInterval(P.rouInt);
+      }, 100);
+    }
+  } else if (m.phase==='active'){
+    const sig = 'act:'+m.roundId;
+    if (P.rouSig !== sig){
+      P.rouSig = sig;
+      P.rouTiers = m.tiers||P.rouTiers||[];
+      clearInterval(P.rouInt); $('roupTimerBar').style.width='0%';
+      $('rouBetPanel').style.display='none'; $('rouGunPanel').style.display='flex';
+      $('rouCylinder')._built = false;
+      rouRenderCylinder($('rouCylinder'));
+      $('rouCylinder').style.transform='translate(-84%,-50%) rotate(0deg)';
+      $('rouFlag').classList.remove('show'); $('rouSmoke').classList.remove('show');
+      if (P.rouMyBet == null){
+        $('rouStatus').className='byline mt';
+        $('rouStatus').textContent = 'NON HAI SCOMMESSO QUESTA VOLTA...';
+        $('rouFireBtn').style.display='none';
+      } else {
+        P.rouBulletPos = Math.floor(Math.random()*8)+1;
+        P.rouShots = 0; P.rouResolved = false;
+        $('rouStatus').className='byline mt';
+        $('rouStatus').textContent = `Hai scommesso ${P.rouMyBet} colpi. Tocca SPARA quando sei pronto!`;
+        $('rouFireBtn').style.display=''; $('rouFireBtn').disabled=false;
+        $('rouFireBtn').textContent = `🔫 SPARA! (colpo 1/${P.rouMyBet})`;
+      }
+    }
+  }
+}
+function rouPick(n){
+  if (P.rouMyBet!=null) return;
+  P.rouMyBet = n;
+  document.querySelectorAll('#rouTierGrid .rouTier').forEach(el=> el.classList.toggle('mine', +el.dataset.n===n));
+  P.ref.child('roulette/bets/'+P.id).set(n);
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+function rouFire(){
+  if (P.rouResolved) return;
+  P.rouShots++;
+  const cyl = $('rouCylinder');
+  cyl.style.transform = `translate(-84%,-50%) rotate(${P.rouShots*45}deg)`;
+  const body = $('rouGunBody');
+  body.classList.add('kick'); setTimeout(()=> body.classList.remove('kick'), 150);
+  if (navigator.vibrate) navigator.vibrate(30);
+
+  if (P.rouShots === P.rouBulletPos){
+    P.rouResolved = true;
+    $('rouFlag').classList.add('show');
+    $('rouSmoke').classList.remove('show'); void $('rouSmoke').offsetWidth; $('rouSmoke').classList.add('show');
+    setTimeout(()=> $('rouSmoke').classList.remove('show'), 1000);
+    $('rouStatus').className='byline mt rouStatusLose';
+    $('rouStatus').textContent = '💥 BANG! HAI PERSO...';
+    $('rouFireBtn').style.display='none';
+    if (navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
+  } else if (P.rouShots === P.rouMyBet){
+    P.rouResolved = true;
+    const winPts = (P.rouTiers||[])[P.rouMyBet-1]||0;
+    P.ref.child('players/'+P.id+'/score').transaction(x=> Math.max(0,(x||0)+winPts));
+    $('rouStatus').className='byline mt rouStatusWin';
+    $('rouStatus').textContent = `🎉 SEI SOPRAVVISSUTO! HAI VINTO ${winPts} PUNTI!`;
+    $('rouFireBtn').style.display='none';
+    confetti();
+    if (navigator.vibrate) navigator.vibrate([80,50,150]);
+  } else {
+    $('rouFireBtn').textContent = `🔫 SPARA! (colpo ${P.rouShots+1}/${P.rouMyBet})`;
+  }
+}
+/* ================================================================
+   LA PAGLIUZZA LUNGA E QUELLA CORTA — telefono
+================================================================ */
+function showPlayerPagliuzza(g){
+  const m = g.pagliuzza||{};
+  $('pagpName').textContent = P.name;
+  $('pagpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayPagliuzza');
+  if (m.phase==='bet'){
+    const sig = 'bet:'+m.roundId;
+    if (P.pagSig !== sig){
+      P.pagSig = sig; P.pagMyStraw = null;
+      $('pagStrawsPl')._n = null;
+      pagRenderStraws($('pagStrawsPl'), m.n, [], -1, -1);
+      $('pagPickGrid').innerHTML = Array.from({length:m.n},(_,i)=>
+        `<div class="pagPickBtn" data-i="${i}" onclick="pagPick(${i})">${i+1}</div>`).join('');
+      $('pagpStatus').textContent = '🌾 SCEGLI UNA PAGLIUZZA!';
+      clearInterval(P.pagInt);
+      $('pagpTimerBar').style.width='100%';
+      P.pagInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('pagpTimerBar').style.width = (left/(m.durationMs||15000)*100)+'%';
+        if (left<=0) clearInterval(P.pagInt);
+      }, 100);
+    }
+  } else if (m.phase==='reveal'){
+    const sig = 'rev:'+m.roundId;
+    if (P.pagSig !== sig){
+      P.pagSig = sig;
+      clearInterval(P.pagInt); $('pagpTimerBar').style.width='0%';
+      $('pagPickGrid').style.display='none';
+      pagRevealStraws($('pagStrawsPl'), m.lengths||[]);
+      const won = (m.winners||[]).length && P.pagMyStraw!=null && (m.lengths||[])[P.pagMyStraw]===Math.max(...(m.lengths||[0]));
+      const lost = P.pagMyStraw!=null && (m.lengths||[])[P.pagMyStraw]===Math.min(...(m.lengths||[0]));
+      $('pagpStatus').textContent = P.pagMyStraw==null ? 'NON HAI SCELTO' : (won ? `👑 PAGLIUZZA PIÙ LUNGA! HAI VINTO ${m.prize} PUNTI!` : (lost ? `✂️ PAGLIUZZA PIÙ CORTA! HAI PERSO ${m.penalty} PUNTI...` : 'NIENTE DA FARE QUESTA VOLTA...'));
+      if (won && navigator.vibrate) navigator.vibrate([80,50,150]);
+      if (lost && navigator.vibrate) navigator.vibrate([120,60,120]);
+    }
+  }
+}
+function pagPick(i){
+  if (P.pagMyStraw!=null) return;
+  P.pagMyStraw = i;
+  P.ref.child('pagliuzza/bets/'+P.id).set(i);
+  document.querySelectorAll('#pagPickGrid .pagPickBtn').forEach((el,idx)=> el.classList.toggle('mine', idx===i));
+  document.querySelectorAll('#pagStrawsPl .pagStraw').forEach((el,idx)=> el.classList.toggle('mine', idx===i));
   if (navigator.vibrate) navigator.vibrate(40);
 }
 function puzzleTap(i){
@@ -7600,6 +7926,195 @@ function pacReveal(){
 }
 
 /* ================================================================
+   ROULETTE RUSSA — motore condiviso + regia
+   (gioco individuale: ogni telefono gioca la propria pistola in autonomia,
+   il proiettore non mostra nulla di specifico perché tutto avviene sullo smartphone)
+================================================================ */
+function rouCalcTiers(maxPrize){
+  // 8 camere, 1 sola "cattiva": scommettere N colpi ha probabilità vera di sopravvivere = (8-N)/8.
+  // Premio proporzionale all'inverso della probabilità, normalizzato così che N=7 dia esattamente il premio massimo.
+  const tiers = [];
+  for (let n=1;n<=7;n++) tiers.push(Math.max(10, Math.round(maxPrize/(8-n)/10)*10));
+  return tiers;
+}
+function rouRenderPreview(){
+  const maxPrize = getPoints('rouMaxPoints','rouMaxPointsMan') || 0;
+  const tiers = rouCalcTiers(maxPrize);
+  $('rouTiersPreview').innerHTML = tiers.map((t,i)=>
+    `<div class="leadRow"><span class="pos">${i+1} colpi</span> <span class="pts">${t} pt</span></div>`).join('');
+}
+function openRoulette(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((ROU||{}).timerInt);
+  G.ref.child('roulette/bets').off();
+  G.ref.update({ status:'roulette', roulette:{ phase:'idle' } });
+  $('rouSetup').style.display='block'; $('rouLive').style.display='none';
+  if (!$('rouMaxPoints').innerHTML){
+    $('rouMaxPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*500}" ${k===3?'selected':''}>${(k+1)*500} punti</option>`).join('');
+    $('rouMaxPoints').addEventListener('change', rouRenderPreview);
+    $('rouMaxPointsMan').addEventListener('input', rouRenderPreview);
+  }
+  rouRenderPreview();
+  pjSend({type:'rouState'});
+  showScreen('scrRoulette');
+}
+let ROU = {};
+function rouStart(){
+  const maxPrize = getPoints('rouMaxPoints','rouMaxPointsMan');
+  if (!maxPrize) return alert('Imposta un premio massimo!');
+  const tiers = rouCalcTiers(maxPrize);
+  const durationMs = 15000;
+  const endAt = serverNow() + durationMs;
+  const roundId = serverNow();
+  ROU = { tiers };
+  G.ref.child('roulette/bets').remove();
+  G.ref.update({ status:'roulette', roulette:{ phase:'bet', tiers, endAt, durationMs, roundId } });
+  $('rouSetup').style.display='none'; $('rouLive').style.display='block';
+  $('rouCount').textContent=''; $('rouBtnAgain').style.display='none';
+  G.ref.child('roulette/bets').on('value', s=>{
+    const n = Object.keys(s.val()||{}).length;
+    $('rouCount').textContent = `Scommesse ricevute: ${n}`;
+  });
+  clearInterval(ROU.timerInt);
+  $('rouTimerBar').style.width='100%';
+  ROU.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('rouTimerBar').style.width = (left/durationMs*100)+'%';
+    if (left<=0){
+      clearInterval(ROU.timerInt);
+      G.ref.child('roulette/bets').off();
+      G.ref.update({ 'roulette/phase':'active' });
+      $('rouBtnAgain').style.display='';
+    }
+  }, 100);
+}
+
+/* ================================================================
+   LA PAGLIUZZA LUNGA E QUELLA CORTA — motore condiviso + regia
+================================================================ */
+function pagGenerateLengths(n){
+  // altezze uniformemente distanziate da corta a lunga, poi mescolate a caso tra le posizioni
+  const minH=26, maxH=150;
+  const lengths = Array.from({length:n},(_,i)=> Math.round(minH + (maxH-minH)*i/(n-1)));
+  for (let i=lengths.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [lengths[i],lengths[j]]=[lengths[j],lengths[i]]; }
+  return lengths;
+}
+function pagRenderStraws(el, n, lengths, longestIdx, shortestIdx){
+  if (el._n !== n){
+    el._n = n;
+    el.innerHTML = Array.from({length:n},(_,i)=>`
+      <div class="pagStraw" id="${el.id}_s${i}" data-i="${i}" style="height:22px">
+        <div class="pagIcon">${i===longestIdx?'👑':(i===shortestIdx?'✂️':'')}</div>
+      </div>`).join('');
+    return;
+  }
+  for (let i=0;i<n;i++){
+    const s = document.getElementById(el.id+'_s'+i);
+    if (!s) continue;
+    s.classList.remove('revealed','longest','shortest');
+    s.style.height='22px';
+    s.querySelector('.pagIcon').textContent='';
+  }
+}
+function pagRevealStraws(el, lengths){
+  const n = lengths.length;
+  const longestIdx = lengths.indexOf(Math.max(...lengths));
+  const shortestIdx = lengths.indexOf(Math.min(...lengths));
+  for (let i=0;i<n;i++){
+    const s = document.getElementById(el.id+'_s'+i);
+    if (!s) continue;
+    const isLong = i===longestIdx, isShort = i===shortestIdx;
+    s.querySelector('.pagIcon').textContent = isLong?'👑':(isShort?'✂️':'');
+    setTimeout(()=>{
+      s.style.height = lengths[i]+'px';
+      s.classList.add('revealed');
+      if (isLong) s.classList.add('longest');
+      if (isShort) s.classList.add('shortest');
+    }, 250+i*140); // apertura scaglionata, una pagliuzza dopo l'altra
+  }
+}
+function openPagliuzza(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((PAG||{}).timerInt);
+  G.ref.child('pagliuzza/bets').off();
+  G.ref.update({ status:'pagliuzza', pagliuzza:{ phase:'idle' } });
+  $('pagSetup').style.display='block'; $('pagLive').style.display='none';
+  if (!$('pagPrize').innerHTML){
+    $('pagPrize').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===2?'selected':''}>${(k+1)*100} punti</option>`).join('');
+    $('pagPenalty').innerHTML = Array.from({length:10},(_,k)=>`<option value="${(k+1)*50}" ${k===1?'selected':''}>${(k+1)*50} punti</option>`).join('');
+  }
+  $('pagStrawsHost')._n = null;
+  pagRenderStraws($('pagStrawsHost'), +$('pagCount').value||9, [], -1, -1);
+  pjSend({type:'pagState', msg:'SI PREPARANO LE PAGLIUZZE...'});
+  showScreen('scrPagliuzza');
+}
+let PAG = {};
+function pagStart(){
+  const n = +($('pagCount').value||9);
+  const prize = getPoints('pagPrize','pagPrizeMan');
+  const penalty = getPoints('pagPenalty','pagPenaltyMan');
+  const lengths = pagGenerateLengths(n);
+  const durationMs = 15000;
+  const endAt = serverNow() + durationMs;
+  const roundId = serverNow();
+  PAG = { n, prize, penalty, lengths, credited:false };
+  G.ref.child('pagliuzza/bets').remove();
+  G.ref.update({ status:'pagliuzza', pagliuzza:{ phase:'bet', n, prize, penalty, endAt, durationMs, roundId } }); // lunghezze SEGRETE finché non si rivela
+  $('pagSetup').style.display='none'; $('pagLive').style.display='block';
+  $('pagMsg').textContent = '🌾 SCEGLI UNA PAGLIUZZA DAL TELEFONO!';
+  $('pagCountLive').textContent=''; $('pagBtnAgain').style.display='none';
+  $('pagStrawsHost')._n = null;
+  pagRenderStraws($('pagStrawsHost'), n, [], -1, -1);
+  pjSend({type:'pagBet', n, endAt, durationMs});
+  G.ref.child('pagliuzza/bets').on('value', s=>{
+    const c = Object.keys(s.val()||{}).length;
+    $('pagCountLive').textContent = `Scelte ricevute: ${c}`;
+  });
+  clearInterval(PAG.timerInt);
+  $('pagTimerBar').style.width='100%';
+  PAG.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('pagTimerBar').style.width = (left/durationMs*100)+'%';
+    if (left<=0){ clearInterval(PAG.timerInt); pagReveal(); }
+  }, 100);
+}
+function pagReveal(){
+  if (PAG.credited) return; PAG.credited = true;
+  clearInterval(PAG.timerInt);
+  $('pagTimerBar').style.width='0%';
+  G.ref.child('pagliuzza/bets').off();
+  const longestIdx = PAG.lengths.indexOf(Math.max(...PAG.lengths));
+  const shortestIdx = PAG.lengths.indexOf(Math.min(...PAG.lengths));
+  G.ref.child('pagliuzza/bets').once('value').then(bs=>{
+    const bets = bs.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const updates = {}; const winners = []; const losers = [];
+      for (const pid in bets){
+        if (!players[pid]) continue;
+        if (bets[pid]===longestIdx){
+          updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+PAG.prize);
+          winners.push(players[pid].name);
+        } else if (bets[pid]===shortestIdx){
+          updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)-PAG.penalty);
+          losers.push(players[pid].name);
+        }
+      }
+      updates['pagliuzza/phase']='reveal'; updates['pagliuzza/lengths']=PAG.lengths; updates['pagliuzza/winners']=winners; updates['pagliuzza/losers']=losers;
+      G.ref.update(updates);
+      $('pagMsg').textContent = '🌾 LE PAGLIUZZE ESCONO DAL PUGNO...';
+      pagRevealStraws($('pagStrawsHost'), PAG.lengths);
+      pjSend({type:'pagReveal', lengths:PAG.lengths, winners, losers});
+      setTimeout(()=>{
+        $('pagMsg').textContent = winners.length ? `👑 Vincitori: ${winners.map(esc).join(', ')}` : 'Nessuno aveva la pagliuzza più lunga!';
+        $('pagBtnAgain').style.display='';
+        confetti();
+      }, 250+PAG.n*140+500);
+    });
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -7904,6 +8419,8 @@ function modalGames(){
       <button class="btn" style="grid-column:1/-1; border-color:var(--cyan); color:var(--cyan)" onclick="openToc()">🪙 Testa o Croce</button>
       <button class="btn" style="grid-column:1/-1; border-color:var(--viola); color:var(--viola)" onclick="openCenerentola()">👠 Cenerentola</button>
       <button class="btn" style="grid-column:1/-1; border-color:#c9975e; color:#c9975e" onclick="openPacchi()">📦 Il Gioco dei Pacchi</button>
+      <button class="btn" style="grid-column:1/-1; border-color:#d4a017; color:#d4a017" onclick="openRoulette()">🤠 Roulette Russa</button>
+      <button class="btn" style="grid-column:1/-1; border-color:#e0b84a; color:#e0b84a" onclick="openPagliuzza()">🌾 La Pagliuzza</button>
     </div>`);
 }
 function modalModules(){
@@ -8360,12 +8877,16 @@ function backToQuiz(title){
   G.ref.child('toc/bets').off();
   G.ref.child('cenerentola/bets').off();
   G.ref.child('pacchi/bets').off();
+  G.ref.child('roulette/bets').off();
+  G.ref.child('pagliuzza/bets').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
   clearInterval((CNR||{}).timerInt);
   clearInterval((PAC||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null });
+  clearInterval((ROU||{}).timerInt);
+  clearInterval((PAG||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -9098,6 +9619,38 @@ function pjRoute(m){
         $('pjPacMsg').textContent = results.length ? `🏆 Il migliore: ${esc(results[0].name)} con ${results[0].pts} punti!` : 'Nessuno ha scelto un pacco questa volta!';
         confetti();
       }, 300+9*130+400);
+    }
+    else if (m.type==='rouState') {
+      showScreen('scrPjRoulette');
+    }
+    else if (m.type==='pagState') {
+      showScreen('scrPjPagliuzza');
+      $('pjPagMsg').textContent = m.msg||''; $('pjPagTimerBar').style.width='0%';
+      $('pagStrawsPj')._n = null;
+      pagRenderStraws($('pagStrawsPj'), 9, [], -1, -1);
+    }
+    else if (m.type==='pagBet') {
+      showScreen('scrPjPagliuzza');
+      $('pjPagMsg').textContent = '🌾 SCEGLI UNA PAGLIUZZA DAL TELEFONO!';
+      $('pagStrawsPj')._n = null;
+      pagRenderStraws($('pagStrawsPj'), m.n, [], -1, -1);
+      clearInterval(window._pjPagInt);
+      $('pjPagTimerBar').style.width='100%';
+      window._pjPagInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('pjPagTimerBar').style.width = (left/(m.durationMs||15000)*100)+'%';
+        if (left<=0) clearInterval(window._pjPagInt);
+      }, 100);
+    }
+    else if (m.type==='pagReveal') {
+      clearInterval(window._pjPagInt); $('pjPagTimerBar').style.width='0%';
+      $('pjPagMsg').textContent = '🌾 LE PAGLIUZZE ESCONO DAL PUGNO...';
+      pagRevealStraws($('pagStrawsPj'), m.lengths||[]);
+      setTimeout(()=>{
+        const winners = m.winners||[];
+        $('pjPagMsg').textContent = winners.length ? `👑 Vincitori: ${winners.map(esc).join(', ')}` : 'Nessuno aveva la pagliuzza più lunga!';
+        confetti();
+      }, 250+(m.lengths||[]).length*140+500);
     }
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
