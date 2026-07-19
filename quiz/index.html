@@ -374,22 +374,23 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   display:flex; flex-direction:column; align-items:center; overflow:visible;}
 .rouScene::before{content:'★'; position:absolute; top:8px; left:50%; transform:translateX(-50%); color:#d4a017; font-size:18px; text-shadow:0 0 8px rgba(212,160,23,.6);}
 .rouGunWrap{position:relative; width:100%; height:150px; display:flex; align-items:center; justify-content:center; margin-top:10px;}
-.rouCylinder{position:absolute; width:86px; height:86px; border-radius:50%; left:50%; top:50%;
-  transform:translate(-84%,-50%) rotate(0deg); transition:transform .35s cubic-bezier(.3,1.4,.5,1);
-  background:radial-gradient(circle at 40% 35%, #7a7a7a, #333 75%); border:5px solid #1a1a1a; box-shadow:0 4px 10px rgba(0,0,0,.5);}
-.rouChamber{position:absolute; width:13px; height:13px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
-  top:50%; left:50%; box-shadow:inset 0 0 4px rgba(0,0,0,.8);}
-.rouGunBody{position:relative; font-size:88px; filter:drop-shadow(0 8px 10px rgba(0,0,0,.6)); transform:scaleX(-1); z-index:2;
-  transition:transform .12s;}
-.rouGunBody.kick{transform:scaleX(-1) translateX(-10px) rotate(-6deg);}
-.rouFlag{position:absolute; left:8%; top:14%; z-index:5; transform:scale(0) rotate(-30deg); transform-origin:bottom left;
+.rouCylinder{position:absolute; width:130px; height:130px; border-radius:50%; left:50%; top:50%;
+  transform:translate(-50%,-50%) rotate(0deg) scale(1); transition:transform .35s cubic-bezier(.3,1.4,.5,1);
+  background:radial-gradient(circle at 38% 32%, #9a9a9a, #444 55%, #222 85%); border:6px solid #161616;
+  box-shadow:0 6px 14px rgba(0,0,0,.55), inset 0 0 14px rgba(0,0,0,.4);}
+.rouCylinder.kick{transition:transform .1s;}
+.rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
+  transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
+.rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
+  top:50%; left:50%; box-shadow:inset 0 0 5px rgba(0,0,0,.85);}
+.rouFlag{position:absolute; left:14%; top:8%; z-index:5; transform:scale(0) rotate(-30deg); transform-origin:bottom left;
   transition:transform .35s cubic-bezier(.3,1.7,.4,1);}
 .rouFlag.show{transform:scale(1) rotate(-8deg);}
 .rouFlag .pole{width:5px; height:60px; background:linear-gradient(180deg,#8a5a2a,#5a3a1a); border-radius:2px;}
 .rouFlag .cloth{position:absolute; left:4px; top:0; width:74px; height:46px; background:repeating-linear-gradient(45deg,#e8e8e8 0 10px,#c0392b 10px 20px);
   border-radius:2px 10px 10px 2px; display:flex; align-items:center; justify-content:center;
   font-family:'Bungee'; font-size:18px; color:#1a1008; text-shadow:1px 1px 0 #fff; box-shadow:0 4px 8px rgba(0,0,0,.4);}
-.rouSmoke{position:absolute; right:6%; top:38%; font-size:30px; opacity:0; z-index:4;}
+.rouSmoke{position:absolute; right:16%; top:28%; font-size:30px; opacity:0; z-index:4;}
 .rouSmoke.show{animation:rouSmokeUp 1s ease-out forwards;}
 @keyframes rouSmokeUp{ 0%{opacity:.9; transform:translateY(0) scale(.6);} 100%{opacity:0; transform:translateY(-40px) scale(1.6);} }
 .rouStatusWin{color:var(--lime); text-shadow:0 0 12px rgba(182,242,46,.6);}
@@ -898,7 +899,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v11.4</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v11.5</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2190,7 +2191,6 @@ body.suspense-on #pfRank{ display:none !important; }
     <div class="rouScene">
       <div class="rouGunWrap">
         <div class="rouCylinder" id="rouCylinder"></div>
-        <div class="rouGunBody" id="rouGunBody">🔫</div>
         <div class="rouSmoke" id="rouSmoke">💨</div>
         <div class="rouFlag" id="rouFlag"><div class="pole"></div><div class="cloth">BANG!</div></div>
       </div>
@@ -2764,7 +2764,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 114; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 115; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -4470,7 +4470,7 @@ function pacPick(i){
 function rouRenderCylinder(el){
   if (el._built) return;
   el._built = true;
-  const r = 30;
+  const r = 45;
   el.innerHTML = Array.from({length:8},(_,i)=>{
     const angle = i * 45 * Math.PI/180;
     const x = r*Math.cos(angle), y = r*Math.sin(angle);
@@ -4509,7 +4509,7 @@ function showPlayerRoulette(g){
       $('rouBetPanel').style.display='none'; $('rouGunPanel').style.display='flex';
       $('rouCylinder')._built = false;
       rouRenderCylinder($('rouCylinder'));
-      $('rouCylinder').style.transform='translate(-84%,-50%) rotate(0deg)';
+      $('rouCylinder').style.transform='translate(-50%,-50%) rotate(0deg) scale(1)';
       $('rouFlag').classList.remove('show'); $('rouSmoke').classList.remove('show');
       if (P.rouMyBet == null){
         $('rouStatus').className='byline mt';
@@ -4537,9 +4537,15 @@ function rouFire(){
   if (P.rouResolved) return;
   P.rouShots++;
   const cyl = $('rouCylinder');
-  cyl.style.transform = `translate(-84%,-50%) rotate(${P.rouShots*45}deg)`;
-  const body = $('rouGunBody');
-  body.classList.add('kick'); setTimeout(()=> body.classList.remove('kick'), 150);
+  const prevAngle = (P.rouShots-1)*45, newAngle = P.rouShots*45;
+  // fase 1: scatto veloce di rinculo (stessa camera, solo un piccolo "colpo")
+  cyl.classList.add('kick');
+  cyl.style.transform = `translate(-50%,-50%) rotate(${prevAngle}deg) scale(1.08)`;
+  setTimeout(()=>{
+    // fase 2: rotazione vera, fluida, verso la prossima camera
+    cyl.classList.remove('kick');
+    cyl.style.transform = `translate(-50%,-50%) rotate(${newAngle}deg) scale(1)`;
+  }, 80);
   if (navigator.vibrate) navigator.vibrate(30);
 
   if (P.rouShots === P.rouBulletPos){
