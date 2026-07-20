@@ -3701,7 +3701,12 @@ let pendingQuizIndex = -1;
 
 function playQuiz(i){
   pendingQuizIndex = i;
-  showLicenseModal();
+  const savedCode = localStorage.getItem('capone_licenza_codice');
+  if(savedCode){
+    verificaCodiceEAvvia(savedCode, true);
+  } else {
+    showLicenseModal();
+  }
 }
 
 function showLicenseModal(){
@@ -3735,23 +3740,39 @@ function verificaLicenzaEavvia(){
   const errBox = $('licError');
   errBox.textContent = '';
   if(!codice){ errBox.textContent = 'Inserisci un codice.'; return; }
+  verificaCodiceEAvvia(codice, false);
+}
+
+function verificaCodiceEAvvia(codice, silente){
+  const errBox = silente ? null : $('licError');
 
   db.ref('licenze/'+codice).once('value').then(snap=>{
     const lic = snap.val();
-    if(!lic){ errBox.textContent = 'Codice licenza non valido.'; return; }
-    if(lic.attiva === false){ errBox.textContent = 'Licenza disattivata. Contatta Alberto.'; return; }
-    if(Date.now() > lic.data_scadenza){ errBox.textContent = 'Licenza scaduta.'; return; }
+
+    const fallisci = (msg)=>{
+      if(silente){
+        localStorage.removeItem('capone_licenza_codice');
+        showLicenseModal();
+      } else if(errBox){
+        errBox.textContent = msg;
+      }
+    };
+
+    if(!lic){ fallisci('Codice licenza non valido.'); return; }
+    if(lic.attiva === false){ fallisci('Licenza disattivata. Contatta Alberto.'); return; }
+    if(Date.now() > lic.data_scadenza){ fallisci('Licenza scaduta.'); return; }
 
     const myDevice = getDeviceId();
 
     if(lic.device_bloccato && lic.device_id && lic.device_id !== myDevice){
-      errBox.textContent = 'Licenza già in uso su un altro dispositivo. Contatta Alberto per lo sblocco.';
+      fallisci('Licenza già in uso su un altro dispositivo. Contatta Alberto per lo sblocco.');
       return;
     }
 
     const finalizza = ()=>{
       window.CAPONE_MINIGIOCHI_ABILITATI = lic.minigiochi_abilitati || {};
-      closeLicenseModal();
+      localStorage.setItem('capone_licenza_codice', codice);
+      if(!silente) closeLicenseModal();
       actuallyPlayQuiz(pendingQuizIndex);
     };
 
@@ -3760,11 +3781,16 @@ function verificaLicenzaEavvia(){
         device_bloccato: true,
         device_id: myDevice,
         primo_utilizzo: Date.now()
-      }).then(finalizza).catch(()=>{ errBox.textContent = 'Errore di registrazione dispositivo.'; });
+      }).then(finalizza).catch(()=>{ fallisci('Errore di registrazione dispositivo.'); });
     } else {
       finalizza();
     }
-  }).catch(()=>{ errBox.textContent = 'Errore di connessione. Riprova.'; });
+  }).catch(()=>{ fallisci_conn(); });
+
+  function fallisci_conn(){
+    if(silente){ showLicenseModal(); }
+    else if(errBox){ errBox.textContent = 'Errore di connessione. Riprova.'; }
+  }
 }
 
 function actuallyPlayQuiz(i){
