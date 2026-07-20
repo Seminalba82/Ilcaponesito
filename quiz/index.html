@@ -722,6 +722,21 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   -webkit-background-clip:text; background-clip:text; color:transparent;
   filter:drop-shadow(0 0 24px rgba(255,201,60,.7)) drop-shadow(0 6px 0 rgba(61,37,0,.9));}
 
+#plWaOverlay{display:none; position:fixed; inset:0; z-index:67; background:rgba(5,2,10,.96); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:26px; text-align:center; flex-direction:column;}
+#plWaTitle{font-family:'Bungee'; font-size:clamp(19px,5.5vw,30px); color:var(--gold); margin-bottom:26px;
+  text-shadow:0 0 16px rgba(255,201,60,.5); line-height:1.3;}
+.waBtn{display:inline-flex; align-items:center; gap:10px; padding:18px 30px; border-radius:20px; border:0;
+  background:linear-gradient(180deg,#2fe374,#128c4a); color:#fff; font-family:'Bungee'; font-size:clamp(15px,4.2vw,20px);
+  box-shadow:0 8px 0 #0b5a30, 0 12px 24px rgba(37,211,102,.4); cursor:pointer; text-decoration:none;
+  animation:waPulse 1.7s ease-in-out infinite;}
+@keyframes waPulse{
+  0%,100%{transform:scale(1); box-shadow:0 8px 0 #0b5a30, 0 12px 24px rgba(37,211,102,.4);}
+  50%{transform:scale(1.06); box-shadow:0 8px 0 #0b5a30, 0 16px 34px rgba(37,211,102,.65);}
+}
+#plWaClose{margin-top:26px; background:none; border:2px solid rgba(255,255,255,.3); color:var(--muted);
+  padding:10px 22px; border-radius:14px; font-weight:700; cursor:pointer; font-size:13px;}
+
 #pjPhotoOverlay{display:none; position:fixed; inset:0; z-index:64; background:#000;
   align-items:center; justify-content:center; padding:16px;}
 #pjPhotoOverlay img{max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; box-shadow:0 0 60px rgba(255,201,60,.15);}
@@ -971,7 +986,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.0</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.1</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1258,6 +1273,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <button class="hb" id="hbLead" onclick="toggleLeadOverlay('lead')">🏆 Classifica → 📺</button>
   <button class="hb" id="hbFast" onclick="toggleLeadOverlay('fast')">⚡ Più veloci → 📺</button>
   <button class="hb" id="hbMsg" onclick="modalPjMsg()">💬 Messaggio → 📺</button>
+  <button class="hb" id="hbWa" onclick="modalWaGroup()">📱 Gruppo WhatsApp</button>
   <button class="hb" id="hbPhoto" onclick="modalPjPhoto()">📷 Pubblica Foto</button>
   <button class="hb" onclick="modalQuestions()">📋 Scelta domanda</button>
   <button class="hb" onclick="modalGames()" style="border-color:var(--gold); color:var(--gold)">🕹 GIOCHI</button>
@@ -2740,6 +2756,11 @@ body.suspense-on #pfRank{ display:none !important; }
 <div id="pjPhotoOverlay"><img id="pjPhotoImg" src=""></div>
 <div id="plLeadOverlay"><div class="brand"><div class="t1" id="plLeadTitle"></div></div><div id="plLeadRows"></div></div>
 <div id="plMsgOverlay"><div id="plMsgText"></div></div>
+<div id="plWaOverlay">
+  <div id="plWaTitle"></div>
+  <a href="#" id="plWaBtn" class="waBtn" target="_blank" rel="noopener">📱 UNISCITI AL GRUPPO!</a>
+  <button id="plWaClose" onclick="plCloseWa()">✕ Chiudi</button>
+</div>
 <div id="plPhotoOverlay"><img id="plPhotoImg" src=""></div>
 
 <!-- ==================== COUNTDOWN (host / proiettore / telefono) ==================== -->
@@ -3001,7 +3022,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 120; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 121; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3697,103 +3718,7 @@ $('importFile').addEventListener('change', e=>{
    HOST — PARTITA
 ================================================================ */
 let G = null; // {code, quiz, ref, qi, timerInt, closed}
-let pendingQuizIndex = -1;
-
 function playQuiz(i){
-  pendingQuizIndex = i;
-  const savedCode = localStorage.getItem('capone_licenza_codice');
-  if(savedCode){
-    verificaCodiceEAvvia(savedCode, true);
-  } else {
-    showLicenseModal();
-  }
-}
-
-function showLicenseModal(){
-  const html = `
-    <div class="row mt" style="justify-content:center">
-      <div style="max-width:360px;width:100%">
-        <div class="label center mt">Inserisci il codice licenza per avviare la partita</div>
-        <input type="text" id="licInput" placeholder="CAPONE-XXXX-XXXX" style="width:100%;padding:12px;margin:12px 0;text-transform:uppercase;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff;text-align:center;font-size:1.1rem;letter-spacing:1px">
-        <div id="licError" style="color:#ff3b3b;font-size:.85rem;min-height:18px;text-align:center;margin-bottom:8px"></div>
-        <div class="row mtb" style="justify-content:center;gap:10px">
-          <button class="btn ghost" onclick="closeLicenseModal()">Annulla</button>
-          <button class="btn mg" onclick="verificaLicenzaEavvia()">Verifica e avvia</button>
-        </div>
-      </div>
-    </div>`;
-  openModal('🔐 Licenza richiesta', html);
-}
-
-function closeLicenseModal(){
-  closeModal();
-}
-
-function getDeviceId(){
-  let id = localStorage.getItem('capone_device_id');
-  if(!id){ id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem('capone_device_id', id); }
-  return id;
-}
-
-function verificaLicenzaEavvia(){
-  const codice = ($('licInput').value || '').trim().toUpperCase();
-  const errBox = $('licError');
-  errBox.textContent = '';
-  if(!codice){ errBox.textContent = 'Inserisci un codice.'; return; }
-  verificaCodiceEAvvia(codice, false);
-}
-
-function verificaCodiceEAvvia(codice, silente){
-  const errBox = silente ? null : $('licError');
-
-  db.ref('licenze/'+codice).once('value').then(snap=>{
-    const lic = snap.val();
-
-    const fallisci = (msg)=>{
-      if(silente){
-        localStorage.removeItem('capone_licenza_codice');
-        showLicenseModal();
-      } else if(errBox){
-        errBox.textContent = msg;
-      }
-    };
-
-    if(!lic){ fallisci('Codice licenza non valido.'); return; }
-    if(lic.attiva === false){ fallisci('Licenza disattivata. Contatta Alberto.'); return; }
-    if(Date.now() > lic.data_scadenza){ fallisci('Licenza scaduta.'); return; }
-
-    const myDevice = getDeviceId();
-
-    if(lic.device_bloccato && lic.device_id && lic.device_id !== myDevice){
-      fallisci('Licenza già in uso su un altro dispositivo. Contatta Alberto per lo sblocco.');
-      return;
-    }
-
-    const finalizza = ()=>{
-      window.CAPONE_MINIGIOCHI_ABILITATI = lic.minigiochi_abilitati || {};
-      localStorage.setItem('capone_licenza_codice', codice);
-      if(!silente) closeLicenseModal();
-      actuallyPlayQuiz(pendingQuizIndex);
-    };
-
-    if(!lic.device_bloccato){
-      db.ref('licenze/'+codice).update({
-        device_bloccato: true,
-        device_id: myDevice,
-        primo_utilizzo: Date.now()
-      }).then(finalizza).catch(()=>{ fallisci('Errore di registrazione dispositivo.'); });
-    } else {
-      finalizza();
-    }
-  }).catch(()=>{ fallisci_conn(); });
-
-  function fallisci_conn(){
-    if(silente){ showLicenseModal(); }
-    else if(errBox){ errBox.textContent = 'Errore di connessione. Riprova.'; }
-  }
-}
-
-function actuallyPlayQuiz(i){
   if (!fbOK) return alert('⚠️ Configura prima Firebase (vedi avviso in home).');
   const quiz = JSON.parse(JSON.stringify(quizzes[i]));
   const code = randCode();
@@ -4204,6 +4129,7 @@ function listenGame(){
     // così chi segue dallo smartphone in un'altra sala non si perde nulla
     P.ref.child('projLead').on('value', s=> plApplyLead(s.val()||{}));
     P.ref.child('projMsg').on('value', s=> plApplyMsg(s.val()||{}));
+    P.ref.child('waGroup').on('value', s=> plApplyWa(s.val()||{}));
     P.ref.child('projPhoto').on('value', s=> plApplyPhoto(s.val()||{}));
   }
   P.ref.on('value', s=>{
@@ -9213,6 +9139,45 @@ function sendPjMsg(on){
   if (G && G.ref) G.ref.child('projMsg').set({on:msgOv.on, text});
   closeModal();
 }
+
+/* ================================================================
+   GRUPPO WHATSAPP — invito ai giocatori con un tap dedicato dalla regia
+================================================================ */
+let waOv = { on:false };
+function modalWaGroup(){
+  let savedTitle=''; let savedLink='';
+  try{ savedTitle = localStorage.getItem('capone_wa_title')||''; savedLink = localStorage.getItem('capone_wa_link')||''; }catch(e){}
+  openModal('📱 GRUPPO WHATSAPP', `
+    <div class="label">Titolo del gruppo (es. SQUADRE IL CAPONE NASELLI PUB)</div>
+    <input type="text" id="waTitleIn" maxlength="60" value="${esc(savedTitle)}" placeholder="Es. SQUADRE IL CAPONE NASELLI PUB">
+    <div class="label mt">Link di invito WhatsApp</div>
+    <input type="text" id="waLinkIn" value="${esc(savedLink)}" placeholder="https://chat.whatsapp.com/...">
+    <div class="byline mt" style="text-transform:none">Il link resta salvato su questo dispositivo: la prossima volta che suoni nello stesso locale lo ritrovi già scritto qui. Ai giocatori non verrà mai mostrato il link per intero, solo un pulsante con il titolo che hai scelto.</div>
+    <div class="row mt">
+      <button class="btn mg grow" onclick="sendWaGroup(true)">📱 MOSTRA AI GIOCATORI</button>
+      <button class="btn ghost" onclick="sendWaGroup(false)">🚫 Nascondi</button>
+    </div>`);
+}
+function sendWaGroup(on){
+  const title = $('waTitleIn') ? $('waTitleIn').value.trim() : waOv.title;
+  const link = $('waLinkIn') ? $('waLinkIn').value.trim() : waOv.link;
+  if (on && (!title || !link)) return alert('Scrivi sia il titolo che il link del gruppo!');
+  if (on && !/^https:\/\/(chat\.whatsapp\.com|wa\.me)\//.test(link)) return alert('Il link non sembra un vero link di invito WhatsApp (deve iniziare con https://chat.whatsapp.com/...)');
+  try{ localStorage.setItem('capone_wa_title', title||''); localStorage.setItem('capone_wa_link', link||''); }catch(e){}
+  waOv = { on:!!on, title, link };
+  $('hbWa').classList.toggle('on', waOv.on);
+  if (G && G.ref) G.ref.child('waGroup').set({ on:waOv.on, title, link });
+  closeModal();
+}
+function plApplyWa(v){
+  const ov = $('plWaOverlay');
+  if (v && v.on && v.link){
+    $('plWaTitle').textContent = v.title || 'UNISCITI AL GRUPPO!';
+    $('plWaBtn').href = v.link;
+    ov.style.display = 'flex';
+  } else ov.style.display = 'none';
+}
+function plCloseWa(){ $('plWaOverlay').style.display = 'none'; }
 
 /* ================================================================
    PUBBLICA FOTO SU PROIETTORE E TELEFONI
