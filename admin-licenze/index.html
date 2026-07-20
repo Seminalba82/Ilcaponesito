@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gestione Licenze — IL CAPONE QUIZ</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#0b0614; --bg2:#150a26; --panel:#1c1033;
+  --magenta:#ff2e9a; --cyan:#00f0ff; --lime:#b6ff2e; --gold:#ffc93c; --viola:#9d4dff;
+  --red:#ff3b3b; --white:#ffffff; --muted:#b9a8d9;
+  --r:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif; color:var(--white);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(157,77,255,.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(0,240,255,.18), transparent 60%),
+    var(--bg);
+  min-height:100%; padding:20px;
+}
+.wrap{max-width:900px;margin:0 auto;}
+h1{font-size:1.4rem;margin-bottom:4px;}
+.sub{color:var(--muted);font-size:.85rem;margin-bottom:24px;}
+
+/* LOGIN */
+#loginBox{
+  max-width:380px;margin:80px auto;background:var(--panel);
+  border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:28px;
+}
+#loginBox h2{margin-bottom:16px;font-size:1.1rem;}
+input, select{
+  width:100%;padding:12px 14px;margin-bottom:12px;border-radius:10px;
+  border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);
+  color:var(--white);font-size:.95rem;
+}
+input::placeholder{color:var(--muted)}
+button{
+  cursor:pointer;border:none;border-radius:10px;padding:12px 18px;
+  font-weight:600;font-size:.95rem;transition:transform .1s;
+}
+button:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--magenta),var(--viola));color:#fff;width:100%;}
+.btn-secondary{background:rgba(255,255,255,.08);color:var(--white);}
+.btn-danger{background:rgba(255,59,59,.15);color:var(--red);border:1px solid rgba(255,59,59,.4);}
+.btn-warn{background:rgba(255,201,60,.15);color:var(--gold);border:1px solid rgba(255,201,60,.4);}
+#loginError{color:var(--red);font-size:.85rem;margin-top:8px;min-height:18px;}
+
+/* APP */
+#app{display:none;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.card{
+  background:var(--panel);border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r);padding:20px;margin-bottom:20px;
+}
+.card h2{font-size:1.05rem;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:560px){.grid2{grid-template-columns:1fr;}}
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px;}
+fieldset{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-bottom:12px;}
+legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
+.mini-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;max-height:220px;overflow-y:auto;}
+.mini-chip{display:flex;align-items:center;gap:6px;font-size:.85rem;background:rgba(255,255,255,.04);padding:6px 8px;border-radius:8px;}
+.mini-chip input{width:auto;margin:0;}
+.actions-row{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;}
+.actions-row button{flex:1;min-width:120px;}
+
+#result{
+  margin-top:14px;padding:14px;border-radius:10px;background:rgba(182,255,46,.08);
+  border:1px solid rgba(182,255,46,.3);display:none;
+}
+#result code{color:var(--lime);font-size:1.1rem;font-weight:700;word-break:break-all;}
+
+/* LICENSE LIST */
+.lic-item{
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:12px;
+  background:rgba(255,255,255,.02);
+}
+.lic-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+.lic-code{font-weight:700;color:var(--cyan);font-size:.95rem;}
+.lic-meta{font-size:.8rem;color:var(--muted);margin-top:4px;}
+.badge{display:inline-block;font-size:.7rem;padding:3px 8px;border-radius:20px;font-weight:700;margin-left:6px;}
+.badge-active{background:rgba(182,255,46,.15);color:var(--lime);}
+.badge-expired{background:rgba(255,59,59,.15);color:var(--red);}
+.badge-unused{background:rgba(255,255,255,.1);color:var(--muted);}
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-row button{background:rgba(255,255,255,.06);color:var(--muted);padding:8px 14px;font-size:.85rem;}
+.filter-row button.active{background:var(--viola);color:#fff;}
+#licList{max-height:600px;overflow-y:auto;}
+.empty-state{color:var(--muted);text-align:center;padding:30px;font-size:.9rem;}
+</style>
+</head>
+<body>
+
+<div id="loginBox">
+  <h2>🔐 Accesso Admin</h2>
+  <input type="email" id="loginEmail" placeholder="Email" autocomplete="username">
+  <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+  <button class="btn-primary" onclick="doLogin()">Accedi</button>
+  <div id="loginError"></div>
+</div>
+
+<div id="app">
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>🎩 Gestione Licenze — IL CAPONE QUIZ</h1>
+      <div class="sub">Pannello riservato</div>
+    </div>
+    <button class="btn-secondary" onclick="doLogout()">Esci</button>
+  </div>
+
+  <div class="card">
+    <h2>➕ Genera nuova licenza</h2>
+    <div class="grid2">
+      <div>
+        <label>Nome cliente</label>
+        <input type="text" id="fCliente" placeholder="Es. Comune di Agrigento">
+      </div>
+      <div>
+        <label>Tipo piano</label>
+        <select id="fPiano">
+          <option value="giorno">Giorno (24 ore)</option>
+          <option value="settimana">Settimana (7 giorni)</option>
+          <option value="mese">Mese (30 giorni)</option>
+          <option value="anno">Anno (365 giorni)</option>
+        </select>
+      </div>
+    </div>
+    <label style="margin-top:8px">Note evento (opzionale)</label>
+    <input type="text" id="fNote" placeholder="Es. Evento piazza San Calogero, 20/07">
+
+    <fieldset>
+      <legend>Minigiochi abilitati</legend>
+      <div class="actions-row" style="margin-bottom:10px">
+        <button type="button" class="btn-secondary" onclick="toggleAllMini(true)">Seleziona tutti</button>
+        <button type="button" class="btn-secondary" onclick="toggleAllMini(false)">Deseleziona tutti</button>
+      </div>
+      <div class="mini-grid" id="miniGrid"></div>
+    </fieldset>
+
+    <button class="btn-primary" onclick="generaLicenza()">Genera licenza</button>
+
+    <div id="result">
+      <div>Codice licenza generato:</div>
+      <code id="resultCode"></code>
+      <div style="margin-top:8px;font-size:.8rem;color:var(--muted)">
+        Scadenza: <span id="resultScad"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Licenze esistenti</h2>
+    <div class="filter-row">
+      <button class="active" onclick="setFilter('tutte',this)">Tutte</button>
+      <button onclick="setFilter('attive',this)">Attive</button>
+      <button onclick="setFilter('scadute',this)">Scadute</button>
+    </div>
+    <div id="licList"><div class="empty-state">Caricamento...</div></div>
+  </div>
+</div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAVTrq0PCEH7HK5VEHK88m7b-Qgdf9nGmE",
+  authDomain: "il-capone-quiz.firebaseapp.com",
+  databaseURL: "https://il-capone-quiz-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "il-capone-quiz",
+  storageBucket: "il-capone-quiz.firebasestorage.app",
+  messagingSenderId: "293529788369",
+  appId: "1:293529788369:web:7063a22dbb884f9bf30af0"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+const MINIGIOCHI = [
+  'mini','dice','simon','voto','wheels','hilo','swiss','memocoppie','memo',
+  'ruota','taptap','grad','seed','cards','tombola','anagram','wordsearch',
+  'puzzle','horses','tfiscale','toc','cenerentola','pacchi','roulette',
+  'pagliuzza','supertris','rdc','mastermind'
+];
+
+const PIANI_MS = {
+  giorno: 24*60*60*1000,
+  settimana: 7*24*60*60*1000,
+  mese: 30*24*60*60*1000,
+  anno: 365*24*60*60*1000
+};
+
+let currentFilter = 'tutte';
+let licenzeCache = {};
+
+// ---------- LOGIN ----------
+function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  document.getElementById('loginError').textContent = '';
+  auth.signInWithEmailAndPassword(email, pass).catch(err=>{
+    document.getElementById('loginError').textContent = 'Accesso negato: controlla email e password.';
+  });
+}
+function doLogout(){ auth.signOut(); }
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('app').style.display='block';
+    initMiniGrid();
+    loadLicenze();
+  } else {
+    document.getElementById('loginBox').style.display='block';
+    document.getElementById('app').style.display='none';
+  }
+});
+
+// ---------- MINIGIOCHI CHECKBOX ----------
+function initMiniGrid(){
+  const grid = document.getElementById('miniGrid');
+  grid.innerHTML = MINIGIOCHI.map(m=>`
+    <label class="mini-chip">
+      <input type="checkbox" class="mini-cb" value="${m}" checked>
+      ${m}
+    </label>`).join('');
+}
+function toggleAllMini(state){
+  document.querySelectorAll('.mini-cb').forEach(cb=>cb.checked=state);
+}
+
+// ---------- GENERA LICENZA ----------
+function generaCodice(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'CAPONE-';
+  for(let i=0;i<4;i++) code += chars[Math.floor(Math.random()*chars.length)];
+  code += '-';
+  for(let i=0;i<4;i++) code += chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+
+function generaLicenza(){
+  const cliente = document.getElementById('fCliente').value.trim();
+  const piano = document.getElementById('fPiano').value;
+  const note = document.getElementById('fNote').value.trim();
+
+  if(!cliente){ alert('Inserisci il nome del cliente.'); return; }
+
+  const minigiochi_abilitati = {};
+  document.querySelectorAll('.mini-cb').forEach(cb=>{
+    minigiochi_abilitati[cb.value] = cb.checked;
+  });
+
+  const now = Date.now();
+  const scadenza = now + PIANI_MS[piano];
+  const codice = generaCodice();
+
+  const licenza = {
+    cliente,
+    tipo_piano: piano,
+    data_inizio: now,
+    data_scadenza: scadenza,
+    attiva: true,
+    minigiochi_abilitati,
+    device_bloccato: false,
+    device_id: null,
+    primo_utilizzo: null,
+    note: note || null
+  };
+
+  db.ref('licenze/'+codice).set(licenza).then(()=>{
+    document.getElementById('resultCode').textContent = codice;
+    document.getElementById('resultScad').textContent = new Date(scadenza).toLocaleString('it-IT');
+    document.getElementById('result').style.display='block';
+    document.getElementById('fCliente').value='';
+    document.getElementById('fNote').value='';
+    loadLicenze();
+  }).catch(err=>{
+    alert('Errore nel salvataggio: '+err.message);
+  });
+}
+
+// ---------- LISTA LICENZE ----------
+function loadLicenze(){
+  db.ref('licenze').on('value', snap=>{
+    licenzeCache = snap.val() || {};
+    renderLicenze();
+  });
+}
+
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.filter-row button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLicenze();
+}
+
+function renderLicenze(){
+  const container = document.getElementById('licList');
+  const now = Date.now();
+  const entries = Object.entries(licenzeCache).sort((a,b)=> (b[1].data_inizio||0) - (a[1].data_inizio||0));
+
+  const filtered = entries.filter(([code, lic])=>{
+    const scaduta = lic.data_scadenza < now;
+    if(currentFilter==='attive') return !scaduta && lic.attiva!==false;
+    if(currentFilter==='scadute') return scaduta || lic.attiva===false;
+    return true;
+  });
+
+  if(filtered.length===0){
+    container.innerHTML = '<div class="empty-state">Nessuna licenza trovata.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(([code, lic])=>{
+    const scaduta = lic.data_scadenza < now;
+    const disattivata = lic.attiva===false;
+    let badge = '';
+    if(disattivata) badge = '<span class="badge badge-expired">DISATTIVATA</span>';
+    else if(scaduta) badge = '<span class="badge badge-expired">SCADUTA</span>';
+    else badge = '<span class="badge badge-active">ATTIVA</span>';
+
+    const deviceBadge = lic.device_bloccato
+      ? '<span class="badge badge-active">DISPOSITIVO BLOCCATO</span>'
+      : '<span class="badge badge-unused">MAI USATA</span>';
+
+    const nMini = lic.minigiochi_abilitati ? Object.values(lic.minigiochi_abilitati).filter(v=>v).length : 0;
+
+    return `
+    <div class="lic-item">
+      <div class="lic-head">
+        <div>
+          <div class="lic-code">${code}</div>
+          <div class="lic-meta">${lic.cliente || '—'} · piano: ${lic.tipo_piano} · ${nMini}/${MINIGIOCHI.length} minigiochi</div>
+          <div class="lic-meta">Scadenza: ${new Date(lic.data_scadenza).toLocaleString('it-IT')}</div>
+          ${lic.note ? `<div class="lic-meta">Note: ${lic.note}</div>` : ''}
+        </div>
+        <div>${badge}${deviceBadge}</div>
+      </div>
+      <div class="actions-row">
+        ${lic.device_bloccato ? `<button class="btn-warn" onclick="sbloccaDevice('${code}')">🔓 Sblocca dispositivo</button>` : ''}
+        ${disattivata
+          ? `<button class="btn-secondary" onclick="riattivaLicenza('${code}')">✅ Riattiva</button>`
+          : `<button class="btn-danger" onclick="disattivaLicenza('${code}')">⛔ Disattiva</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function sbloccaDevice(code){
+  if(!confirm('Sbloccare il dispositivo per la licenza '+code+'? Il prossimo dispositivo che inserisce il codice verrà registrato come nuovo autorizzato.')) return;
+  const updates = {
+    device_bloccato: false,
+    device_id: null
+  };
+  db.ref('licenze/'+code).update(updates).then(()=>{
+    // log dello sblocco
+    db.ref('licenze/'+code+'/reset_log').push({
+      data: Date.now(),
+      azione: 'sblocco_dispositivo'
+    });
+  }).catch(err=>alert('Errore: '+err.message));
+}
+
+function disattivaLicenza(code){
+  if(!confirm('Disattivare la licenza '+code+'? Il cliente non potrà più usarla.')) return;
+  db.ref('licenze/'+code+'/attiva').set(false).catch(err=>alert('Errore: '+err.message));
+}
+
+function riattivaLicenza(code){
+  db.ref('licenze/'+code+'/attiva').set(true).catch(err=>alert('Errore: '+err.message));
+}
+</script>
+</body>
+</html>
