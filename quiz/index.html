@@ -3697,7 +3697,77 @@ $('importFile').addEventListener('change', e=>{
    HOST — PARTITA
 ================================================================ */
 let G = null; // {code, quiz, ref, qi, timerInt, closed}
+let pendingQuizIndex = -1;
+
 function playQuiz(i){
+  pendingQuizIndex = i;
+  showLicenseModal();
+}
+
+function showLicenseModal(){
+  const html = `
+    <div class="row mt" style="justify-content:center">
+      <div style="max-width:360px;width:100%">
+        <div class="label center mt">Inserisci il codice licenza per avviare la partita</div>
+        <input type="text" id="licInput" placeholder="CAPONE-XXXX-XXXX" style="width:100%;padding:12px;margin:12px 0;text-transform:uppercase;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff;text-align:center;font-size:1.1rem;letter-spacing:1px">
+        <div id="licError" style="color:#ff3b3b;font-size:.85rem;min-height:18px;text-align:center;margin-bottom:8px"></div>
+        <div class="row mtb" style="justify-content:center;gap:10px">
+          <button class="btn ghost" onclick="closeLicenseModal()">Annulla</button>
+          <button class="btn mg" onclick="verificaLicenzaEavvia()">Verifica e avvia</button>
+        </div>
+      </div>
+    </div>`;
+  openModal('🔐 Licenza richiesta', html);
+}
+
+function closeLicenseModal(){
+  closeModal();
+}
+
+function getDeviceId(){
+  let id = localStorage.getItem('capone_device_id');
+  if(!id){ id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem('capone_device_id', id); }
+  return id;
+}
+
+function verificaLicenzaEavvia(){
+  const codice = ($('licInput').value || '').trim().toUpperCase();
+  const errBox = $('licError');
+  errBox.textContent = '';
+  if(!codice){ errBox.textContent = 'Inserisci un codice.'; return; }
+
+  db.ref('licenze/'+codice).once('value').then(snap=>{
+    const lic = snap.val();
+    if(!lic){ errBox.textContent = 'Codice licenza non valido.'; return; }
+    if(lic.attiva === false){ errBox.textContent = 'Licenza disattivata. Contatta Alberto.'; return; }
+    if(Date.now() > lic.data_scadenza){ errBox.textContent = 'Licenza scaduta.'; return; }
+
+    const myDevice = getDeviceId();
+
+    if(lic.device_bloccato && lic.device_id && lic.device_id !== myDevice){
+      errBox.textContent = 'Licenza già in uso su un altro dispositivo. Contatta Alberto per lo sblocco.';
+      return;
+    }
+
+    const finalizza = ()=>{
+      window.CAPONE_MINIGIOCHI_ABILITATI = lic.minigiochi_abilitati || {};
+      closeLicenseModal();
+      actuallyPlayQuiz(pendingQuizIndex);
+    };
+
+    if(!lic.device_bloccato){
+      db.ref('licenze/'+codice).update({
+        device_bloccato: true,
+        device_id: myDevice,
+        primo_utilizzo: Date.now()
+      }).then(finalizza).catch(()=>{ errBox.textContent = 'Errore di registrazione dispositivo.'; });
+    } else {
+      finalizza();
+    }
+  }).catch(()=>{ errBox.textContent = 'Errore di connessione. Riprova.'; });
+}
+
+function actuallyPlayQuiz(i){
   if (!fbOK) return alert('⚠️ Configura prima Firebase (vedi avviso in home).');
   const quiz = JSON.parse(JSON.stringify(quizzes[i]));
   const code = randCode();
