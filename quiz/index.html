@@ -137,7 +137,8 @@ option{background:var(--bg2);}
 /* ===== VARIE ===== */
 .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
 .grow{flex:1;}
-.qCard{background:rgba(11,6,20,.7); border:1px solid rgba(157,77,255,.35); border-radius:16px; padding:14px; margin-top:10px; display:flex; gap:10px; align-items:center;}
+.qCard{background:rgba(11,6,20,.7); border:1px solid rgba(157,77,255,.35); border-radius:16px; padding:14px; margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.qCard>.grow{flex-basis:100%;}
 .qCard .idx{font-family:'Bungee'; color:var(--gold); font-size:20px; min-width:34px; text-align:center;}
 .tag{font-size:11px; font-weight:900; letter-spacing:1px; padding:4px 10px; border-radius:99px; text-transform:uppercase;}
 .tag.mult{background:rgba(0,240,255,.15); color:var(--cyan); border:1px solid rgba(0,240,255,.5);}
@@ -986,7 +987,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.1</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.2</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3022,7 +3023,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 121; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 122; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
