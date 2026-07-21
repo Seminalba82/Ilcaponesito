@@ -24,7 +24,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;
 .t2{font-size:clamp(16px,3.4vw,24px);color:var(--cyan);text-shadow:0 0 14px rgba(0,240,255,.7),0 3px 0 #005e66;letter-spacing:3px;}
 .byline{font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--muted);font-size:12px;margin:8px 0 30px;position:relative;z-index:1;}
 .byline b{color:var(--cyan);}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;width:100%;max-width:760px;position:relative;z-index:1;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;width:100%;max-width:760px;min-width:0;align-self:stretch;position:relative;z-index:1;}
 a.app{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-decoration:none;
   font-family:'Bungee';font-size:20px;padding:28px 18px;border-radius:22px;color:#fff;text-align:center;
   text-shadow:0 3px 0 rgba(0,0,0,.5);transition:transform .1s,box-shadow .1s;}
@@ -88,7 +88,7 @@ const GATE_PASS = '1203Quartiergenerale1982@';
 function showHub(){
   document.getElementById('gateBox').style.display = 'none';
   const h = document.getElementById('hubContent');
-  h.style.display = 'flex'; h.style.flexDirection = 'column'; h.style.alignItems = 'center';
+  h.style.display = 'flex'; h.style.flexDirection = 'column'; h.style.alignItems = 'center'; h.style.width = '100%';
 }
 function checkGate(){
   const u = document.getElementById('gateUser').value.trim();
