@@ -1015,7 +1015,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.4</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.5</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1274,6 +1274,7 @@ body.suspense-on #pfRank{ display:none !important; }
   </div>
   <div class="timerWrap mt"><div class="timerBar" id="pqTimerBar"></div></div>
   <div class="pqQ" id="pqQText"></div>
+  <img id="pqPhoto" style="display:none; max-width:100%; max-height:220px; border-radius:16px; margin-top:10px; box-shadow:0 8px 20px rgba(0,0,0,.5)">
   <div class="byline mt" id="pqHint">RISPONDI! PIÙ SEI VELOCE, PIÙ PUNTI FAI 💨</div>
   <div class="ansGrid mtb" id="pqOpts"></div>
   <button class="btn lm mtb" id="pqMultiSend" style="display:none; width:100%; max-width:420px" onclick="sendMultiAnswer()">📨 INVIA LE RISPOSTE SCELTE</button>
@@ -3112,7 +3113,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 124; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 125; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3904,6 +3905,10 @@ function nextQuestion(){
       multi, pattern, startAt: serverNow() },
     reveal:null
   });
+  // la FOTO viaggia per conto suo, in un ramo separato: non è annidata dentro "current" (che resta leggero)
+  // così non viene ritrasmessa ad ogni piccola variazione (es. una risposta di un giocatore), niente lag
+  if (q.media && q.media.kind==='photo' && q.media.data) G.ref.child('currentPhoto').set({ i:G.qi, data:q.media.data });
+  else G.ref.child('currentPhoto').remove();
   G.ref.child('answers/'+G.qi).remove();
   // schermo host
   $('hqProgress').textContent = `DOMANDA ${G.qi+1} / ${G.quiz.questions.length}`;
@@ -4252,6 +4257,7 @@ function listenGame(){
     P.ref.child('projLead').on('value', s=> plApplyLead(s.val()||{}));
     P.ref.child('projMsg').on('value', s=> plApplyMsg(s.val()||{}));
     P.ref.child('waGroup').on('value', s=> plApplyWa(s.val()||{}));
+    P.ref.child('currentPhoto').on('value', s=>{ P.lastPhotoData = s.val(); pqRenderPhoto(); });
     P.ref.child('projPhoto').on('value', s=> plApplyPhoto(s.val()||{}));
   }
   P.ref.on('value', s=>{
@@ -4311,15 +4317,24 @@ function listenGame(){
     else if (g.status==='end') showPlayerEnd(g);
   });
 }
+/* Mostra la foto della domanda corrente sul telefono, se presente e se corrisponde alla domanda attiva ora.
+   Chiamata sia dal listener dedicato della foto sia da showPlayerQ: l'ordine di arrivo dei due dati
+   (stato domanda e foto) non è garantito, quindi entrambi i punti richiamano questa stessa funzione. */
+function pqRenderPhoto(){
+  const img = $('pqPhoto'); if (!img) return;
+  const v = P.lastPhotoData;
+  if (v && v.data && v.i === P.curI) { img.src = v.data; img.style.display='block'; }
+  else { img.style.display='none'; img.src=''; }
+}
 function showPlayerQ(cur){
   if (P.curI === cur.i && $('scrPlayQ').classList.contains('active')) return; // già mostrata
   if (P.curI === cur.i && P.answered) return;
   P.curI = cur.i; P.answered = false; P.t0 = Date.now(); P.dur = cur.timer*1000;
   $('pqSent').style.display='none';
-  const mediaNote = cur.mediaKind==='photo' ? '<small>📷 La foto è sullo schermo grande</small>'
-                  : cur.mediaKind==='audio' ? '<small>🎵 Ascolta la musica!</small>' : '';
+  const mediaNote = cur.mediaKind==='audio' ? '<small>🎵 Ascolta la musica!</small>' : '';
   $('pqQText').innerHTML = cur.text ? esc(cur.text) + mediaNote : '';
   $('pqQText').style.display = cur.text ? 'block' : 'none';
+  pqRenderPhoto();
   P.multiSel = new Set(); P.curPattern = cur.pattern || null;
   $('pqMultiSend').style.display='none';
   if (cur.type==='mult') {
