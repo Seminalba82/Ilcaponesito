@@ -1015,7 +1015,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.3</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.4</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3112,7 +3112,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 123; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 124; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3463,18 +3463,32 @@ function adjPointsRow(pid, sign){
 let quizzes = JSON.parse(localStorage.getItem(LSKEY) || '[]');
 let curQuiz = null, curQIdx = -1;
 
+function fmtLastUsed(ts){
+  if (!ts) return 'Mai ancora giocato';
+  const d = new Date(ts);
+  const mesi = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+  return `Ultima volta: ${d.getDate()} ${mesi[d.getMonth()]} ${d.getFullYear()}`;
+}
 function loadQuizList(){
   const box = $('quizList'); box.innerHTML = '';
   if (!quizzes.length) { box.innerHTML = '<div class="byline" style="letter-spacing:1px">Nessun quiz salvato. Creane uno nuovo!</div>'; return; }
   quizzes.forEach((q,i)=>{
     const d = document.createElement('div'); d.className='qCard';
     d.innerHTML = `<div class="idx">🎩</div>
-      <div class="grow"><b>${esc(q.title)}</b><br><small style="color:var(--muted)">${q.questions.length} domande</small></div>
+      <div class="grow"><b>${esc(q.title)}</b><br><small style="color:var(--muted)">${q.questions.length} domande · ${fmtLastUsed(q.lastUsed)}</small></div>
+      <button class="btn small ghost" onclick="moveQuiz(${i},-1)" ${i===0?'disabled':''} title="Sposta su">▲</button>
+      <button class="btn small ghost" onclick="moveQuiz(${i},1)" ${i===quizzes.length-1?'disabled':''} title="Sposta giù">▼</button>
       <button class="btn small cy" onclick="editQuiz(${i})">✎</button>
       <button class="btn small mg" onclick="playQuiz(${i})">▶</button>
       <button class="btn small ghost" onclick="delQuiz(${i})">🗑</button>`;
     box.appendChild(d);
   });
+}
+function moveQuiz(i, dir){
+  const j = i+dir;
+  if (j<0 || j>=quizzes.length) return;
+  [quizzes[i], quizzes[j]] = [quizzes[j], quizzes[i]];
+  persist(); loadQuizList();
 }
 function newQuiz(){ curQuiz = { title:'', questions:[] }; curQuiz._idx = -1; $('edTitle').value=''; renderEdQuestions(); showScreen('scrEditor'); }
 /* ================================================================
@@ -3684,23 +3698,36 @@ function qeMediaChanged(keep){
   else window._qeMedia.kind = k;
   renderMediaPreview();
 }
+let qeMediaLoading = false;
 $('qeFile').addEventListener('change', e=>{
   const f = e.target.files[0]; if(!f) return;
   const kind = $('qeMedia').value;
   if (kind === 'photo'){
     if (f.size > 20*1024*1024) { alert('⚠️ Foto troppo grande (max 20 MB prima della compressione).'); e.target.value=''; return; }
-    $('qeMediaPreview').innerHTML = '<div class="byline">🗜 Comprimo la foto...</div>';
+    qeMediaLoading = true; qeUpdateSaveLock();
+    $('qeMediaPreview').innerHTML = '<div class="byline">🗜 Comprimo la foto... (aspetta prima di salvare)</div>';
     compressImageFile(f, {maxDim:1280, quality:0.82, maxBytes:550*1024}).then(res=>{
       window._qeMedia = {kind:'photo', data:res.dataUrl, name:f.name};
       renderMediaPreview(res);
-    }).catch(()=>{ alert('⚠️ Non sono riuscito a leggere questa immagine, riprova con un\'altra foto.'); $('qeMediaPreview').innerHTML=''; });
+    }).catch(()=>{ alert('⚠️ Non sono riuscito a leggere questa immagine, riprova con un\'altra foto.'); $('qeMediaPreview').innerHTML=''; })
+      .finally(()=>{ qeMediaLoading = false; qeUpdateSaveLock(); });
     return;
   }
   if (f.size > 4*1024*1024) { alert('⚠️ File audio troppo grande (max 4 MB). Taglia uno spezzone più corto.'); e.target.value=''; return; }
+  qeMediaLoading = true; qeUpdateSaveLock();
+  $('qeMediaPreview').innerHTML = '<div class="byline">⏳ Carico l\'audio... (aspetta prima di salvare)</div>';
   const r = new FileReader();
-  r.onload = ()=>{ window._qeMedia = {kind:'audio', data:r.result, name:f.name}; renderMediaPreview(); };
+  r.onload = ()=>{ window._qeMedia = {kind:'audio', data:r.result, name:f.name}; renderMediaPreview(); qeMediaLoading=false; qeUpdateSaveLock(); };
+  r.onerror = ()=>{ alert('⚠️ Non sono riuscito a leggere questo file audio, riprova.'); qeMediaLoading=false; qeUpdateSaveLock(); };
   r.readAsDataURL(f);
 });
+/* Blocca visivamente salvataggio e navigazione finché una foto/audio non ha finito di caricare:
+   evita che si salvi per sbaglio una domanda con "tipo foto" ma senza i dati veri della foto. */
+function qeUpdateSaveLock(){
+  const btns = [...document.querySelectorAll('#scrQEdit .btn')].filter(b=>
+    /Salva domanda/.test(b.textContent) || b.id==='qeBtnPrev' || b.id==='qeBtnNext');
+  btns.forEach(b=> b.disabled = qeMediaLoading);
+}
 function renderMediaPreview(compressInfo){
   const b = $('qeMediaPreview'); b.innerHTML='';
   const m = window._qeMedia;
@@ -3714,6 +3741,7 @@ function renderMediaPreview(compressInfo){
 }
 /* Legge e valida i campi dell'editor: torna l'oggetto domanda pronto, o null se manca qualcosa (con avviso già mostrato) */
 function qeBuildQuestion(){
+  if (qeMediaLoading) { alert('⏳ Aspetta che la foto/audio finisca di caricare prima di salvare!'); return null; }
   const text = $('qeText').value.trim();
   if (!text) { alert('Scrivi il testo della domanda!'); return null; }
   const type = $('qeType').value;
@@ -3727,6 +3755,9 @@ function qeBuildQuestion(){
     penWrong: Math.max(0,+$('qePenWrong').value||0),
     penNone: Math.max(0,+$('qePenNone').value||0),
     points:getPoints('qePoints','qePointsMan'), timer:+$('qeTimer').value };
+  // rete di sicurezza: se per qualunque motivo il tipo dice foto/audio ma mancano i dati veri,
+  // non salvo un riferimento "rotto" che non mostrerà mai nulla — ripiego su "nessun media"
+  if (q.media && q.media.kind!=='none' && !q.media.data) q.media = {kind:'none'};
   if (type==='mult' && opts.filter(o=>o).length<2) { alert('Servono almeno 2 opzioni compilate!'); return null; }
   if (type==='mult' && !corrects.length) { alert('Spunta almeno una risposta giusta!'); return null; }
   if (type==='mult' && corrects.some(k=>!opts[k])) { alert('Una risposta spuntata come giusta è vuota!'); return null; }
@@ -3810,6 +3841,7 @@ $('importFile').addEventListener('change', e=>{
 let G = null; // {code, quiz, ref, qi, timerInt, closed}
 function playQuiz(i){
   if (!fbOK) return alert('⚠️ Configura prima Firebase (vedi avviso in home).');
+  quizzes[i].lastUsed = Date.now(); persist(); // registro quando è stato usato l'ultima volta, per la nota in home
   const quiz = JSON.parse(JSON.stringify(quizzes[i]));
   const code = randCode();
   G = { code, quiz, qi:-1, played:new Set(), ref: db.ref('caponequiz/games/'+code) };
