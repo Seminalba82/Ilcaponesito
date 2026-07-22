@@ -452,6 +452,34 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .mmHistPeg{width:20px; height:20px; border-radius:50%; box-shadow:inset 0 -2px 3px rgba(0,0,0,.4);}
 .mmHistFb{font-size:12px; font-weight:800; color:var(--cyan); white-space:nowrap;}
 .mmHistFb.solved{color:var(--lime);}
+
+/* ===== BOMBA A OROLOGERIA ===== */
+.bombScene{position:relative; width:100%; max-width:380px; margin:14px auto; border-radius:20px; padding:20px 16px;
+  background:linear-gradient(155deg,#2a1010 0%,#140808 100%); border:6px solid #4a1414;
+  box-shadow:inset 0 0 34px rgba(0,0,0,.6), 0 10px 24px rgba(0,0,0,.5); display:flex; flex-direction:column; align-items:center;}
+.bombClock{position:relative; width:150px; height:150px; border-radius:50%; margin:6px auto 14px;
+  background:radial-gradient(circle at 35% 32%, #3a3a3a, #0d0d0d 75%); border:6px solid #1a1a1a;
+  box-shadow:0 8px 16px rgba(0,0,0,.6), inset 0 0 16px rgba(0,0,0,.7);}
+.bombClock .tick{position:absolute; width:2px; height:9px; background:#888; left:50%; top:4px; transform-origin:50% 71px;}
+.bombHand{position:absolute; width:4px; height:58px; background:linear-gradient(180deg,#ff5d5d,#b71c1c); left:50%; top:50%;
+  transform-origin:50% 0%; border-radius:3px; box-shadow:0 0 6px rgba(255,93,93,.6);}
+.bombCenter{position:absolute; width:14px; height:14px; border-radius:50%; background:#ff5d5d; left:50%; top:50%; transform:translate(-50%,-50%); z-index:3; box-shadow:0 0 8px rgba(255,93,93,.8);}
+.bombDigital{font-family:'Bungee'; font-size:24px; color:#ff5d5d; text-shadow:0 0 12px rgba(255,93,93,.7); letter-spacing:2px; margin-top:4px;}
+.bombWiresBox{width:100%; max-width:320px; margin-top:8px; display:flex; flex-direction:column; gap:10px;}
+.bombWireRow{display:flex; align-items:center; gap:10px; cursor:pointer;}
+.bombWireRow.cut{cursor:default; opacity:.35;}
+.bombWireLine{flex:1; height:12px; border-radius:6px; position:relative; box-shadow:0 2px 4px rgba(0,0,0,.4), inset 0 -2px 3px rgba(0,0,0,.3);}
+.bombWireRow.cut .bombWireLine{background:repeating-linear-gradient(90deg, currentColor 0 8px, transparent 8px 14px) !important; opacity:.5;}
+.bombScissor{font-size:22px; flex-shrink:0; transition:transform .15s;}
+.bombWireRow:active .bombScissor{transform:rotate(-25deg) scale(1.15);}
+.bombStatus{font-family:'Bungee'; font-size:16px; text-align:center; margin-top:14px; letter-spacing:.5px;}
+.bombStatus.safe{color:var(--lime); text-shadow:0 0 10px rgba(182,242,46,.6);}
+.bombStatus.boom{color:#ff5d5d; text-shadow:0 0 14px rgba(255,93,93,.8);}
+.bombBoomFlash{position:fixed; inset:0; background:radial-gradient(circle, rgba(255,201,60,.9), rgba(255,60,20,.9) 60%, rgba(0,0,0,.95) 100%);
+  z-index:80; display:none; align-items:center; justify-content:center; flex-direction:column;
+  animation:bombFlashPulse .5s ease-out;}
+@keyframes bombFlashPulse{ 0%{opacity:0; transform:scale(.7);} 40%{opacity:1; transform:scale(1.05);} 100%{opacity:1; transform:scale(1);} }
+.bombBoomFlash .txt{font-family:'Bungee'; font-size:clamp(36px,10vw,64px); color:#fff; text-shadow:0 0 30px rgba(0,0,0,.8);}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -987,7 +1015,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.2</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.3</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2511,6 +2539,67 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="feedback mt" id="mmpFb" style="display:none; font-size:20px"></div>
 </div>
 
+<!-- ==================== HOST: BOMBA A OROLOGERIA ==================== -->
+<div class="screen" id="scrBomba">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">💣 BOMBA A OROLOGERIA</div></div>
+  <div class="panel mt" style="max-width:420px" id="bombSetup">
+    <div class="row">
+      <div class="grow"><div class="label">Premio massimo</div><select id="bombPoints"></select></div>
+      <div><div class="label">O scrivilo</div><input type="number" id="bombPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Penalità se esplode</div><select id="bombPenalty"></select></div>
+      <div><div class="label">O scrivila</div><input type="number" id="bombPenaltyMan" class="ptsManual" placeholder="—" min="0"></div>
+    </div>
+    <div class="label mt">Tempo sul timer</div>
+    <select id="bombDuration">
+      <option value="60">1 minuto</option>
+      <option value="120" selected>2 minuti</option>
+      <option value="180">3 minuti</option>
+      <option value="240">4 minuti</option>
+      <option value="300">5 minuti</option>
+    </select>
+    <button class="btn mg mt" style="width:100%" onclick="bombStart()">💣 INNESCA LA BOMBA!</button>
+  </div>
+  <div id="bombLive" style="display:none; width:100%" class="center">
+    <div class="bombScene">
+      <div class="bombClock" id="bombClockHost"></div>
+      <div class="bombDigital" id="bombDigitalHost">00:00</div>
+    </div>
+    <div class="byline" id="bombCount"></div>
+    <div class="lead mt" id="bombResultsLive" style="max-width:500px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="bombBtnAgain" onclick="openBomba()" style="display:none">🔁 Un'altra bomba</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: BOMBA A OROLOGERIA ==================== -->
+<div class="screen" id="scrPjBomba">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">💣 BOMBA A OROLOGERIA</div></div>
+  <div class="bombScene" style="max-width:460px">
+    <div class="bombClock" id="bombClockPj" style="width:220px; height:220px;"></div>
+    <div class="bombDigital" id="bombDigitalPj" style="font-size:34px">00:00</div>
+  </div>
+  <div class="lead mt" id="pjBombResults" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: BOMBA A OROLOGERIA ==================== -->
+<div class="screen" id="scrPlayBomba" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="bombpName" style="color:var(--gold)"></div>
+    <div class="pill" id="bombpScore"></div>
+  </div>
+  <div class="bombScene">
+    <div class="bombClock" id="bombClockPl"></div>
+    <div class="bombDigital" id="bombDigitalPl">00:00</div>
+    <div class="bombWiresBox" id="bombWiresBox"></div>
+  </div>
+  <div class="bombStatus" id="bombpStatus">✂️ TAGLIA IL FILO GIUSTO!</div>
+</div>
+<div class="bombBoomFlash" id="bombBoomFlash"><div class="txt">💥 BOOM! 💥</div></div>
+
 <!-- ==================== HOST: SEI TROPPO FISCALE! ==================== -->
 <div class="screen" id="scrTFiscale">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">💶 SEI TROPPO FISCALE!</div></div>
@@ -3023,7 +3112,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 122; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 123; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -4177,6 +4266,7 @@ function listenGame(){
     else if (g.status==='supertris') showPlayerSupertris(g);
     else if (g.status==='rdc') showPlayerRdc(g);
     else if (g.status==='mastermind') showPlayerMastermind(g);
+    else if (g.status==='bomba') showPlayerBomba(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -5095,6 +5185,102 @@ function mmSubmit(){
   P.mmSeq = [null,null,null,null];
   mmRenderSlots($('mmPlaySlots'), P.mmSeq);
   $('mmBtnConfirm').disabled=true;
+}
+/* ================================================================
+   BOMBA A OROLOGERIA — motore condiviso (host/proiettore/telefono)
+================================================================ */
+const BOMB_WIRE_COLORS = [
+  {id:0, hex:'#e74c3c'}, {id:1, hex:'#3498db'}, {id:2, hex:'#f1c40f'}, {id:3, hex:'#2ecc71'},
+  {id:4, hex:'#9b59b6'}, {id:5, hex:'#e67e22'}, {id:6, hex:'#ecf0f1'}, {id:7, hex:'#34495e'}
+];
+function bombRenderClock(el, elapsedMs, totalMs){
+  if (!el._built){
+    el._built = true;
+    el.innerHTML = Array.from({length:12},(_,i)=>`<div class="tick" style="transform:rotate(${i*30}deg)"></div>`).join('') +
+      `<div class="bombHand" id="${el.id}_hand"></div><div class="bombCenter"></div>`;
+  }
+  const frac = Math.max(0, Math.min(1, elapsedMs/totalMs));
+  const hand = document.getElementById(el.id+'_hand');
+  if (hand) hand.style.transform = `rotate(${frac*360}deg)`;
+}
+function bombFormatTime(ms){
+  const s = Math.max(0, Math.ceil(ms/1000));
+  const m = Math.floor(s/60), r = s%60;
+  return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+}
+function bombRenderWires(el, cutIdxs, clickable){
+  el.innerHTML = BOMB_WIRE_COLORS.map((c,i)=>`
+    <div class="bombWireRow${cutIdxs.includes(i)?' cut':''}" id="${el.id}_w${i}" data-i="${i}" ${clickable&&!cutIdxs.includes(i)?`onclick="bombCutWire(${i})"`:''}>
+      <span class="bombScissor">✂️</span>
+      <div class="bombWireLine" style="background:${c.hex}; color:${c.hex}"></div>
+    </div>`).join('');
+}
+/* ================================================================
+   BOMBA A OROLOGERIA — telefono
+================================================================ */
+function showPlayerBomba(g){
+  const m = g.bomba||{};
+  $('bombpName').textContent = P.name;
+  $('bombpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayBomba');
+  if (m.phase==='active'){
+    const sig = 'act:'+m.roundId;
+    if (P.bombSig !== sig){
+      P.bombSig = sig; P.bombResolved = false; P.bombCutWrong = 0; P.bombCutSet = [];
+      P.bombStartAt = serverNow();
+      P.bombSafeWire = Math.floor(Math.random()*8); // il MIO filo giusto, indipendente da tutti gli altri giocatori
+      $('bombpStatus').className='bombStatus'; $('bombpStatus').textContent = '✂️ TAGLIA IL FILO GIUSTO!';
+      $('bombClockPl')._built=false;
+      bombRenderWires($('bombWiresBox'), [], true);
+      clearInterval(P.bombInt);
+      P.bombInt = setInterval(()=>{
+        const now = serverNow();
+        const elapsed = m.durationMs - (m.endAt-now);
+        bombRenderClock($('bombClockPl'), elapsed, m.durationMs);
+        $('bombDigitalPl').textContent = bombFormatTime(m.endAt-now);
+        if (now>=m.endAt){
+          clearInterval(P.bombInt);
+          if (!P.bombResolved){
+            P.bombResolved = true;
+            document.querySelectorAll('#bombWiresBox .bombWireRow').forEach(el=>el.onclick=null);
+            $('bombpStatus').textContent = '⏱ TEMPO SCADUTO! NON HAI FATTO IN TEMPO...';
+          }
+        }
+      }, 150);
+    }
+  }
+}
+function bombCutWire(i){
+  if (P.bombResolved) return;
+  P.bombCutSet.push(i);
+  const row = document.getElementById('bombWiresBox_w'+i);
+  if (row){ row.classList.add('cut'); row.onclick=null; }
+  if (navigator.vibrate) navigator.vibrate(35);
+
+  if (i === P.bombSafeWire){
+    P.bombResolved = true;
+    clearInterval(P.bombInt);
+    const t = Math.max(0, serverNow() - P.bombStartAt);
+    P.ref.child('bomba/results/'+P.id).set({ won:true, t, cuts:P.bombCutSet.length });
+    $('bombpStatus').className='bombStatus safe'; $('bombpStatus').textContent = '✅ FILO GIUSTO! BOMBA DISINNESCATA!';
+    confetti();
+    if (navigator.vibrate) navigator.vibrate([80,50,150]);
+    return;
+  }
+  P.bombCutWrong++;
+  const risk = Math.min(0.10 + (P.bombCutWrong-1)*0.12, 0.85);
+  if (Math.random() < risk){
+    P.bombResolved = true;
+    clearInterval(P.bombInt);
+    document.querySelectorAll('#bombWiresBox .bombWireRow').forEach(el=>el.onclick=null);
+    P.ref.child('bomba/results/'+P.id).set({ won:false, t:0, cuts:P.bombCutSet.length });
+    $('bombBoomFlash').style.display='flex';
+    setTimeout(()=>{ $('bombBoomFlash').style.display='none'; }, 1200);
+    $('bombpStatus').className='bombStatus boom'; $('bombpStatus').textContent = '💥 BOOM! LA BOMBA È ESPLOSA...';
+    if (navigator.vibrate) navigator.vibrate([150,80,150,80,300]);
+  } else {
+    $('bombpStatus').textContent = `😅 SCAMPATO PER POCO... ${8-P.bombCutSet.length} fili rimasti`;
+  }
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -8967,6 +9153,81 @@ function mmClose(){
 }
 
 /* ================================================================
+   BOMBA A OROLOGERIA — regia
+   (gioco individuale: ogni telefono ha il proprio filo giusto, il proiettore mostra solo il timer comune)
+================================================================ */
+function openBomba(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((BOMB||{}).timerInt);
+  G.ref.child('bomba/results').off();
+  G.ref.update({ status:'bomba', bomba:{ phase:'idle' } });
+  $('bombSetup').style.display='block'; $('bombLive').style.display='none';
+  if (!$('bombPoints').innerHTML){
+    $('bombPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===7?'selected':''}>${(k+1)*100} punti</option>`).join('');
+    $('bombPenalty').innerHTML = Array.from({length:10},(_,k)=>`<option value="${(k+1)*50}" ${k===3?'selected':''}>${(k+1)*50} punti</option>`).join('');
+  }
+  $('bombClockHost')._built=false;
+  bombRenderClock($('bombClockHost'), 0, 60000);
+  pjSend({type:'bombState'});
+  showScreen('scrBomba');
+}
+let BOMB = {};
+function bombStart(){
+  const points = getPoints('bombPoints','bombPointsMan');
+  const penalty = getPoints('bombPenalty','bombPenaltyMan');
+  const durationSec = +($('bombDuration').value||120);
+  const durationMs = durationSec*1000;
+  const endAt = serverNow()+durationMs;
+  const roundId = serverNow();
+  BOMB = { points, penalty, durationMs, credited:{} };
+  G.ref.update({ status:'bomba', bomba:{ phase:'active', points, penalty, endAt, durationMs, roundId } });
+  G.ref.child('bomba/results').remove();
+  $('bombSetup').style.display='none'; $('bombLive').style.display='block';
+  $('bombCount').textContent=''; $('bombResultsLive').innerHTML=''; $('bombBtnAgain').style.display='none';
+  pjSend({type:'bombActive', endAt, durationMs});
+  $('bombClockHost')._built=false;
+  clearInterval(BOMB.timerInt);
+  BOMB.timerInt = setInterval(()=>{
+    const now = serverNow();
+    const elapsed = durationMs - (endAt-now);
+    bombRenderClock($('bombClockHost'), elapsed, durationMs);
+    $('bombDigitalHost').textContent = bombFormatTime(endAt-now);
+    if (now>=endAt) clearInterval(BOMB.timerInt);
+  }, 200);
+  // ogni giocatore risolve per conto suo: accredito i punti appena arriva un nuovo risultato
+  G.ref.child('bomba/results').on('child_added', snap=>{
+    const pid = snap.key, r = snap.val();
+    if (!r || BOMB.credited[pid]) return;
+    BOMB.credited[pid] = true;
+    G.ref.child('players/'+pid).once('value').then(ps=>{
+      const p = ps.val(); if (!p) return;
+      let pts = 0;
+      if (r.won){
+        const frac = Math.max(0, 1 - r.t/durationMs);
+        pts = Math.round(points*frac/10)*10;
+        G.ref.child('players/'+pid+'/score').set(Math.max(0,(p.score||0)+pts));
+      } else {
+        pts = -penalty;
+        G.ref.child('players/'+pid+'/score').set(Math.max(0,(p.score||0)-penalty));
+      }
+      G.ref.child('bomba/results/'+pid+'/pts').set(pts);
+    });
+  });
+  G.ref.child('bomba/results').on('value', s=>{
+    const results = s.val()||{};
+    const entries = Object.entries(results);
+    $('bombCount').textContent = `Risultati arrivati: ${entries.length}`;
+    if (entries.length>0) $('bombBtnAgain').style.display='';
+    G.ref.child('players').once('value').then(ps=>{
+      const pl = ps.val()||{};
+      $('bombResultsLive').innerHTML = entries.map(([pid,r])=>
+        `<div class="leadRow"><span class="pos">${r.won?'✅':'💥'}</span> ${esc((pl[pid]||{}).name||'?')} <span class="pts">${r.pts!=null ? (r.pts>0?'+'+r.pts:r.pts) : '…'}</span></div>`).join('')
+        || '<div class="byline">Nessun risultato ancora...</div>';
+    });
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -9315,6 +9576,7 @@ function modalGames(){
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#2d8a4e,#0d4020); color:#ffe042; box-shadow:0 7px 0 #072410,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(13,64,32,.4)" onclick="openSupertris()">🎰 SUPERTRIS</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5a3d8a,#2e1a5a); color:#fff; box-shadow:0 7px 0 #180e30,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,26,90,.4)" onclick="openRdc()">🧮 La Resa dei Conti</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a4a4a,#222); color:#fff; box-shadow:0 7px 0 #0a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4)" onclick="openMastermind()">🎯 Mastermind</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a2020,#4a1010); color:#fff; box-shadow:0 7px 0 #2a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,32,32,.4)" onclick="openBomba()">💣 Bomba a Orologeria</button>
     </div>`);
 }
 function modalModules(){
@@ -9776,6 +10038,7 @@ function backToQuiz(title){
   G.ref.child('supertris/results').off();
   G.ref.child('rdc/answers').off();
   G.ref.child('mastermind/pendingAttempts').off();
+  G.ref.child('bomba/results').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -9785,7 +10048,8 @@ function backToQuiz(title){
   clearInterval((PAG||{}).timerInt);
   clearInterval((RDC||{}).timerInt);
   clearInterval((MM||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null });
+  clearInterval((BOMB||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -10623,6 +10887,27 @@ function pjRoute(m){
         `<div class="leadRow"><span class="pos">🎯</span> ${esc(r.name)} <span class="pts">+${r.pts}</span></div>`).join('')
         : '<div class="byline">Nessuno ha risolto la sequenza in tempo!</div>');
       confetti();
+    }
+    else if (m.type==='bombState') {
+      showScreen('scrPjBomba');
+      clearInterval(window._pjBombInt);
+      $('bombClockPj')._built=false;
+      bombRenderClock($('bombClockPj'), 0, 60000);
+      $('bombDigitalPj').textContent='00:00';
+      $('pjBombResults').innerHTML='';
+    }
+    else if (m.type==='bombActive') {
+      showScreen('scrPjBomba');
+      $('bombClockPj')._built=false;
+      $('pjBombResults').innerHTML='';
+      clearInterval(window._pjBombInt);
+      window._pjBombInt = setInterval(()=>{
+        const now = serverNow();
+        const elapsed = m.durationMs - (m.endAt-now);
+        bombRenderClock($('bombClockPj'), elapsed, m.durationMs);
+        $('bombDigitalPj').textContent = bombFormatTime(m.endAt-now);
+        if (now>=m.endAt) clearInterval(window._pjBombInt);
+      }, 200);
     }
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
