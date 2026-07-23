@@ -1033,7 +1033,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.15</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.16</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -5612,28 +5612,39 @@ function showPlayerShapes(g){
     }
   }
 }
+function shapeAmplitudeForAxis(dirX, dirY, maxX, maxY, cx, cy){
+  // trovo la distanza massima percorribile dal centro lungo questa direzione, restando dentro l'arena
+  let t = Infinity;
+  if (dirX > 0) t = Math.min(t, (maxX-cx)/dirX);
+  if (dirX < 0) t = Math.min(t, (0-cx)/dirX);
+  if (dirY > 0) t = Math.min(t, (maxY-cy)/dirY);
+  if (dirY < 0) t = Math.min(t, (0-cy)/dirY);
+  return t;
+}
 function shapeStartMovement(arena, moverEl, speed){
   const rect = arena.getBoundingClientRect();
   const sizePx = moverEl.getBoundingClientRect().width;
   const maxX = rect.width - sizePx, maxY = rect.height - sizePx;
-  let x = Math.random()*maxX, y = Math.random()*maxY;
-  const ang = Math.random()*Math.PI*2;
-  let vx = Math.cos(ang)*speed, vy = Math.sin(ang)*speed;
-  let lastT = performance.now();
+  const cx = maxX/2, cy = maxY/2; // il centro esatto: qui sta il bersaglio, l'oscillazione deve passarci sempre in mezzo
+  // scelgo a caso uno tra 4 assi: orizzontale, verticale, o una delle due diagonali — così ogni round è un po' diverso
+  const axes = [ [1,0], [0,1], [Math.SQRT1_2,Math.SQRT1_2], [Math.SQRT1_2,-Math.SQRT1_2] ];
+  const [dirX, dirY] = axes[Math.floor(Math.random()*axes.length)];
+  const amplitude = shapeAmplitudeForAxis(dirX, dirY, maxX, maxY, cx, cy) * 0.94; // un margine, così non tocca mai il bordo esatto
+  const angularSpeed = speed / 60; // determina DIRETTAMENTE quanto spesso attraversa il centro (non dipende più dall'ampiezza, che lo rendeva troppo lento)
+  const startT = performance.now();
   P.shapeMoving = true;
   P.shapeArenaSize = { w:rect.width, h:rect.height, sizePx };
   const frame = (t)=>{
     if (!P.shapeMoving) return;
-    const dt = Math.min(0.05, (t-lastT)/1000); lastT = t;
-    x += vx*dt; y += vy*dt;
-    if (x<0){ x=0; vx=-vx; } if (x>maxX){ x=maxX; vx=-vx; }
-    if (y<0){ y=0; vy=-vy; } if (y>maxY){ y=maxY; vy=-vy; }
+    const elapsed = (t-startT)/1000;
+    const offset = amplitude * Math.sin(elapsed*angularSpeed);
+    const x = cx + offset*dirX, y = cy + offset*dirY;
     moverEl.style.transform = `translate(${x}px, ${y}px)`;
     P.shapeGetPos = ()=>({ x:x+sizePx/2, y:y+sizePx/2 });
     P.shapeReq = requestAnimationFrame(frame);
   };
   P.shapeReq = requestAnimationFrame(frame);
-  P.shapeGetPos = ()=>({ x:x+sizePx/2, y:y+sizePx/2 });
+  P.shapeGetPos = ()=>({ x:cx+sizePx/2, y:cy+sizePx/2 });
 }
 function shapeStop(){
   if (P.shapeResolved || !P.shapeMoving) return;
@@ -11425,12 +11436,14 @@ function pjRoute(m){
       const rect = arena.getBoundingClientRect();
       const sizePx = moverEl.getBoundingClientRect().width;
       const maxX = rect.width-sizePx, maxY = rect.height-sizePx;
-      let x=Math.random()*maxX, y=Math.random()*maxY, a=Math.random()*Math.PI*2, vx=Math.cos(a)*90, vy=Math.sin(a)*90, lastT=performance.now();
+      const cx=maxX/2, cy=maxY/2;
+      const axesPj = [ [1,0], [0,1], [Math.SQRT1_2,Math.SQRT1_2], [Math.SQRT1_2,-Math.SQRT1_2] ];
+      const [dX,dY] = axesPj[Math.floor(Math.random()*axesPj.length)];
+      const amp = shapeAmplitudeForAxis(dX,dY,maxX,maxY,cx,cy) * 0.94;
+      const angSpeed = 120/60, startTpj = performance.now();
       const frame=(t)=>{
-        const dt=Math.min(0.05,(t-lastT)/1000); lastT=t;
-        x+=vx*dt; y+=vy*dt;
-        if(x<0){x=0;vx=-vx;} if(x>maxX){x=maxX;vx=-vx;} if(y<0){y=0;vy=-vy;} if(y>maxY){y=maxY;vy=-vy;}
-        moverEl.style.transform=`translate(${x}px,${y}px)`;
+        const off = amp*Math.sin(((t-startTpj)/1000)*angSpeed);
+        moverEl.style.transform=`translate(${cx+off*dX}px,${cy+off*dY}px)`;
         window._pjShapeReq = requestAnimationFrame(frame);
       };
       window._pjShapeReq = requestAnimationFrame(frame);
