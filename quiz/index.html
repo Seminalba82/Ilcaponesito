@@ -169,18 +169,18 @@ option{background:var(--bg2);}
 .fb-ok{color:var(--lime); text-shadow:0 0 26px rgba(182,255,46,.8),0 5px 0 #3f5e00; animation:pop .4s;}
 .fb-no{color:var(--red); text-shadow:0 0 26px rgba(255,59,59,.8),0 5px 0 #5e0000; animation:shake .4s;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
-.podio{display:flex; align-items:flex-end; gap:12px; justify-content:center; margin-top:30px; width:100%; max-width:600px;}
-.podStep{flex:1; border-radius:18px 18px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:14px;
+.podio{display:flex; align-items:flex-end; gap:clamp(10px,2vw,26px); justify-content:center; margin-top:30px; width:100%; max-width:1000px;}
+.podStep{flex:1; border-radius:18px 18px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:clamp(10px,1.6vh,22px);
   opacity:0; transform:translateY(90px) scale(.55); transition:opacity .55s, transform .55s cubic-bezier(.25,1.6,.45,1);}
 .podStep.show{opacity:1; transform:translateY(0) scale(1);}
 .podHiddenLead{opacity:0; transition:opacity .8s;}
 .podHiddenLead.show{opacity:1;}
-.podStep .nm{font-weight:900; font-size:16px; padding:0 6px; text-align:center; word-break:break-word;}
-.podStep .sc{font-family:'Bungee'; font-size:15px; margin-top:4px;}
-.pod1{height:220px; background:linear-gradient(180deg,var(--gold),#8a5f00); box-shadow:0 0 34px rgba(255,201,60,.7);}
-.pod2{height:160px; background:linear-gradient(180deg,#e8e8f5,#7a7a90); color:#111; box-shadow:0 0 24px rgba(230,230,245,.5);}
-.pod3{height:120px; background:linear-gradient(180deg,#ff9c5b,#8a4300); box-shadow:0 0 24px rgba(255,156,91,.5);}
-.crown{font-size:34px; margin-top:-40px; animation:float 2s ease-in-out infinite;}
+.podStep .nm{font-weight:900; font-size:clamp(16px,3.1vw,40px); padding:0 10px; text-align:center; word-break:break-word;}
+.podStep .sc{font-family:'Bungee'; font-size:clamp(15px,2.7vw,34px); margin-top:6px;}
+.pod1{height:clamp(200px,38vh,480px); background:linear-gradient(180deg,var(--gold),#8a5f00); box-shadow:0 0 34px rgba(255,201,60,.7);}
+.pod2{height:clamp(150px,29vh,380px); background:linear-gradient(180deg,#e8e8f5,#7a7a90); color:#111; box-shadow:0 0 24px rgba(230,230,245,.5);}
+.pod3{height:clamp(110px,22vh,300px); background:linear-gradient(180deg,#ff9c5b,#8a4300); box-shadow:0 0 24px rgba(255,156,91,.5);}
+.crown{font-size:clamp(36px,5.6vw,72px); margin-top:-46px; animation:float 2s ease-in-out infinite;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .warn{background:rgba(255,59,59,.12); border:2px solid var(--red); border-radius:14px; padding:14px; font-weight:700; font-size:14px; color:#ffb3b3;}
 .openAnsRow{display:flex; gap:10px; align-items:center; background:rgba(0,0,0,.4); border:1px solid rgba(157,77,255,.3); border-radius:12px; padding:10px 14px; margin-top:8px; font-weight:700;}
@@ -1015,9 +1015,17 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.5</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.10</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
+  </div>
+  <div id="resumeBanner" class="warn mtb" style="display:none; max-width:640px; background:rgba(182,242,46,.12); border-color:var(--lime)">
+    <div style="font-weight:900; color:var(--lime)">🔌 Hai una partita interrotta: "<span id="resumeTitle"></span>"</div>
+    <div class="byline" style="margin-top:6px; letter-spacing:0; text-transform:none">Punteggi e stato sono ancora salvati su Firebase. La riprendi esattamente da dove eri rimasto.</div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn lm" onclick="resumeGame()">▶ Riprendi partita</button>
+      <button class="btn ghost" onclick="dismissResumeBanner()">Ignora, inizia da capo</button>
+    </div>
   </div>
   <div class="row mtb" style="justify-content:center">
     <button class="btn mg" onclick="newQuiz()">✚ Crea nuovo quiz</button>
@@ -1311,6 +1319,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <button class="hb" onclick="openProjector()">📺 Apri proiettore</button>
   <button class="hb" id="hbPreview" onclick="togglePreview()">👁 Anteprima proiettore</button>
   <button class="hb" id="hbQr" onclick="toggleQrOverlay()">📱 QR sul proiettore</button>
+  <button class="hb" onclick="modalEntryLink()">🔗 Link ingresso</button>
   <button class="hb" onclick="openInterimPodium()">🏆 Podio</button>
   <button class="hb" onclick="btnEndQuiz()">🏁 Termina quiz</button>
   </div>
@@ -1953,6 +1962,7 @@ body.suspense-on #pfRank{ display:none !important; }
   </div>
   <div id="anaLive" style="display:none; width:100%" class="center">
     <div class="anaClue" id="anaClueHost"></div>
+    <div id="anaMedia"></div>
     <div class="qBoxes" id="anaScrambleHost"></div>
     <div class="timerWrap mt" style="max-width:480px"><div class="timerBar" id="anaTimerBar"></div></div>
     <div class="byline mt" id="anaAnswered">0 risposte</div>
@@ -1972,6 +1982,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrPjAnagram">
   <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🔤➰ ANAGRAMMA</div></div>
   <div class="anaClue" id="pjAnaClue" style="font-size:clamp(20px,3.2vw,34px)"></div>
+  <div id="pjAnaMedia"></div>
   <div class="qBoxes" id="pjAnaScramble" style="transform:scale(1.3); margin-top:26px"></div>
   <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjAnaTimerBar"></div></div>
   <div class="bigQ mt" id="pjAnaAnswer" style="color:var(--lime); display:none"></div>
@@ -1986,6 +1997,7 @@ body.suspense-on #pfRank{ display:none !important; }
   </div>
   <div class="timerWrap mt"><div class="timerBar" id="paTimerBar"></div></div>
   <div class="anaClue mt" id="paClue"></div>
+  <img id="paPhoto" style="display:none; max-width:100%; max-height:180px; border-radius:16px; margin-top:8px; box-shadow:0 8px 20px rgba(0,0,0,.5)">
   <div class="qBoxes" id="paScramble"></div>
   <div class="label center mt">LA TUA RISPOSTA</div>
   <div class="qBoxes" id="paBoxes"></div>
@@ -2022,6 +2034,7 @@ body.suspense-on #pfRank{ display:none !important; }
   </div>
   <div id="wsLive" style="display:none; width:100%" class="center">
     <div class="wsClue" id="wsClueHost"></div>
+    <div id="wsMedia"></div>
     <div class="wsGrid" id="wsGridHost"></div>
     <div class="timerWrap mt" style="max-width:480px"><div class="timerBar" id="wsTimerBar"></div></div>
     <div class="miniMsg" id="wsMsg">🔤 Si cerca dal telefono, passando il dito sulle lettere!</div>
@@ -2037,6 +2050,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrPjWordSearch">
   <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🔤 TROVA LA PAROLA</div></div>
   <div class="wsClue" id="pjWsClue" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div id="pjWsMedia"></div>
   <div class="wsGrid big" id="wsGridPj"></div>
   <div class="timerWrap mt" style="max-width:700px"><div class="timerBar" id="pjWsTimerBar"></div></div>
   <div class="miniMsg" id="pjWsMsg">🔤 CERCATELA DAL TELEFONO — ORIZZONTALE, VERTICALE O DIAGONALE!</div>
@@ -2051,6 +2065,7 @@ body.suspense-on #pfRank{ display:none !important; }
   </div>
   <div class="timerWrap mt"><div class="timerBar" id="pwsTimerBar"></div></div>
   <div class="wsClue mt" id="pwsClue"></div>
+  <img id="pwsPhoto" style="display:none; max-width:100%; max-height:180px; border-radius:16px; margin-top:8px; box-shadow:0 8px 20px rgba(0,0,0,.5)">
   <div class="wsGrid" id="wsGridPl"></div>
   <div class="wsBanner mt" id="pwsBanner"></div>
   <div class="lead mt" id="pwsRanking" style="width:100%; max-width:380px"></div>
@@ -3090,7 +3105,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <!-- ==================== PROIETTORE: PODIO ==================== -->
 <div class="screen" id="scrPjPodium">
   <div class="brand"><div class="t1">🏆 PODIO FINALE</div></div>
-  <div class="podio" id="pjPodium" style="max-width:760px"></div>
+  <div class="podio" id="pjPodium" style="max-width:1100px"></div>
   <div class="lead mtb" style="max-width:700px"><div id="pjPodLead"></div></div>
 </div>
 
@@ -3113,7 +3128,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 125; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 130; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3305,6 +3320,28 @@ function toggleQrOverlay(){
   if (bc) bc.postMessage({type:'qrOverlay', on:qrOverlayOn, url:G.url});
   G.ref.child('projQr').set({on:qrOverlayOn, url:G.url});
 }
+/* Link diretto di ingresso, in alternativa al QR — utile per chi segue da casa/social e non può
+   inquadrare nulla con la fotocamera: stessa pagina di ingresso (nome + entra), solo un altro modo di arrivarci. */
+function modalEntryLink(){
+  if (!G || !G.url) return alert('Avvia prima una partita!');
+  openModal('🔗 LINK DIRETTO DI INGRESSO', `
+    <div class="label" style="text-transform:none; letter-spacing:0">Utile per chi non è fisicamente in sala e non può inquadrare il QR — condividilo su WhatsApp, Instagram, Facebook... porta alla stessa pagina di ingresso (nome + entra).</div>
+    <input type="text" id="entryLinkBox" value="${G.url}" readonly onclick="this.select()" style="margin-top:10px">
+    <div class="row mt">
+      <button class="btn cy grow" onclick="copyEntryLink(this)">📋 Copia link</button>
+      <button class="btn mg grow" onclick="shareEntryLinkWa()">📱 Condividi su WhatsApp</button>
+    </div>`);
+}
+function copyEntryLink(btn){
+  if (!G || !G.url) return;
+  navigator.clipboard && navigator.clipboard.writeText(G.url);
+  if (btn){ btn.textContent = '✔ Copiato!'; setTimeout(()=>{ btn.textContent = '📋 Copia link'; }, 1800); }
+}
+function shareEntryLinkWa(){
+  if (!G || !G.url) return;
+  const msg = `🎩 Unisciti al quiz "${G.quiz.title}"! Entra da qui: ${G.url}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
 function togglePreview(){
   const p = $('projPreview'), on = !p.classList.contains('on');
   p.classList.toggle('on', on); $('hbPreview').classList.toggle('on', on);
@@ -3360,7 +3397,7 @@ if (bc) bc.onmessage = e=>{ if (e.data && e.data.type==='hello' && lastPjMsg){ p
 /* ================================================================
    MODALE + CLASSIFICHE + PUNTI MANUALI
 ================================================================ */
-function openModal(title, html){ $('modalTitle').textContent = title; $('modalBody').innerHTML = html; $('modal').classList.add('on'); }
+function openModal(title, html){ $('modalTitle').textContent = title; $('modalBody').innerHTML = html; $('modal').classList.add('on'); $('modalCard').scrollTop = 0; }
 function closeModal(){ $('modal').classList.remove('on'); }
 
 function modalFastest(){
@@ -3846,10 +3883,11 @@ function playQuiz(i){
   const quiz = JSON.parse(JSON.stringify(quizzes[i]));
   const code = randCode();
   G = { code, quiz, qi:-1, played:new Set(), ref: db.ref('caponequiz/games/'+code) };
-  try{ localStorage.setItem('capone_last_game', code); }catch(e){}
+  try{ localStorage.setItem('capone_last_game', code); localStorage.setItem('capone_last_quiz_idx', i); }catch(e){}
   suspenseMode = false; $('hbSuspense').classList.remove('on');
   G.ref.set({ status:'lobby', title:quiz.title, created:Date.now(), ver:APP_V, suspense:false });
-  G.ref.onDisconnect().remove();
+  // NIENTE PIÙ onDisconnect().remove(): se salta la corrente o cade la connessione, la partita
+  // (punteggi, domanda a cui eravamo arrivati) resta salvata su Firebase finché non premi "Termina quiz".
   $('lobbyQuizName').textContent = quiz.title;
   $('lobbyCode').textContent = code;
   const url = location.origin + location.pathname + '?g=' + code;
@@ -3867,6 +3905,57 @@ function playQuiz(i){
   if (window.innerWidth < 700) { $('hostBar').classList.add('collapsed'); document.body.classList.add('barCollapsed'); $('hbToggle').textContent='🎛 REGIA ▴'; }
   pjSend({type:'lobby', title:quiz.title, code, url, names:[]});
   showScreen('scrLobby');
+}
+/* ================================================================
+   RIPRESA DI UNA PARTITA INTERROTTA (mancanza di corrente, crash, tab chiusa per sbaglio...)
+   I dati restano su Firebase finché non premi "Termina quiz": qui li ritroviamo e li riattacchiamo.
+================================================================ */
+function checkResumableGame(){
+  let code, qIdx;
+  try{ code = localStorage.getItem('capone_last_game'); qIdx = localStorage.getItem('capone_last_quiz_idx'); }catch(e){ return; }
+  if (!code || qIdx==null || !fbOK) return;
+  qIdx = +qIdx;
+  if (!quizzes[qIdx]) return; // il quiz non esiste più in lista, non posso ricostruirlo
+  db.ref('caponequiz/games/'+code).once('value').then(s=>{
+    const data = s.val();
+    if (!data || data.status==='end') return; // partita già conclusa o non più presente: niente da riprendere
+    if (data.created && (Date.now()-data.created) > 12*3600*1000) return; // troppo vecchia (oltre 12 ore), ignoro
+    window._resumeCode = code; window._resumeQIdx = qIdx;
+    $('resumeTitle').textContent = data.title || quizzes[qIdx].title;
+    $('resumeBanner').style.display = 'block';
+  }).catch(()=>{});
+}
+function dismissResumeBanner(){
+  $('resumeBanner').style.display = 'none';
+  try{ localStorage.removeItem('capone_last_game'); localStorage.removeItem('capone_last_quiz_idx'); }catch(e){}
+}
+function resumeGame(){
+  const code = window._resumeCode, qIdx = window._resumeQIdx;
+  if (!code || qIdx==null) return;
+  $('resumeBanner').style.display = 'none';
+  const quiz = JSON.parse(JSON.stringify(quizzes[qIdx]));
+  G = { code, quiz, qi:-1, played:new Set(), ref: db.ref('caponequiz/games/'+code) };
+  G.ref.once('value').then(s=>{
+    const data = s.val()||{};
+    // ricostruisco a che domanda eravamo arrivati leggendo lo stato salvato su Firebase
+    G.qi = (data.current && data.current.i!=null) ? data.current.i : -1;
+    for (let k=0; k<=G.qi; k++) G.played.add(k);
+    suspenseMode = !!data.suspense; $('hbSuspense').classList.toggle('on', suspenseMode);
+    const url = location.origin + location.pathname + '?g=' + code;
+    G.url = url;
+    $('lobbyQuizName').textContent = quiz.title; $('lobbyCode').textContent = code;
+    $('qrBox').innerHTML=''; new QRCode($('qrBox'), { text:url, width:210, height:210, colorDark:'#0b0614' });
+    G.ref.child('players').on('value', s2=>{
+      const p = s2.val()||{}; const arr = Object.values(p);
+      $('lobbyCount').textContent = arr.length;
+      $('lobbyPlayers').innerHTML = arr.map(x=>`<div class="pChip">${esc(x.name)}</div>`).join('');
+    });
+    $('hostBar').classList.add('on'); document.body.classList.add('barOn');
+    if (window.innerWidth < 700) { $('hostBar').classList.add('collapsed'); document.body.classList.add('barCollapsed'); $('hbToggle').textContent='🎛 REGIA ▴'; }
+    pjSend({type:'lobby', title:quiz.title, code, url, names:Object.values(data.players||{}).map(x=>x.name)});
+    // rimetto tutti (regia compresa) a un punto sicuro e noto: la pausa del quiz, pronta per continuare
+    backToQuiz('PARTITA RIPRESA! Prosegui da qui.');
+  });
 }
 function toggleHostBar(){
   const c = $('hostBar').classList.toggle('collapsed');
@@ -3891,6 +3980,7 @@ function nextQuestion(){
   if (leadOv.on) sendLeadOverlay({on:false});
   if (msgOv.on) sendPjMsg(false);
   if (photoOv.on) sendPjPhoto(false);
+  if (qrOverlayOn) toggleQrOverlay();
   if (q.type==='wordsearch') { playWsQuestion(q); return; }
   if (q.type==='anagram') { playAnagramQuestion(q); return; }
   // scrive su DB solo ciò che serve ai telefoni (niente media, niente testo domanda)
@@ -3907,7 +3997,7 @@ function nextQuestion(){
   });
   // la FOTO viaggia per conto suo, in un ramo separato: non è annidata dentro "current" (che resta leggero)
   // così non viene ritrasmessa ad ogni piccola variazione (es. una risposta di un giocatore), niente lag
-  if (q.media && q.media.kind==='photo' && q.media.data) G.ref.child('currentPhoto').set({ i:G.qi, data:q.media.data });
+  if (q.media && q.media.kind==='photo' && q.media.data) G.ref.child('currentPhoto').set({ key:G.qi, data:q.media.data });
   else G.ref.child('currentPhoto').remove();
   G.ref.child('answers/'+G.qi).remove();
   // schermo host
@@ -3955,6 +4045,10 @@ function cancelLiveQuestion(){
   const au = $('hqAudio'); if (au) au.pause();
   if (G.qi >= 0) G.ref.child('answers/'+G.qi).off();
   G.closed = true;
+  if (leadOv.on) sendLeadOverlay({on:false});
+  if (msgOv.on) sendPjMsg(false);
+  if (photoOv.on) sendPjPhoto(false);
+  if (qrOverlayOn) toggleQrOverlay();
 }
 function modalQuestions(){
   if (!G) return;
@@ -4000,6 +4094,7 @@ function closeQuestion(){
       const keyOk = corrects.slice().sort((x,y)=>x-y).join(',');
       const penW = q.penWrong||0, penN = q.penNone||0;
       const stats = q.type==='mult' ? { counts: q.opts.map(()=>0), tot: 0 } : null;
+      const scorePromises = [];
       for (const pid in ans) {
         const a = ans[pid]; let ok = false;
         if (q.type==='mult') {
@@ -4010,20 +4105,28 @@ function closeQuestion(){
         else ok = accepted.includes(norm(a.a));
         const pts = ok ? calcPts(q, a.t) : -penW;
         results[pid] = { ok, pts, a:a.a, t:a.t };
-        if (players[pid]) players[pid].score = Math.max(0, (players[pid].score||0)+pts);
+        if (players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
         if (!ok && q.type==='open' && players[pid]) pending.push({pid, name:players[pid].name, a:a.a, t:a.t});
       }
       if (penN > 0) for (const pid in players) if (!ans[pid]) {
         results[pid] = { ok:false, pts:-penN, none:true };
-        players[pid].score = Math.max(0, (players[pid].score||0)-penN);
+        scorePromises.push(applyScoreDelta(pid, -penN));
       }
       const correctText = q.type==='mult' ? corrects.map(i=>q.opts[i]).filter(Boolean).join(' + ') : (q.accepted.split(',')[0]||'').trim();
-      const updates = { status:'reveal', reveal:{ i:G.qi, correct: q.type==='mult'?corrects[0]:null, corrects: q.type==='mult'?corrects:null, correctText, results, stats, opts: q.type==='mult'?q.opts:null } };
-      for (const pid in players) updates['players/'+pid+'/score'] = players[pid].score||0;
-      G.ref.update(updates);
-      showReveal(q, correctText, players, pending, results, stats);
+      Promise.all(scorePromises).then(()=>{
+        G.ref.update({ status:'reveal', reveal:{ i:G.qi, correct: q.type==='mult'?corrects[0]:null, corrects: q.type==='mult'?corrects:null, correctText, results, stats, opts: q.type==='mult'?q.opts:null } });
+        showReveal(q, correctText, players, pending, results, stats);
+      });
     });
   });
+}
+/* Applica in modo ATOMICO un incremento (o decremento) al punteggio di un giocatore.
+   A differenza di "leggi il punteggio, calcola, scrivi il nuovo totale", una transazione Firebase
+   è al sicuro anche se un altro aggiornamento concorrente (un'altra domanda, un minigioco, una rete lenta)
+   tocca lo stesso punteggio nello stesso istante: non si "perdono" mai punti per una scrittura in corsa. */
+function applyScoreDelta(pid, delta){
+  if (!pid || !delta) return Promise.resolve();
+  return G.ref.child('players/'+pid+'/score').transaction(cur => Math.max(0, (cur||0) + delta));
 }
 function calcPts(q, tMs){
   const frac = Math.max(0, 1 - tMs/(q.timer*1000));
@@ -4257,7 +4360,7 @@ function listenGame(){
     P.ref.child('projLead').on('value', s=> plApplyLead(s.val()||{}));
     P.ref.child('projMsg').on('value', s=> plApplyMsg(s.val()||{}));
     P.ref.child('waGroup').on('value', s=> plApplyWa(s.val()||{}));
-    P.ref.child('currentPhoto').on('value', s=>{ P.lastPhotoData = s.val(); pqRenderPhoto(); });
+    P.ref.child('currentPhoto').on('value', s=>{ P.lastPhotoData = s.val(); pqRenderPhoto('pqPhoto'); pqRenderPhoto('paPhoto'); pqRenderPhoto('pwsPhoto'); });
     P.ref.child('projPhoto').on('value', s=> plApplyPhoto(s.val()||{}));
   }
   P.ref.on('value', s=>{
@@ -4317,19 +4420,19 @@ function listenGame(){
     else if (g.status==='end') showPlayerEnd(g);
   });
 }
-/* Mostra la foto della domanda corrente sul telefono, se presente e se corrisponde alla domanda attiva ora.
-   Chiamata sia dal listener dedicato della foto sia da showPlayerQ: l'ordine di arrivo dei due dati
-   (stato domanda e foto) non è garantito, quindi entrambi i punti richiamano questa stessa funzione. */
-function pqRenderPhoto(){
-  const img = $('pqPhoto'); if (!img) return;
+/* Mostra la foto della domanda/round corrente sul telefono, se presente e se corrisponde al turno attivo ora.
+   "P.activeRoundKey" è una chiave condivisa da domande normali, trova-la-parola e anagramma: ognuna la imposta
+   quando parte un turno nuovo, così la stessa funzione funziona per tutti e tre senza rischiare foto "vecchie". */
+function pqRenderPhoto(elId){
+  const img = $(elId||'pqPhoto'); if (!img) return;
   const v = P.lastPhotoData;
-  if (v && v.data && v.i === P.curI) { img.src = v.data; img.style.display='block'; }
+  if (v && v.data && v.key === P.activeRoundKey) { img.src = v.data; img.style.display='block'; }
   else { img.style.display='none'; img.src=''; }
 }
 function showPlayerQ(cur){
   if (P.curI === cur.i && $('scrPlayQ').classList.contains('active')) return; // già mostrata
   if (P.curI === cur.i && P.answered) return;
-  P.curI = cur.i; P.answered = false; P.t0 = Date.now(); P.dur = cur.timer*1000;
+  P.curI = cur.i; P.activeRoundKey = cur.i; P.answered = false; P.t0 = Date.now(); P.dur = cur.timer*1000;
   $('pqSent').style.display='none';
   const mediaNote = cur.mediaKind==='audio' ? '<small>🎵 Ascolta la musica!</small>' : '';
   $('pqQText').innerHTML = cur.text ? esc(cur.text) + mediaNote : '';
@@ -5356,8 +5459,9 @@ function showPlayerAnagram(g){
   showScreen('scrPlayAnagram');
   if (m.phase==='play'){
     if (P.anaStartAt !== m.startAt){
-      P.anaStartAt = m.startAt; P.anaAnswered = false; P.anaPattern = m.pattern||null;
+      P.anaStartAt = m.startAt; P.activeRoundKey = m.startAt; P.anaAnswered = false; P.anaPattern = m.pattern||null;
       $('paClue').textContent = m.text ? '💡 '+m.text : '';
+      pqRenderPhoto('paPhoto');
       renderBoxes($('paScramble'), anaBuildScramblePattern(m.scramble), m.scramble);
       document.querySelectorAll('#paScramble .qBox').forEach(b=>b.classList.add('scramble'));
       renderBoxes($('paBoxes'), P.anaPattern, '');
@@ -5410,9 +5514,10 @@ function showPlayerWordSearch(g){
   showScreen('scrPlayWordSearch');
   if (m.phase==='play'){
     if (P.wsStartAt !== m.startAt){
-      P.wsStartAt = m.startAt; P.wsEndAt = m.endAt; P.wsDur = m.dur; P.wsGrid = m.grid; P.wsSize = m.size;
+      P.wsStartAt = m.startAt; P.activeRoundKey = m.startAt; P.wsEndAt = m.endAt; P.wsDur = m.dur; P.wsGrid = m.grid; P.wsSize = m.size;
       P.wsWord = m.word; P.wsPoints = m.points; P.wsSolved = false; wsClearSel();
       $('pwsClue').textContent = m.clue ? '💡 '+m.clue : '';
+      pqRenderPhoto('pwsPhoto');
       $('pwsBanner').textContent = '';
       renderWsGrid($('wsGridPl'), m.grid, m.size);
       clearInterval(($('pwsTimerBar')||{})._int);
@@ -6459,15 +6564,16 @@ function wheelsStop(){
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
       const results = {}, updates = { 'wheels/phase':'result', 'wheels/res':resIdx, 'wheels/values':values };
-      const c=[0,0,0];
+      const c=[0,0,0]; const scorePromises=[];
       for (const pid in bets){
         const w = bets[pid];
         if (c[w]!==undefined) c[w]++;
         const val = values[w]||0;
         results[pid] = { w, val };
-        if (val>0 && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + val;
+        if (val>0 && players[pid]) scorePromises.push(applyScoreDelta(pid, val));
       }
       updates['wheels/lastResult'] = { round:WH.round, results, values, at:Date.now() };
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       $('wheelsMsg').textContent = '🎡 LE RUOTE FRENANO...';
       pjSend({type:'wheelsStop', resIdx, values, counts:c, orders:WH.orders});
@@ -6475,6 +6581,7 @@ function wheelsStop(){
         $('wheelsMsg').textContent = `RISULTATI: ${values.map((v,i)=>'R'+(i+1)+'='+v).join(' · ')}`;
         $('wheelsBtnAgain').style.display='';
         confetti();
+      });
       });
     });
   });
@@ -6550,18 +6657,19 @@ function hiloFlip(){
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
       const results = {}, updates = {};
-      const c = {alta:0, bassa:0};
+      const c = {alta:0, bassa:0}; const scorePromises=[];
       for (const pid in bets){
         if (c[bets[pid]]!==undefined) c[bets[pid]]++;
         const ok = bets[pid]===esito;
         const pts = ok ? HILO.points : -(HILO.pen||0);
         results[pid] = { ok, pts, bet:bets[pid] };
-        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
+        if (pts!==0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
       HILO.revealed.push(card);
       updates['hilo/phase'] = 'flip';
       updates['hilo/revealed'] = HILO.revealed;
       updates['hilo/lastResult'] = { round:HILO.round, esito, prevRank:RANKS[prev.r], rank:RANKS[card.r], results, at:Date.now() };
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       renderCardTable($('hiloTableHost'), HILO.revealed);
       $('hiloMsg').textContent = `${RANKS[card.r]}${SUITS[card.s]} → più ${esito.toUpperCase()} del ${RANKS[prev.r]}! +${HILO.points} a chi ha indovinato`;
@@ -6574,6 +6682,7 @@ function hiloFlip(){
         $('hiloMsg').textContent += ' · MANO FINITA! 🃏';
         $('hiloBtnAgain').style.display='';
       }
+      });
     });
   });
 }
@@ -7003,13 +7112,14 @@ function gradReveal(){
     const winners = counts.map((c,i)=>({c,i})).filter(x=>x.c===max && max>0).map(x=>x.i);
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const results = {}, updates = {};
+      const results = {}, updates = {}; const scorePromises=[];
       for (const pid in votesObj){
         const ok = winners.includes(votesObj[pid]);
         const pts = ok ? GRAD.points : 0;
         results[pid] = { ok, pts, vote:votesObj[pid] };
-        if (ok && players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + pts;
+        if (ok && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
+      Promise.all(scorePromises).then(()=>{
       G.ref.update({ ...updates, 'grad/phase':'result', 'grad/results':{ counts, tot, winners, resultsByPid:results } });
       renderGradBars($('gradBarsHost'), opts, counts, tot);
       const order = opts.map((o,i)=>({o,i,c:counts[i]})).sort((a,b)=>b.c-a.c);
@@ -7017,6 +7127,7 @@ function gradReveal(){
       $('gradWinHost').textContent = winners.length ? `👑 ${winners.map(i=>opts[i]).join(', ')}` : '';
       $('gradBtnAgain').style.display='';
       pjSend({type:'gradEnd', opts, counts, tot, winners});
+      });
     });
   });
 }
@@ -7102,18 +7213,19 @@ function seedFlip(){
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
       const results = {}, updates = {};
-      const c=[0,0,0,0];
+      const c=[0,0,0,0]; const scorePromises=[];
       for (const pid in bets){
         if (c[bets[pid]]!==undefined) c[bets[pid]]++;
         const ok = bets[pid]===win;
         const pts = ok ? SEED.points : -(SEED.pen||0);
         results[pid] = { ok, pts, bet:bets[pid] };
-        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
+        if (pts!==0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
       SEED.revealed.push(win);
       updates['seed/phase'] = 'flip';
       updates['seed/revealed'] = SEED.revealed;
       updates['seed/lastResult'] = { round:SEED.round, win, results, at:Date.now() };
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       renderSeedTable($('seedTableHost'), SEED.revealed);
       $('seedMsg').textContent = `IL SEME VINCENTE ERA ${SUITS[win]}! +${SEED.points} a chi l'ha indovinato`;
@@ -7126,6 +7238,7 @@ function seedFlip(){
         $('seedMsg').textContent += ' · MANCHE FINITA! 🃏';
         $('seedBtnAgain').style.display='';
       }
+      });
     });
   });
 }
@@ -7186,14 +7299,15 @@ function swissReveal(){
     const press = prs.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const results = {}, updates = { 'swiss/phase':'result' };
+      const results = {}, updates = { 'swiss/phase':'result' }; const scorePromises=[];
       for (const pid in players){
         const t = press[pid] != null ? press[pid] : null;
         const pts = swissCalcPts(t, SW.points);
         if (t != null) results[pid] = { t, pts };
-        if (pts !== 0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0, (players[pid].score||0) + pts);
+        if (pts !== 0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
       updates['swiss/results'] = results;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       const rows = Object.entries(results).map(([pid,r])=>({name:(players[pid]||{}).name||'?', ...r}))
         .sort((a,b)=> Math.abs(a.t-10000) - Math.abs(b.t-10000));
@@ -7204,6 +7318,7 @@ function swissReveal(){
       $('swissMsg').textContent = rows.length ? `🏆 Il più svizzero: ${rows[0].name} (${(rows[0].t/1000).toFixed(3)}s)` : 'Tutti addormentati! 😴';
       $('swissBtnAgain').style.display='';
       pjSend({type:'swissResult', rows: rows.slice(0,10).map(r=>({name:r.name, t:r.t, pts:r.pts}))});
+      });
     });
   });
 }
@@ -7295,18 +7410,19 @@ function cardsFlip(){
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
       const results = {}, updates = {};
-      const c = {rossa:0, nera:0};
+      const c = {rossa:0, nera:0}; const scorePromises=[];
       for (const pid in bets){
         if (c[bets[pid]]!==undefined) c[bets[pid]]++;
         const ok = bets[pid]===col;
         const pts = ok ? CARDS.points : -(CARDS.pen||0);
         results[pid] = { ok, pts, bet:bets[pid] };
-        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
+        if (pts!==0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
       CARDS.revealed.push(card);
       updates['cards/phase'] = 'flip';
       updates['cards/revealed'] = CARDS.revealed;
       updates['cards/lastResult'] = { round:CARDS.round, col, results, at:Date.now() };
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       renderCardTable($('cardsTableHost'), CARDS.revealed);
       $('cardsMsg').textContent = `CARTA ${CARDS.round+1}: ${RANKS[card.r]}${SUITS[card.s]} → ${col.toUpperCase()}! +${CARDS.points} a chi ha indovinato`;
@@ -7319,6 +7435,7 @@ function cardsFlip(){
         $('cardsMsg').textContent += ' · MANO FINITA! 🎴';
         $('cardsBtnAgain').style.display='';
       }
+      });
     });
   });
 }
@@ -7431,6 +7548,7 @@ function tombolaDraw(){
   G.ref.child('players').once('value').then(ps=>{
     const players = ps.val()||{};
     const updates = { 'tombola/drawn': TOM.drawn };
+    const scorePromises = [];
     for (const [k, need, label] of TOM_LEVELS){
       if (TOM.won[k]) continue;
       const winners = [];
@@ -7447,10 +7565,11 @@ function tombolaDraw(){
         TOM.won[k] = { names, pids:Object.fromEntries(winners.map(w=>[w,1])), pts:p.pts, txt:p.txt };
         updates['tombola/won/'+k] = TOM.won[k];
         updates['tombola/lastWin'] = { level:k, label, names, pids:TOM.won[k].pids, pts:p.pts, txt:p.txt, at:Date.now() };
-        winners.forEach(pid=>{ if (players[pid]) updates['players/'+pid+'/score'] = (players[pid].score||0) + p.pts; players[pid] && (players[pid].score=(players[pid].score||0)+p.pts); });
+        winners.forEach(pid=>{ if (players[pid]) scorePromises.push(applyScoreDelta(pid, p.pts)); });
         newWins.push({ level:k, label, names, pts:p.pts, txt:p.txt });
       }
     }
+    Promise.all(scorePromises).then(()=>{
     G.ref.update(updates);
     // schermo host
     $('tomLastNum').textContent = n;
@@ -7460,6 +7579,7 @@ function tombolaDraw(){
     pjSend({type:'tombola', prizes:TOM.prizes, drawn:TOM.drawn, won:TOM.won, lastN:n});
     newWins.forEach((w,i)=> setTimeout(()=> pjSend({type:'tombolaWin', ...w}), 600 + i*4000));
     if (TOM.won.tombola || !TOM.remaining.length) $('tomBtnDraw').disabled = true;
+    });
   });
 }
 
@@ -7685,11 +7805,19 @@ function runAnagram(q){
   G.ref.child('anagram/answers').remove();
   $('anaSetup').style.display='none'; $('anaLive').style.display='block'; $('anaBtnBackRow').style.display = G.anaInQuiz?'none':'';
   $('anaClueHost').textContent = q.text ? '💡 '+q.text : '';
+  const anamBox = $('anaMedia'); anamBox.innerHTML='';
+  if (q.media && q.media.data) {
+    if (q.media.kind==='photo') anamBox.innerHTML = `<img src="${q.media.data}" class="hostMedia">`;
+    else anamBox.innerHTML = `<audio id="anaAudio" controls autoplay src="${q.media.data}"></audio>`;
+  }
+  if (q.media && q.media.kind==='photo' && q.media.data) G.ref.child('currentPhoto').set({ key:startAt, data:q.media.data });
+  else G.ref.child('currentPhoto').remove();
   renderBoxes($('anaScrambleHost'), anaBuildScramblePattern(q.scramble), q.scramble);
   document.querySelectorAll('#anaScrambleHost .qBox').forEach(b=>b.classList.add('scramble'));
   $('anaAnswered').textContent = '0 risposte';
   $('anaRevealBox').style.display='none'; $('anaBtnNext').style.display='none';
-  pjSend({type:'anaStart', text:q.text, scramble:q.scramble, startAt, endAt, dur:q.timer*1000});
+  pjSend({type:'anaStart', text:q.text, scramble:q.scramble, startAt, endAt, dur:q.timer*1000,
+    photo: (q.media && q.media.kind==='photo' && q.media.data) ? q.media.data : null});
   G.ref.child('anagram/answers').on('value', s=>{
     const n = s.numChildren(); $('anaAnswered').textContent = n + (n===1?' risposta':' risposte');
     G.ref.child('players').once('value', ps=>{ if (n>0 && n>=ps.numChildren() && !ANA.closed) closeAnagram(); });
@@ -7716,22 +7844,23 @@ function closeAnagram(){
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
       const accepted = (q.accepted||'').split(',').map(norm).filter(Boolean);
-      const results = {}, pending = [];
+      const results = {}, pending = []; const scorePromises=[];
       for (const pid in ans){
         const a = ans[pid]; const ok = accepted.includes(norm(a.a));
         const pts = ok ? calcPts(q, a.t) : -(q.penWrong||0);
         results[pid] = { ok, pts, a:a.a, t:a.t };
-        if (players[pid]) players[pid].score = Math.max(0,(players[pid].score||0)+pts);
+        if (players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
         if (!ok && players[pid]) pending.push({ pid, name:players[pid].name, a:a.a, t:a.t });
       }
       if ((q.penNone||0) > 0) for (const pid in players) if (!ans[pid]){
         results[pid] = { ok:false, pts:-q.penNone, none:true };
-        players[pid].score = Math.max(0,(players[pid].score||0)-q.penNone);
+        scorePromises.push(applyScoreDelta(pid, -q.penNone));
       }
       const updates = { 'anagram/phase':'result', 'anagram/reveal':{ correctText:q.accepted, results } };
-      for (const pid in players) updates['players/'+pid+'/score'] = players[pid].score||0;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       showAnagramReveal(q, players, pending, results);
+      });
     });
   });
 }
@@ -7835,12 +7964,20 @@ function playWsQuestion(q){
   $('wsSetup').style.display='none'; $('wsLive').style.display='block';
   $('wsBtnBackRow').style.display='none';
   $('wsClueHost').textContent = q.text ? '💡 '+q.text : '';
+  const wsmbox = $('wsMedia'); wsmbox.innerHTML='';
+  if (q.media && q.media.data) {
+    if (q.media.kind==='photo') wsmbox.innerHTML = `<img src="${q.media.data}" class="hostMedia">`;
+    else wsmbox.innerHTML = `<audio id="wsAudio" controls autoplay src="${q.media.data}"></audio>`;
+  }
+  if (q.media && q.media.kind==='photo' && q.media.data) G.ref.child('currentPhoto').set({ key:startAt, data:q.media.data });
+  else G.ref.child('currentPhoto').remove();
   renderWsGrid($('wsGridHost'), placed.grid, size);
   $('wsMsg').textContent = `DOMANDA ${G.qi+1}/${G.quiz.questions.length} · 🔤 SI CERCA DAL TELEFONO!`;
   $('wsBtnAgain').textContent = (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
   $('wsBtnAgain').style.display='none';
   renderWsRanking($('wsRanking'), []);
-  pjSend({type:'wsStart', grid:placed.grid, size, clue:q.text||'', startAt, endAt, dur});
+  pjSend({type:'wsStart', grid:placed.grid, size, clue:q.text||'', startAt, endAt, dur,
+    photo: (q.media && q.media.kind==='photo' && q.media.data) ? q.media.data : null});
   puzzleCountdown($('wsTimerBar'), $('wsMsg'), endAt, dur, wordsearchFinish);
   wsListenSolves();
   showScreen('scrWordSearch');
@@ -7898,9 +8035,10 @@ function wordsearchFinish(){
   $('wsBtnAgain').style.display='';
   if (WS.inQuiz && WS.penNone > 0) {
     G.ref.child('players').once('value').then(ps=>{
-      const players = ps.val()||{}, updates = {};
-      for (const pid in players) if (!WS.credited.has(pid)) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)-WS.penNone);
-      if (Object.keys(updates).length) G.ref.update(updates);
+      const players = ps.val()||{};
+      const scorePromises = [];
+      for (const pid in players) if (!WS.credited.has(pid)) scorePromises.push(applyScoreDelta(pid, -WS.penNone));
+      Promise.all(scorePromises);
     });
   }
   pjSend({type:'wsEnd', rows:WS.rows, word:finalWord});
@@ -8028,14 +8166,15 @@ function memoReveal(){
     const guesses = s.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const results = {}, updates = {};
+      const results = {}, updates = {}; const scorePromises=[];
       for (const pid in guesses){
         const g2 = guesses[pid];
         const ok = g2.idx === MEMO.targetIdx;
         const pts = ok ? puzzlePts(MEMO.secs*1000, g2.t, MEMO.points) : 0;
         results[pid] = { ok, pts, idx:g2.idx };
-        if (pts>0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+pts);
+        if (pts>0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
+      Promise.all(scorePromises).then(()=>{
       G.ref.update({ ...updates, 'memo/phase':'result', 'memo/results':results });
       renderMemoGrid($('memoGridHost'), 8, MEMO.cards, -1, MEMO.targetIdx, true);
       $('memoTimerWrapHost').style.display='none';
@@ -8048,6 +8187,7 @@ function memoReveal(){
       $('memoBtnAgain').style.display='';
       confetti();
       pjSend({type:'memoResult', cards:MEMO.cards, targetIdx:MEMO.targetIdx, rows});
+      });
     });
   });
 }
@@ -8181,14 +8321,15 @@ function hrsFinishRace(plan){
     const bets = bs.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const updates = {}; const winners = [];
+      const updates = {}; const winners = []; const scorePromises=[];
       for (const pid in bets){
         if (bets[pid]===winnerIdx && players[pid]){
-          updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+HRS.points);
+          scorePromises.push(applyScoreDelta(pid, HRS.points));
           winners.push(players[pid].name);
         }
       }
       updates['horses/phase'] = 'result'; updates['horses/winnerIdx'] = winnerIdx; updates['horses/winners'] = winners;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       $('hrsMsg').style.display='block'; $('hrsMsg').textContent = `🏆 HA VINTO ${HRS.names[winnerIdx].toUpperCase()}!`;
       $('hrsBetCounts').innerHTML = winners.length
@@ -8197,6 +8338,7 @@ function hrsFinishRace(plan){
       $('hrsBtnAgain').style.display='';
       confetti();
       pjSend({type:'horsesResult', winnerIdx, winnerName:HRS.names[winnerIdx], winners});
+      });
     });
   });
 }
@@ -8310,17 +8452,18 @@ function tfClose(){
     const guesses = gs.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const updates = {}; const results = [];
+      const updates = {}; const results = []; const scorePromises=[];
       for (const pid in guesses){
         const gVal = guesses[pid];
         const diff = Math.abs(gVal - TF.price);
         const pct = tfCalcPct(diff, TF.margin);
         const pts = Math.round(TF.points*pct/10)*10;
-        if (pts>0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+pts);
+        if (pts>0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
         results.push({ id:pid, name:(players[pid]||{}).name||'?', guess:gVal, diff, pts });
       }
       results.sort((a,b)=>a.diff-b.diff);
       updates['tfiscale/phase'] = 'result'; updates['tfiscale/price'] = TF.price; updates['tfiscale/winners'] = results;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       $('tfMsg').textContent = `💰 IL PREZZO VERO ERA ${TF.price.toFixed(2)}€`;
       $('tfGuesses').innerHTML = results.slice(0,10).map(r=>
@@ -8329,6 +8472,7 @@ function tfClose(){
       $('tfBtnAgain').style.display=''; $('tfBtnClose').style.display='none';
       confetti();
       pjSend({type:'tfResult', price:TF.price, results:results.slice(0,10)});
+      });
     });
   });
 }
@@ -8399,15 +8543,15 @@ function tocClose(){
     const bets = bs.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const updates = {}; const winners = [];
+      const updates = {}; const winners = []; const scorePromises=[];
       for (const pid in bets){
         if (bets[pid]===result && players[pid]){
-          updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+TOC.points);
+          scorePromises.push(applyScoreDelta(pid, TOC.points));
           winners.push(players[pid].name);
         }
       }
       updates['toc/phase']='result'; updates['toc/result']=result; updates['toc/winners']=winners; updates['toc/spinStart']=spinStart;
-      G.ref.update(updates);
+      Promise.all(scorePromises).then(()=> G.ref.update(updates));
       pjSend({type:'tocResult', result, winners, spinStart});
       $('tocMsg').textContent = '🪙 LA MONETA GIRA...';
       const wait = Math.max(0, spinStart-serverNow());
@@ -8508,15 +8652,15 @@ function cnrReveal(){
     const bets = bs.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const updates = {}; const winners = [];
+      const updates = {}; const winners = []; const scorePromises=[];
       for (const pid in bets){
         if (bets[pid]===CNR.winningBox && players[pid]){
-          updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+CNR.points);
+          scorePromises.push(applyScoreDelta(pid, CNR.points));
           winners.push(players[pid].name);
         }
       }
       updates['cenerentola/phase']='reveal'; updates['cenerentola/winningBox']=CNR.winningBox; updates['cenerentola/winners']=winners;
-      G.ref.update(updates);
+      Promise.all(scorePromises).then(()=> G.ref.update(updates));
       $('cnrMsg').textContent = '👠 LE SCATOLE SI APRONO...';
       cnrRenderGrid($('cnrGridHost'), true, CNR.winningBox, false);
       pjSend({type:'cnrReveal', winningBox:CNR.winningBox, winners});
@@ -8620,16 +8764,16 @@ function pacReveal(){
     const bets = bs.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const updates = {}; const results = [];
+      const updates = {}; const results = []; const scorePromises=[];
       for (const pid in bets){
         const box = bets[pid];
         const pts = PAC.values[box]||0;
-        if (players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+pts);
+        if (players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
         results.push({ id:pid, name:(players[pid]||{}).name||'?', box, pts });
       }
       results.sort((a,b)=>b.pts-a.pts);
       updates['pacchi/phase']='reveal'; updates['pacchi/values']=PAC.values; updates['pacchi/winners']=results;
-      G.ref.update(updates);
+      Promise.all(scorePromises).then(()=> G.ref.update(updates));
       $('pacMsg').textContent = '📦 I PACCHI SI APRONO...';
       pacRenderGrid($('pacGridHost'), PAC.values, true, false);
       pjSend({type:'pacReveal', values:PAC.values, results});
@@ -8806,19 +8950,19 @@ function pagReveal(){
     const bets = bs.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const updates = {}; const winners = []; const losers = [];
+      const updates = {}; const winners = []; const losers = []; const scorePromises=[];
       for (const pid in bets){
         if (!players[pid]) continue;
         if (bets[pid]===longestIdx){
-          updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+PAG.prize);
+          scorePromises.push(applyScoreDelta(pid, PAG.prize));
           winners.push(players[pid].name);
         } else if (bets[pid]===shortestIdx){
-          updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)-PAG.penalty);
+          scorePromises.push(applyScoreDelta(pid, -PAG.penalty));
           losers.push(players[pid].name);
         }
       }
       updates['pagliuzza/phase']='reveal'; updates['pagliuzza/lengths']=PAG.lengths; updates['pagliuzza/winners']=winners; updates['pagliuzza/losers']=losers;
-      G.ref.update(updates);
+      Promise.all(scorePromises).then(()=> G.ref.update(updates));
       $('pagMsg').textContent = '🌾 LE PAGLIUZZE ESCONO DAL PUGNO...';
       pagRevealStraws($('pagStrawsHost'), PAG.lengths);
       pjSend({type:'pagReveal', lengths:PAG.lengths, winners, losers});
@@ -9041,7 +9185,7 @@ function rdcClose(){
     const answers = as.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const updates = {}; const results = [];
+      const updates = {}; const results = []; const scorePromises=[];
       for (const pid in answers){
         const a = answers[pid];
         const correct = +a.v === RDC.data.finalAnswer;
@@ -9049,12 +9193,13 @@ function rdcClose(){
         if (correct){
           const frac = Math.max(0, 1 - a.t/RDC.durationMs);
           pts = Math.round(RDC.points*(0.5+0.5*frac)/10)*10;
-          if (players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+pts);
+          if (players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
         }
         results.push({ id:pid, name:(players[pid]||{}).name||'?', v:a.v, correct, pts });
       }
       results.sort((a,b)=> b.pts-a.pts);
       updates['rdc/phase']='result'; updates['rdc/finalAnswer']=RDC.data.finalAnswer; updates['rdc/results']=results;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       $('rdcMsg').textContent = `💡 LA RISPOSTA GIUSTA ERA ${RDC.data.finalAnswer}!`;
       const cell = document.getElementById('rdcGridHost_r3c3');
@@ -9062,6 +9207,7 @@ function rdcClose(){
       pjSend({type:'rdcResult', finalAnswer:RDC.data.finalAnswer, results});
       $('rdcBtnAgain').style.display='';
       confetti();
+      });
     });
   });
 }
@@ -9175,16 +9321,17 @@ function mmClose(){
     const solved = ss.val()||{};
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
-      const updates = {}; const results = [];
+      const updates = {}; const results = []; const scorePromises=[];
       for (const pid in solved){
         const t = solved[pid].t;
         const frac = Math.max(0, 1 - t/MM.durationMs);
         const pts = Math.round(MM.points*(0.5+0.5*frac)/10)*10;
-        if (players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0)+pts);
+        if (players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
         results.push({ id:pid, name:(players[pid]||{}).name||'?', t, pts });
       }
       results.sort((a,b)=> a.t-b.t); // chi ha risolto prima, in cima
       updates['mastermind/phase']='result'; updates['mastermind/secret']=MM.secret; updates['mastermind/results']=results;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       $('mmMsg').textContent = '💡 LA SEQUENZA SEGRETA ERA:';
       $('mmResultsLive').innerHTML = `<div class="mmSlotsRow" style="justify-content:center; margin-bottom:10px"></div>` +
@@ -9195,6 +9342,7 @@ function mmClose(){
       pjSend({type:'mmResult', secret:MM.secret, results});
       $('mmBtnAgain').style.display='';
       confetti();
+      });
     });
   });
 }
@@ -9862,15 +10010,16 @@ function simonReveal(){
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
       const results = {}, updates = { 'simon/phase':'result' };
-      let okN = 0;
+      let okN = 0; const scorePromises=[];
       for (const pid in answers){
         const ok = (answers[pid].s||'') === key;
         const pts = ok ? SIM.points : -(SIM.pen||0);
         if (ok) okN++;
         results[pid] = { ok, pts };
-        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
+        if (pts!==0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
       updates['simon/results'] = results;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       $('simonMsg').textContent = `🏆 SEQUENZA GIUSTA! ${okN} l'hanno azzeccata · +${SIM.points}`;
       $('simonDots').innerHTML = seqDotsHtml(SIM.seq);
@@ -9878,6 +10027,7 @@ function simonReveal(){
       simonPlaySeq($('simonStage'), SIM.seq);
       $('simonBtnAgain').style.display='';
       pjSend({type:'simonResult', seq:SIM.seq, okN, tot:Object.keys(answers).length, points:SIM.points});
+      });
     });
   });
 }
@@ -9942,20 +10092,22 @@ function diceReveal(){
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
       const results = {}, updates = { 'dice/phase':'result', 'dice/d1':d1, 'dice/d2':d2, 'dice/sum':sum, 'dice/win':win };
-      const c = {pari:0, dispari:0};
+      const c = {pari:0, dispari:0}; const scorePromises=[];
       for (const pid in bets){
         const ok = bets[pid]===win; if(c[bets[pid]]!==undefined) c[bets[pid]]++;
         const pts = ok ? DICE.points : -(DICE.pen||0);
         results[pid] = { ok, pts };
-        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
+        if (pts!==0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
       updates['dice/results'] = results;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       diceLand($('diceStage'), d1, d2, sum, win);
       $('diceMsg').textContent = `🏆 ${sum} → ${win.toUpperCase()}! +${DICE.points} agli indovini`;
       $('diceCounts').innerHTML = `<div class="vc">PARI · ${c.pari}</div><div class="vc">DISPARI · ${c.dispari}</div>`;
       $('diceBtnAgain').style.display='';
       pjSend({type:'diceResult', d1, d2, sum, win, counts:c, points:DICE.points});
+      });
     });
   });
 }
@@ -10024,20 +10176,22 @@ function miniReveal(){
     G.ref.child('players').once('value').then(ps=>{
       const players = ps.val()||{};
       const results = {}, updates = { 'mini/phase':'result', 'mini/win':win };
-      const c = {A:0,B:0,C:0};
+      const c = {A:0,B:0,C:0}; const scorePromises=[];
       for (const pid in votes){
         const ok = votes[pid]===win; if(c[votes[pid]]!==undefined) c[votes[pid]]++;
         const pts = ok ? MINI.points : -(MINI.pen||0);
         results[pid] = { ok, pts };
-        if (pts!==0 && players[pid]) updates['players/'+pid+'/score'] = Math.max(0,(players[pid].score||0) + pts);
+        if (pts!==0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
       }
       updates['mini/results'] = results;
+      Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
       revealStage($('miniStage'), win);
       $('miniMsg').textContent = `🏆 LA PALLINA ERA SOTTO IL ${win}! +${MINI.points} ai furbi`;
       $('miniCounts').innerHTML = `<div class="vc">A · ${c.A}</div><div class="vc">B · ${c.B}</div><div class="vc">C · ${c.C}</div>`;
       $('miniBtnAgain').style.display='';
       pjSend({type:'miniReveal', win, counts:c, points:MINI.points});
+      });
     });
   });
 }
@@ -10508,6 +10662,7 @@ function pjRoute(m){
     else if (m.type==='anaStart') {
       showScreen('scrPjAnagram');
       $('pjAnaClue').textContent = m.text ? '💡 '+m.text : '';
+      $('pjAnaMedia').innerHTML = m.photo ? `<img src="${m.photo}" class="hostMedia" style="max-height:200px">` : '';
       renderBoxes($('pjAnaScramble'), anaBuildScramblePattern(m.scramble), m.scramble);
       document.querySelectorAll('#pjAnaScramble .qBox').forEach(b=>b.classList.add('scramble'));
       $('pjAnaAnswer').style.display='none'; $('pjAnaLead').innerHTML='';
@@ -10538,6 +10693,7 @@ function pjRoute(m){
     else if (m.type==='wsStart') {
       showScreen('scrPjWordSearch');
       $('pjWsClue').textContent = m.clue ? '💡 '+m.clue : '';
+      $('pjWsMedia').innerHTML = m.photo ? `<img src="${m.photo}" class="hostMedia" style="max-height:220px">` : '';
       renderWsGrid($('wsGridPj'), m.grid, m.size);
       $('pjWsMsg').textContent = '🔤 CERCATELA DAL TELEFONO — ORIZZONTALE, VERTICALE O DIAGONALE!';
       $('pjWsRanking').innerHTML='';
@@ -10975,7 +11131,7 @@ const params = new URLSearchParams(location.search);
 const gp = params.get('g');
 if (params.get('proj')) initProjector();
 else if (gp) initPlayer(gp);
-else { $('fbWarn').style.display = fbOK?'none':'block'; loadQuizList(); showScreen('scrHome'); }
+else { $('fbWarn').style.display = fbOK?'none':'block'; loadQuizList(); showScreen('scrHome'); checkResumableGame(); }
 </script>
 </body>
 </html>
