@@ -1033,7 +1033,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.16</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.17</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -5548,20 +5548,48 @@ function shapeStarPts(spikes, oR, iR, rot){
   const pts=[]; for(let i=0;i<spikes*2;i++){ const r=i%2===0?oR:iR; const a=(rot+i*360/(spikes*2))*Math.PI/180; pts.push((50+r*Math.cos(a)).toFixed(1)+','+(50+r*Math.sin(a)).toFixed(1)); }
   return pts.join(' ');
 }
+function shapePointsToPath(ptsStr){
+  const pts = ptsStr.split(' ');
+  return 'M'+pts.join('L')+'Z';
+}
 function shapeGeometry(id){
   switch(id){
-    case 'circle': return { tag:'circle', attrs:'cx="50" cy="50" r="38"', boundingR:38 };
-    case 'square': return { tag:'polygon', attrs:'points="14,14 86,14 86,86 14,86"', boundingR:38 };
-    case 'triangle': return { tag:'polygon', attrs:`points="${shapeRegularPoly(3,42,-90)}"`, boundingR:42 };
-    case 'diamond': return { tag:'polygon', attrs:'points="50,8 92,50 50,92 8,50"', boundingR:42 };
-    case 'pentagon': return { tag:'polygon', attrs:`points="${shapeRegularPoly(5,40,-90)}"`, boundingR:40 };
-    case 'hexagon': return { tag:'polygon', attrs:`points="${shapeRegularPoly(6,40,0)}"`, boundingR:40 };
-    case 'heart': return { tag:'path', attrs:'d="M50,88 C22,64 4,44 4,25 C4,10 15,1 27,1 C37,1 46,8 50,20 C54,8 63,1 73,1 C85,1 96,10 96,25 C96,44 78,64 50,88 Z"', boundingR:42 };
-    case 'star5': return { tag:'polygon', attrs:`points="${shapeStarPts(5,42,17,-90)}"`, boundingR:42 };
-    case 'cross': return { tag:'polygon', attrs:'points="34,4 66,4 66,34 96,34 96,66 66,66 66,96 34,96 34,66 4,66 4,34 34,34"', boundingR:44 };
-    case 'arrow': return { tag:'polygon', attrs:'points="4,38 56,38 56,12 97,50 56,88 56,62 4,62"', boundingR:44 };
-    default: return { tag:'circle', attrs:'cx="50" cy="50" r="38"', boundingR:38 };
+    case 'circle': return { tag:'circle', attrs:'cx="50" cy="50" r="38"', boundingR:38,
+      path:'M50,12 A38,38 0 1,0 50,88 A38,38 0 1,0 50,12 Z' };
+    case 'square': { const pts='14,14 86,14 86,86 14,86'; return { tag:'polygon', attrs:`points="${pts}"`, boundingR:38, path:shapePointsToPath(pts) }; }
+    case 'triangle': { const pts=shapeRegularPoly(3,42,-90); return { tag:'polygon', attrs:`points="${pts}"`, boundingR:42, path:shapePointsToPath(pts) }; }
+    case 'diamond': { const pts='50,8 92,50 50,92 8,50'; return { tag:'polygon', attrs:`points="${pts}"`, boundingR:42, path:shapePointsToPath(pts) }; }
+    case 'pentagon': { const pts=shapeRegularPoly(5,40,-90); return { tag:'polygon', attrs:`points="${pts}"`, boundingR:40, path:shapePointsToPath(pts) }; }
+    case 'hexagon': { const pts=shapeRegularPoly(6,40,0); return { tag:'polygon', attrs:`points="${pts}"`, boundingR:40, path:shapePointsToPath(pts) }; }
+    case 'heart': { const d='M50,88 C22,64 4,44 4,25 C4,10 15,1 27,1 C37,1 46,8 50,20 C54,8 63,1 73,1 C85,1 96,10 96,25 C96,44 78,64 50,88 Z'; return { tag:'path', attrs:`d="${d}"`, boundingR:42, path:d }; }
+    case 'star5': { const pts=shapeStarPts(5,42,17,-90); return { tag:'polygon', attrs:`points="${pts}"`, boundingR:42, path:shapePointsToPath(pts) }; }
+    case 'cross': { const pts='34,4 66,4 66,34 96,34 96,66 66,66 66,96 34,96 34,66 4,66 4,34 34,34'; return { tag:'polygon', attrs:`points="${pts}"`, boundingR:44, path:shapePointsToPath(pts) }; }
+    case 'arrow': { const pts='4,38 56,38 56,12 97,50 56,88 56,62 4,62'; return { tag:'polygon', attrs:`points="${pts}"`, boundingR:44, path:shapePointsToPath(pts) }; }
+    default: return { tag:'circle', attrs:'cx="50" cy="50" r="38"', boundingR:38, path:'M50,12 A38,38 0 1,0 50,88 A38,38 0 1,0 50,12 Z' };
   }
+}
+/* Calcola la VERA sovrapposizione geometrica (pixel per pixel) tra il bersaglio fermo e la forma mobile
+   spostata di (dxUnits,dyUnits) nello stesso sistema di coordinate 0-100 della geometria delle forme.
+   Molto più fedele, per forme concave come stella/croce/freccia/cuore, di un semplice calcolo a "distanza dal centro". */
+function shapeComputeOverlapPct(shapeId, dxUnits, dyUnits){
+  const g = shapeGeometry(shapeId);
+  const N = 90; // risoluzione della griglia di campionamento (90x90 è più che sufficiente per il nostro scopo)
+  const cnv = document.createElement('canvas'); cnv.width = N; cnv.height = N;
+  const ctx = cnv.getContext('2d');
+  const path = new Path2D(g.path);
+  // bersaglio: nero pieno, alla sua posizione naturale
+  ctx.clearRect(0,0,N,N); ctx.save(); ctx.scale(N/100,N/100); ctx.fillStyle='#000'; ctx.fill(path); ctx.restore();
+  const targetData = ctx.getImageData(0,0,N,N).data;
+  // forma mobile: la disegno spostata di (dxUnits,dyUnits), poi confronto i due bitmap
+  ctx.clearRect(0,0,N,N); ctx.save(); ctx.translate(dxUnits*N/100, dyUnits*N/100); ctx.scale(N/100,N/100); ctx.fillStyle='#000'; ctx.fill(path); ctx.restore();
+  const moverData = ctx.getImageData(0,0,N,N).data;
+  let targetPx=0, overlapPx=0;
+  for (let i=3; i<targetData.length; i+=4){
+    const tOn = targetData[i] > 10, mOn = moverData[i] > 10;
+    if (tOn) targetPx++;
+    if (tOn && mOn) overlapPx++;
+  }
+  return targetPx>0 ? Math.round(overlapPx/targetPx*100) : 0;
 }
 function shapeTargetSvg(id){
   const g = shapeGeometry(id);
@@ -5593,10 +5621,10 @@ function showPlayerShapes(g){
       $('shapepPct').textContent = ''; $('shapepPct').className = 'shapePct';
       const arena = $('shapeArena');
       arena.innerHTML = `<div class="shapeTarget" id="shapeTargetEl"></div><div class="shapeMover" id="shapeMoverEl"></div>`;
-      $('shapeTargetEl').style.width = $('shapeTargetEl').style.height = '34%';
+      $('shapeTargetEl').style.width = $('shapeTargetEl').style.height = '32%';
       $('shapeTargetEl').innerHTML = shapeTargetSvg(m.shape);
       const moverEl = $('shapeMoverEl');
-      moverEl.style.width = moverEl.style.height = '30%';
+      moverEl.style.width = moverEl.style.height = '32%';
       moverEl.innerHTML = shapeMoverSvg(m.shape, 'shapeGrad'+Math.floor(Math.random()*99999));
       arena.onclick = shapeStop;
       shapeStartMovement(arena, moverEl, m.speed);
@@ -5654,12 +5682,11 @@ function shapeStop(){
   const pos = P.shapeGetPos();
   const { w, h, sizePx } = P.shapeArenaSize;
   const targetCenter = { x:w/2, y:h/2 };
-  const dx = pos.x-targetCenter.x, dy = pos.y-targetCenter.y;
-  const dist = Math.sqrt(dx*dx+dy*dy);
-  const g = shapeGeometry(P.shapeId||'circle');
-  const boundingRpx = (g.boundingR/100) * sizePx;
-  const overlapFrac = Math.max(0, Math.min(1, 1 - dist/(2*boundingRpx)));
-  const pct = Math.round(overlapFrac*100);
+  // converto lo spostamento in pixel reali nello stesso sistema di coordinate 0-100 della geometria delle forme,
+  // poi calcolo la VERA sovrapposizione geometrica (pixel per pixel), fedele anche per forme concave come la stella
+  const dxUnits = (pos.x-targetCenter.x) * 100/sizePx, dyUnits = (pos.y-targetCenter.y) * 100/sizePx;
+  const pct = shapeComputeOverlapPct(P.shapeId||'circle', dxUnits, dyUnits);
+  const overlapFrac = pct/100;
   const moverEl = $('shapeMoverEl');
   moverEl.classList.add('frozen');
   $('shapeArena').onclick = null;
@@ -11428,7 +11455,7 @@ function pjRoute(m){
       $('pjShapeMsg').textContent = `👁 SI GIOCA! FORMA: ${SHAPE_LIST.find(s=>s.id===m.shape).name.toUpperCase()}`;
       $('pjShapeResults').innerHTML='';
       const arena = $('pjShapeArena');
-      arena.innerHTML = `<div class="shapeTarget" id="pjShapeTargetEl" style="width:34%; height:34%"></div><div class="shapeMover" id="pjShapeMoverEl" style="width:30%; height:30%"></div>`;
+      arena.innerHTML = `<div class="shapeTarget" id="pjShapeTargetEl" style="width:32%; height:32%"></div><div class="shapeMover" id="pjShapeMoverEl" style="width:32%; height:32%"></div>`;
       $('pjShapeTargetEl').innerHTML = shapeTargetSvg(m.shape);
       $('pjShapeMoverEl').innerHTML = shapeMoverSvg(m.shape, 'pjShapeGrad'+Math.floor(Math.random()*99999));
       // pura decorazione condivisa: si muove per conto suo, non incide sul punteggio di nessuno
