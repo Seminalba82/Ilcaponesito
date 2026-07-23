@@ -1033,7 +1033,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.18</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.19</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -4087,7 +4087,7 @@ function nextQuestion(){
   // LA FOTO E L'AUDIO viaggiano per conto loro, in un ramo separato: non sono annidati dentro "current"
   // (che resta leggero) così non vengono ritrasmessi ad ogni piccola variazione (es. risposta di un giocatore), niente lag.
   // Così anche chi gioca solo da smartphone (senza vedere/sentire il videoproiettore) può vivere la domanda per intero.
-  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:G.qi, kind:q.media.kind, data:q.media.data });
+  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:G.qi, kind:q.media.kind, data:q.media.data, startAt:serverNow() });
   else G.ref.child('currentMedia').remove();
   G.ref.child('answers/'+G.qi).remove();
   // schermo host
@@ -4098,7 +4098,7 @@ function nextQuestion(){
   const mbox = $('hqMedia'); mbox.innerHTML='';
   if (q.media && q.media.data) {
     if (q.media.kind==='photo') mbox.innerHTML = `<img src="${q.media.data}" class="hostMedia">`;
-    else { mbox.innerHTML = `<audio id="hqAudio" controls autoplay src="${q.media.data}"></audio>`; }
+    else { mbox.innerHTML = `<audio id="hqAudio" controls autoplay src="${q.media.data}"></audio>`; $('hqAudio').volume = 0.7; }
   }
   const nOpts = q.type==='mult' ? q.opts.filter(o=>o).length : 0;
   $('hqOpts').innerHTML = q.type==='mult'
@@ -4524,7 +4524,19 @@ function pqRenderMedia(imgId, audioId){
     else { img.style.display='none'; img.src=''; }
   }
   if (aud) {
-    if (match && v.kind==='audio') { if (aud.src !== v.data) aud.src = v.data; aud.style.display='block'; aud.play().catch(()=>{}); }
+    if (match && v.kind==='audio') {
+      aud.volume = 0.7; // volume moderato: a tutto volume gli altoparlanti dei telefoni spesso distorcono
+      if (aud.src !== v.data) { aud.src = v.data; aud.load(); }
+      const startPlayback = ()=>{
+        // recupero il ritardo dovuto al tempo di trasmissione: parto dal punto della canzone in cui sarebbe
+        // già arrivata la regia, invece che sempre dall'inizio — così restano molto più vicine nel tempo
+        const elapsedSec = Math.max(0, (serverNow() - (v.startAt||serverNow()))/1000);
+        if (elapsedSec > 0.15 && elapsedSec < (aud.duration||1e9)) { try{ aud.currentTime = elapsedSec; }catch(e){} }
+        aud.play().catch(()=>{});
+      };
+      if (aud.readyState >= 1) startPlayback(); else aud.addEventListener('loadedmetadata', startPlayback, {once:true});
+      aud.style.display='block';
+    }
     else { aud.style.display='none'; if (aud.src) { aud.pause(); aud.removeAttribute('src'); aud.load(); } }
   }
 }
@@ -8085,9 +8097,9 @@ function runAnagram(q){
   const anamBox = $('anaMedia'); anamBox.innerHTML='';
   if (q.media && q.media.data) {
     if (q.media.kind==='photo') anamBox.innerHTML = `<img src="${q.media.data}" class="hostMedia">`;
-    else anamBox.innerHTML = `<audio id="anaAudio" controls autoplay src="${q.media.data}"></audio>`;
+    else { anamBox.innerHTML = `<audio id="anaAudio" controls autoplay src="${q.media.data}"></audio>`; $('anaAudio').volume = 0.7; }
   }
-  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:startAt, kind:q.media.kind, data:q.media.data });
+  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:startAt, kind:q.media.kind, data:q.media.data, startAt });
   else G.ref.child('currentMedia').remove();
   renderBoxes($('anaScrambleHost'), anaBuildScramblePattern(q.scramble), q.scramble);
   document.querySelectorAll('#anaScrambleHost .qBox').forEach(b=>b.classList.add('scramble'));
@@ -8244,9 +8256,9 @@ function playWsQuestion(q){
   const wsmbox = $('wsMedia'); wsmbox.innerHTML='';
   if (q.media && q.media.data) {
     if (q.media.kind==='photo') wsmbox.innerHTML = `<img src="${q.media.data}" class="hostMedia">`;
-    else wsmbox.innerHTML = `<audio id="wsAudio" controls autoplay src="${q.media.data}"></audio>`;
+    else { wsmbox.innerHTML = `<audio id="wsAudio" controls autoplay src="${q.media.data}"></audio>`; $('wsAudio').volume = 0.7; }
   }
-  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:startAt, kind:q.media.kind, data:q.media.data });
+  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:startAt, kind:q.media.kind, data:q.media.data, startAt });
   else G.ref.child('currentMedia').remove();
   renderWsGrid($('wsGridHost'), placed.grid, size);
   $('wsMsg').textContent = `DOMANDA ${G.qi+1}/${G.quiz.questions.length} · 🔤 SI CERCA DAL TELEFONO!`;
