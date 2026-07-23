@@ -1033,7 +1033,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.17</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.18</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -5621,10 +5621,12 @@ function showPlayerShapes(g){
       $('shapepPct').textContent = ''; $('shapepPct').className = 'shapePct';
       const arena = $('shapeArena');
       arena.innerHTML = `<div class="shapeTarget" id="shapeTargetEl"></div><div class="shapeMover" id="shapeMoverEl"></div>`;
-      $('shapeTargetEl').style.width = $('shapeTargetEl').style.height = '32%';
+      const arenaRectNow = { width: arena.clientWidth, height: arena.clientHeight };
+      const shapeSizePx = Math.round(Math.min(arenaRectNow.width, arenaRectNow.height) * 0.32);
+      $('shapeTargetEl').style.width = $('shapeTargetEl').style.height = shapeSizePx+'px';
       $('shapeTargetEl').innerHTML = shapeTargetSvg(m.shape);
       const moverEl = $('shapeMoverEl');
-      moverEl.style.width = moverEl.style.height = '32%';
+      moverEl.style.width = moverEl.style.height = shapeSizePx+'px';
       moverEl.innerHTML = shapeMoverSvg(m.shape, 'shapeGrad'+Math.floor(Math.random()*99999));
       arena.onclick = shapeStop;
       shapeStartMovement(arena, moverEl, m.speed);
@@ -5650,7 +5652,7 @@ function shapeAmplitudeForAxis(dirX, dirY, maxX, maxY, cx, cy){
   return t;
 }
 function shapeStartMovement(arena, moverEl, speed){
-  const rect = arena.getBoundingClientRect();
+  const rect = { width: arena.clientWidth, height: arena.clientHeight };
   const sizePx = moverEl.getBoundingClientRect().width;
   const maxX = rect.width - sizePx, maxY = rect.height - sizePx;
   const cx = maxX/2, cy = maxY/2; // il centro esatto: qui sta il bersaglio, l'oscillazione deve passarci sempre in mezzo
@@ -11455,12 +11457,16 @@ function pjRoute(m){
       $('pjShapeMsg').textContent = `👁 SI GIOCA! FORMA: ${SHAPE_LIST.find(s=>s.id===m.shape).name.toUpperCase()}`;
       $('pjShapeResults').innerHTML='';
       const arena = $('pjShapeArena');
-      arena.innerHTML = `<div class="shapeTarget" id="pjShapeTargetEl" style="width:32%; height:32%"></div><div class="shapeMover" id="pjShapeMoverEl" style="width:32%; height:32%"></div>`;
+      arena.innerHTML = `<div class="shapeTarget" id="pjShapeTargetEl"></div><div class="shapeMover" id="pjShapeMoverEl"></div>`;
+      const pjArenaRectNow = { width: arena.clientWidth, height: arena.clientHeight };
+      const pjShapeSizePx = Math.round(Math.min(pjArenaRectNow.width, pjArenaRectNow.height) * 0.32);
+      $('pjShapeTargetEl').style.width = $('pjShapeTargetEl').style.height = pjShapeSizePx+'px';
+      $('pjShapeMoverEl').style.width = $('pjShapeMoverEl').style.height = pjShapeSizePx+'px';
       $('pjShapeTargetEl').innerHTML = shapeTargetSvg(m.shape);
       $('pjShapeMoverEl').innerHTML = shapeMoverSvg(m.shape, 'pjShapeGrad'+Math.floor(Math.random()*99999));
       // pura decorazione condivisa: si muove per conto suo, non incide sul punteggio di nessuno
       const moverEl = $('pjShapeMoverEl');
-      const rect = arena.getBoundingClientRect();
+      const rect = { width: arena.clientWidth, height: arena.clientHeight };
       const sizePx = moverEl.getBoundingClientRect().width;
       const maxX = rect.width-sizePx, maxY = rect.height-sizePx;
       const cx=maxX/2, cy=maxY/2;
