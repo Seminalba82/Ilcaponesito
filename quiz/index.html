@@ -1033,7 +1033,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.19</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.20</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -9944,15 +9944,48 @@ function sendPjMsg(on){
    GRUPPO WHATSAPP — invito ai giocatori con un tap dedicato dalla regia
 ================================================================ */
 let waOv = { on:false };
+function waSavedList(){
+  try{ return JSON.parse(localStorage.getItem('capone_wa_saved')||'[]'); }catch(e){ return []; }
+}
+function waSaveEntry(title, link){
+  if (!title || !link) return;
+  const list = waSavedList();
+  const i = list.findIndex(e=>e.title===title);
+  if (i>=0) list[i].link = link; else list.push({title, link});
+  try{ localStorage.setItem('capone_wa_saved', JSON.stringify(list)); }catch(e){}
+}
+function waDeleteEntry(title){
+  if (!confirm(`Eliminare "${title}" dai gruppi salvati?`)) return;
+  const list = waSavedList().filter(e=>e.title!==title);
+  try{ localStorage.setItem('capone_wa_saved', JSON.stringify(list)); }catch(e){}
+  modalWaGroup();
+}
+function waPickSaved(sel){
+  if (!sel.value) return;
+  const list = waSavedList();
+  const entry = list.find(e=>e.title===sel.value);
+  if (entry){ $('waTitleIn').value = entry.title; $('waLinkIn').value = entry.link; }
+}
 function modalWaGroup(){
   let savedTitle=''; let savedLink='';
   try{ savedTitle = localStorage.getItem('capone_wa_title')||''; savedLink = localStorage.getItem('capone_wa_link')||''; }catch(e){}
+  const list = waSavedList();
+  const dropdownHtml = list.length ? `
+    <div class="label mt">Gruppi già salvati</div>
+    <div class="row">
+      <select id="waSavedSel" class="grow" onchange="waPickSaved(this)">
+        <option value="">— scegli un locale già salvato —</option>
+        ${list.map(e=>`<option value="${esc(e.title)}" ${e.title===savedTitle?'selected':''}>${esc(e.title)}</option>`).join('')}
+      </select>
+      <button class="btn small ghost" onclick="waDeleteEntry($('waSavedSel').value)" title="Elimina il locale selezionato">🗑</button>
+    </div>` : '';
   openModal('📱 GRUPPO WHATSAPP', `
-    <div class="label">Titolo del gruppo (es. SQUADRE IL CAPONE NASELLI PUB)</div>
+    ${dropdownHtml}
+    <div class="label mt">Titolo del gruppo (es. SQUADRE IL CAPONE NASELLI PUB)</div>
     <input type="text" id="waTitleIn" maxlength="60" value="${esc(savedTitle)}" placeholder="Es. SQUADRE IL CAPONE NASELLI PUB">
     <div class="label mt">Link di invito WhatsApp</div>
     <input type="text" id="waLinkIn" value="${esc(savedLink)}" placeholder="https://chat.whatsapp.com/...">
-    <div class="byline mt" style="text-transform:none">Il link resta salvato su questo dispositivo: la prossima volta che suoni nello stesso locale lo ritrovi già scritto qui. Ai giocatori non verrà mai mostrato il link per intero, solo un pulsante con il titolo che hai scelto.</div>
+    <div class="byline mt" style="text-transform:none">Confermando, il gruppo resta salvato nell'elenco qui sopra: la prossima volta che suoni nello stesso locale lo richiami dal menu, senza riscrivere nulla. Ai giocatori non verrà mai mostrato il link per intero, solo un pulsante con il titolo che hai scelto.</div>
     <div class="row mt">
       <button class="btn mg grow" onclick="sendWaGroup(true)">📱 MOSTRA AI GIOCATORI</button>
       <button class="btn ghost" onclick="sendWaGroup(false)">🚫 Nascondi</button>
@@ -9964,6 +9997,7 @@ function sendWaGroup(on){
   if (on && (!title || !link)) return alert('Scrivi sia il titolo che il link del gruppo!');
   if (on && !/^https:\/\/(chat\.whatsapp\.com|wa\.me)\//.test(link)) return alert('Il link non sembra un vero link di invito WhatsApp (deve iniziare con https://chat.whatsapp.com/...)');
   try{ localStorage.setItem('capone_wa_title', title||''); localStorage.setItem('capone_wa_link', link||''); }catch(e){}
+  if (on) waSaveEntry(title, link);
   waOv = { on:!!on, title, link };
   $('hbWa').classList.toggle('on', waOv.on);
   if (G && G.ref) G.ref.child('waGroup').set({ on:waOv.on, title, link });
