@@ -1015,7 +1015,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.10</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.11</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1283,6 +1283,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="timerWrap mt"><div class="timerBar" id="pqTimerBar"></div></div>
   <div class="pqQ" id="pqQText"></div>
   <img id="pqPhoto" style="display:none; max-width:100%; max-height:220px; border-radius:16px; margin-top:10px; box-shadow:0 8px 20px rgba(0,0,0,.5)">
+  <audio id="pqAudio" controls style="display:none; width:100%; max-width:340px; margin-top:10px"></audio>
   <div class="byline mt" id="pqHint">RISPONDI! PIÙ SEI VELOCE, PIÙ PUNTI FAI 💨</div>
   <div class="ansGrid mtb" id="pqOpts"></div>
   <button class="btn lm mtb" id="pqMultiSend" style="display:none; width:100%; max-width:420px" onclick="sendMultiAnswer()">📨 INVIA LE RISPOSTE SCELTE</button>
@@ -1998,6 +1999,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="timerWrap mt"><div class="timerBar" id="paTimerBar"></div></div>
   <div class="anaClue mt" id="paClue"></div>
   <img id="paPhoto" style="display:none; max-width:100%; max-height:180px; border-radius:16px; margin-top:8px; box-shadow:0 8px 20px rgba(0,0,0,.5)">
+  <audio id="paAudio" controls style="display:none; width:100%; max-width:340px; margin-top:8px"></audio>
   <div class="qBoxes" id="paScramble"></div>
   <div class="label center mt">LA TUA RISPOSTA</div>
   <div class="qBoxes" id="paBoxes"></div>
@@ -2066,6 +2068,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="timerWrap mt"><div class="timerBar" id="pwsTimerBar"></div></div>
   <div class="wsClue mt" id="pwsClue"></div>
   <img id="pwsPhoto" style="display:none; max-width:100%; max-height:180px; border-radius:16px; margin-top:8px; box-shadow:0 8px 20px rgba(0,0,0,.5)">
+  <audio id="pwsAudio" controls style="display:none; width:100%; max-width:340px; margin-top:8px"></audio>
   <div class="wsGrid" id="wsGridPl"></div>
   <div class="wsBanner mt" id="pwsBanner"></div>
   <div class="lead mt" id="pwsRanking" style="width:100%; max-width:380px"></div>
@@ -3995,10 +3998,11 @@ function nextQuestion(){
       multi, pattern, startAt: serverNow() },
     reveal:null
   });
-  // la FOTO viaggia per conto suo, in un ramo separato: non è annidata dentro "current" (che resta leggero)
-  // così non viene ritrasmessa ad ogni piccola variazione (es. una risposta di un giocatore), niente lag
-  if (q.media && q.media.kind==='photo' && q.media.data) G.ref.child('currentPhoto').set({ key:G.qi, data:q.media.data });
-  else G.ref.child('currentPhoto').remove();
+  // LA FOTO E L'AUDIO viaggiano per conto loro, in un ramo separato: non sono annidati dentro "current"
+  // (che resta leggero) così non vengono ritrasmessi ad ogni piccola variazione (es. risposta di un giocatore), niente lag.
+  // Così anche chi gioca solo da smartphone (senza vedere/sentire il videoproiettore) può vivere la domanda per intero.
+  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:G.qi, kind:q.media.kind, data:q.media.data });
+  else G.ref.child('currentMedia').remove();
   G.ref.child('answers/'+G.qi).remove();
   // schermo host
   $('hqProgress').textContent = `DOMANDA ${G.qi+1} / ${G.quiz.questions.length}`;
@@ -4202,6 +4206,7 @@ function podiumRevealNext(){
   podiumRevealRank($('podium'), $('podLead'), rank);
   pjSend({type:'podiumReveal', rank});
   podStage++;
+  if (G && G.ref) G.ref.child('podiumStage').set(podStage); // così anche chi segue solo da smartphone (modalità suspense) scopre l'esito nello stesso momento
   podiumUpdateBtn();
 }
 /* Podio "intermedio": lo stesso spettacolo del podio finale, ma NON termina la partita — utile per spezzare
@@ -4225,7 +4230,7 @@ function endQuiz(){
   G.ref.child('players').once('value').then(ps=>{
     const players = ps.val()||{};
     const arr = Object.entries(players).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
-    G.ref.update({ status:'end', final: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})) });
+    G.ref.update({ status:'end', final: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})), podiumStage:0 });
     renderPodiumBuild($('podium'), $('podLead'), arr);
     renderLead($('podLead'), players);
     podStage = 0; podiumUpdateBtn();
@@ -4360,7 +4365,7 @@ function listenGame(){
     P.ref.child('projLead').on('value', s=> plApplyLead(s.val()||{}));
     P.ref.child('projMsg').on('value', s=> plApplyMsg(s.val()||{}));
     P.ref.child('waGroup').on('value', s=> plApplyWa(s.val()||{}));
-    P.ref.child('currentPhoto').on('value', s=>{ P.lastPhotoData = s.val(); pqRenderPhoto('pqPhoto'); pqRenderPhoto('paPhoto'); pqRenderPhoto('pwsPhoto'); });
+    P.ref.child('currentMedia').on('value', s=>{ P.lastMediaData = s.val(); pqRenderMedia('pqPhoto','pqAudio'); pqRenderMedia('paPhoto','paAudio'); pqRenderMedia('pwsPhoto','pwsAudio'); });
     P.ref.child('projPhoto').on('value', s=> plApplyPhoto(s.val()||{}));
   }
   P.ref.on('value', s=>{
@@ -4420,24 +4425,30 @@ function listenGame(){
     else if (g.status==='end') showPlayerEnd(g);
   });
 }
-/* Mostra la foto della domanda/round corrente sul telefono, se presente e se corrisponde al turno attivo ora.
+/* Mostra la foto O l'audio della domanda/round corrente sul telefono, se presente e se corrisponde al turno attivo ora.
    "P.activeRoundKey" è una chiave condivisa da domande normali, trova-la-parola e anagramma: ognuna la imposta
-   quando parte un turno nuovo, così la stessa funzione funziona per tutti e tre senza rischiare foto "vecchie". */
-function pqRenderPhoto(elId){
-  const img = $(elId||'pqPhoto'); if (!img) return;
-  const v = P.lastPhotoData;
-  if (v && v.data && v.key === P.activeRoundKey) { img.src = v.data; img.style.display='block'; }
-  else { img.style.display='none'; img.src=''; }
+   quando parte un turno nuovo, così la stessa funzione funziona per tutti e tre senza rischiare media "vecchi". */
+function pqRenderMedia(imgId, audioId){
+  const img = $(imgId), aud = $(audioId);
+  const v = P.lastMediaData;
+  const match = v && v.data && v.key === P.activeRoundKey;
+  if (img) {
+    if (match && v.kind==='photo') { img.src = v.data; img.style.display='block'; }
+    else { img.style.display='none'; img.src=''; }
+  }
+  if (aud) {
+    if (match && v.kind==='audio') { if (aud.src !== v.data) aud.src = v.data; aud.style.display='block'; aud.play().catch(()=>{}); }
+    else { aud.style.display='none'; if (aud.src) { aud.pause(); aud.removeAttribute('src'); aud.load(); } }
+  }
 }
 function showPlayerQ(cur){
   if (P.curI === cur.i && $('scrPlayQ').classList.contains('active')) return; // già mostrata
   if (P.curI === cur.i && P.answered) return;
   P.curI = cur.i; P.activeRoundKey = cur.i; P.answered = false; P.t0 = Date.now(); P.dur = cur.timer*1000;
   $('pqSent').style.display='none';
-  const mediaNote = cur.mediaKind==='audio' ? '<small>🎵 Ascolta la musica!</small>' : '';
-  $('pqQText').innerHTML = cur.text ? esc(cur.text) + mediaNote : '';
+  $('pqQText').innerHTML = cur.text ? esc(cur.text) : '';
   $('pqQText').style.display = cur.text ? 'block' : 'none';
-  pqRenderPhoto();
+  pqRenderMedia('pqPhoto','pqAudio');
   P.multiSel = new Set(); P.curPattern = cur.pattern || null;
   $('pqMultiSend').style.display='none';
   if (cur.type==='mult') {
@@ -5461,7 +5472,7 @@ function showPlayerAnagram(g){
     if (P.anaStartAt !== m.startAt){
       P.anaStartAt = m.startAt; P.activeRoundKey = m.startAt; P.anaAnswered = false; P.anaPattern = m.pattern||null;
       $('paClue').textContent = m.text ? '💡 '+m.text : '';
-      pqRenderPhoto('paPhoto');
+      pqRenderMedia('paPhoto','paAudio');
       renderBoxes($('paScramble'), anaBuildScramblePattern(m.scramble), m.scramble);
       document.querySelectorAll('#paScramble .qBox').forEach(b=>b.classList.add('scramble'));
       renderBoxes($('paBoxes'), P.anaPattern, '');
@@ -5517,7 +5528,7 @@ function showPlayerWordSearch(g){
       P.wsStartAt = m.startAt; P.activeRoundKey = m.startAt; P.wsEndAt = m.endAt; P.wsDur = m.dur; P.wsGrid = m.grid; P.wsSize = m.size;
       P.wsWord = m.word; P.wsPoints = m.points; P.wsSolved = false; wsClearSel();
       $('pwsClue').textContent = m.clue ? '💡 '+m.clue : '';
-      pqRenderPhoto('pwsPhoto');
+      pqRenderMedia('pwsPhoto','pwsAudio');
       $('pwsBanner').textContent = '';
       renderWsGrid($('wsGridPl'), m.grid, m.size);
       clearInterval(($('pwsTimerBar')||{})._int);
@@ -6209,10 +6220,11 @@ function showPlayerEnd(g){
   const pos = arr.findIndex(p=>p.id===P.id)+1;
   showScreen('scrWait');
   $('waitLinktree').style.display = 'block';
-  if (g.suspense){
-    // niente spoiler: l'esito lo scoprono tutti insieme quando la regia lo mostra sul maxischermo
+  if (g.suspense && (g.podiumStage||0) < 3){
+    // niente spoiler finché la regia non rivela almeno il podio (3°,2°,1°): da quel momento in poi
+    // lo sanno tutti comunque, quindi lo mostro anche a chi segue solo da smartphone, in sincrono col resto
     $('waitMsg').textContent = '🏁 PARTITA FINITA!';
-    $('waitSub').innerHTML = 'Guarda il maxischermo per scoprire la classifica finale... 🎩';
+    $('waitSub').innerHTML = 'La regia sta per rivelare la classifica finale... resta qui, si aggiorna da sola appena è il momento! 🎩';
     return;
   }
   $('waitMsg').textContent = pos===1 ? '👑 HAI VINTO, BOSS!' : pos===2 ? '🥈 SECONDO POSTO!' : pos===3 ? '🥉 TERZO POSTO!' : 'PARTITA FINITA!';
@@ -7810,8 +7822,8 @@ function runAnagram(q){
     if (q.media.kind==='photo') anamBox.innerHTML = `<img src="${q.media.data}" class="hostMedia">`;
     else anamBox.innerHTML = `<audio id="anaAudio" controls autoplay src="${q.media.data}"></audio>`;
   }
-  if (q.media && q.media.kind==='photo' && q.media.data) G.ref.child('currentPhoto').set({ key:startAt, data:q.media.data });
-  else G.ref.child('currentPhoto').remove();
+  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:startAt, kind:q.media.kind, data:q.media.data });
+  else G.ref.child('currentMedia').remove();
   renderBoxes($('anaScrambleHost'), anaBuildScramblePattern(q.scramble), q.scramble);
   document.querySelectorAll('#anaScrambleHost .qBox').forEach(b=>b.classList.add('scramble'));
   $('anaAnswered').textContent = '0 risposte';
@@ -7969,8 +7981,8 @@ function playWsQuestion(q){
     if (q.media.kind==='photo') wsmbox.innerHTML = `<img src="${q.media.data}" class="hostMedia">`;
     else wsmbox.innerHTML = `<audio id="wsAudio" controls autoplay src="${q.media.data}"></audio>`;
   }
-  if (q.media && q.media.kind==='photo' && q.media.data) G.ref.child('currentPhoto').set({ key:startAt, data:q.media.data });
-  else G.ref.child('currentPhoto').remove();
+  if (q.media && (q.media.kind==='photo'||q.media.kind==='audio') && q.media.data) G.ref.child('currentMedia').set({ key:startAt, kind:q.media.kind, data:q.media.data });
+  else G.ref.child('currentMedia').remove();
   renderWsGrid($('wsGridHost'), placed.grid, size);
   $('wsMsg').textContent = `DOMANDA ${G.qi+1}/${G.quiz.questions.length} · 🔤 SI CERCA DAL TELEFONO!`;
   $('wsBtnAgain').textContent = (G.qi+1 >= G.quiz.questions.length) ? '🏆 PODIO FINALE' : '▶ Prossima domanda';
