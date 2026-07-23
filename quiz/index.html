@@ -480,6 +480,27 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   animation:bombFlashPulse .5s ease-out;}
 @keyframes bombFlashPulse{ 0%{opacity:0; transform:scale(.7);} 40%{opacity:1; transform:scale(1.05);} 100%{opacity:1; transform:scale(1);} }
 .bombBoomFlash .txt{font-family:'Bungee'; font-size:clamp(36px,10vw,64px); color:#fff; text-shadow:0 0 30px rgba(0,0,0,.8);}
+
+/* ===== OCCHIO ALLE FORME ===== */
+.shapeArena{position:relative; width:100%; max-width:380px; aspect-ratio:1/1.15; margin:14px auto; border-radius:22px;
+  background:radial-gradient(ellipse at center, #1a1030 0%, #0a0614 100%); border:5px solid #3a2a5c;
+  box-shadow:inset 0 0 34px rgba(0,0,0,.6), 0 10px 24px rgba(0,0,0,.5); overflow:hidden; touch-action:none;}
+.shapeTarget{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:none; opacity:.85;}
+.shapeTarget svg path, .shapeTarget svg circle, .shapeTarget svg polygon, .shapeTarget svg rect{
+  fill:none; stroke:var(--gold); stroke-width:3; stroke-dasharray:7 6; filter:drop-shadow(0 0 8px rgba(255,201,60,.6));}
+.shapeMover{position:absolute; left:0; top:0; pointer-events:none; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));}
+.shapeMover.frozen{transition:filter .2s;}
+.shapeMover.win{filter:drop-shadow(0 0 16px rgba(182,242,46,.9)) drop-shadow(0 6px 10px rgba(0,0,0,.5));}
+.shapeMover.lose{filter:drop-shadow(0 0 16px rgba(255,93,93,.9)) drop-shadow(0 6px 10px rgba(0,0,0,.5));}
+.shapePct{font-family:'Bungee'; font-size:20px; text-align:center; margin-top:12px; letter-spacing:1px;}
+.shapePct.win{color:var(--lime); text-shadow:0 0 10px rgba(182,242,46,.6);}
+.shapePct.lose{color:#ff5d5d; text-shadow:0 0 12px rgba(255,93,93,.7);}
+.shapePreviewRow{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:420px; margin:10px auto;}
+.shapePreviewRow .sBtn{width:64px; height:64px; border-radius:14px; border:3px solid rgba(255,201,60,.3); background:rgba(0,0,0,.3);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .1s;}
+.shapePreviewRow .sBtn.sel{border-color:var(--lime); box-shadow:0 0 16px rgba(182,242,46,.6); background:rgba(182,242,46,.1);}
+.shapePreviewRow .sBtn:active{transform:scale(.92);}
+.shapePreviewRow .sBtn svg{width:40px; height:40px;}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -1012,7 +1033,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.13</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.15</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2615,6 +2636,71 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="bombStatus" id="bombpStatus">✂️ TAGLIA IL FILO GIUSTO!</div>
 </div>
 <div class="bombBoomFlash" id="bombBoomFlash"><div class="txt">💥 BOOM! 💥</div></div>
+
+<!-- ==================== HOST: OCCHIO ALLE FORME ==================== -->
+<div class="screen" id="scrShapes">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">👁 OCCHIO ALLE FORME</div></div>
+  <div class="panel mt" style="max-width:460px" id="shapesSetup">
+    <div class="label">Scegli la forma</div>
+    <div class="shapePreviewRow" id="shapePicker"></div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Premio massimo</div><select id="shapePoints"></select></div>
+      <div><div class="label">O scrivilo</div><input type="number" id="shapePointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Penalità (se fuori oltre il 50%)</div><select id="shapePenalty"></select></div>
+      <div><div class="label">O scrivila</div><input type="number" id="shapePenaltyMan" class="ptsManual" placeholder="—" min="0"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Velocità (difficoltà)</div>
+        <select id="shapeSpeed">
+          <option value="70">🐢 Lenta</option>
+          <option value="120" selected>🚶 Media</option>
+          <option value="190">🏃 Veloce</option>
+          <option value="280">🚀 Pazzesca</option>
+        </select>
+      </div>
+      <div class="grow"><div class="label">Tempo</div>
+        <select id="shapeDuration">
+          <option value="10">10 secondi</option>
+          <option value="20" selected>20 secondi</option>
+          <option value="30">30 secondi</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="shapeStart()">👁 AVVIA OCCHIO ALLE FORME!</button>
+  </div>
+  <div id="shapeLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="shapeMsg"></div>
+    <div class="byline" id="shapeCount"></div>
+    <div class="lead mt" id="shapeResultsLive" style="max-width:500px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="shapeBtnAgain" onclick="openShapes()" style="display:none">🔁 Un'altra forma</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: OCCHIO ALLE FORME ==================== -->
+<div class="screen" id="scrPjShapes">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">👁 OCCHIO ALLE FORME</div></div>
+  <div class="miniMsg" id="pjShapeMsg" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="pjShapeTimerBar"></div></div>
+  <div class="shapeArena" id="pjShapeArena" style="max-width:420px"></div>
+  <div class="lead mt" id="pjShapeResults" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: OCCHIO ALLE FORME ==================== -->
+<div class="screen" id="scrPlayShapes" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="shapepName" style="color:var(--gold)"></div>
+    <div class="pill" id="shapepScore"></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:280px"><div class="timerBar" id="shapepTimerBar"></div></div>
+  <div class="byline mt" id="shapepStatus">👁 TOCCA QUANDO PENSI DI CENTRARLA!</div>
+  <div class="shapeArena" id="shapeArena"></div>
+  <div class="shapePct" id="shapepPct"></div>
+</div>
 
 <!-- ==================== HOST: SEI TROPPO FISCALE! ==================== -->
 <div class="screen" id="scrTFiscale">
@@ -4413,6 +4499,7 @@ function listenGame(){
     else if (g.status==='rdc') showPlayerRdc(g);
     else if (g.status==='mastermind') showPlayerMastermind(g);
     else if (g.status==='bomba') showPlayerBomba(g);
+    else if (g.status==='shapes') showPlayerShapes(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -5442,6 +5529,144 @@ function bombCutWire(i){
   } else {
     $('bombpStatus').textContent = `😅 SCAMPATO PER POCO... ${8-P.bombCutSet.length} fili rimasti`;
   }
+}
+/* ================================================================
+   OCCHIO ALLE FORME — motore condiviso (host/proiettore/telefono)
+================================================================ */
+const SHAPE_LIST = [
+  {id:'circle', name:'Cerchio', emoji:'⚪'}, {id:'square', name:'Quadrato', emoji:'⬜'},
+  {id:'triangle', name:'Triangolo', emoji:'🔺'}, {id:'diamond', name:'Rombo', emoji:'♦️'},
+  {id:'pentagon', name:'Pentagono', emoji:'⬠'}, {id:'hexagon', name:'Esagono', emoji:'⬡'},
+  {id:'heart', name:'Cuore', emoji:'❤️'}, {id:'star5', name:'Stella', emoji:'⭐'},
+  {id:'cross', name:'Croce', emoji:'➕'}, {id:'arrow', name:'Freccia', emoji:'➡️'}
+];
+function shapeRegularPoly(n, r, rot){
+  const pts=[]; for(let i=0;i<n;i++){ const a=(rot+i*360/n)*Math.PI/180; pts.push((50+r*Math.cos(a)).toFixed(1)+','+(50+r*Math.sin(a)).toFixed(1)); }
+  return pts.join(' ');
+}
+function shapeStarPts(spikes, oR, iR, rot){
+  const pts=[]; for(let i=0;i<spikes*2;i++){ const r=i%2===0?oR:iR; const a=(rot+i*360/(spikes*2))*Math.PI/180; pts.push((50+r*Math.cos(a)).toFixed(1)+','+(50+r*Math.sin(a)).toFixed(1)); }
+  return pts.join(' ');
+}
+function shapeGeometry(id){
+  switch(id){
+    case 'circle': return { tag:'circle', attrs:'cx="50" cy="50" r="38"', boundingR:38 };
+    case 'square': return { tag:'polygon', attrs:'points="14,14 86,14 86,86 14,86"', boundingR:38 };
+    case 'triangle': return { tag:'polygon', attrs:`points="${shapeRegularPoly(3,42,-90)}"`, boundingR:42 };
+    case 'diamond': return { tag:'polygon', attrs:'points="50,8 92,50 50,92 8,50"', boundingR:42 };
+    case 'pentagon': return { tag:'polygon', attrs:`points="${shapeRegularPoly(5,40,-90)}"`, boundingR:40 };
+    case 'hexagon': return { tag:'polygon', attrs:`points="${shapeRegularPoly(6,40,0)}"`, boundingR:40 };
+    case 'heart': return { tag:'path', attrs:'d="M50,88 C22,64 4,44 4,25 C4,10 15,1 27,1 C37,1 46,8 50,20 C54,8 63,1 73,1 C85,1 96,10 96,25 C96,44 78,64 50,88 Z"', boundingR:42 };
+    case 'star5': return { tag:'polygon', attrs:`points="${shapeStarPts(5,42,17,-90)}"`, boundingR:42 };
+    case 'cross': return { tag:'polygon', attrs:'points="34,4 66,4 66,34 96,34 96,66 66,66 66,96 34,96 34,66 4,66 4,34 34,34"', boundingR:44 };
+    case 'arrow': return { tag:'polygon', attrs:'points="4,38 56,38 56,12 97,50 56,88 56,62 4,62"', boundingR:44 };
+    default: return { tag:'circle', attrs:'cx="50" cy="50" r="38"', boundingR:38 };
+  }
+}
+function shapeTargetSvg(id){
+  const g = shapeGeometry(id);
+  return `<svg viewBox="0 0 100 100" width="100%" height="100%"><${g.tag} ${g.attrs}/></svg>`;
+}
+function shapeMoverSvg(id, gradId){
+  const g = shapeGeometry(id);
+  return `<svg viewBox="0 0 100 100" width="100%" height="100%">
+    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffe27a"/><stop offset="55%" stop-color="#ff8a3c"/><stop offset="100%" stop-color="#c2183d"/>
+    </linearGradient></defs>
+    <${g.tag} ${g.attrs} fill="url(#${gradId})" stroke="#4a1010" stroke-width="2.5"/>
+  </svg>`;
+}
+/* ================================================================
+   OCCHIO ALLE FORME — telefono
+================================================================ */
+function showPlayerShapes(g){
+  const m = g.shapes||{};
+  $('shapepName').textContent = P.name;
+  $('shapepScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayShapes');
+  if (m.phase==='active'){
+    const sig = 'act:'+m.roundId;
+    if (P.shapeSig !== sig){
+      P.shapeSig = sig; P.shapeResolved = false;
+      P.shapeId = m.shape; P.shapePoints = m.points; P.shapePenalty = m.penalty;
+      $('shapepStatus').textContent = '👁 TOCCA QUANDO PENSI DI CENTRARLA!';
+      $('shapepPct').textContent = ''; $('shapepPct').className = 'shapePct';
+      const arena = $('shapeArena');
+      arena.innerHTML = `<div class="shapeTarget" id="shapeTargetEl"></div><div class="shapeMover" id="shapeMoverEl"></div>`;
+      $('shapeTargetEl').style.width = $('shapeTargetEl').style.height = '34%';
+      $('shapeTargetEl').innerHTML = shapeTargetSvg(m.shape);
+      const moverEl = $('shapeMoverEl');
+      moverEl.style.width = moverEl.style.height = '30%';
+      moverEl.innerHTML = shapeMoverSvg(m.shape, 'shapeGrad'+Math.floor(Math.random()*99999));
+      arena.onclick = shapeStop;
+      shapeStartMovement(arena, moverEl, m.speed);
+      clearInterval(P.shapeInt);
+      P.shapeInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('shapepTimerBar').style.width = (left/(m.durationMs||1)*100)+'%';
+        if (left<=0){
+          clearInterval(P.shapeInt);
+          if (!P.shapeResolved){ P.shapeMoving=false; cancelAnimationFrame(P.shapeReq); arena.onclick=null; $('shapepStatus').textContent='⏱ TEMPO SCADUTO!'; }
+        }
+      }, 100);
+    }
+  }
+}
+function shapeStartMovement(arena, moverEl, speed){
+  const rect = arena.getBoundingClientRect();
+  const sizePx = moverEl.getBoundingClientRect().width;
+  const maxX = rect.width - sizePx, maxY = rect.height - sizePx;
+  let x = Math.random()*maxX, y = Math.random()*maxY;
+  const ang = Math.random()*Math.PI*2;
+  let vx = Math.cos(ang)*speed, vy = Math.sin(ang)*speed;
+  let lastT = performance.now();
+  P.shapeMoving = true;
+  P.shapeArenaSize = { w:rect.width, h:rect.height, sizePx };
+  const frame = (t)=>{
+    if (!P.shapeMoving) return;
+    const dt = Math.min(0.05, (t-lastT)/1000); lastT = t;
+    x += vx*dt; y += vy*dt;
+    if (x<0){ x=0; vx=-vx; } if (x>maxX){ x=maxX; vx=-vx; }
+    if (y<0){ y=0; vy=-vy; } if (y>maxY){ y=maxY; vy=-vy; }
+    moverEl.style.transform = `translate(${x}px, ${y}px)`;
+    P.shapeGetPos = ()=>({ x:x+sizePx/2, y:y+sizePx/2 });
+    P.shapeReq = requestAnimationFrame(frame);
+  };
+  P.shapeReq = requestAnimationFrame(frame);
+  P.shapeGetPos = ()=>({ x:x+sizePx/2, y:y+sizePx/2 });
+}
+function shapeStop(){
+  if (P.shapeResolved || !P.shapeMoving) return;
+  P.shapeResolved = true; P.shapeMoving = false;
+  cancelAnimationFrame(P.shapeReq);
+  clearInterval(P.shapeInt);
+  const pos = P.shapeGetPos();
+  const { w, h, sizePx } = P.shapeArenaSize;
+  const targetCenter = { x:w/2, y:h/2 };
+  const dx = pos.x-targetCenter.x, dy = pos.y-targetCenter.y;
+  const dist = Math.sqrt(dx*dx+dy*dy);
+  const g = shapeGeometry(P.shapeId||'circle');
+  const boundingRpx = (g.boundingR/100) * sizePx;
+  const overlapFrac = Math.max(0, Math.min(1, 1 - dist/(2*boundingRpx)));
+  const pct = Math.round(overlapFrac*100);
+  const moverEl = $('shapeMoverEl');
+  moverEl.classList.add('frozen');
+  $('shapeArena').onclick = null;
+  let pts = 0;
+  if (pct >= 50){
+    pts = Math.round((P.shapePoints||0)*overlapFrac/10)*10;
+    moverEl.classList.add('win');
+    $('shapepPct').className = 'shapePct win'; $('shapepPct').textContent = `🎯 ${pct}% CENTRATA! +${pts} PUNTI`;
+    $('shapepStatus').textContent = 'BEL COLPO!';
+    confetti(); if (navigator.vibrate) navigator.vibrate([80,50,120]);
+  } else {
+    pts = -(P.shapePenalty||0);
+    moverEl.classList.add('lose');
+    $('shapepPct').className = 'shapePct lose'; $('shapepPct').textContent = `😬 SOLO ${pct}% CENTRATA... ${pts} PUNTI`;
+    $('shapepStatus').textContent = 'TROPPO FUORI BERSAGLIO!';
+    if (navigator.vibrate) navigator.vibrate([150,80,150]);
+  }
+  P.ref.child('shapes/results/'+P.id).set({ pct, pts });
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -9401,24 +9626,14 @@ function bombStart(){
     $('bombDigitalHost').textContent = bombFormatTime(endAt-now);
     if (now>=endAt) clearInterval(BOMB.timerInt);
   }, 200);
-  // ogni giocatore risolve per conto suo: accredito i punti appena arriva un nuovo risultato
+  // ogni giocatore risolve per conto suo: accredito i punti (in modo atomico) appena arriva un nuovo risultato
   G.ref.child('bomba/results').on('child_added', snap=>{
     const pid = snap.key, r = snap.val();
     if (!r || BOMB.credited[pid]) return;
     BOMB.credited[pid] = true;
-    G.ref.child('players/'+pid).once('value').then(ps=>{
-      const p = ps.val(); if (!p) return;
-      let pts = 0;
-      if (r.won){
-        const frac = Math.max(0, 1 - r.t/durationMs);
-        pts = Math.round(points*frac/10)*10;
-        G.ref.child('players/'+pid+'/score').set(Math.max(0,(p.score||0)+pts));
-      } else {
-        pts = -penalty;
-        G.ref.child('players/'+pid+'/score').set(Math.max(0,(p.score||0)-penalty));
-      }
-      G.ref.child('bomba/results/'+pid+'/pts').set(pts);
-    });
+    const pts = r.won ? Math.round(points*Math.max(0,1-r.t/durationMs)/10)*10 : -penalty;
+    applyScoreDelta(pid, pts);
+    G.ref.child('bomba/results/'+pid+'/pts').set(pts);
   });
   G.ref.child('bomba/results').on('value', s=>{
     const results = s.val()||{};
@@ -9429,6 +9644,70 @@ function bombStart(){
       const pl = ps.val()||{};
       $('bombResultsLive').innerHTML = entries.map(([pid,r])=>
         `<div class="leadRow"><span class="pos">${r.won?'✅':'💥'}</span> ${esc((pl[pid]||{}).name||'?')} <span class="pts">${r.pts!=null ? (r.pts>0?'+'+r.pts:r.pts) : '…'}</span></div>`).join('')
+        || '<div class="byline">Nessun risultato ancora...</div>';
+    });
+  });
+}
+
+/* ================================================================
+   OCCHIO ALLE FORME — regia
+   (gioco individuale: ogni telefono ha la propria forma in movimento indipendente, il proiettore fa da atmosfera)
+================================================================ */
+function openShapes(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((SHAPES||{}).timerInt);
+  G.ref.child('shapes/results').off();
+  G.ref.update({ status:'shapes', shapes:{ phase:'idle' } });
+  $('shapesSetup').style.display='block'; $('shapeLive').style.display='none';
+  if (!$('shapePoints').innerHTML){
+    $('shapePoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===4?'selected':''}>${(k+1)*100} punti</option>`).join('');
+    $('shapePenalty').innerHTML = Array.from({length:10},(_,k)=>`<option value="${(k+1)*50}" ${k===2?'selected':''}>${(k+1)*50} punti</option>`).join('');
+  }
+  if (!window._shapeSel) window._shapeSel = 'circle';
+  $('shapePicker').innerHTML = SHAPE_LIST.map(s=>
+    `<div class="sBtn${window._shapeSel===s.id?' sel':''}" data-id="${s.id}" onclick="shapePickerSelect('${s.id}')" title="${s.name}">${shapeTargetSvg(s.id).replace('stroke:none','')}</div>`).join('');
+  document.querySelectorAll('#shapePicker svg').forEach(svg=> svg.style.cssText='width:36px;height:36px;');
+  document.querySelectorAll('#shapePicker svg *').forEach(el=> el.style.cssText='fill:none;stroke:var(--gold);stroke-width:5;');
+  pjSend({type:'shapeState'});
+  showScreen('scrShapes');
+}
+function shapePickerSelect(id){
+  window._shapeSel = id;
+  document.querySelectorAll('#shapePicker .sBtn').forEach(b=> b.classList.toggle('sel', b.dataset.id===id));
+}
+let SHAPES = {};
+function shapeStart(){
+  const shape = window._shapeSel||'circle';
+  const points = getPoints('shapePoints','shapePointsMan');
+  const penalty = getPoints('shapePenalty','shapePenaltyMan');
+  const speed = +($('shapeSpeed').value||120);
+  const durationSec = +($('shapeDuration').value||20);
+  const durationMs = durationSec*1000;
+  const endAt = serverNow()+durationMs;
+  const roundId = serverNow();
+  SHAPES = { credited:{} };
+  G.ref.update({ status:'shapes', shapes:{ phase:'active', shape, points, penalty, speed, endAt, durationMs, roundId } });
+  G.ref.child('shapes/results').remove();
+  $('shapesSetup').style.display='none'; $('shapeLive').style.display='block';
+  $('shapeMsg').textContent = `👁 SI GIOCA! FORMA: ${SHAPE_LIST.find(s=>s.id===shape).name.toUpperCase()}`;
+  $('shapeCount').textContent=''; $('shapeResultsLive').innerHTML=''; $('shapeBtnAgain').style.display='none';
+  pjSend({type:'shapeActive', shape, endAt, durationMs});
+  clearInterval(SHAPES.timerInt);
+  G.ref.child('shapes/results').on('child_added', snap=>{
+    const pid = snap.key, r = snap.val();
+    if (!r || SHAPES.credited[pid]) return;
+    SHAPES.credited[pid] = true;
+    applyScoreDelta(pid, r.pts);
+  });
+  G.ref.child('shapes/results').on('value', s=>{
+    const results = s.val()||{};
+    const entries = Object.entries(results);
+    $('shapeCount').textContent = `Risultati arrivati: ${entries.length}`;
+    if (entries.length>0) $('shapeBtnAgain').style.display='';
+    G.ref.child('players').once('value').then(ps=>{
+      const pl = ps.val()||{};
+      $('shapeResultsLive').innerHTML = entries.map(([pid,r])=>
+        `<div class="leadRow"><span class="pos">${r.pts>=0?'🎯':'💢'}</span> ${esc((pl[pid]||{}).name||'?')} <span class="pts">${r.pct}% · ${r.pts>0?'+'+r.pts:r.pts}</span></div>`).join('')
         || '<div class="byline">Nessun risultato ancora...</div>';
     });
   });
@@ -9784,6 +10063,7 @@ function modalGames(){
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5a3d8a,#2e1a5a); color:#fff; box-shadow:0 7px 0 #180e30,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,26,90,.4)" onclick="openRdc()">🧮 La Resa dei Conti</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a4a4a,#222); color:#fff; box-shadow:0 7px 0 #0a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4)" onclick="openMastermind()">🎯 Mastermind</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a2020,#4a1010); color:#fff; box-shadow:0 7px 0 #2a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,32,32,.4)" onclick="openBomba()">💣 Bomba a Orologeria</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c2183d,#ff8a3c); color:#fff; box-shadow:0 7px 0 #6b0e21,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(194,24,61,.4)" onclick="openShapes()">👁 Occhio alle Forme</button>
     </div>`);
 }
 function modalModules(){
@@ -10252,6 +10532,7 @@ function backToQuiz(title){
   G.ref.child('rdc/answers').off();
   G.ref.child('mastermind/pendingAttempts').off();
   G.ref.child('bomba/results').off();
+  G.ref.child('shapes/results').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -10262,7 +10543,8 @@ function backToQuiz(title){
   clearInterval((RDC||{}).timerInt);
   clearInterval((MM||{}).timerInt);
   clearInterval((BOMB||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null });
+  clearInterval((SHAPES||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -11123,6 +11405,41 @@ function pjRoute(m){
         $('bombDigitalPj').textContent = bombFormatTime(m.endAt-now);
         if (now>=m.endAt) clearInterval(window._pjBombInt);
       }, 200);
+    }
+    else if (m.type==='shapeState') {
+      showScreen('scrPjShapes');
+      $('pjShapeMsg').textContent=''; $('pjShapeTimerBar').style.width='0%';
+      $('pjShapeArena').innerHTML=''; $('pjShapeResults').innerHTML='';
+      clearInterval(window._pjShapeInt); cancelAnimationFrame(window._pjShapeReq);
+    }
+    else if (m.type==='shapeActive') {
+      showScreen('scrPjShapes');
+      $('pjShapeMsg').textContent = `👁 SI GIOCA! FORMA: ${SHAPE_LIST.find(s=>s.id===m.shape).name.toUpperCase()}`;
+      $('pjShapeResults').innerHTML='';
+      const arena = $('pjShapeArena');
+      arena.innerHTML = `<div class="shapeTarget" id="pjShapeTargetEl" style="width:34%; height:34%"></div><div class="shapeMover" id="pjShapeMoverEl" style="width:30%; height:30%"></div>`;
+      $('pjShapeTargetEl').innerHTML = shapeTargetSvg(m.shape);
+      $('pjShapeMoverEl').innerHTML = shapeMoverSvg(m.shape, 'pjShapeGrad'+Math.floor(Math.random()*99999));
+      // pura decorazione condivisa: si muove per conto suo, non incide sul punteggio di nessuno
+      const moverEl = $('pjShapeMoverEl');
+      const rect = arena.getBoundingClientRect();
+      const sizePx = moverEl.getBoundingClientRect().width;
+      const maxX = rect.width-sizePx, maxY = rect.height-sizePx;
+      let x=Math.random()*maxX, y=Math.random()*maxY, a=Math.random()*Math.PI*2, vx=Math.cos(a)*90, vy=Math.sin(a)*90, lastT=performance.now();
+      const frame=(t)=>{
+        const dt=Math.min(0.05,(t-lastT)/1000); lastT=t;
+        x+=vx*dt; y+=vy*dt;
+        if(x<0){x=0;vx=-vx;} if(x>maxX){x=maxX;vx=-vx;} if(y<0){y=0;vy=-vy;} if(y>maxY){y=maxY;vy=-vy;}
+        moverEl.style.transform=`translate(${x}px,${y}px)`;
+        window._pjShapeReq = requestAnimationFrame(frame);
+      };
+      window._pjShapeReq = requestAnimationFrame(frame);
+      clearInterval(window._pjShapeInt);
+      window._pjShapeInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjShapeTimerBar').style.width = (left/m.durationMs*100)+'%';
+        if (left<=0){ clearInterval(window._pjShapeInt); cancelAnimationFrame(window._pjShapeReq); }
+      }, 100);
     }
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
