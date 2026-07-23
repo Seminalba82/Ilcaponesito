@@ -1033,7 +1033,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.20</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.21</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -10697,6 +10697,7 @@ function pjApplyLead(v){
     $('pjLeadRows').innerHTML = (v.rows||[]).map(r=>
       `<div class="leadRow"><span class="pos">${esc(r.pos)}</span> ${esc(r.name)} <span class="pts">${esc(r.val)}</span></div>`).join('');
     ov.style.display='flex';
+    ov.scrollTop = 0; // altrimenti, se l'ultima volta era stato scorso in giù, riparte da lì invece che dal primo posto
   } else ov.style.display='none';
 }
 function pjApplyQr(v){
@@ -10707,6 +10708,15 @@ function pjApplyQr(v){
   } else ov.style.display='none';
 }
 function pjRoute(m){
+  try { pjRouteInner(m); }
+  catch(e){
+    // Un errore in UN SOLO gestore non deve più bloccare il proiettore per il resto della serata:
+    // lo segnalo nel pannello diagnostica, ma resto pronto a ricevere il prossimo messaggio.
+    console.error('pjRoute:', e);
+    pjDiagState.last = '⚠️ errore: '+(e && e.message || e); pjDiag();
+  }
+}
+function pjRouteInner(m){
     if (!m) return;
     if (m.id) { if (m.id === window._pjLastId) return; window._pjLastId = m.id; }
     pjDiagState.msgs++; pjDiagState.last = m.type; pjDiag();
