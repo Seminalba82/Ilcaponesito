@@ -820,9 +820,6 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .carN.hit{color:#fff; background:radial-gradient(circle at 35% 30%, #ff7a95, #c2183d 70%); border-color:#6e0e21;
   box-shadow:0 0 12px rgba(255,46,154,.8); animation:pop .35s;}
 .rotWrap{width:100%;}
-@media (orientation:portrait){
-  .rotWrap{position:fixed; top:50%; left:50%; width:96vh; transform:translate(-50%,-50%) rotate(90deg); z-index:5;}
-}
 
 /* ===== CARTA ROSSA CARTA NERA ===== */
 .cardsRow{display:flex; gap:2%; justify-content:center; align-items:flex-end; width:100%; max-width:900px; margin:14px auto 0; perspective:1200px;}
@@ -1015,7 +1012,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.11</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.13</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3374,7 +3371,10 @@ function initPvDrag(){
     dragging = true; p.classList.add('dragging');
     const r = p.getBoundingClientRect();
     offX = clientX - r.left; offY = clientY - r.top;
-    p.style.right = 'auto'; p.style.bottom = 'auto';
+    p.style.right = 'auto'; p.style.bottom = 'auto'; p.style.transform = 'none';
+    // sullo smartphone il CSS centra l'anteprima con un transform: lo tolgo qui, altrimenti
+    // resterebbe "sommato" alla posizione calcolata dal trascinamento, spingendola fuori schermo
+    p.style.left = r.left+'px'; p.style.top = r.top+'px';
   };
   const move = (clientX, clientY)=>{
     if (!dragging) return;
