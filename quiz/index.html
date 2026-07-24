@@ -1033,7 +1033,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.21</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.24</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1050,7 +1050,9 @@ body.suspense-on #pfRank{ display:none !important; }
     <button class="btn cy" onclick="importQuiz()">⬆ Importa quiz</button>
     <button class="btn lm" onclick="modalCampionato()">🏆 Campionato serate</button>
     <button class="btn" onclick="modalMerge()">🔀 Fondi quiz</button>
+    <button class="btn ghost" onclick="backupAllQuizzes()">💾 Backup di tutti i quiz</button>
   </div>
+  <div class="byline" style="text-transform:none; max-width:520px; text-align:center">I tuoi quiz sono salvati solo su questo dispositivo/browser. Scarica ogni tanto un backup completo, così non li perdi mai — anche se cancelli i dati di navigazione.</div>
   <div class="panel mtb" style="max-width:640px">
     <div class="label">I tuoi quiz salvati</div>
     <div id="quizList"></div>
@@ -1331,6 +1333,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <button class="hb" id="hbFast" onclick="toggleLeadOverlay('fast')">⚡ Più veloci → 📺</button>
   <button class="hb" id="hbMsg" onclick="modalPjMsg()">💬 Messaggio → 📺</button>
   <button class="hb" id="hbWa" onclick="modalWaGroup()">📱 Gruppo WhatsApp</button>
+  <button class="hb" onclick="modalPlayers()">👥 Gestisci giocatori</button>
   <button class="hb" id="hbPhoto" onclick="modalPjPhoto()">📷 Pubblica Foto</button>
   <button class="hb" onclick="modalQuestions()">📋 Scelta domanda</button>
   <button class="hb" onclick="modalGames()" style="border-color:var(--gold); color:var(--gold)">🕹 GIOCHI</button>
@@ -3949,6 +3952,14 @@ function saveQuiz(andPlay){
   persist();
   if (andPlay) playQuiz(curQuiz._idx); else { loadQuizList(); showScreen('scrHome'); }
 }
+function backupAllQuizzes(){
+  if (!quizzes.length) return alert('Non hai ancora nessun quiz salvato da mettere al sicuro.');
+  const backup = { backupType:'capone-quiz-backup', createdAt:new Date().toISOString(), quizzes };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(backup)],{type:'application/json'}));
+  const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  a.download = `Backup_Il_Capone_Quiz_${dateStr}.caponequizbackup.json`; a.click();
+}
 function exportQuiz(){
   const t = $('edTitle').value.trim()||'quiz'; curQuiz.title=t;
   const a = document.createElement('a');
@@ -3958,7 +3969,26 @@ function exportQuiz(){
 function importQuiz(){ $('importFile').click(); }
 $('importFile').addEventListener('change', e=>{
   const f=e.target.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const q=JSON.parse(r.result); if(!q.questions) throw 0; delete q._idx; quizzes.push(q); persist(); loadQuizList(); alert('✔ Quiz "'+q.title+'" importato!'); }catch(_){ alert('File non valido.'); } };
+  r.onload=()=>{
+    try{
+      const data = JSON.parse(r.result);
+      // riconosco da solo se è un backup con più quiz dentro, o un quiz singolo come prima
+      if (data.backupType==='capone-quiz-backup' && Array.isArray(data.quizzes)){
+        let added=0, skipped=0;
+        data.quizzes.forEach(q=>{
+          if (!q || !q.questions) return;
+          if (quizzes.some(existing=>existing.title===q.title)) { skipped++; return; } // evito doppioni se lo reimporti per sbaglio
+          delete q._idx; quizzes.push(q); added++;
+        });
+        persist(); loadQuizList();
+        alert(`✔ Backup ripristinato: ${added} quiz aggiunti${skipped?`, ${skipped} già presenti (saltati)`:''}.`);
+      } else {
+        if(!data.questions) throw 0;
+        delete data._idx; quizzes.push(data); persist(); loadQuizList();
+        alert('✔ Quiz "'+data.title+'" importato!');
+      }
+    }catch(_){ alert('File non valido.'); }
+  };
   r.readAsText(f); e.target.value='';
 });
 
@@ -3983,6 +4013,7 @@ function playQuiz(i){
   G.url = url;
   $('qrBox').innerHTML=''; new QRCode($('qrBox'), { text:url, width:210, height:210, colorDark:'#0b0614' });
   $('lobbyPlayers').innerHTML=''; $('lobbyCount').textContent='0';
+  G.ref.child('players').off();
   G.ref.child('players').on('value', s=>{
     const p = s.val()||{}; const arr = Object.values(p);
     $('lobbyCount').textContent = arr.length;
@@ -4034,6 +4065,7 @@ function resumeGame(){
     G.url = url;
     $('lobbyQuizName').textContent = quiz.title; $('lobbyCode').textContent = code;
     $('qrBox').innerHTML=''; new QRCode($('qrBox'), { text:url, width:210, height:210, colorDark:'#0b0614' });
+    G.ref.child('players').off(); // niente ascoltatori accumulati se la funzione venisse richiamata più di una volta
     G.ref.child('players').on('value', s2=>{
       const p = s2.val()||{}; const arr = Object.values(p);
       $('lobbyCount').textContent = arr.length;
@@ -4351,18 +4383,25 @@ function joinGame(){
   const gref = db.ref('caponequiz/games/'+P.code);
   gref.child('status').once('value').then(s=>{
     if (!s.exists()) { $('joinErr').style.display='block'; $('joinErr').textContent='⚠️ Partita non trovata. Controlla il codice o riscansiona il QR.'; return; }
-    // nome unico per partita: niente doppioni in classifica
-    gref.child('players').once('value').then(ps=>{
-    const taken = Object.values(ps.val()||{}).some(p=> norm(p.name)===norm(name));
-    if (taken) { $('joinErr').style.display='block'; $('joinErr').textContent='🎩 "'+name+'" è già in partita! Scegli un altro nome (es. '+name+'2), oppure usa "Ho cambiato telefono" qui sotto se sei tu.'; return; }
-    $('joinErr').style.display='none';
-    P.ref = gref;
-    const tok = 'tok'+Date.now()+Math.random().toString(36).slice(2);
-    const pref = gref.child('players').push({ name, score:0, sessionTok:tok });
-    P.id = pref.key; P.name = name;
-    try{ localStorage.setItem('capone_sess_'+P.code, JSON.stringify({id:P.id, name, tok})); }catch(e){}
-    $('pqName').textContent = name;
-    listenGame();
+    const pref = gref.child('players').push(); // genero subito la chiave, senza ancora scrivere nulla
+    const myId = pref.key;
+    const nameKey = norm(name);
+    // prenotazione ATOMICA del nome tramite transazione: al sicuro anche se due persone si iscrivono
+    // con lo stesso nome nello stesso istante (tipico proprio a inizio serata, tutti insieme sul QR)
+    gref.child('nameLock/'+nameKey).transaction(cur => cur ? cur : myId).then(res=>{
+      if (!res.committed || res.snapshot.val() !== myId){
+        $('joinErr').style.display='block';
+        $('joinErr').textContent='🎩 "'+name+'" è già in partita! Scegli un altro nome (es. '+name+'2), oppure usa "Ho cambiato telefono" qui sotto se sei tu.';
+        return;
+      }
+      $('joinErr').style.display='none';
+      P.ref = gref;
+      const tok = 'tok'+Date.now()+Math.random().toString(36).slice(2);
+      pref.set({ name, score:0, sessionTok:tok });
+      P.id = myId; P.name = name;
+      try{ localStorage.setItem('capone_sess_'+P.code, JSON.stringify({id:P.id, name, tok})); }catch(e){}
+      $('pqName').textContent = name;
+      listenGame();
     });
   });
 }
@@ -9965,6 +10004,24 @@ function waPickSaved(sel){
   const list = waSavedList();
   const entry = list.find(e=>e.title===sel.value);
   if (entry){ $('waTitleIn').value = entry.title; $('waLinkIn').value = entry.link; }
+}
+function modalPlayers(){
+  if (!G) return alert('Avvia prima una partita!');
+  G.ref.child('players').once('value').then(ps=>{
+    const players = ps.val()||{};
+    const arr = Object.entries(players).map(([id,p])=>({id,...p})).sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+    openModal('👥 GIOCATORI COLLEGATI', `
+      <div class="byline" style="text-transform:none; letter-spacing:0">Ordinati per nome: se due voci molto simili ti sembrano la stessa squadra entrata due volte, elimina quella di troppo con il cestino.</div>
+      <div class="lead mt" id="playersMgmtList">${arr.length ? arr.map(p=>
+        `<div class="leadRow"><span style="flex:1">${esc(p.name)}</span> <span class="pts" style="margin-right:10px">${p.score||0} pt</span>
+         <button class="btn small ghost" onclick="delPlayerConfirm('${p.id}','${esc(p.name).replace(/'/g,"\\'")}')" title="Rimuovi questo giocatore">🗑</button></div>`).join('')
+        : '<div class="byline">Nessun giocatore ancora collegato.</div>'}</div>`);
+  });
+}
+function delPlayerConfirm(pid, name){
+  if (!confirm(`Rimuovere "${name}" dalla partita? Perderà il suo punteggio.`)) return;
+  G.ref.child('players/'+pid).remove();
+  modalPlayers(); // ricarico la lista aggiornata
 }
 function modalWaGroup(){
   let savedTitle=''; let savedLink='';
