@@ -1061,7 +1061,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.30</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.31</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -4160,8 +4160,9 @@ function playQuiz(i){
   const code = randCode();
   G = { code, quiz, qi:-1, played:new Set(), ref: db.ref('caponequiz/games/'+code) };
   try{ localStorage.setItem('capone_last_game', code); localStorage.setItem('capone_last_quiz_idx', i); }catch(e){}
-  suspenseMode = false; $('hbSuspense').classList.remove('on');
-  G.ref.set({ status:'lobby', title:quiz.title, created:Date.now(), ver:APP_V, suspense:false });
+  suspenseMode = true; $('hbSuspense').classList.add('on');
+  G.ref.set({ status:'lobby', title:quiz.title, created:Date.now(), ver:APP_V, suspense:true });
+  openProjector(); // apertura automatica, così trovi già tutto pronto: la disattivi tu chiudendo la finestra se non ti serve
   // NIENTE PIÙ onDisconnect().remove(): se salta la corrente o cade la connessione, la partita
   // (punteggi, domanda a cui eravamo arrivati) resta salvata su Firebase finché non premi "Termina quiz".
   $('lobbyQuizName').textContent = quiz.title;
