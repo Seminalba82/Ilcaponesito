@@ -501,6 +501,23 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .shapePreviewRow .sBtn.sel{border-color:var(--lime); box-shadow:0 0 16px rgba(182,242,46,.6); background:rgba(182,242,46,.1);}
 .shapePreviewRow .sBtn:active{transform:scale(.92);}
 .shapePreviewRow .sBtn svg{width:40px; height:40px;}
+
+/* ===== TROVA LE DIFFERENZE ===== */
+.fdImgWrap{position:relative; width:100%; max-width:420px; margin:10px auto; border-radius:16px; overflow:hidden;
+  border:3px solid rgba(157,77,255,.4); box-shadow:0 8px 20px rgba(0,0,0,.4); cursor:crosshair; touch-action:none;}
+.fdImgWrap img{display:block; width:100%; height:auto; pointer-events:none; user-select:none;}
+.fdImgWrap.small{max-width:220px; cursor:default; opacity:.9;}
+.fdMarker{position:absolute; width:30px; height:30px; border-radius:50%; transform:translate(-50%,-50%);
+  border:3px solid var(--gold); background:rgba(255,201,60,.18); display:flex; align-items:center; justify-content:center;
+  font-family:'Bungee'; font-size:13px; color:var(--gold); pointer-events:none;}
+.fdMarker.found{border-color:var(--lime); background:rgba(182,242,46,.28); color:var(--lime);
+  animation:fdPop .4s ease-out; box-shadow:0 0 14px rgba(182,242,46,.7);}
+@keyframes fdPop{ 0%{transform:translate(-50%,-50%) scale(.3);} 60%{transform:translate(-50%,-50%) scale(1.3);} 100%{transform:translate(-50%,-50%) scale(1);} }
+.fdMiss{position:absolute; width:26px; height:26px; border-radius:50%; transform:translate(-50%,-50%);
+  border:3px solid #ff5d5d; pointer-events:none; animation:fdMissFade .6s ease-out forwards;}
+@keyframes fdMissFade{ 0%{opacity:1; transform:translate(-50%,-50%) scale(.5);} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.4);} }
+.fdProgress{font-family:'Bungee'; font-size:22px; text-align:center; margin:10px 0; color:var(--gold); letter-spacing:1px;}
+.fdLabel{font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); text-align:center; margin-bottom:6px;}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -1033,7 +1050,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.24</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.26</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2705,6 +2722,90 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="shapePct" id="shapepPct"></div>
 </div>
 
+<!-- ==================== HOST: TROVA LE DIFFERENZE ==================== -->
+<div class="screen" id="scrFindDiff">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🔍 TROVA LE DIFFERENZE</div></div>
+  <div class="panel mt" style="max-width:460px" id="fdSetup">
+    <div id="fdStep1">
+      <div id="fdSavedRow"></div>
+      <div class="label mt">1. Carica le due foto</div>
+      <div class="row mt">
+        <button class="btn cy grow" onclick="$('fdOrigFile').click()">📷 Foto originale</button>
+        <input type="file" id="fdOrigFile" accept="image/*" style="display:none">
+      </div>
+      <div id="fdOrigPreview" class="byline mt"></div>
+      <div class="row mt">
+        <button class="btn cy grow" onclick="$('fdModFile').click()">📷 Foto con gli errori</button>
+        <input type="file" id="fdModFile" accept="image/*" style="display:none">
+      </div>
+      <div id="fdModPreview" class="byline mt"></div>
+    </div>
+    <div id="fdStep2" style="display:none">
+      <div class="label">2. Tocca sulla foto i 5 punti esatti delle differenze</div>
+      <div class="fdProgress" id="fdMarkCount">0 / 5 segnati</div>
+      <div class="fdImgWrap" id="fdAnnotateWrap"></div>
+      <div class="row mt" style="justify-content:center">
+        <button class="btn ghost" onclick="fdUndoMark()">↩ Annulla ultimo punto</button>
+        <button class="btn ghost" onclick="fdRestartUpload()">🔁 Cambia foto</button>
+      </div>
+    </div>
+    <div id="fdStep3" style="display:none">
+      <div class="row mt">
+        <div class="grow"><div class="label">Punti totali (a foto completa)</div><select id="fdPoints"></select></div>
+        <div><div class="label">O scrivili</div><input type="number" id="fdPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+      </div>
+      <div class="row mt">
+        <div class="grow"><div class="label">Penalità per tocco a vuoto</div><select id="fdPenalty"></select></div>
+        <div><div class="label">O scrivila</div><input type="number" id="fdPenaltyMan" class="ptsManual" placeholder="—" min="0"></div>
+      </div>
+      <div class="label mt">Tempo</div>
+      <select id="fdDuration">
+        <option value="20">20 secondi</option>
+        <option value="30" selected>30 secondi</option>
+        <option value="45">45 secondi</option>
+        <option value="60">60 secondi</option>
+      </select>
+      <button class="btn ghost mt" style="width:100%" onclick="fdSaveSetPrompt()">💾 Salva questo set per riusarlo in futuro</button>
+      <button class="btn mg mt" style="width:100%" onclick="fdStart()">🔍 AVVIA TROVA LE DIFFERENZE!</button>
+    </div>
+  </div>
+  <div id="fdLive" style="display:none; width:100%" class="center">
+    <div class="byline" id="fdCount"></div>
+    <div class="lead mt" id="fdResultsLive" style="max-width:500px; width:100%"></div>
+    <div class="row mt" style="justify-content:center">
+      <button class="btn cy" id="fdBtnAgain" onclick="openFindDiff()" style="display:none">🔁 Un'altra foto</button>
+    </div>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: TROVA LE DIFFERENZE ==================== -->
+<div class="screen" id="scrPjFindDiff">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🔍 TROVA LE DIFFERENZE</div></div>
+  <div class="miniMsg">CERCATE 5 DIFFERENZE DAL TELEFONO!</div>
+  <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="pjFdTimerBar"></div></div>
+  <div class="row mt" style="justify-content:center; flex-wrap:wrap; gap:20px">
+    <div><div class="fdLabel">Originale</div><div class="fdImgWrap small" style="max-width:300px"><img id="pjFdOrig"></div></div>
+    <div><div class="fdLabel">Con gli errori</div><div class="fdImgWrap small" style="max-width:300px"><img id="pjFdMod"></div></div>
+  </div>
+  <div class="lead mt" id="pjFdResults" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: TROVA LE DIFFERENZE ==================== -->
+<div class="screen" id="scrPlayFindDiff" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="fdpName" style="color:var(--gold)"></div>
+    <div class="pill" id="fdpScore"></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="fdpTimerBar"></div></div>
+  <div class="fdProgress" id="fdpProgress">0 / 5 trovati</div>
+  <div class="fdLabel">Originale (di riferimento)</div>
+  <div class="fdImgWrap small" id="fdpOrigWrap"><img id="fdpOrigImg"></div>
+  <div class="fdLabel mt">Tocca qui dove vedi una differenza</div>
+  <div class="fdImgWrap" id="fdpModWrap"><img id="fdpModImg"></div>
+  <div class="byline mt" id="fdpStatus"></div>
+</div>
+
 <!-- ==================== HOST: SEI TROPPO FISCALE! ==================== -->
 <div class="screen" id="scrTFiscale">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">💶 SEI TROPPO FISCALE!</div></div>
@@ -3953,8 +4054,14 @@ function saveQuiz(andPlay){
   if (andPlay) playQuiz(curQuiz._idx); else { loadQuizList(); showScreen('scrHome'); }
 }
 function backupAllQuizzes(){
-  if (!quizzes.length) return alert('Non hai ancora nessun quiz salvato da mettere al sicuro.');
-  const backup = { backupType:'capone-quiz-backup', createdAt:new Date().toISOString(), quizzes };
+  const waSaved = waSavedList();
+  const hrsNames = (()=>{ try{ return JSON.parse(localStorage.getItem('capone_hrs_names')||'[]'); }catch(e){ return []; } })();
+  const fdSaved = fdSavedList();
+  if (!quizzes.length && !waSaved.length && !hrsNames.length && !fdSaved.length){
+    return alert('Non hai ancora nessun dato salvato da mettere al sicuro (né quiz, né gruppi WhatsApp, né altro).');
+  }
+  const backup = { backupType:'capone-quiz-backup', createdAt:new Date().toISOString(),
+    quizzes, waGroups: waSaved, horseNames: hrsNames, findDiffSets: fdSaved };
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(backup)],{type:'application/json'}));
   const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -3981,7 +4088,28 @@ $('importFile').addEventListener('change', e=>{
           delete q._idx; quizzes.push(q); added++;
         });
         persist(); loadQuizList();
-        alert(`✔ Backup ripristinato: ${added} quiz aggiunti${skipped?`, ${skipped} già presenti (saltati)`:''}.`);
+        // ripristino anche le altre categorie salvate localmente, se presenti nel backup (evitando doppioni per titolo)
+        let waAdded=0, hrsAdded=0, fdAdded=0;
+        if (Array.isArray(data.waGroups)){
+          const cur = waSavedList();
+          data.waGroups.forEach(w=>{ if (w && w.title && w.link && !cur.some(x=>x.title===w.title)){ cur.push(w); waAdded++; } });
+          try{ localStorage.setItem('capone_wa_saved', JSON.stringify(cur)); }catch(e){}
+        }
+        if (Array.isArray(data.horseNames) && data.horseNames.length){
+          try{
+            const cur = JSON.parse(localStorage.getItem('capone_hrs_names')||'[]');
+            const merged = [...new Set([...cur, ...data.horseNames])];
+            hrsAdded = merged.length - cur.length;
+            localStorage.setItem('capone_hrs_names', JSON.stringify(merged));
+          }catch(e){}
+        }
+        if (Array.isArray(data.findDiffSets)){
+          const cur = fdSavedList();
+          data.findDiffSets.forEach(s=>{ if (s && s.title && !cur.some(x=>x.title===s.title)){ cur.push(s); fdAdded++; } });
+          try{ localStorage.setItem('capone_fd_saved', JSON.stringify(cur)); }catch(e){}
+        }
+        const extras = [waAdded&&`${waAdded} gruppi WhatsApp`, hrsAdded>0&&`${hrsAdded} nomi cavalli`, fdAdded&&`${fdAdded} set Trova le Differenze`].filter(Boolean).join(', ');
+        alert(`✔ Backup ripristinato: ${added} quiz aggiunti${skipped?`, ${skipped} già presenti (saltati)`:''}${extras?`. Inoltre: ${extras}.`:''}`);
       } else {
         if(!data.questions) throw 0;
         delete data._idx; quizzes.push(data); persist(); loadQuizList();
@@ -4539,6 +4667,7 @@ function listenGame(){
     else if (g.status==='mastermind') showPlayerMastermind(g);
     else if (g.status==='bomba') showPlayerBomba(g);
     else if (g.status==='shapes') showPlayerShapes(g);
+    else if (g.status==='finddiff') showPlayerFindDiff(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -5758,6 +5887,77 @@ function shapeStop(){
     if (navigator.vibrate) navigator.vibrate([150,80,150]);
   }
   P.ref.child('shapes/results/'+P.id).set({ pct, pts });
+}
+/* ================================================================
+   TROVA LE DIFFERENZE — telefono
+================================================================ */
+function showPlayerFindDiff(g){
+  const m = g.finddiff||{};
+  $('fdpName').textContent = P.name;
+  $('fdpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayFindDiff');
+  if (m.phase==='active'){
+    const sig = 'act:'+m.roundId;
+    if (P.fdSig !== sig){
+      P.fdSig = sig; P.fdResolved = false; P.fdFound = new Set(); P.fdWrongTaps = 0;
+      P.fdPoints = m.points; P.fdPenalty = m.penalty; P.fdMarkers = m.markers;
+      $('fdpOrigImg').src = m.origPhoto; $('fdpModImg').src = m.modPhoto;
+      $('fdpProgress').textContent = '0 / 5 trovati';
+      $('fdpStatus').textContent = '🔍 TOCCA DOVE VEDI UNA DIFFERENZA!';
+      const wrap = $('fdpModWrap');
+      wrap.querySelectorAll('.fdMarker, .fdMiss').forEach(el=>el.remove());
+      wrap.onclick = fdPlayerTap;
+      clearInterval(P.fdInt);
+      P.fdInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('fdpTimerBar').style.width = (left/(m.durationMs||1)*100)+'%';
+        if (left<=0){
+          clearInterval(P.fdInt);
+          if (!P.fdResolved) fdPlayerFinish();
+        }
+      }, 100);
+    }
+  }
+}
+function fdPlayerTap(ev){
+  if (P.fdResolved || P.fdFound.size>=5) return;
+  const wrap = $('fdpModWrap');
+  const rect = wrap.getBoundingClientRect();
+  const clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+  const clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+  const xPct = (clientX-rect.left)/rect.width*100, yPct = (clientY-rect.top)/rect.height*100;
+  let hitIdx = -1, bestDist = 99999;
+  P.fdMarkers.forEach((mk,i)=>{
+    if (P.fdFound.has(i)) return;
+    const d = Math.sqrt((mk.x-xPct)**2 + (mk.y-yPct)**2);
+    if (d < 6 && d < bestDist) { bestDist = d; hitIdx = i; }
+  });
+  if (hitIdx>=0){
+    P.fdFound.add(hitIdx);
+    const el = document.createElement('div');
+    el.className = 'fdMarker found'; el.style.left = P.fdMarkers[hitIdx].x+'%'; el.style.top = P.fdMarkers[hitIdx].y+'%';
+    el.textContent = '✓'; wrap.appendChild(el);
+    $('fdpProgress').textContent = `${P.fdFound.size} / 5 trovati`;
+    if (navigator.vibrate) navigator.vibrate(50);
+    if (P.fdFound.size>=5){ $('fdpStatus').textContent = '🎉 TROVATE TUTTE E 5!'; fdPlayerFinish(); }
+  } else {
+    P.fdWrongTaps++;
+    const miss = document.createElement('div');
+    miss.className = 'fdMiss'; miss.style.left = xPct+'%'; miss.style.top = yPct+'%';
+    wrap.appendChild(miss); setTimeout(()=> miss.remove(), 650);
+    if (navigator.vibrate) navigator.vibrate(120);
+  }
+}
+function fdPlayerFinish(){
+  if (P.fdResolved) return;
+  P.fdResolved = true;
+  clearInterval(P.fdInt);
+  $('fdpModWrap').onclick = null;
+  const found = P.fdFound.size;
+  const pts = Math.round(P.fdPoints*found/5/10)*10 - P.fdWrongTaps*(P.fdPenalty||0);
+  if (found<5) $('fdpStatus').textContent = `⏱ TEMPO SCADUTO! Trovate ${found}/5`;
+  if (found===5) confetti();
+  P.ref.child('finddiff/results/'+P.id).set({ found, wrong:P.fdWrongTaps, pts });
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -9805,6 +10005,152 @@ function shapeStart(){
 }
 
 /* ================================================================
+   TROVA LE DIFFERENZE — regia
+================================================================ */
+let FD = { markers:[], orig:null, mod:null };
+function openFindDiff(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((FD||{}).timerInt);
+  G.ref.child('finddiff/results').off();
+  G.ref.update({ status:'finddiff', finddiff:{ phase:'idle' } });
+  FD = { markers:[], orig:null, mod:null };
+  $('fdSetup').style.display='block'; $('fdLive').style.display='none';
+  $('fdStep1').style.display='block'; $('fdStep2').style.display='none'; $('fdStep3').style.display='none';
+  $('fdOrigPreview').innerHTML=''; $('fdModPreview').innerHTML='';
+  if (!$('fdPoints').innerHTML){
+    $('fdPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===4?'selected':''}>${(k+1)*100} punti</option>`).join('');
+    $('fdPenalty').innerHTML = Array.from({length:8},(_,k)=>`<option value="${(k+1)*20}" ${k===1?'selected':''}>${(k+1)*20} punti</option>`).join('');
+  }
+  showScreen('scrFindDiff');
+  fdRenderSavedRow();
+}
+function fdSavedList(){
+  try{ return JSON.parse(localStorage.getItem('capone_fd_saved')||'[]'); }catch(e){ return []; }
+}
+function fdRenderSavedRow(){
+  const list = fdSavedList();
+  $('fdSavedRow').innerHTML = list.length ? `
+    <div class="label">Set già salvati</div>
+    <div class="row">
+      <select id="fdSavedSel" class="grow">
+        <option value="">— scegli un set già pronto —</option>
+        ${list.map(s=>`<option value="${esc(s.title)}">${esc(s.title)}</option>`).join('')}
+      </select>
+      <button class="btn small cy" onclick="fdLoadSet($('fdSavedSel').value)">▶ Usa</button>
+      <button class="btn small ghost" onclick="fdDeleteSet($('fdSavedSel').value)" title="Elimina questo set">🗑</button>
+    </div>` : '';
+}
+function fdLoadSet(title){
+  if (!title) return;
+  const list = fdSavedList();
+  const s = list.find(x=>x.title===title);
+  if (!s) return;
+  FD = { markers: s.markers, orig: s.orig, mod: s.mod };
+  $('fdOrigPreview').innerHTML = `<img src="${s.orig}" style="max-width:100%; max-height:120px; border-radius:8px">`;
+  $('fdModPreview').innerHTML = `<img src="${s.mod}" style="max-width:100%; max-height:120px; border-radius:8px">`;
+  $('fdStep1').style.display='none'; $('fdStep2').style.display='none'; $('fdStep3').style.display='block';
+}
+function fdDeleteSet(title){
+  if (!title) return;
+  if (!confirm(`Eliminare il set "${title}" salvato?`)) return;
+  const list = fdSavedList().filter(x=>x.title!==title);
+  try{ localStorage.setItem('capone_fd_saved', JSON.stringify(list)); }catch(e){}
+  fdRenderSavedRow();
+}
+function fdSaveSetPrompt(){
+  if (FD.markers.length!==5) return alert('Servono esattamente 5 punti segnati prima di salvare il set!');
+  const title = prompt('Che nome vuoi dare a questo set (es. "Bar Da Nino — vetrina")?');
+  if (!title || !title.trim()) return;
+  const list = fdSavedList();
+  const i = list.findIndex(s=>s.title===title.trim());
+  const entry = { title:title.trim(), orig:FD.orig, mod:FD.mod, markers:FD.markers };
+  if (i>=0) list[i] = entry; else list.push(entry);
+  try{
+    localStorage.setItem('capone_fd_saved', JSON.stringify(list));
+    alert(`✔ Set "${entry.title}" salvato! La prossima volta lo richiami dal menu, senza ricaricare nulla.`);
+  }catch(e){ alert('⚠️ Memoria piena: prova a eliminare qualche set salvato più vecchio, o usa foto più piccole.'); }
+}
+$('fdOrigFile').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  compressImageFile(f, {maxDim:900, quality:0.85, maxBytes:700*1024}).then(res=>{
+    FD.orig = res.dataUrl;
+    $('fdOrigPreview').innerHTML = `<img src="${res.dataUrl}" style="max-width:100%; max-height:120px; border-radius:8px">`;
+    fdCheckBothUploaded();
+  }).catch(()=> alert('⚠️ Non sono riuscito a leggere questa immagine.'));
+});
+$('fdModFile').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  compressImageFile(f, {maxDim:900, quality:0.85, maxBytes:700*1024}).then(res=>{
+    FD.mod = res.dataUrl;
+    $('fdModPreview').innerHTML = `<img src="${res.dataUrl}" style="max-width:100%; max-height:120px; border-radius:8px">`;
+    fdCheckBothUploaded();
+  }).catch(()=> alert('⚠️ Non sono riuscito a leggere questa immagine.'));
+});
+function fdCheckBothUploaded(){
+  if (!FD.orig || !FD.mod) return;
+  $('fdStep1').style.display='none'; $('fdStep2').style.display='block';
+  const wrap = $('fdAnnotateWrap');
+  wrap.innerHTML = `<img src="${FD.mod}">`;
+  wrap.onclick = fdAnnotateClick;
+  FD.markers = [];
+  fdRenderMarkers();
+}
+function fdAnnotateClick(ev){
+  if (FD.markers.length>=5) return;
+  const wrap = $('fdAnnotateWrap');
+  const rect = wrap.getBoundingClientRect();
+  const xPct = (ev.clientX-rect.left)/rect.width*100, yPct = (ev.clientY-rect.top)/rect.height*100;
+  FD.markers.push({x:xPct, y:yPct});
+  fdRenderMarkers();
+}
+function fdRenderMarkers(){
+  const wrap = $('fdAnnotateWrap');
+  wrap.querySelectorAll('.fdMarker').forEach(el=>el.remove());
+  FD.markers.forEach((mk,i)=>{
+    const el = document.createElement('div');
+    el.className = 'fdMarker'; el.style.left=mk.x+'%'; el.style.top=mk.y+'%'; el.textContent = i+1;
+    wrap.appendChild(el);
+  });
+  $('fdMarkCount').textContent = `${FD.markers.length} / 5 segnati`;
+  if (FD.markers.length===5){ $('fdStep2').style.display='none'; $('fdStep3').style.display='block'; }
+}
+function fdUndoMark(){ FD.markers.pop(); $('fdStep3').style.display='none'; $('fdStep2').style.display='block'; fdRenderMarkers(); }
+function fdRestartUpload(){ FD = {markers:[], orig:null, mod:null}; $('fdStep2').style.display='none'; $('fdStep1').style.display='block'; $('fdOrigPreview').innerHTML=''; $('fdModPreview').innerHTML=''; }
+function fdStart(){
+  const points = getPoints('fdPoints','fdPointsMan');
+  const penalty = getPoints('fdPenalty','fdPenaltyMan');
+  const durationSec = +($('fdDuration').value||30);
+  const durationMs = durationSec*1000;
+  const endAt = serverNow()+durationMs;
+  const roundId = serverNow();
+  FD.credited = {};
+  G.ref.update({ status:'finddiff', finddiff:{ phase:'active', origPhoto:FD.orig, modPhoto:FD.mod, markers:FD.markers, points, penalty, endAt, durationMs, roundId } });
+  G.ref.child('finddiff/results').remove();
+  $('fdSetup').style.display='none'; $('fdLive').style.display='block';
+  $('fdCount').textContent=''; $('fdResultsLive').innerHTML=''; $('fdBtnAgain').style.display='none';
+  pjSend({type:'fdActive', origPhoto:FD.orig, modPhoto:FD.mod, endAt, durationMs});
+  clearInterval(FD.timerInt);
+  G.ref.child('finddiff/results').on('child_added', snap=>{
+    const pid = snap.key, r = snap.val();
+    if (!r || FD.credited[pid]) return;
+    FD.credited[pid] = true;
+    applyScoreDelta(pid, r.pts);
+  });
+  G.ref.child('finddiff/results').on('value', s=>{
+    const results = s.val()||{};
+    const entries = Object.entries(results);
+    $('fdCount').textContent = `Risultati arrivati: ${entries.length}`;
+    if (entries.length>0) $('fdBtnAgain').style.display='';
+    G.ref.child('players').once('value').then(ps=>{
+      const pl = ps.val()||{};
+      $('fdResultsLive').innerHTML = entries.map(([pid,r])=>
+        `<div class="leadRow"><span class="pos">${r.found===5?'🎉':'🔍'}</span> ${esc((pl[pid]||{}).name||'?')} <span class="pts">${r.found}/5 · ${r.pts>0?'+'+r.pts:r.pts}</span></div>`).join('')
+        || '<div class="byline">Nessun risultato ancora...</div>';
+    });
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -10207,6 +10553,7 @@ function modalGames(){
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a4a4a,#222); color:#fff; box-shadow:0 7px 0 #0a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4)" onclick="openMastermind()">🎯 Mastermind</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a2020,#4a1010); color:#fff; box-shadow:0 7px 0 #2a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,32,32,.4)" onclick="openBomba()">💣 Bomba a Orologeria</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c2183d,#ff8a3c); color:#fff; box-shadow:0 7px 0 #6b0e21,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(194,24,61,.4)" onclick="openShapes()">👁 Occhio alle Forme</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a2fb8,#9d4dff); color:#fff; box-shadow:0 7px 0 #2a1866,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.4)" onclick="openFindDiff()">🔍 Trova le Differenze</button>
     </div>`);
 }
 function modalModules(){
@@ -10676,6 +11023,7 @@ function backToQuiz(title){
   G.ref.child('mastermind/pendingAttempts').off();
   G.ref.child('bomba/results').off();
   G.ref.child('shapes/results').off();
+  G.ref.child('finddiff/results').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -10687,7 +11035,8 @@ function backToQuiz(title){
   clearInterval((MM||{}).timerInt);
   clearInterval((BOMB||{}).timerInt);
   clearInterval((SHAPES||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null });
+  clearInterval((FD||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -11598,6 +11947,17 @@ function pjRouteInner(m){
         const left = Math.max(0, m.endAt - serverNow());
         $('pjShapeTimerBar').style.width = (left/m.durationMs*100)+'%';
         if (left<=0){ clearInterval(window._pjShapeInt); cancelAnimationFrame(window._pjShapeReq); }
+      }, 100);
+    }
+    else if (m.type==='fdActive') {
+      showScreen('scrPjFindDiff');
+      $('pjFdOrig').src = m.origPhoto; $('pjFdMod').src = m.modPhoto;
+      $('pjFdResults').innerHTML='';
+      clearInterval(window._pjFdInt);
+      window._pjFdInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjFdTimerBar').style.width = (left/m.durationMs*100)+'%';
+        if (left<=0) clearInterval(window._pjFdInt);
       }, 100);
     }
     else if (m.type==='podium') {
