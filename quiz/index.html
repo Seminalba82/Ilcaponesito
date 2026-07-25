@@ -503,10 +503,10 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .shapePreviewRow .sBtn svg{width:40px; height:40px;}
 
 /* ===== TROVA LE DIFFERENZE ===== */
-.fdImgWrap{position:relative; width:100%; max-width:420px; margin:10px auto; border-radius:16px; overflow:hidden;
+.fdImgWrap{position:relative; width:100%; max-width:300px; margin:10px auto; border-radius:16px; overflow:hidden;
   border:3px solid rgba(157,77,255,.4); box-shadow:0 8px 20px rgba(0,0,0,.4); cursor:crosshair; touch-action:none;}
 .fdImgWrap img{display:block; width:100%; height:auto; pointer-events:none; user-select:none;}
-.fdImgWrap.small{max-width:220px; cursor:default; opacity:.9;}
+.fdImgWrap.small{max-width:100px; cursor:default; opacity:.9;}
 .fdMarker{position:absolute; width:30px; height:30px; border-radius:50%; transform:translate(-50%,-50%);
   border:3px solid var(--gold); background:rgba(255,201,60,.18); display:flex; align-items:center; justify-content:center;
   font-family:'Bungee'; font-size:13px; color:var(--gold); pointer-events:none;}
@@ -516,8 +516,8 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .fdMiss{position:absolute; width:26px; height:26px; border-radius:50%; transform:translate(-50%,-50%);
   border:3px solid #ff5d5d; pointer-events:none; animation:fdMissFade .6s ease-out forwards;}
 @keyframes fdMissFade{ 0%{opacity:1; transform:translate(-50%,-50%) scale(.5);} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.4);} }
-.fdProgress{font-family:'Bungee'; font-size:22px; text-align:center; margin:10px 0; color:var(--gold); letter-spacing:1px;}
-.fdLabel{font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); text-align:center; margin-bottom:6px;}
+.fdProgress{font-family:'Bungee'; font-size:18px; text-align:center; margin:6px 0; color:var(--gold); letter-spacing:1px;}
+.fdLabel{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); text-align:center; margin-bottom:4px;}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -1050,7 +1050,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.27</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.28</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2792,18 +2792,20 @@ body.suspense-on #pfRank{ display:none !important; }
 </div>
 
 <!-- ==================== PLAYER: TROVA LE DIFFERENZE ==================== -->
-<div class="screen" id="scrPlayFindDiff" style="align-items:center; justify-content:center">
+<div class="screen" id="scrPlayFindDiff" style="align-items:center; justify-content:center; padding:12px">
   <div class="row" style="width:100%; justify-content:space-between">
     <div class="pill" id="fdpName" style="color:var(--gold)"></div>
     <div class="pill" id="fdpScore"></div>
   </div>
   <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="fdpTimerBar"></div></div>
   <div class="fdProgress" id="fdpProgress">0 / 5 trovati</div>
-  <div class="fdLabel">Originale (di riferimento)</div>
-  <div class="fdImgWrap small" id="fdpOrigWrap"><img id="fdpOrigImg"></div>
-  <div class="fdLabel mt">Tocca qui dove vedi una differenza</div>
-  <div class="fdImgWrap" id="fdpModWrap"><img id="fdpModImg"></div>
-  <div class="byline mt" id="fdpStatus"></div>
+  <div class="row" style="align-items:center; gap:10px; justify-content:center; margin-top:4px">
+    <div class="fdImgWrap small" id="fdpOrigWrap" style="margin:0"><img id="fdpOrigImg"></div>
+    <div class="fdLabel" style="margin:0">← Originale di riferimento</div>
+  </div>
+  <div class="fdLabel" style="margin-top:6px">Tocca qui dove vedi una differenza</div>
+  <div class="fdImgWrap" id="fdpModWrap" style="margin:6px auto"><img id="fdpModImg"></div>
+  <div class="byline" id="fdpStatus"></div>
 </div>
 
 <!-- ==================== HOST: SEI TROPPO FISCALE! ==================== -->
