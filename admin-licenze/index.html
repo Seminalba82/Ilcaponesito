@@ -182,10 +182,35 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 const MINIGIOCHI = [
-  'mini','dice','simon','voto','wheels','hilo','swiss','memocoppie','memo',
-  'ruota','taptap','grad','seed','cards','tombola','anagram','wordsearch',
-  'puzzle','horses','tfiscale','toc','cenerentola','pacchi','roulette',
-  'pagliuzza','supertris','rdc','mastermind'
+  {k:'mini', l:'🥃 Bussolotti'},
+  {k:'dice', l:'🎲 Pari o Dispari'},
+  {k:'simon', l:'🎨 Simon'},
+  {k:'puzzle', l:'🧩 Puzzle'},
+  {k:'wordsearch', l:'🔤 Trova la Parola'},
+  {k:'anagram', l:'🔤➰ Anagramma'},
+  {k:'tombola', l:'🎱 Tombola'},
+  {k:'cards', l:'🎴 Carta Rossa, Carta Nera'},
+  {k:'seed', l:'🃏 Il Seme Vincente'},
+  {k:'taptap', l:'👆 Tap Tap'},
+  {k:'ruota', l:'🎡 La Ruota Gira per Tutti'},
+  {k:'swiss', l:'⌚ Precisione Svizzera'},
+  {k:'hilo', l:'🃏 Carta Alta, Carta Bassa'},
+  {k:'wheels', l:'🎡 Le Ruote della Fortuna'},
+  {k:'memo', l:'🔍 Trova la Carta'},
+  {k:'memocoppie', l:'🃏 Memo le Coppie'},
+  {k:'horses', l:'🐎 Pubbliche Offese'},
+  {k:'tfiscale', l:'💶 Sei Troppo Fiscale!'},
+  {k:'toc', l:'🪙 Testa o Croce'},
+  {k:'cenerentola', l:'👠 Cenerentola'},
+  {k:'pacchi', l:'📦 Il Gioco dei Pacchi'},
+  {k:'roulette', l:'🤠 Roulette Russa'},
+  {k:'pagliuzza', l:'🌾 La Pagliuzza'},
+  {k:'supertris', l:'🎰 SUPERTRIS'},
+  {k:'rdc', l:'🧮 La Resa dei Conti'},
+  {k:'mastermind', l:'🎯 Mastermind'},
+  {k:'bomba', l:'💣 Bomba a Orologeria'},
+  {k:'shapes', l:'👁 Occhio alle Forme'},
+  {k:'finddiff', l:'🔍 Trova le Differenze'}
 ];
 
 const PIANI_MS = {
@@ -226,8 +251,8 @@ function initMiniGrid(){
   const grid = document.getElementById('miniGrid');
   grid.innerHTML = MINIGIOCHI.map(m=>`
     <label class="mini-chip">
-      <input type="checkbox" class="mini-cb" value="${m}" checked>
-      ${m}
+      <input type="checkbox" class="mini-cb" value="${m.k}" checked>
+      ${m.l}
     </label>`).join('');
 }
 function toggleAllMini(state){
