@@ -10743,7 +10743,43 @@ function sendPjPhoto(on, keepOpen){
 /* ================================================================
    GIOCHI e MODULI — due menu separati
 ================================================================ */
-function isGameEnabled(key){
+const GIOCHI_CATALOGO = [
+  {k:'mini', l:'🥃 Bussolotti'},
+  {k:'dice', l:'🎲 Pari o Dispari'},
+  {k:'simon', l:'🎨 Simon'},
+  {k:'puzzle', l:'🧩 Puzzle'},
+  {k:'wordsearch', l:'🔤 Trova la Parola'},
+  {k:'anagram', l:'🔤➰ Anagramma'},
+  {k:'tombola', l:'🎱 Tombola'},
+  {k:'cards', l:'🎴 Carta Rossa, Carta Nera'},
+  {k:'seed', l:'🃏 Il Seme Vincente'},
+  {k:'taptap', l:'👆 Tap Tap'},
+  {k:'ruota', l:'🎡 La Ruota Gira per Tutti'},
+  {k:'swiss', l:'⌚ Precisione Svizzera'},
+  {k:'hilo', l:'🃏 Carta Alta, Carta Bassa'},
+  {k:'wheels', l:'🎡 Le Ruote della Fortuna'},
+  {k:'memo', l:'🔍 Trova la Carta'},
+  {k:'memocoppie', l:'🃏 Memo le Coppie'},
+  {k:'horses', l:'🐎 Pubbliche Offese'},
+  {k:'tfiscale', l:'💶 Sei Troppo Fiscale!'},
+  {k:'toc', l:'🪙 Testa o Croce'},
+  {k:'cenerentola', l:'👠 Cenerentola'},
+  {k:'pacchi', l:'📦 Il Gioco dei Pacchi'},
+  {k:'roulette', l:'🤠 Roulette Russa'},
+  {k:'pagliuzza', l:'🌾 La Pagliuzza'},
+  {k:'supertris', l:'🎰 SUPERTRIS'},
+  {k:'rdc', l:'🧮 La Resa dei Conti'},
+  {k:'mastermind', l:'🎯 Mastermind'},
+  {k:'bomba', l:'💣 Bomba a Orologeria'},
+  {k:'shapes', l:'👁 Occhio alle Forme'},
+  {k:'finddiff', l:'🔍 Trova le Differenze'}
+];
+
+function syncGiochiCatalogo(){
+  if(!fbOK) return;
+  try{ db.ref('giochi_catalogo').set(GIOCHI_CATALOGO); }catch(e){}
+}
+  function isGameEnabled(key){
   const en = window.CAPONE_MINIGIOCHI_ABILITATI;
   if(!en) return true; // nessuna licenza attiva registrata: non blocchiamo (fallback sicuro)
   return en[key] !== false; // abilitato di default, bloccato solo se esplicitamente false
@@ -10752,6 +10788,7 @@ function gk(key, html){
   return isGameEnabled(key) ? html : '';
 }
 function modalGames(){
+  syncGiochiCatalogo();
   const btns = [
     gk('mini', `<button class="btn mg" onclick="openMini()">🥃 Bussolotti</button>`),
     gk('dice', `<button class="btn cy" onclick="openDice()">🎲 Pari o Dispari</button>`),
