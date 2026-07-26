@@ -116,7 +116,7 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
   </div>
 
   <div class="card">
-    <h2>➕ Genera nuova licenza</h2>
+   <h2 id="formTitle">➕ Genera nuova licenza</h2>
     <div class="grid2">
       <div>
         <label>Nome cliente</label>
@@ -144,7 +144,8 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
       <div class="mini-grid" id="miniGrid"></div>
     </fieldset>
 
-    <button class="btn-primary" onclick="generaLicenza()">Genera licenza</button>
+   <button class="btn-primary" id="btnGenera" onclick="generaLicenza()">Genera licenza</button>
+<button class="btn-secondary" id="btnAnnullaModifica" style="display:none;margin-top:8px" onclick="annullaModifica()">Annulla modifica</button>
 
     <div id="result">
       <div>Codice licenza generato:</div>
