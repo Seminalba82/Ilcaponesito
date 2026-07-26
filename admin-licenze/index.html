@@ -245,7 +245,7 @@ auth.onAuthStateChanged(user=>{
   if(user){
     document.getElementById('loginBox').style.display='none';
     document.getElementById('app').style.display='block';
-    initMiniGrid();
+   loadCatalogoAndInit();
     loadLicenze();
   } else {
     document.getElementById('loginBox').style.display='block';
