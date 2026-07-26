@@ -181,7 +181,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-const MINIGIOCHI = [
+let MINIGIOCHI = [
   {k:'mini', l:'🥃 Bussolotti'},
   {k:'dice', l:'🎲 Pari o Dispari'},
   {k:'simon', l:'🎨 Simon'},
@@ -211,8 +211,15 @@ const MINIGIOCHI = [
   {k:'bomba', l:'💣 Bomba a Orologeria'},
   {k:'shapes', l:'👁 Occhio alle Forme'},
   {k:'finddiff', l:'🔍 Trova le Differenze'}
-];
+]; // ⬆️ Questo è solo un FALLBACK usato finché il quiz non ha ancora sincronizzato il catalogo reale
 
+function loadCatalogoAndInit(){
+  db.ref('giochi_catalogo').once('value').then(snap=>{
+    const data = snap.val();
+    if(Array.isArray(data) && data.length){ MINIGIOCHI = data; }
+    initMiniGrid();
+  }).catch(()=>{ initMiniGrid(); });
+}
 const PIANI_MS = {
   giorno: 24*60*60*1000,
   settimana: 7*24*60*60*1000,
