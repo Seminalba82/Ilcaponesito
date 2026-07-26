@@ -277,6 +277,8 @@ function generaCodice(){
   return code;
 }
 
+let editingCode = null;
+
 function generaLicenza(){
   const cliente = document.getElementById('fCliente').value.trim();
   const piano = document.getElementById('fPiano').value;
@@ -289,6 +291,32 @@ function generaLicenza(){
     minigiochi_abilitati[cb.value] = cb.checked;
   });
 
+  if(editingCode){
+    // Modalità MODIFICA: aggiorna una licenza esistente (rinnova scadenza da oggi)
+    const codice = editingCode;
+    const now = Date.now();
+    const scadenza = now + PIANI_MS[piano];
+    const aggiornamento = {
+      cliente,
+      tipo_piano: piano,
+      note: note || null,
+      minigiochi_abilitati,
+      data_scadenza: scadenza,
+      attiva: true
+    };
+    db.ref('licenze/'+codice).update(aggiornamento).then(()=>{
+      document.getElementById('resultCode').textContent = codice;
+      document.getElementById('resultScad').textContent = new Date(scadenza).toLocaleString('it-IT');
+      document.getElementById('result').style.display='block';
+      annullaModifica();
+      loadLicenze();
+    }).catch(err=>{
+      alert('Errore nel salvataggio: '+err.message);
+    });
+    return;
+  }
+
+  // Modalità GENERA NUOVA LICENZA (comportamento originale)
   const now = Date.now();
   const scadenza = now + PIANI_MS[piano];
   const codice = generaCodice();
@@ -315,6 +343,49 @@ function generaLicenza(){
     loadLicenze();
   }).catch(err=>{
     alert('Errore nel salvataggio: '+err.message);
+  });
+}
+
+function modificaLicenza(codice){
+  const lic = licenzeCache[codice];
+  if(!lic) return;
+  editingCode = codice;
+
+  document.getElementById('fCliente').value = lic.cliente || '';
+  document.getElementById('fPiano').value = lic.tipo_piano || 'giorno';
+  document.getElementById('fNote').value = lic.note || '';
+
+  document.querySelectorAll('.mini-cb').forEach(cb=>{
+    const abil = lic.minigiochi_abilitati ? lic.minigiochi_abilitati[cb.value] : true;
+    cb.checked = abil !== false;
+  });
+
+  document.getElementById('formTitle').textContent = '✏️ Modifica licenza: '+codice;
+  document.getElementById('btnGenera').textContent = 'Salva modifiche';
+  document.getElementById('btnAnnullaModifica').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function annullaModifica(){
+  editingCode = null;
+  document.getElementById('fCliente').value = '';
+  document.getElementById('fNote').value = '';
+  document.getElementById('fPiano').value = 'giorno';
+  document.querySelectorAll('.mini-cb').forEach(cb=> cb.checked = true);
+  document.getElementById('formTitle').textContent = '➕ Genera nuova licenza';
+  document.getElementById('btnGenera').textContent = 'Genera licenza';
+  document.getElementById('btnAnnullaModifica').style.display = 'none';
+}
+
+function eliminaLicenza(codice){
+  if(!confirm('Eliminare DEFINITIVAMENTE la licenza '+codice+'? Questa azione non si può annullare.')) return;
+  db.ref('licenze/'+codice).remove().then(()=>{
+    if(editingCode === codice) annullaModifica();
+    loadLicenze();
+  }).catch(err=>{
+    alert('Errore nella cancellazione: '+err.message);
   });
 }
 
@@ -380,6 +451,8 @@ function renderLicenze(){
         ${disattivata
           ? `<button class="btn-secondary" onclick="riattivaLicenza('${code}')">✅ Riattiva</button>`
           : `<button class="btn-danger" onclick="disattivaLicenza('${code}')">⛔ Disattiva</button>`}
+          <button class="btn-secondary" onclick="modificaLicenza('${code}')">✏️ Modifica</button>
+        <button class="btn-danger" onclick="eliminaLicenza('${code}')">🗑️ Elimina</button>
       </div>
     </div>`;
   }).join('');
