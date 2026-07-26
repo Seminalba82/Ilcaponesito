@@ -530,6 +530,30 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 @keyframes fdMissFade{ 0%{opacity:1; transform:translate(-50%,-50%) scale(.5);} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.4);} }
 .fdProgress{font-family:'Bungee'; font-size:18px; text-align:center; margin:6px 0; color:var(--gold); letter-spacing:1px;}
 .fdLabel{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); text-align:center; margin-bottom:4px;}
+
+/* ===== LA MAGGIORANZA VINCE ===== */
+.mvGrid{display:grid; grid-template-columns:1fr 1fr; gap:16px; width:100%; max-width:420px; margin:14px auto;}
+.mvBtn{aspect-ratio:1.3/1; border-radius:22px; border:none; cursor:pointer; font-family:'Bungee'; font-size:clamp(16px,4.2vw,24px);
+  color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  text-shadow:0 2px 0 rgba(0,0,0,.4); box-shadow:0 8px 0 rgba(0,0,0,.35), 0 12px 22px rgba(0,0,0,.4); transition:transform .1s, filter .2s;}
+.mvBtn:active{transform:translateY(4px) scale(.97); box-shadow:0 4px 0 rgba(0,0,0,.35);}
+.mvBtn.dimmed{opacity:.35; filter:grayscale(.6); cursor:default;}
+.mvBtn.sel{outline:5px solid #fff; outline-offset:-5px;}
+.mvBtn .ico{font-size:clamp(28px,7vw,42px);}
+.mvBtn.red{background:linear-gradient(180deg,#ff6b6b,#c2183d);}
+.mvBtn.blue{background:linear-gradient(180deg,#5ec8ff,#0b6fb8);}
+.mvBtn.green{background:linear-gradient(180deg,#8cf28a,#189a4a);}
+.mvBtn.yellow{background:linear-gradient(180deg,#ffe27a,#d19a1a); color:#3a2600; text-shadow:0 2px 0 rgba(255,255,255,.3);}
+.mvBarsRow{display:flex; flex-direction:column; gap:10px; width:100%; max-width:460px; margin:14px auto;}
+.mvBarRow{display:flex; align-items:center; gap:10px;}
+.mvBarRow .lbl{width:70px; font-family:'Bungee'; font-size:14px; color:#fff; flex-shrink:0;}
+.mvBarTrack{flex:1; height:26px; background:rgba(255,255,255,.08); border-radius:13px; overflow:hidden; position:relative;}
+.mvBarFill{height:100%; border-radius:13px; transition:width .3s;}
+.mvBarFill.red{background:linear-gradient(90deg,#c2183d,#ff6b6b);}
+.mvBarFill.blue{background:linear-gradient(90deg,#0b6fb8,#5ec8ff);}
+.mvBarFill.green{background:linear-gradient(90deg,#189a4a,#8cf28a);}
+.mvBarFill.yellow{background:linear-gradient(90deg,#d19a1a,#ffe27a);}
+.mvBarRow .cnt{width:34px; text-align:right; font-weight:800; color:#fff;}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -1074,7 +1098,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.34</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.36</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2747,6 +2771,62 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="shapePct" id="shapepPct"></div>
 </div>
 
+<!-- ==================== HOST: LA MAGGIORANZA VINCE ==================== -->
+<div class="screen" id="scrMaj">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🗳️ LA MAGGIORANZA VINCE</div></div>
+  <div class="panel mt" style="max-width:460px" id="majSetup">
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti alla maggioranza</div><select id="majPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="majPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti tolti alla minoranza</div><select id="majPenalty"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="majPenaltyMan" class="ptsManual" placeholder="—" min="0"></div>
+    </div>
+    <div class="label mt">Tempo per rispondere</div>
+    <select id="majDuration">
+      <option value="10">10 secondi</option>
+      <option value="20" selected>20 secondi</option>
+      <option value="30">30 secondi</option>
+    </select>
+    <button class="btn mg mt" style="width:100%" onclick="majStart()">🗳️ AVVIA LA MAGGIORANZA VINCE!</button>
+  </div>
+  <div id="majLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="majMsg"></div>
+    <div class="timerWrap mt" style="max-width:420px"><div class="timerBar" id="majTimerBarHost"></div></div>
+    <div class="mvBarsRow" id="majBarsHost"></div>
+    <div class="byline" id="majCount"></div>
+    <button class="btn mg mt" id="majBtnReveal" onclick="majReveal()" style="display:none">🔮 CHIUDI E RIVELA!</button>
+    <button class="btn cy mt" id="majBtnAgain" onclick="openMaj()" style="display:none">🔁 Un'altra manche</button>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: LA MAGGIORANZA VINCE ==================== -->
+<div class="screen" id="scrPjMaj">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🗳️ LA MAGGIORANZA VINCE</div></div>
+  <div class="miniMsg" id="pjMajMsg" style="font-size:clamp(18px,3vw,30px)"></div>
+  <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="pjMajTimerBar"></div></div>
+  <div class="mvBarsRow" id="pjMajBars"></div>
+</div>
+
+<!-- ==================== PLAYER: LA MAGGIORANZA VINCE ==================== -->
+<div class="screen" id="scrPlayMaj" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="majpName" style="color:var(--gold)"></div>
+    <div class="pill" id="majpScore"></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="majpTimerBar"></div></div>
+  <div class="byline mt" id="majpStatus">🗳️ SCEGLI UN COLORE!</div>
+  <div class="mvGrid" id="majpGrid">
+    <button class="mvBtn red" id="majpBtn0" onclick="majPlayerTap(0)"><span class="ico">🔴</span>ROSSO</button>
+    <button class="mvBtn blue" id="majpBtn1" onclick="majPlayerTap(1)"><span class="ico">🔵</span>BLU</button>
+    <button class="mvBtn green" id="majpBtn2" onclick="majPlayerTap(2)"><span class="ico">🟢</span>VERDE</button>
+    <button class="mvBtn yellow" id="majpBtn3" onclick="majPlayerTap(3)"><span class="ico">🟡</span>GIALLO</button>
+  </div>
+  <div class="byline mt" id="majpResult"></div>
+</div>
+
 <!-- ==================== HOST: TROVA LE DIFFERENZE ==================== -->
 <div class="screen" id="scrFindDiff">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🔍 TROVA LE DIFFERENZE</div></div>
@@ -4192,103 +4272,7 @@ $('importFile').addEventListener('change', e=>{
    HOST — PARTITA
 ================================================================ */
 let G = null; // {code, quiz, ref, qi, timerInt, closed}
-let pendingQuizIndex = -1;
-
 function playQuiz(i){
-  pendingQuizIndex = i;
-  const savedCode = localStorage.getItem('capone_licenza_codice');
-  if(savedCode){
-    verificaCodiceEAvvia(savedCode, true);
-  } else {
-    showLicenseModal();
-  }
-}
-
-function showLicenseModal(){
-  const html = `
-    <div class="row mt" style="justify-content:center">
-      <div style="max-width:360px;width:100%">
-        <div class="label center mt">Inserisci il codice licenza per avviare la partita</div>
-        <input type="text" id="licInput" placeholder="CAPONE-XXXX-XXXX" style="width:100%;padding:12px;margin:12px 0;text-transform:uppercase;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff;text-align:center;font-size:1.1rem;letter-spacing:1px">
-        <div id="licError" style="color:#ff3b3b;font-size:.85rem;min-height:18px;text-align:center;margin-bottom:8px"></div>
-        <div class="row mtb" style="justify-content:center;gap:10px">
-          <button class="btn ghost" onclick="closeLicenseModal()">Annulla</button>
-          <button class="btn mg" onclick="verificaLicenzaEavvia()">Verifica e avvia</button>
-        </div>
-      </div>
-    </div>`;
-  openModal('🔐 Licenza richiesta', html);
-}
-
-function closeLicenseModal(){
-  closeModal();
-}
-
-function getDeviceId(){
-  let id = localStorage.getItem('capone_device_id');
-  if(!id){ id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem('capone_device_id', id); }
-  return id;
-}
-
-function verificaLicenzaEavvia(){
-  const codice = ($('licInput').value || '').trim().toUpperCase();
-  const errBox = $('licError');
-  errBox.textContent = '';
-  if(!codice){ errBox.textContent = 'Inserisci un codice.'; return; }
-  verificaCodiceEAvvia(codice, false);
-}
-
-function verificaCodiceEAvvia(codice, silente){
-  const errBox = silente ? null : $('licError');
-
-  db.ref('licenze/'+codice).once('value').then(snap=>{
-    const lic = snap.val();
-
-    const fallisci = (msg)=>{
-      if(silente){
-        localStorage.removeItem('capone_licenza_codice');
-        showLicenseModal();
-      } else if(errBox){
-        errBox.textContent = msg;
-      }
-    };
-
-    if(!lic){ fallisci('Codice licenza non valido.'); return; }
-    if(lic.attiva === false){ fallisci('Licenza disattivata. Contatta Alberto.'); return; }
-    if(Date.now() > lic.data_scadenza){ fallisci('Licenza scaduta.'); return; }
-
-    const myDevice = getDeviceId();
-
-    if(lic.device_bloccato && lic.device_id && lic.device_id !== myDevice){
-      fallisci('Licenza già in uso su un altro dispositivo. Contatta Alberto per lo sblocco.');
-      return;
-    }
-
-    const finalizza = ()=>{
-      window.CAPONE_MINIGIOCHI_ABILITATI = lic.minigiochi_abilitati || {};
-      localStorage.setItem('capone_licenza_codice', codice);
-      if(!silente) closeLicenseModal();
-      actuallyPlayQuiz(pendingQuizIndex);
-    };
-
-    if(!lic.device_bloccato){
-      db.ref('licenze/'+codice).update({
-        device_bloccato: true,
-        device_id: myDevice,
-        primo_utilizzo: Date.now()
-      }).then(finalizza).catch(()=>{ fallisci('Errore di registrazione dispositivo.'); });
-    } else {
-      finalizza();
-    }
-  }).catch(()=>{ fallisci_conn(); });
-
-  function fallisci_conn(){
-    if(silente){ showLicenseModal(); }
-    else if(errBox){ errBox.textContent = 'Errore di connessione. Riprova.'; }
-  }
-}
-
-function actuallyPlayQuiz(i){
   if (!fbOK) return alert('⚠️ Configura prima Firebase (vedi avviso in home).');
   quizzes[i].lastUsed = Date.now(); persist(); // registro quando è stato usato l'ultima volta, per la nota in home
   const quiz = JSON.parse(JSON.stringify(quizzes[i]));
@@ -4839,6 +4823,7 @@ function listenGame(){
     else if (g.status==='bomba') showPlayerBomba(g);
     else if (g.status==='shapes') showPlayerShapes(g);
     else if (g.status==='finddiff') showPlayerFindDiff(g);
+    else if (g.status==='maggioranza') showPlayerMaj(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -6129,6 +6114,79 @@ function fdPlayerFinish(){
   if (found<5) $('fdpStatus').textContent = `⏱ TEMPO SCADUTO! Trovate ${found}/5`;
   if (found===5) confetti();
   P.ref.child('finddiff/results/'+P.id).set({ found, wrong:P.fdWrongTaps, pts });
+}
+/* ================================================================
+   LA MAGGIORANZA VINCE — motore condiviso e telefono
+================================================================ */
+const MAJ_COLORS = [
+  {key:'red', name:'ROSSO', emoji:'🔴'},
+  {key:'blue', name:'BLU', emoji:'🔵'},
+  {key:'green', name:'VERDE', emoji:'🟢'},
+  {key:'yellow', name:'GIALLO', emoji:'🟡'},
+];
+/* Determina quali colori sono in maggioranza (i più votati) e quali in minoranza (i meno votati).
+   Se tutti e quattro i colori hanno ricevuto esattamente lo stesso numero di voti, non ha senso
+   che siano CONTEMPORANEAMENTE "maggioranza" e "minoranza": in quel caso specifico, per scelta di
+   Alberto, si premiano tutti (punti positivi a tutti), e nessuno viene penalizzato. */
+function majComputeGroups(counts){
+  const allEqual = counts.every(c=>c===counts[0]);
+  if (allEqual) return { majority:[0,1,2,3], minority:[] };
+  const maxV = Math.max(...counts), minV = Math.min(...counts);
+  const majority=[], minority=[];
+  counts.forEach((c,i)=>{ if (c===maxV) majority.push(i); if (c===minV) minority.push(i); });
+  return { majority, minority };
+}
+function majRenderBars(container, counts, highlight){
+  container.innerHTML = MAJ_COLORS.map((c,i)=>{
+    const total = counts.reduce((a,b)=>a+b,0)||1;
+    const pct = Math.round(counts[i]/total*100);
+    const glow = highlight && highlight.majority && highlight.majority.includes(i) ? ' style="box-shadow:0 0 14px rgba(182,242,46,.8)"' :
+                 highlight && highlight.minority && highlight.minority.includes(i) ? ' style="box-shadow:0 0 14px rgba(255,93,93,.8)"' : '';
+    return `<div class="mvBarRow"><span class="lbl">${c.emoji} ${c.name}</span>
+      <div class="mvBarTrack"><div class="mvBarFill ${c.key}" style="width:${pct}%"${glow}></div></div>
+      <span class="cnt">${counts[i]}</span></div>`;
+  }).join('');
+}
+function showPlayerMaj(g){
+  const m = g.maggioranza||{};
+  $('majpName').textContent = P.name;
+  $('majpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayMaj');
+  if (m.phase==='active'){
+    const sig = 'act:'+m.roundId;
+    if (P.majSig !== sig){
+      P.majSig = sig; P.majChoice = null;
+      $('majpStatus').textContent = '🗳️ SCEGLI UN COLORE!';
+      $('majpResult').textContent = '';
+      document.querySelectorAll('.mvBtn').forEach(b=> b.classList.remove('sel','dimmed'));
+      clearInterval(P.majInt);
+      P.majInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('majpTimerBar').style.width = (left/(m.durationMs||1)*100)+'%';
+        if (left<=0){ clearInterval(P.majInt); if (P.majChoice==null) $('majpStatus').textContent = '⏱ TEMPO SCADUTO, NESSUNA SCELTA!'; }
+      }, 100);
+    }
+  } else if (m.phase==='reveal'){
+    if (P.majChoice!=null){
+      const pts = (m.results&&m.results[P.id]&&m.results[P.id].pts) || 0;
+      const majority = m.majority||[], minority = m.minority||[];
+      if (majority.includes(P.majChoice)) { $('majpResult').innerHTML = `🎉 ${MAJ_COLORS[P.majChoice].name} era in MAGGIORANZA! <b style="color:var(--lime)">+${pts}</b>`; confetti(); }
+      else if (minority.includes(P.majChoice)) { $('majpResult').innerHTML = `😬 ${MAJ_COLORS[P.majChoice].name} era in MINORANZA... <b style="color:#ff5d5d">${pts}</b>`; }
+      else { $('majpResult').innerHTML = `${MAJ_COLORS[P.majChoice].name}: né maggioranza né minoranza, nessun punto.`; }
+    }
+    document.querySelectorAll('.mvBtn').forEach((b,i)=>{
+      b.classList.toggle('sel', i===P.majChoice);
+      b.classList.toggle('dimmed', i!==P.majChoice);
+    });
+  }
+}
+function majPlayerTap(i){
+  if (P.majChoice!=null) return; // una sola scelta a manche
+  P.majChoice = i;
+  document.querySelectorAll('.mvBtn').forEach((b,idx)=> b.classList.toggle('sel', idx===i));
+  $('majpStatus').textContent = `Hai scelto ${MAJ_COLORS[i].name}! Aspetta la rivelazione...`;
+  if (navigator.vibrate) navigator.vibrate(50);
+  P.ref.child('maggioranza/votes/'+P.id).set(i);
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -10322,6 +10380,79 @@ function fdStart(){
 }
 
 /* ================================================================
+   LA MAGGIORANZA VINCE — regia
+================================================================ */
+let MAJ = {};
+function openMaj(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((MAJ||{}).timerInt);
+  G.ref.child('maggioranza/votes').off();
+  G.ref.update({ status:'maggioranza', maggioranza:{ phase:'idle' } });
+  MAJ = {};
+  $('majSetup').style.display='block'; $('majLive').style.display='none';
+  if (!$('majPoints').innerHTML){
+    $('majPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===4?'selected':''}>${(k+1)*100} punti</option>`).join('');
+    $('majPenalty').innerHTML = Array.from({length:8},(_,k)=>`<option value="${(k+1)*50}" ${k===2?'selected':''}>${(k+1)*50} punti</option>`).join('');
+  }
+  showScreen('scrMaj');
+}
+function majStart(){
+  const points = getPoints('majPoints','majPointsMan');
+  const penalty = getPoints('majPenalty','majPenaltyMan');
+  const durationSec = +($('majDuration').value||20);
+  const durationMs = durationSec*1000;
+  const endAt = serverNow()+durationMs;
+  const roundId = serverNow();
+  MAJ = { points, penalty, durationMs };
+  G.ref.update({ status:'maggioranza', maggioranza:{ phase:'active', points, penalty, endAt, durationMs, roundId } });
+  G.ref.child('maggioranza/votes').remove();
+  $('majSetup').style.display='none'; $('majLive').style.display='block';
+  $('majMsg').textContent = '🗳️ SI VOTA! OGNI GIOCATORE SCEGLIE UN COLORE...';
+  $('majCount').textContent=''; $('majBtnReveal').style.display='none'; $('majBtnAgain').style.display='none';
+  majRenderBars($('majBarsHost'), [0,0,0,0]);
+  pjSend({type:'majActive', endAt, durationMs});
+  clearInterval(MAJ.timerInt);
+  MAJ.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt-serverNow());
+    $('majTimerBarHost').style.width = (left/durationMs*100)+'%';
+    if (left<=0){ clearInterval(MAJ.timerInt); $('majBtnReveal').style.display='block'; }
+  }, 100);
+  G.ref.child('maggioranza/votes').on('value', s=>{
+    const votes = s.val()||{};
+    const counts = [0,0,0,0];
+    Object.values(votes).forEach(v=>{ if (v>=0 && v<4) counts[v]++; });
+    majRenderBars($('majBarsHost'), counts);
+    $('majCount').textContent = `Voti arrivati: ${Object.keys(votes).length}`;
+    if (Object.keys(votes).length>0) $('majBtnReveal').style.display='block';
+  });
+}
+function majReveal(){
+  clearInterval(MAJ.timerInt);
+  G.ref.child('maggioranza/votes').once('value').then(s=>{
+    const votes = s.val()||{};
+    const counts = [0,0,0,0];
+    Object.entries(votes).forEach(([pid,v])=>{ if (v>=0 && v<4) counts[v]++; });
+    const { majority, minority } = majComputeGroups(counts);
+    const results = {};
+    Object.entries(votes).forEach(([pid,v])=>{
+      let pts = 0;
+      if (majority.includes(v)) pts = MAJ.points;
+      else if (minority.includes(v)) pts = -MAJ.penalty;
+      results[pid] = { choice:v, pts };
+      if (pts) applyScoreDelta(pid, pts);
+    });
+    G.ref.child('maggioranza').update({ phase:'reveal', counts, majority, minority, results });
+    majRenderBars($('majBarsHost'), counts, {majority, minority});
+    const majNames = majority.map(i=>MAJ_COLORS[i].name).join(' e ');
+    const minNames = minority.length ? minority.map(i=>MAJ_COLORS[i].name).join(' e ') : 'nessuno (pareggio a 4, nessuna penalità)';
+    $('majMsg').innerHTML = `🎉 Maggioranza: <b style="color:var(--lime)">${majNames}</b> · 💢 Minoranza: <b style="color:#ff5d5d">${minNames}</b>`;
+    $('majBtnReveal').style.display='none'; $('majBtnAgain').style.display='block';
+    pjSend({type:'majReveal', counts, majority, minority});
+    confetti();
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -10743,91 +10874,40 @@ function sendPjPhoto(on, keepOpen){
 /* ================================================================
    GIOCHI e MODULI — due menu separati
 ================================================================ */
-const GIOCHI_CATALOGO = [
-  {k:'mini', l:'🥃 Bussolotti'},
-  {k:'dice', l:'🎲 Pari o Dispari'},
-  {k:'simon', l:'🎨 Simon'},
-  {k:'puzzle', l:'🧩 Puzzle'},
-  {k:'wordsearch', l:'🔤 Trova la Parola'},
-  {k:'anagram', l:'🔤➰ Anagramma'},
-  {k:'tombola', l:'🎱 Tombola'},
-  {k:'cards', l:'🎴 Carta Rossa, Carta Nera'},
-  {k:'seed', l:'🃏 Il Seme Vincente'},
-  {k:'taptap', l:'👆 Tap Tap'},
-  {k:'ruota', l:'🎡 La Ruota Gira per Tutti'},
-  {k:'swiss', l:'⌚ Precisione Svizzera'},
-  {k:'hilo', l:'🃏 Carta Alta, Carta Bassa'},
-  {k:'wheels', l:'🎡 Le Ruote della Fortuna'},
-  {k:'memo', l:'🔍 Trova la Carta'},
-  {k:'memocoppie', l:'🃏 Memo le Coppie'},
-  {k:'horses', l:'🐎 Pubbliche Offese'},
-  {k:'tfiscale', l:'💶 Sei Troppo Fiscale!'},
-  {k:'toc', l:'🪙 Testa o Croce'},
-  {k:'cenerentola', l:'👠 Cenerentola'},
-  {k:'pacchi', l:'📦 Il Gioco dei Pacchi'},
-  {k:'roulette', l:'🤠 Roulette Russa'},
-  {k:'pagliuzza', l:'🌾 La Pagliuzza'},
-  {k:'supertris', l:'🎰 SUPERTRIS'},
-  {k:'rdc', l:'🧮 La Resa dei Conti'},
-  {k:'mastermind', l:'🎯 Mastermind'},
-  {k:'bomba', l:'💣 Bomba a Orologeria'},
-  {k:'shapes', l:'👁 Occhio alle Forme'},
-  {k:'finddiff', l:'🔍 Trova le Differenze'}
-];
-
-function syncGiochiCatalogo(){
-  if(!fbOK) return;
-  try{ db.ref('giochi_catalogo').set(GIOCHI_CATALOGO); }catch(e){}
-}
-  function isGameEnabled(key){
-  const en = window.CAPONE_MINIGIOCHI_ABILITATI;
-  if(!en) return true; // nessuna licenza attiva registrata: non blocchiamo (fallback sicuro)
-  return en[key] !== false; // abilitato di default, bloccato solo se esplicitamente false
-}
-function gk(key, html){
-  return isGameEnabled(key) ? html : '';
-}
 function modalGames(){
-  syncGiochiCatalogo();
-  const btns = [
-    gk('mini', `<button class="btn mg" onclick="openMini()">🥃 Bussolotti</button>`),
-    gk('dice', `<button class="btn cy" onclick="openDice()">🎲 Pari o Dispari</button>`),
-    gk('simon', `<button class="btn lm" onclick="openSimon()">🎨 Simon</button>`),
-    gk('puzzle', `<button class="btn mg" onclick="openPuzzle()">🧩 Puzzle</button>`),
-    gk('wordsearch', `<button class="btn cy" onclick="openWordSearch()">🔤 Trova la Parola</button>`),
-    gk('anagram', `<button class="btn" onclick="openAnagram()">🔤➰ Anagramma</button>`),
-    gk('tombola', `<button class="btn lm" onclick="openTombola()">🎱 Tombola</button>`),
-    gk('cards', `<button class="btn mg" onclick="openCards()">🎴 Carta Rossa, Carta Nera</button>`),
-    gk('seed', `<button class="btn" onclick="openSeed()">🃏 Il Seme Vincente</button>`),
-    gk('taptap', `<button class="btn mg" onclick="openTapTap()">👆 Tap Tap</button>`),
-    gk('ruota', `<button class="btn cy" onclick="openRuota()">🎡 La Ruota Gira per Tutti</button>`),
-    gk('swiss', `<button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>`),
-    gk('hilo', `<button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>`),
-    gk('wheels', `<button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>`),
-    gk('memo', `<button class="btn lm" onclick="openMemo()">🔍 Trova la Carta</button>`),
-    gk('memocoppie', `<button class="btn" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>`),
-    gk('horses', `<button class="btn mg" style="grid-column:1/-1" onclick="openHorses()">🐎 Pubbliche Offese</button>`),
-    gk('tfiscale', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#6fe08f,#2e9c4f); color:#fff; box-shadow:0 7px 0 #1a5c2e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,156,79,.35)" onclick="openTFiscale()">💶 Sei Troppo Fiscale!</button>`),
-    gk('toc', `<button class="btn cy" style="grid-column:1/-1" onclick="openToc()">🪙 Testa o Croce</button>`),
-    gk('cenerentola', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c9a0ff,var(--viola)); color:#fff; box-shadow:0 7px 0 #5a2a9c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.35)" onclick="openCenerentola()">👠 Cenerentola</button>`),
-    gk('pacchi', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#d9ac6e,#8a6428); color:#fff; box-shadow:0 7px 0 #5a3d18,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,100,40,.35)" onclick="openPacchi()">📦 Il Gioco dei Pacchi</button>`),
-    gk('roulette', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a85838,#6b3018); color:#ffe9a8; box-shadow:0 7px 0 #3a1a0c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(107,48,24,.4)" onclick="openRoulette()">🤠 Roulette Russa</button>`),
-    gk('pagliuzza', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a6428,#5a3d18); color:#ffe9a8; box-shadow:0 7px 0 #2e1e0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(90,61,24,.4)" onclick="openPagliuzza()">🌾 La Pagliuzza</button>`),
-    gk('supertris', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#2d8a4e,#0d4020); color:#ffe042; box-shadow:0 7px 0 #072410,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(13,64,32,.4)" onclick="openSupertris()">🎰 SUPERTRIS</button>`),
-    gk('rdc', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5a3d8a,#2e1a5a); color:#fff; box-shadow:0 7px 0 #180e30,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,26,90,.4)" onclick="openRdc()">🧮 La Resa dei Conti</button>`),
-    gk('mastermind', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a4a4a,#222); color:#fff; box-shadow:0 7px 0 #0a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4)" onclick="openMastermind()">🎯 Mastermind</button>`),
-    gk('bomba', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a2020,#4a1010); color:#fff; box-shadow:0 7px 0 #2a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,32,32,.4)" onclick="openBomba()">💣 Bomba a Orologeria</button>`),
-    gk('shapes', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c2183d,#ff8a3c); color:#fff; box-shadow:0 7px 0 #6b0e21,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(194,24,61,.4)" onclick="openShapes()">👁 Occhio alle Forme</button>`),
-    gk('finddiff', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a2fb8,#9d4dff); color:#fff; box-shadow:0 7px 0 #2a1866,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.4)" onclick="openFindDiff()">🔍 Trova le Differenze</button>`)
-  ].filter(Boolean).join('');
-
-  const msgVuoto = btns ? '' : '<div class="byline" style="letter-spacing:1px">Nessun minigioco abilitato per questa licenza.</div>';
-
   openModal('🕹 GIOCHI', `
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
-      ${btns}
-    </div>
-    ${msgVuoto}`);
+      <button class="btn mg" onclick="openMini()">🥃 Bussolotti</button>
+      <button class="btn cy" onclick="openDice()">🎲 Pari o Dispari</button>
+      <button class="btn lm" onclick="openSimon()">🎨 Simon</button>
+      <button class="btn mg" onclick="openPuzzle()">🧩 Puzzle</button>
+      <button class="btn cy" onclick="openWordSearch()">🔤 Trova la Parola</button>
+      <button class="btn" onclick="openAnagram()">🔤➰ Anagramma</button>
+      <button class="btn lm" onclick="openTombola()">🎱 Tombola</button>
+      <button class="btn mg" onclick="openCards()">🎴 Carta Rossa, Carta Nera</button>
+      <button class="btn" onclick="openSeed()">🃏 Il Seme Vincente</button>
+      <button class="btn mg" onclick="openTapTap()">👆 Tap Tap</button>
+      <button class="btn cy" onclick="openRuota()">🎡 La Ruota Gira per Tutti</button>
+      <button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>
+      <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
+      <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
+      <button class="btn lm" onclick="openMemo()">🔍 Trova la Carta</button>
+      <button class="btn" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>
+      <button class="btn mg" style="grid-column:1/-1" onclick="openHorses()">🐎 Pubbliche Offese</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#6fe08f,#2e9c4f); color:#fff; box-shadow:0 7px 0 #1a5c2e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,156,79,.35)" onclick="openTFiscale()">💶 Sei Troppo Fiscale!</button>
+      <button class="btn cy" style="grid-column:1/-1" onclick="openToc()">🪙 Testa o Croce</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c9a0ff,var(--viola)); color:#fff; box-shadow:0 7px 0 #5a2a9c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.35)" onclick="openCenerentola()">👠 Cenerentola</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#d9ac6e,#8a6428); color:#fff; box-shadow:0 7px 0 #5a3d18,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,100,40,.35)" onclick="openPacchi()">📦 Il Gioco dei Pacchi</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a85838,#6b3018); color:#ffe9a8; box-shadow:0 7px 0 #3a1a0c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(107,48,24,.4)" onclick="openRoulette()">🤠 Roulette Russa</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a6428,#5a3d18); color:#ffe9a8; box-shadow:0 7px 0 #2e1e0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(90,61,24,.4)" onclick="openPagliuzza()">🌾 La Pagliuzza</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#2d8a4e,#0d4020); color:#ffe042; box-shadow:0 7px 0 #072410,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(13,64,32,.4)" onclick="openSupertris()">🎰 SUPERTRIS</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5a3d8a,#2e1a5a); color:#fff; box-shadow:0 7px 0 #180e30,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,26,90,.4)" onclick="openRdc()">🧮 La Resa dei Conti</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a4a4a,#222); color:#fff; box-shadow:0 7px 0 #0a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4)" onclick="openMastermind()">🎯 Mastermind</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a2020,#4a1010); color:#fff; box-shadow:0 7px 0 #2a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,32,32,.4)" onclick="openBomba()">💣 Bomba a Orologeria</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c2183d,#ff8a3c); color:#fff; box-shadow:0 7px 0 #6b0e21,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(194,24,61,.4)" onclick="openShapes()">👁 Occhio alle Forme</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a2fb8,#9d4dff); color:#fff; box-shadow:0 7px 0 #2a1866,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.4)" onclick="openFindDiff()">🔍 Trova le Differenze</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#189a4a,#0b6fb8); color:#fff; box-shadow:0 7px 0 #0a3a1e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(24,154,74,.4)" onclick="openMaj()">🗳️ La Maggioranza Vince</button>
+    </div>`);
 }
 function modalModules(){
   openModal('🧩 MODULI', `
@@ -11297,6 +11377,7 @@ function backToQuiz(title){
   G.ref.child('bomba/results').off();
   G.ref.child('shapes/results').off();
   G.ref.child('finddiff/results').off();
+  G.ref.child('maggioranza/votes').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -11309,7 +11390,8 @@ function backToQuiz(title){
   clearInterval((BOMB||{}).timerInt);
   clearInterval((SHAPES||{}).timerInt);
   clearInterval((FD||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null });
+  clearInterval((MAJ||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -12240,6 +12322,25 @@ function pjRouteInner(m){
         $('pjFdTimerBar').style.width = (left/m.durationMs*100)+'%';
         if (left<=0) clearInterval(window._pjFdInt);
       }, 100);
+    }
+    else if (m.type==='majActive') {
+      showScreen('scrPjMaj');
+      $('pjMajMsg').textContent = '🗳️ SI VOTA! OGNI GIOCATORE SCEGLIE UN COLORE...';
+      majRenderBars($('pjMajBars'), [0,0,0,0]);
+      clearInterval(window._pjMajInt);
+      window._pjMajInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjMajTimerBar').style.width = (left/m.durationMs*100)+'%';
+        if (left<=0) clearInterval(window._pjMajInt);
+      }, 100);
+    }
+    else if (m.type==='majReveal') {
+      clearInterval(window._pjMajInt);
+      $('pjMajTimerBar').style.width = '0%';
+      const majNames = m.majority.map(i=>MAJ_COLORS[i].name).join(' e ');
+      const minNames = m.minority.length ? m.minority.map(i=>MAJ_COLORS[i].name).join(' e ') : 'nessuno (pareggio a 4!)';
+      $('pjMajMsg').innerHTML = `🎉 Maggioranza: <b style="color:var(--lime)">${majNames}</b> · 💢 Minoranza: <b style="color:#ff5d5d">${minNames}</b>`;
+      majRenderBars($('pjMajBars'), m.counts, {majority:m.majority, minority:m.minority});
     }
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
