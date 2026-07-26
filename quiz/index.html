@@ -4289,7 +4289,37 @@ function verificaCodiceEAvvia(codice, silente){
 }
 
 function actuallyPlayQuiz(i){
-
+  if (!fbOK) return alert('⚠️ Configura prima Firebase (vedi avviso in home).');
+  quizzes[i].lastUsed = Date.now(); persist(); // registro quando è stato usato l'ultima volta, per la nota in home
+  const quiz = JSON.parse(JSON.stringify(quizzes[i]));
+  const code = randCode();
+  G = { code, quiz, qi:-1, played:new Set(), ref: db.ref('caponequiz/games/'+code) };
+  G.dataSnapshotAtStart = captureLocalDataSnapshot();
+  try{ localStorage.setItem('capone_last_game', code); localStorage.setItem('capone_last_quiz_idx', i); }catch(e){}
+  suspenseMode = true; $('hbSuspense').classList.add('on');
+  G.ref.set({ status:'lobby', title:quiz.title, created:Date.now(), ver:APP_V, suspense:true });
+  openProjector(); // apertura automatica, così trovi già tutto pronto: la disattivi tu chiudendo la finestra se non ti serve
+  // NIENTE PIÙ onDisconnect().remove(): se salta la corrente o cade la connessione, la partita
+  // (punteggi, domanda a cui eravamo arrivati) resta salvata su Firebase finché non premi "Termina quiz".
+  $('lobbyQuizName').textContent = quiz.title;
+  $('lobbyCode').textContent = code;
+  const url = location.origin + location.pathname + '?g=' + code;
+  G.url = url;
+  $('qrBox').innerHTML=''; new QRCode($('qrBox'), { text:url, width:210, height:210, colorDark:'#0b0614' });
+  $('lobbyPlayers').innerHTML=''; $('lobbyCount').textContent='0';
+  G.ref.child('players').off();
+  G.ref.child('players').on('value', s=>{
+    const p = s.val()||{}; const arr = Object.values(p);
+    $('lobbyCount').textContent = arr.length;
+    $('lobbyPlayers').innerHTML = arr.map(x=>`<div class="pChip">${esc(x.name)}</div>`).join('');
+    pjSend({type:'lobby', title:quiz.title, code, url, names:arr.map(x=>x.name)});
+  });
+  $('hostBar').classList.add('on');
+  document.body.classList.add('barOn');
+  if (window.innerWidth < 700) { $('hostBar').classList.add('collapsed'); document.body.classList.add('barCollapsed'); $('hbToggle').textContent='🎛 REGIA ▴'; }
+  pjSend({type:'lobby', title:quiz.title, code, url, names:[]});
+  showScreen('scrLobby');
+}
 /* ================================================================
    RIPRESA DI UNA PARTITA INTERROTTA (mancanza di corrente, crash, tab chiusa per sbaglio...)
    I dati restano su Firebase finché non premi "Termina quiz": qui li ritroviamo e li riattacchiamo.
