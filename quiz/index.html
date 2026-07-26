@@ -507,6 +507,18 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
   border:3px solid rgba(157,77,255,.4); box-shadow:0 8px 20px rgba(0,0,0,.4); cursor:crosshair; touch-action:none;}
 .fdImgWrap img{display:block; width:100%; height:auto; pointer-events:none; user-select:none;}
 .fdImgWrap.small{max-width:100px; cursor:default; opacity:.9;}
+/* In verticale: una sotto l'altra, riferimento piccolo. In orizzontale (telefono ruotato): affiancate ed entrambe più grandi,
+   perché lo spazio in più in larghezza lo permette — niente rotazioni forzate via CSS, solo un adattamento al vero orientamento del dispositivo. */
+#fdImagesRow{display:flex; flex-direction:column; align-items:center; width:100%;}
+#fdOrigCol{display:flex; flex-direction:column; align-items:center; gap:4px;}
+#fdModCol{display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:6px;}
+@media (orientation:landscape){
+  #fdImagesRow{flex-direction:row; justify-content:center; align-items:flex-start; gap:18px;}
+  #fdModCol{margin-top:0;}
+  .fdImgWrap.small{max-width:min(34vw,320px);}
+  .fdImgWrap{max-width:min(40vw,420px);}
+  #fdRotateHint{display:none;}
+}
 .fdMarker{position:absolute; width:30px; height:30px; border-radius:50%; transform:translate(-50%,-50%);
   border:3px solid var(--gold); background:rgba(255,201,60,.18); display:flex; align-items:center; justify-content:center;
   font-family:'Bungee'; font-size:13px; color:var(--gold); pointer-events:none;}
@@ -869,6 +881,7 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .carN.hit{color:#fff; background:radial-gradient(circle at 35% 30%, #ff7a95, #c2183d 70%); border-color:#6e0e21;
   box-shadow:0 0 12px rgba(255,46,154,.8); animation:pop .35s;}
 .rotWrap{width:100%;}
+@media (orientation:landscape){ #ptRotateHint{display:none;} }
 
 /* ===== CARTA ROSSA CARTA NERA ===== */
 .cardsRow{display:flex; gap:2%; justify-content:center; align-items:flex-end; width:100%; max-width:900px; margin:14px auto 0; perspective:1200px;}
@@ -1061,7 +1074,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.31</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.34</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1913,6 +1926,7 @@ body.suspense-on #pfRank{ display:none !important; }
       <div class="pill" id="ptLast" style="color:var(--lime)"></div>
     </div>
     <div class="cartella mt" id="ptCard"></div>
+    <div class="byline center mt" id="ptRotateHint" style="color:var(--lime)">📱 Ruota il telefono in orizzontale per vederla più grande!</div>
     <div class="byline mt center" id="ptMsg" style="letter-spacing:2px"></div>
   </div>
   <!-- fuori dal blocco che ruota: così restano leggibili anche prima di girare il telefono,
@@ -2810,12 +2824,17 @@ body.suspense-on #pfRank{ display:none !important; }
   </div>
   <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="fdpTimerBar"></div></div>
   <div class="fdProgress" id="fdpProgress">0 / 5 trovati</div>
-  <div class="row" style="align-items:center; gap:10px; justify-content:center; margin-top:4px">
-    <div class="fdImgWrap small" id="fdpOrigWrap" style="margin:0"><img id="fdpOrigImg"></div>
-    <div class="fdLabel" style="margin:0">← Originale di riferimento</div>
+  <div class="byline center" id="fdRotateHint" style="color:var(--lime)">📱 Ruota il telefono in orizzontale per vedere le foto più grandi!</div>
+  <div id="fdImagesRow">
+    <div id="fdOrigCol">
+      <div class="fdLabel">Originale di riferimento</div>
+      <div class="fdImgWrap small" id="fdpOrigWrap"><img id="fdpOrigImg"></div>
+    </div>
+    <div id="fdModCol">
+      <div class="fdLabel">Tocca qui dove vedi una differenza</div>
+      <div class="fdImgWrap" id="fdpModWrap"><img id="fdpModImg"></div>
+    </div>
   </div>
-  <div class="fdLabel" style="margin-top:6px">Tocca qui dove vedi una differenza</div>
-  <div class="fdImgWrap" id="fdpModWrap" style="margin:6px auto"><img id="fdpModImg"></div>
   <div class="byline" id="fdpStatus"></div>
 </div>
 
@@ -4072,7 +4091,14 @@ function saveQuiz(andPlay){
   if (curQuiz._idx>=0) quizzes[curQuiz._idx] = JSON.parse(JSON.stringify(curQuiz));
   else { quizzes.push(JSON.parse(JSON.stringify(curQuiz))); curQuiz._idx = quizzes.length-1; }
   persist();
+  if (confirm('✔ Quiz salvato! Vuoi anche fare subito un backup di tutti i tuoi dati (utile per non perderli mai)?')) backupAllQuizzes();
   if (andPlay) playQuiz(curQuiz._idx); else { loadQuizList(); showScreen('scrHome'); }
+}
+function captureLocalDataSnapshot(){
+  let hrsNames=[], msgContact='';
+  try{ hrsNames = JSON.parse(localStorage.getItem('capone_hrs_names')||'[]'); }catch(e){}
+  try{ msgContact = localStorage.getItem('capone_msg_contact')||''; }catch(e){}
+  return JSON.stringify({ wa:waSavedList(), hrs:hrsNames, fd:fdSavedList(), msg:msgSavedList(), msgContact });
 }
 function backupAllQuizzes(){
   const waSaved = waSavedList();
@@ -4085,10 +4111,23 @@ function backupAllQuizzes(){
   }
   const backup = { backupType:'capone-quiz-backup', createdAt:new Date().toISOString(),
     quizzes, waGroups: waSaved, horseNames: hrsNames, findDiffSets: fdSaved, messages: msgSaved, msgContact };
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(backup)],{type:'application/json'}));
   const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  a.download = `Backup_Il_Capone_Quiz_${dateStr}.caponequizbackup.json`; a.click();
+  const fileName = `Backup_Il_Capone_Quiz_${dateStr}.caponequizbackup.json`;
+  const blob = new Blob([JSON.stringify(backup)],{type:'application/json'});
+
+  const doDownload = ()=>{
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = fileName; a.click();
+  };
+
+  // provo la condivisione nativa (porta dritto alla scelta "WhatsApp" con il file già allegato, non solo un link)
+  const file = new File([blob], fileName, {type:'application/json'});
+  const canShareFile = navigator.canShare && navigator.canShare({files:[file]});
+  if (canShareFile && confirm('✔ Backup pronto! Vuoi condividerlo subito su WhatsApp (per averlo anche sugli altri tuoi dispositivi)?')){
+    navigator.share({ files:[file], title:'Backup Il Capone Quiz' }).catch(()=>{ doDownload(); });
+  } else {
+    doDownload();
+  }
 }
 function exportQuiz(){
   const t = $('edTitle').value.trim()||'quiz'; curQuiz.title=t;
@@ -4159,6 +4198,7 @@ function playQuiz(i){
   const quiz = JSON.parse(JSON.stringify(quizzes[i]));
   const code = randCode();
   G = { code, quiz, qi:-1, played:new Set(), ref: db.ref('caponequiz/games/'+code) };
+  G.dataSnapshotAtStart = captureLocalDataSnapshot();
   try{ localStorage.setItem('capone_last_game', code); localStorage.setItem('capone_last_quiz_idx', i); }catch(e){}
   suspenseMode = true; $('hbSuspense').classList.add('on');
   G.ref.set({ status:'lobby', title:quiz.title, created:Date.now(), ver:APP_V, suspense:true });
@@ -4213,6 +4253,7 @@ function resumeGame(){
   $('resumeBanner').style.display = 'none';
   const quiz = JSON.parse(JSON.stringify(quizzes[qIdx]));
   G = { code, quiz, qi:-1, played:new Set(), ref: db.ref('caponequiz/games/'+code) };
+  G.dataSnapshotAtStart = captureLocalDataSnapshot();
   G.ref.once('value').then(s=>{
     const data = s.val()||{};
     // ricostruisco a che domanda eravamo arrivati leggendo lo stato salvato su Firebase
@@ -4502,6 +4543,9 @@ function openInterimPodium(){
   });
 }
 function endQuiz(){
+  if (G && G.dataSnapshotAtStart && captureLocalDataSnapshot() !== G.dataSnapshotAtStart){
+    if (confirm('📌 Durante questa serata sono cambiati alcuni dati salvati (gruppi WhatsApp, nomi cavalli, set o messaggi). Vuoi fare un backup adesso?')) backupAllQuizzes();
+  }
   if (leadOv.on) sendLeadOverlay({on:false});
   G.ref.child('players').once('value').then(ps=>{
     const players = ps.val()||{};
