@@ -589,6 +589,11 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .rwCenter{position:absolute; inset:32%; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ffe27a, #b8860b 60%, #5c3a12);
   box-shadow:0 6px 14px rgba(0,0,0,.6), inset 0 -4px 10px rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center;
   font-family:'Bungee'; font-size:clamp(9px,2vw,13px); color:#3a2600; text-align:center; line-height:1.2; z-index:3;}
+#pjWatermark{display:none; position:fixed; bottom:14px; right:20px; z-index:9999; pointer-events:none;
+  font-family:'Outfit'; font-weight:700; font-size:15px; color:rgba(255,255,255,.45); letter-spacing:.5px;
+  text-shadow:0 2px 4px rgba(0,0,0,.6);}
+#pjWatermark b{color:rgba(255,201,60,.6);}
+
 .rwPointer{position:absolute; top:-2%; left:50%; transform:translateX(-50%); font-size:clamp(22px,5vw,32px); z-index:5;
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.6));}
 .rwBallOrbit{position:absolute; inset:0; will-change:transform; pointer-events:none; z-index:4;}
@@ -1178,6 +1183,7 @@ body.suspense-on #pfRank{ display:none !important; }
 </style>
 </head>
 <body>
+<div id="pjWatermark">🎩 IL CAPONE QUIZ · <b>Alberto Seminerio</b></div>
 
 <!-- ============ LOGO SVG (riusabile) ============ -->
 <template id="tplLogo">
@@ -1188,7 +1194,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.50</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.51</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3681,6 +3687,7 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="brand"><div class="t1">🏆 PODIO FINALE</div></div>
   <div class="podio" id="pjPodium" style="max-width:1100px"></div>
   <div class="lead mtb" style="max-width:700px"><div id="pjPodLead"></div></div>
+  <div class="byline mtb" style="opacity:.8">🎩 IL CAPONE QUIZ · by <b>Alberto Seminerio</b></div>
 </div>
 
 <script>
@@ -3725,6 +3732,10 @@ function showScreen(id){
     pjFitScreen(); // subito, nello stesso istante: il browser disegna solo il risultato già scalato, mai la versione piccola grezza
     setTimeout(pjFitScreen, 100); // rete di sicurezza per contenuti che si caricano un attimo dopo (es. immagini)
     pjWatchActiveScreen();
+    // il marchio discreto in basso a destra compare durante il gioco vero, ma non dove c'è già
+    // la scritta grande "by Alberto Seminerio" (attesa, lobby, podio) — sarebbe ridondante lì
+    const alreadyBranded = ['scrPjWait','scrPjLobby','scrPjPodium'];
+    $('pjWatermark').style.display = alreadyBranded.includes(id) ? 'none' : 'block';
   }
 }
 let pjFitObserver = null;
