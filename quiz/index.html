@@ -1194,7 +1194,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.51</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.52</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3692,6 +3692,49 @@ body.suspense-on #pfRank{ display:none !important; }
 
 <script>
 /* ================================================================
+   📋 ELENCO MINIGIOCHI — aggiornare questa lista ogni volta che se ne
+   aggiunge uno nuovo (serve ad Alberto per la documentazione delle licenze).
+   Ultimo aggiornamento: v12.51 — 36 minigiochi totali.
+   ================================================================
+   1.  🥃 Bussolotti
+   2.  🎲 Pari o Dispari
+   3.  🎨 Simon
+   4.  🧩 Puzzle
+   5.  🔤 Trova la Parola
+   6.  🔤➰ Anagramma
+   7.  🎱 Tombola
+   8.  🎴 Carta Rossa, Carta Nera
+   9.  🃏 Il Seme Vincente
+   10. 👆 Tap Tap
+   11. 🎡 La Ruota Gira per Tutti
+   12. ⌚ Precisione Svizzera
+   13. 🃏 Carta Alta, Carta Bassa
+   14. 🎡 Le Ruote della Fortuna
+   15. 🔍 Trova la Carta
+   16. 🃏 Memo le Coppie
+   17. 🐎 Pubbliche Offese
+   18. 💶 Sei Troppo Fiscale!
+   19. 🪙 Testa o Croce
+   20. 👠 Cenerentola
+   21. 📦 Il Gioco dei Pacchi
+   22. 🤠 Roulette Russa
+   23. 🌾 La Pagliuzza
+   24. 🎰 SUPERTRIS
+   25. 🧮 La Resa dei Conti
+   26. 🎯 Mastermind
+   27. 💣 Bomba a Orologeria
+   28. 👁 Occhio alle Forme
+   29. 🔍 Trova le Differenze
+   30. 🗳️ La Maggioranza Vince
+   31. 🎫 Il Biglietto d'Oro
+   32. 🎰 Roulette (casinò, con puntate)
+   33. 🥁 I Tamburini
+   34. 🌡 Votometro
+   35. ⏱ Timer
+   36. 📊 Classifica di Gradimento
+================================================================ */
+
+/* ================================================================
    ⭐ FIREBASE CONFIG — INCOLLA QUI LA TUA CONFIGURAZIONE ⭐
    (Console Firebase → Impostazioni progetto → Le tue app → Config.
     Puoi usare lo stesso progetto di IL CAPONE CHAT.
@@ -4557,7 +4600,103 @@ $('importFile').addEventListener('change', e=>{
    HOST — PARTITA
 ================================================================ */
 let G = null; // {code, quiz, ref, qi, timerInt, closed}
+let pendingQuizIndex = -1;
+
 function playQuiz(i){
+  pendingQuizIndex = i;
+  const savedCode = localStorage.getItem('capone_licenza_codice');
+  if(savedCode){
+    verificaCodiceEAvvia(savedCode, true);
+  } else {
+    showLicenseModal();
+  }
+}
+
+function showLicenseModal(){
+  const html = `
+    <div class="row mt" style="justify-content:center">
+      <div style="max-width:360px;width:100%">
+        <div class="label center mt">Inserisci il codice licenza per avviare la partita</div>
+        <input type="text" id="licInput" placeholder="CAPONE-XXXX-XXXX" style="width:100%;padding:12px;margin:12px 0;text-transform:uppercase;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff;text-align:center;font-size:1.1rem;letter-spacing:1px">
+        <div id="licError" style="color:#ff3b3b;font-size:.85rem;min-height:18px;text-align:center;margin-bottom:8px"></div>
+        <div class="row mtb" style="justify-content:center;gap:10px">
+          <button class="btn ghost" onclick="closeLicenseModal()">Annulla</button>
+          <button class="btn mg" onclick="verificaLicenzaEavvia()">Verifica e avvia</button>
+        </div>
+      </div>
+    </div>`;
+  openModal('🔐 Licenza richiesta', html);
+}
+
+function closeLicenseModal(){
+  closeModal();
+}
+
+function getDeviceId(){
+  let id = localStorage.getItem('capone_device_id');
+  if(!id){ id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem('capone_device_id', id); }
+  return id;
+}
+
+function verificaLicenzaEavvia(){
+  const codice = ($('licInput').value || '').trim().toUpperCase();
+  const errBox = $('licError');
+  errBox.textContent = '';
+  if(!codice){ errBox.textContent = 'Inserisci un codice.'; return; }
+  verificaCodiceEAvvia(codice, false);
+}
+
+function verificaCodiceEAvvia(codice, silente){
+  const errBox = silente ? null : $('licError');
+
+  db.ref('licenze/'+codice).once('value').then(snap=>{
+    const lic = snap.val();
+
+    const fallisci = (msg)=>{
+      if(silente){
+        localStorage.removeItem('capone_licenza_codice');
+        showLicenseModal();
+      } else if(errBox){
+        errBox.textContent = msg;
+      }
+    };
+
+    if(!lic){ fallisci('Codice licenza non valido.'); return; }
+    if(lic.attiva === false){ fallisci('Licenza disattivata. Contatta Alberto.'); return; }
+    if(Date.now() > lic.data_scadenza){ fallisci('Licenza scaduta.'); return; }
+
+    const myDevice = getDeviceId();
+
+    if(lic.device_bloccato && lic.device_id && lic.device_id !== myDevice){
+      fallisci('Licenza già in uso su un altro dispositivo. Contatta Alberto per lo sblocco.');
+      return;
+    }
+
+    const finalizza = ()=>{
+      window.CAPONE_MINIGIOCHI_ABILITATI = lic.minigiochi_abilitati || {};
+      localStorage.setItem('capone_licenza_codice', codice);
+      if(!silente) closeLicenseModal();
+      actuallyPlayQuiz(pendingQuizIndex);
+    };
+
+    if(!lic.device_bloccato){
+      db.ref('licenze/'+codice).update({
+        device_bloccato: true,
+        device_id: myDevice,
+        primo_utilizzo: Date.now()
+      }).then(finalizza).catch(()=>{ fallisci('Errore di registrazione dispositivo.'); });
+    } else {
+      finalizza();
+    }
+  }).catch(()=>{ fallisci_conn(); });
+
+  function fallisci_conn(){
+    if(silente){ showLicenseModal(); }
+    else if(errBox){ errBox.textContent = 'Errore di connessione. Riprova.'; }
+  }
+}
+
+function actuallyPlayQuiz(i){
   if (!fbOK) return alert('⚠️ Configura prima Firebase (vedi avviso in home).');
   quizzes[i].lastUsed = Date.now(); persist(); // registro quando è stato usato l'ultima volta, per la nota in home
   const quiz = JSON.parse(JSON.stringify(quizzes[i]));
@@ -11871,43 +12010,102 @@ function sendPjPhoto(on, keepOpen){
 /* ================================================================
    GIOCHI e MODULI — due menu separati
 ================================================================ */
+const GIOCHI_CATALOGO = [
+  {k:'mini', l:'🥃 Bussolotti'},
+  {k:'dice', l:'🎲 Pari o Dispari'},
+  {k:'simon', l:'🎨 Simon'},
+  {k:'puzzle', l:'🧩 Puzzle'},
+  {k:'wordsearch', l:'🔤 Trova la Parola'},
+  {k:'anagram', l:'🔤➰ Anagramma'},
+  {k:'tombola', l:'🎱 Tombola'},
+  {k:'cards', l:'🎴 Carta Rossa, Carta Nera'},
+  {k:'seed', l:'🃏 Il Seme Vincente'},
+  {k:'taptap', l:'👆 Tap Tap'},
+  {k:'ruota', l:'🎡 La Ruota Gira per Tutti'},
+  {k:'swiss', l:'⌚ Precisione Svizzera'},
+  {k:'hilo', l:'🃏 Carta Alta, Carta Bassa'},
+  {k:'wheels', l:'🎡 Le Ruote della Fortuna'},
+  {k:'memo', l:'🔍 Trova la Carta'},
+  {k:'memocoppie', l:'🃏 Memo le Coppie'},
+  {k:'horses', l:'🐎 Pubbliche Offese'},
+  {k:'tfiscale', l:'💶 Sei Troppo Fiscale!'},
+  {k:'toc', l:'🪙 Testa o Croce'},
+  {k:'cenerentola', l:'👠 Cenerentola'},
+  {k:'pacchi', l:'📦 Il Gioco dei Pacchi'},
+  {k:'roulette', l:'🤠 Roulette Russa'},
+  {k:'pagliuzza', l:'🌾 La Pagliuzza'},
+  {k:'supertris', l:'🎰 SUPERTRIS'},
+  {k:'rdc', l:'🧮 La Resa dei Conti'},
+  {k:'mastermind', l:'🎯 Mastermind'},
+  {k:'bomba', l:'💣 Bomba a Orologeria'},
+  {k:'shapes', l:'👁 Occhio alle Forme'},
+  {k:'finddiff', l:'🔍 Trova le Differenze'},
+  {k:'maj', l:'🗳️ La Maggioranza Vince'},
+  {k:'gold', l:"🎫 Il Biglietto d'Oro"},
+  {k:'casino', l:'🎰 Roulette (Casinò)'},
+  {k:'tamb', l:'🥁 I Tamburini'}
+  // 👉 QUANDO AGGIUNGI UN NUOVO MINIGIOCO: aggiungi qui una riga {k:'chiave', l:'Emoji Nome'},
+  // poi apri il quiz come host e clicca una volta su "GIOCHI": il pannello admin lo vedrà da solo.
+];
+
+function syncGiochiCatalogo(){
+  if(!fbOK) return;
+  try{ db.ref('giochi_catalogo').set(GIOCHI_CATALOGO); }catch(e){}
+}
+
+function isGameEnabled(key){
+  const en = window.CAPONE_MINIGIOCHI_ABILITATI;
+  if(!en) return true; // nessuna licenza attiva registrata: non blocchiamo (fallback sicuro)
+  return en[key] !== false; // abilitato di default, bloccato solo se esplicitamente false
+}
+function gk(key, html){
+  return isGameEnabled(key) ? html : '';
+}
 function modalGames(){
+  syncGiochiCatalogo();
+  const btns = [
+    gk('mini', `<button class="btn mg" onclick="openMini()">🥃 Bussolotti</button>`),
+    gk('dice', `<button class="btn cy" onclick="openDice()">🎲 Pari o Dispari</button>`),
+    gk('simon', `<button class="btn lm" onclick="openSimon()">🎨 Simon</button>`),
+    gk('puzzle', `<button class="btn mg" onclick="openPuzzle()">🧩 Puzzle</button>`),
+    gk('wordsearch', `<button class="btn cy" onclick="openWordSearch()">🔤 Trova la Parola</button>`),
+    gk('anagram', `<button class="btn" onclick="openAnagram()">🔤➰ Anagramma</button>`),
+    gk('tombola', `<button class="btn lm" onclick="openTombola()">🎱 Tombola</button>`),
+    gk('cards', `<button class="btn mg" onclick="openCards()">🎴 Carta Rossa, Carta Nera</button>`),
+    gk('seed', `<button class="btn" onclick="openSeed()">🃏 Il Seme Vincente</button>`),
+    gk('taptap', `<button class="btn mg" onclick="openTapTap()">👆 Tap Tap</button>`),
+    gk('ruota', `<button class="btn cy" onclick="openRuota()">🎡 La Ruota Gira per Tutti</button>`),
+    gk('swiss', `<button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>`),
+    gk('hilo', `<button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>`),
+    gk('wheels', `<button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>`),
+    gk('memo', `<button class="btn lm" onclick="openMemo()">🔍 Trova la Carta</button>`),
+    gk('memocoppie', `<button class="btn" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>`),
+    gk('horses', `<button class="btn mg" style="grid-column:1/-1" onclick="openHorses()">🐎 Pubbliche Offese</button>`),
+    gk('tfiscale', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#6fe08f,#2e9c4f); color:#fff; box-shadow:0 7px 0 #1a5c2e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,156,79,.35)" onclick="openTFiscale()">💶 Sei Troppo Fiscale!</button>`),
+    gk('toc', `<button class="btn cy" style="grid-column:1/-1" onclick="openToc()">🪙 Testa o Croce</button>`),
+    gk('cenerentola', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c9a0ff,var(--viola)); color:#fff; box-shadow:0 7px 0 #5a2a9c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.35)" onclick="openCenerentola()">👠 Cenerentola</button>`),
+    gk('pacchi', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#d9ac6e,#8a6428); color:#fff; box-shadow:0 7px 0 #5a3d18,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,100,40,.35)" onclick="openPacchi()">📦 Il Gioco dei Pacchi</button>`),
+    gk('roulette', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a85838,#6b3018); color:#ffe9a8; box-shadow:0 7px 0 #3a1a0c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(107,48,24,.4)" onclick="openRoulette()">🤠 Roulette Russa</button>`),
+    gk('pagliuzza', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a6428,#5a3d18); color:#ffe9a8; box-shadow:0 7px 0 #2e1e0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(90,61,24,.4)" onclick="openPagliuzza()">🌾 La Pagliuzza</button>`),
+    gk('supertris', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#2d8a4e,#0d4020); color:#ffe042; box-shadow:0 7px 0 #072410,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(13,64,32,.4)" onclick="openSupertris()">🎰 SUPERTRIS</button>`),
+    gk('rdc', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5a3d8a,#2e1a5a); color:#fff; box-shadow:0 7px 0 #180e30,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,26,90,.4)" onclick="openRdc()">🧮 La Resa dei Conti</button>`),
+    gk('mastermind', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a4a4a,#222); color:#fff; box-shadow:0 7px 0 #0a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4)" onclick="openMastermind()">🎯 Mastermind</button>`),
+    gk('bomba', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a2020,#4a1010); color:#fff; box-shadow:0 7px 0 #2a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,32,32,.4)" onclick="openBomba()">💣 Bomba a Orologeria</button>`),
+    gk('shapes', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c2183d,#ff8a3c); color:#fff; box-shadow:0 7px 0 #6b0e21,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(194,24,61,.4)" onclick="openShapes()">👁 Occhio alle Forme</button>`),
+    gk('finddiff', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a2fb8,#9d4dff); color:#fff; box-shadow:0 7px 0 #2a1866,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.4)" onclick="openFindDiff()">🔍 Trova le Differenze</button>`),
+    gk('maj', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#189a4a,#0b6fb8); color:#fff; box-shadow:0 7px 0 #0a3a1e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(24,154,74,.4)" onclick="openMaj()">🗳️ La Maggioranza Vince</button>`),
+    gk('gold', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#ffcf3d,#8a5a00); color:#3a2600; box-shadow:0 7px 0 #4a2f00,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(255,207,61,.4)" onclick="openGold()">🎫 Il Biglietto d'Oro</button>`),
+    gk('casino', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a3111c,#1a1108); color:#fff; box-shadow:0 7px 0 #3a0508,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(163,17,28,.4)" onclick="openCasino()">🎰 Roulette</button>`),
+    gk('tamb', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#e8b45a,#8a4a12); color:#3a2000; box-shadow:0 7px 0 #4a2400,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(232,180,90,.4)" onclick="openTamb()">🥁 I Tamburini</button>`)
+  ].filter(Boolean).join('');
+
+  const msgVuoto = btns ? '' : '<div class="byline" style="letter-spacing:1px">Nessun minigioco abilitato per questa licenza.</div>';
+
   openModal('🕹 GIOCHI', `
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
-      <button class="btn mg" onclick="openMini()">🥃 Bussolotti</button>
-      <button class="btn cy" onclick="openDice()">🎲 Pari o Dispari</button>
-      <button class="btn lm" onclick="openSimon()">🎨 Simon</button>
-      <button class="btn mg" onclick="openPuzzle()">🧩 Puzzle</button>
-      <button class="btn cy" onclick="openWordSearch()">🔤 Trova la Parola</button>
-      <button class="btn" onclick="openAnagram()">🔤➰ Anagramma</button>
-      <button class="btn lm" onclick="openTombola()">🎱 Tombola</button>
-      <button class="btn mg" onclick="openCards()">🎴 Carta Rossa, Carta Nera</button>
-      <button class="btn" onclick="openSeed()">🃏 Il Seme Vincente</button>
-      <button class="btn mg" onclick="openTapTap()">👆 Tap Tap</button>
-      <button class="btn cy" onclick="openRuota()">🎡 La Ruota Gira per Tutti</button>
-      <button class="btn cy" onclick="openSwiss()">⌚ Precisione Svizzera</button>
-      <button class="btn lm" onclick="openHiLo()">🃏 Carta Alta, Carta Bassa</button>
-      <button class="btn" onclick="openWheels()">🎡 Le Ruote della Fortuna</button>
-      <button class="btn lm" onclick="openMemo()">🔍 Trova la Carta</button>
-      <button class="btn" onclick="openMemoCoppie()">🃏 Memo le Coppie</button>
-      <button class="btn mg" style="grid-column:1/-1" onclick="openHorses()">🐎 Pubbliche Offese</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#6fe08f,#2e9c4f); color:#fff; box-shadow:0 7px 0 #1a5c2e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,156,79,.35)" onclick="openTFiscale()">💶 Sei Troppo Fiscale!</button>
-      <button class="btn cy" style="grid-column:1/-1" onclick="openToc()">🪙 Testa o Croce</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c9a0ff,var(--viola)); color:#fff; box-shadow:0 7px 0 #5a2a9c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.35)" onclick="openCenerentola()">👠 Cenerentola</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#d9ac6e,#8a6428); color:#fff; box-shadow:0 7px 0 #5a3d18,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,100,40,.35)" onclick="openPacchi()">📦 Il Gioco dei Pacchi</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a85838,#6b3018); color:#ffe9a8; box-shadow:0 7px 0 #3a1a0c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(107,48,24,.4)" onclick="openRoulette()">🤠 Roulette Russa</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a6428,#5a3d18); color:#ffe9a8; box-shadow:0 7px 0 #2e1e0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(90,61,24,.4)" onclick="openPagliuzza()">🌾 La Pagliuzza</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#2d8a4e,#0d4020); color:#ffe042; box-shadow:0 7px 0 #072410,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(13,64,32,.4)" onclick="openSupertris()">🎰 SUPERTRIS</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5a3d8a,#2e1a5a); color:#fff; box-shadow:0 7px 0 #180e30,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(46,26,90,.4)" onclick="openRdc()">🧮 La Resa dei Conti</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a4a4a,#222); color:#fff; box-shadow:0 7px 0 #0a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4)" onclick="openMastermind()">🎯 Mastermind</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#8a2020,#4a1010); color:#fff; box-shadow:0 7px 0 #2a0a0a,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(138,32,32,.4)" onclick="openBomba()">💣 Bomba a Orologeria</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#c2183d,#ff8a3c); color:#fff; box-shadow:0 7px 0 #6b0e21,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(194,24,61,.4)" onclick="openShapes()">👁 Occhio alle Forme</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a2fb8,#9d4dff); color:#fff; box-shadow:0 7px 0 #2a1866,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.4)" onclick="openFindDiff()">🔍 Trova le Differenze</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#189a4a,#0b6fb8); color:#fff; box-shadow:0 7px 0 #0a3a1e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(24,154,74,.4)" onclick="openMaj()">🗳️ La Maggioranza Vince</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#ffcf3d,#8a5a00); color:#3a2600; box-shadow:0 7px 0 #4a2f00,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(255,207,61,.4)" onclick="openGold()">🎫 Il Biglietto d'Oro</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a3111c,#1a1108); color:#fff; box-shadow:0 7px 0 #3a0508,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(163,17,28,.4)" onclick="openCasino()">🎰 Roulette</button>
-      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#e8b45a,#8a4a12); color:#3a2000; box-shadow:0 7px 0 #4a2400,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(232,180,90,.4)" onclick="openTamb()">🥁 I Tamburini</button>
-    </div>`);
+      ${btns}
+    </div>
+    ${msgVuoto}`);
 }
 function modalModules(){
   openModal('🧩 MODULI', `
