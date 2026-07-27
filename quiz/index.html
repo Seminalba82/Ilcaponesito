@@ -1163,7 +1163,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.46</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.47</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3639,6 +3639,9 @@ const $ = id => document.getElementById(id);
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $(id).classList.add('active'); window.scrollTo(0,0);
+  // segno il momento in cui, in regia, si esce per la prima volta dalla lobby verso un gioco vero:
+  // da qui in poi l'ascoltatore dei giocatori non deve più rimandare il proiettore al QR
+  if (typeof G!=='undefined' && G && G.code && id!=='scrLobby') G.leftLobby = true;
   // sul videoproiettore ogni schermata viene ingrandita automaticamente per riempire il 16:9 —
   // su regia e telefoni questo blocco non fa nulla (resta il layout centrato di sempre)
   if (document.body.classList.contains('proj')) {
@@ -4491,7 +4494,11 @@ function playQuiz(i){
     const p = s.val()||{}; const arr = Object.values(p);
     $('lobbyCount').textContent = arr.length;
     $('lobbyPlayers').innerHTML = arr.map(x=>`<div class="pChip">${esc(x.name)}</div>`).join('');
-    pjSend({type:'lobby', title:quiz.title, code, url, names:arr.map(x=>x.name)});
+    // IMPORTANTE: questo ascoltatore resta attivo per tutta la partita (aggiorna il conteggio giocatori
+    // anche dopo la lobby), ma il messaggio "lobby" al proiettore va inviato SOLO mentre si è davvero
+    // ancora nella lobby — altrimenti ogni cambio di punteggio durante un gioco (es. una vincita alla
+    // Roulette) rispedirebbe il proiettore al QR, interrompendo qualunque animazione in corso.
+    if (!G.leftLobby) pjSend({type:'lobby', title:quiz.title, code, url, names:arr.map(x=>x.name)});
   });
   $('hostBar').classList.add('on');
   document.body.classList.add('barOn');
