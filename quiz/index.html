@@ -619,6 +619,31 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .rwStakeBtn{padding:8px 14px; border-radius:12px; border:2px solid rgba(255,201,60,.4); background:rgba(0,0,0,.3); color:#fff;
   font-weight:800; cursor:pointer; font-size:13px;}
 .rwStakeBtn.sel{background:var(--gold); color:#3a2600; border-color:var(--gold);}
+
+/* ===== I TAMBURINI ===== */
+.tmbRow{display:flex; gap:16px; justify-content:center; width:100%; max-width:380px; margin:14px auto;}
+.tmbDrum{position:relative; flex:1; aspect-ratio:1; border-radius:50%; cursor:pointer; touch-action:none; user-select:none;
+  box-shadow:0 12px 0 rgba(0,0,0,.45), 0 18px 28px rgba(0,0,0,.5), inset 0 -10px 18px rgba(0,0,0,.35), inset 0 10px 14px rgba(255,255,255,.15);
+  transition:transform .05s;}
+.tmbDrum.a{background:radial-gradient(circle at 35% 28%, #e8b45a, #c9812e 55%, #8a4a12 100%);}
+.tmbDrum.b{background:radial-gradient(circle at 35% 28%, #5ac9a8, #1f8a6e 55%, #0f4a3a 100%);}
+.tmbDrum::before{content:""; position:absolute; inset:8%; border-radius:50%; border:3px dashed rgba(0,0,0,.35);
+  background-image:
+    repeating-conic-gradient(from 0deg, rgba(0,0,0,.18) 0deg 8deg, transparent 8deg 20deg);
+  opacity:.6;}
+.tmbDrum::after{content:"◆ ▲ ◆ ▲ ◆ ▲ ◆ ▲"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:rgba(0,0,0,.4); letter-spacing:6px; transform:rotate(0deg); text-align:center; width:100%;}
+.tmbDrum.hit{transform:scale(.92); filter:brightness(1.25);}
+.tmbDrum .cnt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:'Bungee'; font-size:clamp(28px,9vw,44px); color:#fff; text-shadow:0 3px 0 rgba(0,0,0,.5); z-index:2;}
+@keyframes tmbHitPulse{0%{box-shadow:0 0 0 0 rgba(255,201,60,.7);} 100%{box-shadow:0 0 0 22px rgba(255,201,60,0);}}
+.tmbPulse{position:absolute; inset:0; border-radius:50%; animation:tmbHitPulse .4s ease-out; pointer-events:none;}
+.tmbTotal{font-family:'Bungee'; font-size:clamp(30px,8vw,46px); color:var(--gold); text-align:center; margin-top:8px;
+  text-shadow:0 0 20px rgba(255,201,60,.6);}
+.tmbHint{font-size:12px; letter-spacing:1px; color:var(--muted); text-align:center; text-transform:uppercase;}
+.tmbPrizeRow{display:flex; align-items:center; gap:10px; margin-top:6px;}
+.tmbPrizeRow .medal{width:40px; font-size:20px; text-align:center;}
+.tmbPrizeRow.loss .medal{color:#ff5d5d;}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -1163,7 +1188,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.49</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.50</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2835,6 +2860,58 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="byline mt" id="shapepStatus">👁 TOCCA QUANDO PENSI DI CENTRARLA!</div>
   <div class="shapeArena" id="shapeArena"></div>
   <div class="shapePct" id="shapepPct"></div>
+</div>
+
+<!-- ==================== HOST: I TAMBURINI ==================== -->
+<div class="screen" id="scrTamb">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🥁 I TAMBURINI</div></div>
+  <div class="panel mt" style="max-width:560px" id="tambSetup">
+    <div class="label">Punti a chi arriva primo, secondo, terzo...</div>
+    <div id="tambPrizeInputs"></div>
+    <div class="label mt">Punti tolti a chi arriva ultimo, penultimo...</div>
+    <div id="tambLossInputs"></div>
+    <div class="label mt">Tempo per suonare</div>
+    <select id="tambSecs">
+      <option value="10">10 secondi</option>
+      <option value="20" selected>20 secondi</option>
+      <option value="30">30 secondi</option>
+      <option value="40">40 secondi</option>
+      <option value="50">50 secondi</option>
+    </select>
+    <button class="btn mg mt" style="width:100%" onclick="tambStart()">🥁 SI SUONA!</button>
+  </div>
+  <div id="tambLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="tambMsg"></div>
+    <div class="timerWrap mt" style="max-width:420px"><div class="timerBar" id="tambTimerBar"></div></div>
+    <div class="lead mt" id="tambRanking" style="max-width:500px; width:100%"></div>
+    <button class="btn cy mt" id="tambBtnAgain" onclick="openTamb()" style="display:none">🔁 Un'altra manche</button>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: I TAMBURINI ==================== -->
+<div class="screen" id="scrPjTamb">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🥁 I TAMBURINI</div></div>
+  <div class="miniMsg" id="pjTambMsg">SUONATE I TAMBURI DAL TELEFONO, CON DUE O PIÙ DITA!</div>
+  <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="pjTambTimerBar"></div></div>
+  <div class="lead mt" id="pjTambRanking" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: I TAMBURINI ==================== -->
+<div class="screen" id="scrPlayTamb" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="tambpName" style="color:var(--gold)"></div>
+    <div class="pill" id="tambpScore"></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="tambpTimerBar"></div></div>
+  <div class="tmbHint mt">👐 SUONA CON DUE O PIÙ DITA CONTEMPORANEAMENTE!</div>
+  <div class="tmbTotal" id="tambpTotal">0</div>
+  <div class="tmbRow">
+    <div class="tmbDrum a" id="tambpDrum0"><div class="cnt" id="tambpCnt0">0</div></div>
+    <div class="tmbDrum b" id="tambpDrum1"><div class="cnt" id="tambpCnt1">0</div></div>
+  </div>
+  <div class="feedback mtb" id="tambpFbMsg" style="display:none"></div>
+  <div class="feedback mtb" id="tambpFbPts" style="display:none"></div>
 </div>
 
 <!-- ==================== HOST: ROULETTE ==================== -->
@@ -5059,6 +5136,7 @@ function listenGame(){
     else if (g.status==='maggioranza') showPlayerMaj(g);
     else if (g.status==='goldenticket') showPlayerGold(g);
     else if (g.status==='casino') showPlayerCasino(g);
+    else if (g.status==='tamburini') showPlayerTamb(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -6709,6 +6787,80 @@ function rwPlayerSendBet(){
   $('rwpStatus').textContent = `Hai puntato ${P.rwStake} punti su ${P.rwBetNum!=null ? 'numero '+P.rwBetNum : P.rwBetType.toUpperCase()}. Aspetta che girino tutti...`;
   if (navigator.vibrate) navigator.vibrate(50);
   P.ref.child('casino/bets/'+P.id).set({ type:P.rwBetType, num:P.rwBetNum, stake:P.rwStake });
+}
+/* ================================================================
+   I TAMBURINI — telefono (due tamburi, conteggio multi-dito)
+================================================================ */
+function tambInitDrums(){
+  [0,1].forEach(idx=>{
+    const drum = $('tambpDrum'+idx);
+    if (drum._tambWired) return;
+    drum._tambWired = true;
+    // touchstart: conta OGNI dito appena appoggiato come un tap distinto — così suonare con più dita
+    // insieme vale davvero di più, non solo un tap qualunque sia il numero di dita
+    drum.addEventListener('touchstart', e=>{ e.preventDefault(); tambHit(idx, e.changedTouches.length); }, {passive:false});
+    // ripiego per mouse/desktop (utile in prova): un tap = un colpo
+    drum.addEventListener('mousedown', e=>{ if (e.pointerType!=='touch') tambHit(idx, 1); });
+  });
+}
+function showPlayerTamb(g){
+  tambInitDrums();
+  const m = g.tamburini||{};
+  $('tambpName').textContent = P.name;
+  $('tambpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayTamb');
+  if (m.phase==='play'){
+    if (P.tambStartAt !== m.startAt){
+      P.tambStartAt = m.startAt; P.tambEndAt = m.endAt; P.tambSecs = m.secs;
+      P.tambN = 0; P.tambN0 = 0; P.tambN1 = 0; P.tambSynced = 0; P.tambDone = false;
+      $('tambpTotal').textContent = '0'; $('tambpCnt0').textContent='0'; $('tambpCnt1').textContent='0';
+      $('tambpFbMsg').style.display='none'; $('tambpFbPts').style.display='none';
+      document.querySelectorAll('.tmbDrum').forEach(d=>d.classList.remove('hit'));
+      clearInterval(P.tambInt);
+      P.tambInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('tambpTimerBar').style.width = (left/((m.secs||20)*1000)*100)+'%';
+        if (left<=0){
+          clearInterval(P.tambInt);
+          if (!P.tambDone){ P.tambDone = true; tambSync(true); }
+        }
+      }, 100);
+      clearInterval(P.tambSyncInt);
+      P.tambSyncInt = setInterval(()=> tambSync(false), 250);
+    }
+  } else if (m.phase==='result'){
+    clearInterval(P.tambInt); clearInterval(P.tambSyncInt);
+    $('tambpTimerBar').style.width='0%';
+    const rv = m.results||{};
+    const rk = rv.ranking||[];
+    const idx = rk.findIndex(r=>r.pid===P.id);
+    const mine = idx>=0 ? rk[idx] : null;
+    const msg = $('tambpFbMsg'), pts = $('tambpFbPts');
+    msg.style.display='block'; pts.style.display='block';
+    if (!mine){ msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='NON HAI SUONATO'; pts.textContent='+0'; }
+    else if (idx===0){ msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='🥇 HAI VINTO TU!'; pts.textContent='+'+mine.pts+' PUNTI · '+mine.n+' tap'; if(navigator.vibrate) navigator.vibrate([80,50,120]); }
+    else if (mine.pts>0){ msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent=(idx+1)+'° POSTO!'; pts.textContent='+'+mine.pts+' PUNTI · '+mine.n+' tap'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
+    else if (mine.pts<0){ msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent=(idx+1)+'° POSTO...'; pts.textContent=mine.pts+' PUNTI · '+mine.n+' tap'; if(navigator.vibrate) navigator.vibrate(150); }
+    else { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent=(idx+1)+'° POSTO'; pts.textContent=mine.n+' tap · nessun punto'; }
+  }
+}
+function tambHit(drumIdx, nFingers){
+  if (P.tambDone) return;
+  P.tambN += nFingers;
+  if (drumIdx===0) P.tambN0 += nFingers; else P.tambN1 += nFingers;
+  $('tambpTotal').textContent = P.tambN;
+  $('tambpCnt'+drumIdx).textContent = drumIdx===0?P.tambN0:P.tambN1;
+  const drum = $('tambpDrum'+drumIdx);
+  drum.classList.add('hit'); setTimeout(()=>drum.classList.remove('hit'), 90);
+  const pulse = document.createElement('div'); pulse.className='tmbPulse';
+  drum.appendChild(pulse); setTimeout(()=>pulse.remove(), 400);
+  if (navigator.vibrate) navigator.vibrate(15);
+}
+function tambSync(force){
+  if (!P.tambStartAt) return;
+  if (!force && P.tambN===P.tambSynced) return;
+  P.tambSynced = P.tambN;
+  P.ref.child('tamburini/counts/'+P.id).set(P.tambN);
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -11187,6 +11339,101 @@ function rwSpin(){
 }
 
 /* ================================================================
+   I TAMBURINI — regia
+================================================================ */
+const TAMB_MEDALS = ['🥇','🥈','🥉','4°','5°'];
+const TAMB_PRIZE_DEFAULTS = [1000,700,500,300,200];
+const TAMB_LOSS_LABELS = ['Ultimo 💢','Penultimo','Terzultimo','4°ultimo','5°ultimo'];
+const TAMB_LOSS_DEFAULTS = [300,200,100,0,0];
+let TAMB = {};
+function tambRenderRanking(el, rows, prizes, losses, live){
+  const n = rows.length;
+  el.innerHTML = rows.map((r,i)=>{
+    const fromEnd = n-1-i; // 0 = ultimo, 1 = penultimo...
+    let ptsLabel = '';
+    if (!live){
+      if (i<5 && prizes[i]>0) ptsLabel = `<span class="pts" style="color:var(--lime)">+${prizes[i]}</span>`;
+      else if (fromEnd<5 && losses[fromEnd]>0) ptsLabel = `<span class="pts" style="color:#ff5d5d">-${losses[fromEnd]}</span>`;
+      else ptsLabel = `<span class="pts">0</span>`;
+    }
+    const medal = i<3 ? TAMB_MEDALS[i] : (i+1)+'°';
+    return `<div class="leadRow"><span class="pos">${medal}</span> ${esc(r.name)} <span class="byline" style="margin:0 8px">${r.n} tap</span> ${ptsLabel}</div>`;
+  }).join('') || '<div class="byline">Nessuno sta ancora suonando...</div>';
+}
+function openTamb(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((TAMB||{}).timerInt);
+  G.ref.child('tamburini/counts').off();
+  G.ref.update({ status:'tamburini', tamburini:{ phase:'idle' } });
+  TAMB = {};
+  $('tambPrizeInputs').innerHTML = TAMB_MEDALS.map((m,k)=>`
+    <div class="tmbPrizeRow"><span class="medal">${m}</span>
+      <input type="number" id="tambPz${k}" value="${TAMB_PRIZE_DEFAULTS[k]}" min="0" style="width:110px; text-align:center"></div>`).join('');
+  $('tambLossInputs').innerHTML = TAMB_LOSS_LABELS.map((lbl,k)=>`
+    <div class="tmbPrizeRow loss"><span class="medal">${lbl}</span>
+      <input type="number" id="tambLs${k}" value="${TAMB_LOSS_DEFAULTS[k]}" min="0" style="width:110px; text-align:center"></div>`).join('');
+  $('tambSetup').style.display='block'; $('tambLive').style.display='none';
+  pjSend({type:'tambState', msg:'SI PREPARANO I TAMBURI...'});
+  showScreen('scrTamb');
+}
+function tambStart(){
+  const secs = +$('tambSecs').value;
+  const prizes = TAMB_MEDALS.map((_,k)=> Math.max(0,+$('tambPz'+k).value||0));
+  const losses = TAMB_LOSS_LABELS.map((_,k)=> Math.max(0,+$('tambLs'+k).value||0));
+  const startAt = serverNow()+800, endAt = startAt + secs*1000;
+  TAMB = { prizes, losses, secs, startAt, endAt };
+  G.ref.update({ status:'tamburini', tamburini:{ phase:'play', secs, prizes, losses, startAt, endAt, counts:null, results:null } });
+  G.ref.child('tamburini/counts').remove();
+  $('tambSetup').style.display='none'; $('tambLive').style.display='block';
+  $('tambMsg').textContent = '🥁 SI SUONA! PICCHIATE I TAMBURI DAL TELEFONO!';
+  $('tambBtnAgain').style.display='none';
+  tambRenderRanking($('tambRanking'), [], prizes, losses, true);
+  pjSend({type:'tambStart', secs, startAt, endAt});
+  G.ref.child('tamburini/counts').on('value', s=>{
+    G.ref.child('players').once('value', ps=>{
+      const players = ps.val()||{};
+      const rows = Object.entries(s.val()||{}).map(([pid,n])=>({name:(players[pid]||{}).name||'?', n}))
+        .sort((a,b)=>b.n-a.n);
+      tambRenderRanking($('tambRanking'), rows, prizes, losses, true);
+      pjSend({type:'tambRank', rows: rows.slice(0,8)});
+    });
+  });
+  clearInterval(TAMB.timerInt);
+  TAMB.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('tambTimerBar').style.width = (left/(secs*1000)*100)+'%';
+    if (left<=0) { clearInterval(TAMB.timerInt); tambFinish(); }
+  }, 100);
+}
+function tambFinish(){
+  G.ref.child('tamburini/counts').off();
+  G.ref.child('tamburini/counts').once('value').then(s=>{
+    const counts = s.val()||{};
+    G.ref.child('players').once('value').then(ps=>{
+      const players = ps.val()||{};
+      const ranking = Object.entries(counts).map(([pid,n])=>({pid, name:(players[pid]||{}).name||'?', n}))
+        .sort((a,b)=>b.n-a.n);
+      const total = ranking.length;
+      const updates = {};
+      ranking.forEach((r,i)=>{
+        const fromEnd = total-1-i;
+        let pts = 0;
+        if (i<5 && TAMB.prizes[i]>0) pts = TAMB.prizes[i];
+        else if (fromEnd<5 && TAMB.losses[fromEnd]>0 && total>1) pts = -TAMB.losses[fromEnd]; // con un solo giocatore, niente penalità: non avrebbe senso
+        r.pts = pts;
+        if (pts!==0 && players[r.pid]) updates['players/'+r.pid+'/score'] = Math.max(0,(players[r.pid].score||0) + pts);
+      });
+      G.ref.update({ ...updates, 'tamburini/phase':'result', 'tamburini/results':{ ranking, at:Date.now() } });
+      tambRenderRanking($('tambRanking'), ranking, TAMB.prizes, TAMB.losses, false);
+      $('tambMsg').textContent = ranking.length ? `🏆 ${ranking[0].name} VINCE CON ${ranking[0].n} TAP!` : 'NESSUNO HA SUONATO!';
+      $('tambBtnAgain').style.display='';
+      pjSend({type:'tambEnd', ranking, prizes:TAMB.prizes, losses:TAMB.losses});
+      if (ranking.length) confetti();
+    });
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -11648,6 +11895,7 @@ function modalGames(){
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#189a4a,#0b6fb8); color:#fff; box-shadow:0 7px 0 #0a3a1e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(24,154,74,.4)" onclick="openMaj()">🗳️ La Maggioranza Vince</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#ffcf3d,#8a5a00); color:#3a2600; box-shadow:0 7px 0 #4a2f00,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(255,207,61,.4)" onclick="openGold()">🎫 Il Biglietto d'Oro</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a3111c,#1a1108); color:#fff; box-shadow:0 7px 0 #3a0508,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(163,17,28,.4)" onclick="openCasino()">🎰 Roulette</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#e8b45a,#8a4a12); color:#3a2000; box-shadow:0 7px 0 #4a2400,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(232,180,90,.4)" onclick="openTamb()">🥁 I Tamburini</button>
     </div>`);
 }
 function modalModules(){
@@ -12121,6 +12369,7 @@ function backToQuiz(title){
   G.ref.child('maggioranza/votes').off();
   G.ref.child('goldenticket/results').off();
   G.ref.child('casino/bets').off();
+  G.ref.child('tamburini/counts').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -12136,7 +12385,8 @@ function backToQuiz(title){
   clearInterval((MAJ||{}).timerInt);
   clearInterval((GOLD||{}).timerInt);
   clearInterval((RW||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null, goldenticket:null, casino:null });
+  clearInterval((TAMB||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null, goldenticket:null, casino:null, tamburini:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -12410,6 +12660,31 @@ function pjRouteInner(m){
       clearInterval(window._pjTapInt); $('pjTapTimerBar').style.width='0%';
       renderTapRanking($('pjTapRanking'), m.ranking||[], m.prizes||[], false);
       $('pjTapMsg').textContent = (m.ranking&&m.ranking.length) ? `🏆 ${m.ranking[0].name} VINCE CON ${m.ranking[0].n} TAP!` : 'NESSUNO HA TOCCATO IL PULSANTE!';
+      if (m.ranking && m.ranking.length) confetti();
+    }
+    else if (m.type==='tambState') {
+      showScreen('scrPjTamb');
+      $('pjTambMsg').textContent = m.msg||''; $('pjTambRanking').innerHTML='';
+      $('pjTambTimerBar').style.width='100%';
+    }
+    else if (m.type==='tambStart') {
+      showScreen('scrPjTamb');
+      $('pjTambMsg').textContent = 'SUONATE I TAMBURI DAL TELEFONO, CON DUE O PIÙ DITA!';
+      $('pjTambRanking').innerHTML='';
+      clearInterval(window._pjTambInt);
+      window._pjTambInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjTambTimerBar').style.width = (left/(m.secs*1000)*100)+'%';
+        if (left<=0) clearInterval(window._pjTambInt);
+      },100);
+    }
+    else if (m.type==='tambRank') {
+      tambRenderRanking($('pjTambRanking'), m.rows||[], [], [], true);
+    }
+    else if (m.type==='tambEnd') {
+      clearInterval(window._pjTambInt); $('pjTambTimerBar').style.width='0%';
+      tambRenderRanking($('pjTambRanking'), m.ranking||[], m.prizes||[], m.losses||[], false);
+      $('pjTambMsg').textContent = (m.ranking&&m.ranking.length) ? `🏆 ${m.ranking[0].name} VINCE CON ${m.ranking[0].n} TAP!` : 'NESSUNO HA SUONATO!';
       if (m.ranking && m.ranking.length) confetti();
     }
     else if (m.type==='gradState') {
