@@ -1163,7 +1163,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.47</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.48</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -6575,11 +6575,20 @@ function rwSpinTo(stageEl, winningNumber, durationMs, onDone){
   const targetAngle = -90 - (idx*segAngle);
   const wheelSpins = 4 + Math.floor(Math.random()*2);
   const ballSpins = 7 + Math.floor(Math.random()*2);
+  // fisso esplicitamente il punto di partenza e forzo un ridisegno del browser PRIMA di attivare
+  // la transizione: senza questo passaggio, su alcuni telefoni la rotazione può risultare "saltata"
+  // (il browser applica subito lo stato finale, senza mostrare l'animazione) se l'elemento della ruota
+  // è stato creato o modificato pochi istanti prima, nello stesso respiro di rendering
+  wheelEl.style.transition = 'none'; ballOrbit.style.transition = 'none';
+  wheelEl.style.transform = 'rotate(0deg)'; ballOrbit.style.transform = 'rotate(0deg)';
+  void wheelEl.offsetHeight; // costringo il browser a calcolare/disegnare questo stato prima di proseguire
   wheelEl.style.transition = `transform ${durationMs}ms cubic-bezier(.11,.82,.28,1)`;
   ballOrbit.style.transition = `transform ${durationMs}ms cubic-bezier(.11,.82,.28,1)`;
   requestAnimationFrame(()=>{
-    wheelEl.style.transform = `rotate(${wheelSpins*360 + targetAngle}deg)`;
-    ballOrbit.style.transform = `rotate(${-ballSpins*360}deg)`;
+    requestAnimationFrame(()=>{
+      wheelEl.style.transform = `rotate(${wheelSpins*360 + targetAngle}deg)`;
+      ballOrbit.style.transform = `rotate(${-ballSpins*360}deg)`;
+    });
   });
   if (onDone) setTimeout(onDone, durationMs+150);
 }
