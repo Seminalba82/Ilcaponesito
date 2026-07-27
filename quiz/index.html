@@ -1163,7 +1163,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.42</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.43</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3110,9 +3110,14 @@ body.suspense-on #pfRank{ display:none !important; }
     <div class="pgGrid mt" id="tfGallery"></div>
     <div class="label mt">Foto selezionata</div>
     <img id="tfPreview" class="tfPhoto" style="display:none; max-height:160px">
-    <div class="row mt">
+    <div class="label mt">Modalità di vincita</div>
+    <select id="tfMode" onchange="tfToggleMode()">
+      <option value="margin" selected>Margine di errore (più giocatori possono vincere, punti in base a quanto ci si avvicina)</option>
+      <option value="closest">Vince il più vicino (una sola squadra, chi si avvicina di più al prezzo giusto)</option>
+    </select>
+    <div class="row mt" id="tfPriceMarginRow">
       <div class="grow"><div class="label">Prezzo vero (€)</div><input type="number" id="tfPrice" step="0.01" min="0" placeholder="Es. 12.50"></div>
-      <div class="grow"><div class="label">Margine di errore (€)</div><input type="number" id="tfMargin" step="0.10" min="0" value="1"></div>
+      <div class="grow" id="tfMarginBox"><div class="label">Margine di errore (€)</div><input type="number" id="tfMargin" step="0.10" min="0" value="1"></div>
     </div>
     <div class="label mt">Frase indizio (facoltativa) — "Il prezzo si aggira tra ... e ..."</div>
     <div class="row">
@@ -9592,6 +9597,10 @@ function hrsFinishRace(plan){
    SEI TROPPO FISCALE! — indovina il prezzo (host)
 ================================================================ */
 function tfPhotoRef(){ return db.ref('caponequiz/tfiscaleData/'+(G?G.code:(P?P.code:'x'))); }
+function tfToggleMode(){
+  const closest = $('tfMode').value==='closest';
+  $('tfMarginBox').style.display = closest ? 'none' : '';
+}
 function tfCalcPct(diff, margin){
   if (diff <= 0.005) return 1; // centro pieno
   if (margin>0 && diff <= margin) return 0.5 + 0.5*(1 - diff/margin); // dentro il margine: da 50% a 100%
@@ -9658,6 +9667,7 @@ function tfStart(){
   const price = +($('tfPrice').value||0);
   if (!price) return alert('Scrivi il prezzo vero del prodotto!');
   const margin = Math.max(0, +($('tfMargin').value||1));
+  const mode = $('tfMode').value; // 'margin' oppure 'closest'
   const hintLow = $('tfHintLow').value!=='' ? +$('tfHintLow').value : null;
   const hintHigh = $('tfHintHigh').value!=='' ? +$('tfHintHigh').value : null;
   const points = getPoints('tfPoints','tfPointsMan');
@@ -9665,7 +9675,7 @@ function tfStart(){
   const endAt = serverNow() + durationSec*1000;
   const durationMs = durationSec*1000;
   const roundId = serverNow();
-  TF = { price, margin, points, credited:false };
+  TF = { price, margin, mode, points, credited:false };
   tfPhotoRef().set(window._tfPhoto); // solo la foto va in un ramo separato: non intasa i telefoni ad ogni risposta
   G.ref.update({ status:'tfiscale', tfiscale:{ phase:'bet', hintLow, hintHigh, margin, points, endAt, durationMs, roundId } });
   G.ref.child('tfiscale/guesses').remove();
@@ -9701,12 +9711,23 @@ function tfClose(){
       for (const pid in guesses){
         const gVal = guesses[pid];
         const diff = Math.abs(gVal - TF.price);
-        const pct = tfCalcPct(diff, TF.margin);
-        const pts = Math.round(TF.points*pct/10)*10;
-        if (pts>0 && players[pid]) scorePromises.push(applyScoreDelta(pid, pts));
-        results.push({ id:pid, name:(players[pid]||{}).name||'?', guess:gVal, diff, pts });
+        results.push({ id:pid, name:(players[pid]||{}).name||'?', guess:gVal, diff, pts:0 });
       }
       results.sort((a,b)=>a.diff-b.diff);
+      if (TF.mode==='closest'){
+        // vince solo chi si è avvicolato di più: gli altri restano a 0 punti
+        if (results.length){
+          const bestDiff = results[0].diff;
+          results.forEach(r=>{ if (Math.abs(r.diff-bestDiff)<1e-9) r.pts = TF.points; }); // a pari merito esatto, vincono insieme
+          results.forEach(r=>{ if (r.pts>0 && players[r.id]) scorePromises.push(applyScoreDelta(r.id, r.pts)); });
+        }
+      } else {
+        results.forEach(r=>{
+          const pct = tfCalcPct(r.diff, TF.margin);
+          r.pts = Math.round(TF.points*pct/10)*10;
+          if (r.pts>0 && players[r.id]) scorePromises.push(applyScoreDelta(r.id, r.pts));
+        });
+      }
       updates['tfiscale/phase'] = 'result'; updates['tfiscale/price'] = TF.price; updates['tfiscale/winners'] = results;
       Promise.all(scorePromises).then(()=>{
       G.ref.update(updates);
