@@ -1163,7 +1163,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.41</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.42</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -6532,15 +6532,18 @@ function rwBuildWheel(stageEl){
   RW_WHEEL_ORDER.forEach((n,i)=>{
     const angle = i*segAngle;
     segsHtml += `<div class="rwSeg" style="transform:rotate(${angle}deg)"><span class="num">${n}</span></div>`;
-    // il gradiente parte da -90° (cioè da dove punta il segmento 0, "verso destra"), così i colori restano
-    // sempre perfettamente allineati agli stessi numeri, qualunque rotazione venga applicata più avanti
-    gradStops.push(`${colHex[rwColor(n)]} ${(i/RW_WHEEL_ORDER.length*100).toFixed(2)}% ${((i+1)/RW_WHEEL_ORDER.length*100).toFixed(2)}%`);
+    gradStops.push(`${colHex[rwColor(n)]} ${(i/RW_WHEEL_ORDER.length*100).toFixed(3)}% ${((i+1)/RW_WHEEL_ORDER.length*100).toFixed(3)}%`);
   });
+  // sposto il punto di partenza del gradiente di MEZZO segmento indietro: così lo spicchio i-esimo
+  // (che va da i/37 a (i+1)/37, percentuali pulite) risulta centrato esattamente sul numero i,
+  // invece di avere il numero seduto proprio sul confine tra due colori (dove basta un arrotondamento
+  // del browser per fargli prendere il colore dello spicchio accanto)
+  const halfSeg = segAngle/2;
   stageEl.innerHTML = `
     <div class="rwPointer">🔻</div>
     <div class="rwBallOrbit" id="${stageEl.id}_ballOrbit"><div class="rwBall"></div></div>
     <div class="rwWheel" id="${stageEl.id}_wheel">
-      <div class="rwOuterRing" style="background:conic-gradient(from -90deg, ${gradStops.join(',')})"></div>
+      <div class="rwOuterRing" style="background:conic-gradient(from ${(90-halfSeg).toFixed(3)}deg, ${gradStops.join(',')})"></div>
       ${segsHtml}
       <div class="rwCenter">IL CAPONE<br>QUIZ</div>
     </div>
