@@ -576,6 +576,51 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .gtPrizeRow select{width:110px; flex-shrink:0;}
 @keyframes gtCoinsFall{ 0%{transform:translateY(-40px) rotate(0deg); opacity:1;} 100%{transform:translateY(340px) rotate(360deg); opacity:0;} }
 .gtCoin{position:absolute; top:0; font-size:22px; animation:gtCoinsFall 1.8s ease-in forwards; pointer-events:none;}
+
+/* ===== ROULETTE ===== */
+.rwStage{position:relative; width:100%; max-width:420px; aspect-ratio:1; margin:14px auto;}
+.rwWheel{position:absolute; inset:6%; border-radius:50%; will-change:transform;
+  box-shadow:0 0 0 10px #1a1108, 0 0 0 16px #5c3a12, 0 14px 34px rgba(0,0,0,.7), inset 0 0 30px rgba(0,0,0,.6);}
+.rwSeg{position:absolute; top:50%; left:50%; width:50%; height:2px; transform-origin:0 50%;}
+.rwSeg .num{position:absolute; right:6%; top:50%; transform:translateY(-50%); font-family:'Bungee'; font-size:clamp(9px,2.6vw,13px); color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.8); width:24px; text-align:center;}
+.rwSeg.red .num{ }
+.rwOuterRing{position:absolute; inset:6%; border-radius:50%; background:
+  repeating-conic-gradient(from 0deg, #a3111c 0deg calc(360deg/37), #111 calc(360deg/37) calc(720deg/37));
+  box-shadow:inset 0 0 24px rgba(0,0,0,.5);}
+.rwCenter{position:absolute; inset:32%; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ffe27a, #b8860b 60%, #5c3a12);
+  box-shadow:0 6px 14px rgba(0,0,0,.6), inset 0 -4px 10px rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center;
+  font-family:'Bungee'; font-size:clamp(9px,2vw,13px); color:#3a2600; text-align:center; line-height:1.2; z-index:3;}
+.rwPointer{position:absolute; top:-2%; left:50%; transform:translateX(-50%); font-size:clamp(22px,5vw,32px); z-index:5;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.6));}
+.rwBallOrbit{position:absolute; inset:0; will-change:transform; pointer-events:none; z-index:4;}
+.rwBall{position:absolute; top:2%; left:50%; width:14px; height:14px; margin-left:-7px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff, #ccc 60%, #888); box-shadow:0 2px 4px rgba(0,0,0,.6);}
+.rwResultBadge{position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:6;}
+.rwResultBadge.show{display:flex;}
+.rwResultBadge .circ{width:46%; aspect-ratio:1; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'Bungee'; font-size:clamp(28px,9vw,52px); color:#fff; text-shadow:0 3px 0 rgba(0,0,0,.5);
+  box-shadow:0 0 40px rgba(255,201,60,.8), 0 10px 0 rgba(0,0,0,.4); animation:goPop .5s cubic-bezier(.2,1.5,.4,1);}
+.rwResultBadge .circ.red{background:radial-gradient(circle at 35% 30%,#ff6b6b,#a3111c 70%);}
+.rwResultBadge .circ.black{background:radial-gradient(circle at 35% 30%,#555,#111 70%);}
+.rwResultBadge .circ.green{background:radial-gradient(circle at 35% 30%,#8cf28a,#189a4a 70%);}
+.rwBetGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; width:100%; max-width:380px; margin:12px auto;}
+.rwBetBtn{padding:16px 10px; border-radius:16px; border:none; cursor:pointer; font-family:'Bungee'; font-size:clamp(14px,3.6vw,18px);
+  color:#fff; box-shadow:0 6px 0 rgba(0,0,0,.35), 0 9px 16px rgba(0,0,0,.35); transition:transform .1s;}
+.rwBetBtn:active{transform:translateY(3px);}
+.rwBetBtn.sel{outline:4px solid #fff; outline-offset:-4px;}
+.rwBetBtn.red{background:linear-gradient(180deg,#ff6b6b,#a3111c);}
+.rwBetBtn.black{background:linear-gradient(180deg,#555,#111);}
+.rwBetBtn.parity{background:linear-gradient(180deg,#5ec8ff,#0b6fb8);}
+.rwNumGrid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; width:100%; max-width:380px; margin:10px auto;}
+.rwNumBtn{aspect-ratio:1; border-radius:8px; border:none; cursor:pointer; font-weight:800; font-size:clamp(10px,2.6vw,13px); color:#fff;
+  box-shadow:0 3px 0 rgba(0,0,0,.35);}
+.rwNumBtn.red{background:#a3111c;} .rwNumBtn.black{background:#222;} .rwNumBtn.green{background:#189a4a;}
+.rwNumBtn.sel{outline:3px solid #ffe27a; outline-offset:-3px;}
+.rwStakeRow{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:380px; margin:10px auto;}
+.rwStakeBtn{padding:8px 14px; border-radius:12px; border:2px solid rgba(255,201,60,.4); background:rgba(0,0,0,.3); color:#fff;
+  font-weight:800; cursor:pointer; font-size:13px;}
+.rwStakeBtn.sel{background:var(--gold); color:#3a2600; border-color:var(--gold);}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -1120,7 +1165,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.39</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.40</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2792,6 +2837,65 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="byline mt" id="shapepStatus">👁 TOCCA QUANDO PENSI DI CENTRARLA!</div>
   <div class="shapeArena" id="shapeArena"></div>
   <div class="shapePct" id="shapepPct"></div>
+</div>
+
+<!-- ==================== HOST: ROULETTE ==================== -->
+<div class="screen" id="scrCasino">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🎰 ROULETTE</div></div>
+  <div class="panel mt" style="max-width:520px" id="rwSetup">
+    <div class="label">Le 10 quote scommettibili (punti)</div>
+    <div class="row" style="flex-wrap:wrap; gap:8px" id="rwStakesInputs"></div>
+    <div class="label mt">Tempo per scommettere</div>
+    <select id="rwDuration">
+      <option value="15">15 secondi</option>
+      <option value="20" selected>20 secondi</option>
+      <option value="30">30 secondi</option>
+      <option value="45">45 secondi</option>
+    </select>
+    <button class="btn mg mt" style="width:100%" onclick="rwStart()">🎰 APRI LE SCOMMESSE!</button>
+  </div>
+  <div id="rwLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="rwMsg"></div>
+    <div class="timerWrap mt" style="max-width:420px"><div class="timerBar" id="rwTimerBarHost"></div></div>
+    <div class="rwStage" id="rwStageHost"></div>
+    <div class="byline" id="rwCount"></div>
+    <button class="btn mg mt" id="rwBtnSpin" onclick="rwSpin()" style="display:none">🎡 GIRA LA RUOTA!</button>
+    <div class="lead mt" id="rwResultsLive" style="max-width:500px; width:100%"></div>
+    <button class="btn cy mt" id="rwBtnAgain" onclick="openCasino()" style="display:none">🔁 Un'altra mano</button>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: ROULETTE ==================== -->
+<div class="screen" id="scrPjCasino">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">🎰 ROULETTE</div></div>
+  <div class="miniMsg" id="pjRwMsg">SCOMMETTETE DAL TELEFONO!</div>
+  <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="pjRwTimerBar"></div></div>
+  <div class="rwStage" id="rwStagePj" style="max-width:500px"></div>
+  <div class="lead mt" id="pjRwResults" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: ROULETTE ==================== -->
+<div class="screen" id="scrPlayCasino" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="rwpName" style="color:var(--gold)"></div>
+    <div class="pill" id="rwpScore"></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="rwpTimerBar"></div></div>
+  <div class="byline mt" id="rwpStatus">🎰 SCEGLI SU COSA PUNTARE!</div>
+  <div class="rwBetGrid">
+    <button class="rwBetBtn red" id="rwpBetRed" onclick="rwPlayerPick('red')">🔴 ROSSO ·×2</button>
+    <button class="rwBetBtn black" id="rwpBetBlack" onclick="rwPlayerPick('black')">⚫ NERO ·×2</button>
+    <button class="rwBetBtn parity" id="rwpBetOdd" onclick="rwPlayerPick('odd')">DISPARI ·×2</button>
+    <button class="rwBetBtn parity" id="rwpBetEven" onclick="rwPlayerPick('even')">PARI ·×2</button>
+  </div>
+  <div class="byline center" style="margin-top:10px">...oppure un NUMERO secco (×36!)</div>
+  <div class="rwNumGrid" id="rwpNumGrid"></div>
+  <div class="label mt center" style="width:100%">Quanto punti?</div>
+  <div class="rwStakeRow" id="rwpStakeRow"></div>
+  <button class="btn mg mt" id="rwpBtnBet" onclick="rwPlayerSendBet()" disabled>🎰 PUNTA!</button>
+  <div class="rwStage" id="rwStagePlayer" style="max-width:260px; display:none"></div>
+  <div class="byline mt" id="rwpResult"></div>
 </div>
 
 <!-- ==================== HOST: IL BIGLIETTO D'ORO ==================== -->
@@ -4944,6 +5048,7 @@ function listenGame(){
     else if (g.status==='finddiff') showPlayerFindDiff(g);
     else if (g.status==='maggioranza') showPlayerMaj(g);
     else if (g.status==='goldenticket') showPlayerGold(g);
+    else if (g.status==='casino') showPlayerCasino(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -6413,6 +6518,147 @@ function gtFinishScratch(){
     if (navigator.vibrate) navigator.vibrate(120);
   }
   P.ref.child('goldenticket/results/'+P.id).set(P.gtOutcome);
+}
+/* ================================================================
+   ROULETTE — motore condiviso (host/proiettore/telefono)
+================================================================ */
+// ordine reale dei numeri sulla plancia della roulette europea (37 caselle, 0 compreso)
+const RW_WHEEL_ORDER = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const RW_RED = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+function rwColor(n){ if (n===0) return 'green'; return RW_RED.has(n) ? 'red' : 'black'; }
+function rwBuildWheel(stageEl){
+  const N = RW_WHEEL_ORDER.length, segAngle = 360/N;
+  let segsHtml = '';
+  RW_WHEEL_ORDER.forEach((n,i)=>{
+    const angle = i*segAngle;
+    segsHtml += `<div class="rwSeg" style="transform:rotate(${angle}deg)"><span class="num">${n}</span></div>`;
+  });
+  stageEl.innerHTML = `
+    <div class="rwPointer">🔻</div>
+    <div class="rwBallOrbit" id="${stageEl.id}_ballOrbit"><div class="rwBall"></div></div>
+    <div class="rwWheel" id="${stageEl.id}_wheel">
+      <div class="rwOuterRing"></div>
+      ${segsHtml}
+      <div class="rwCenter">IL CAPONE<br>QUIZ</div>
+    </div>
+    <div class="rwResultBadge" id="${stageEl.id}_badge"><div class="circ"></div></div>`;
+}
+/* Fa girare la ruota e la pallina fino a fermarsi esattamente sul numero vincente.
+   La pallina finisce SEMPRE ferma in cima (dove c'è il puntatore fisso): è la RUOTA che gira
+   fino a portare il numero giusto sotto quel punto — così le due animazioni non devono "cercarsi"
+   a vicenda, restano sempre coerenti tra loro. */
+function rwSpinTo(stageEl, winningNumber, durationMs, onDone){
+  const wheelEl = document.getElementById(stageEl.id+'_wheel');
+  const ballOrbit = document.getElementById(stageEl.id+'_ballOrbit');
+  const idx = RW_WHEEL_ORDER.indexOf(winningNumber);
+  const segAngle = 360/RW_WHEEL_ORDER.length;
+  const targetAngle = -(idx*segAngle);
+  const wheelSpins = 4 + Math.floor(Math.random()*2);
+  const ballSpins = 7 + Math.floor(Math.random()*2);
+  wheelEl.style.transition = `transform ${durationMs}ms cubic-bezier(.11,.82,.28,1)`;
+  ballOrbit.style.transition = `transform ${durationMs}ms cubic-bezier(.11,.82,.28,1)`;
+  requestAnimationFrame(()=>{
+    wheelEl.style.transform = `rotate(${wheelSpins*360 + targetAngle}deg)`;
+    ballOrbit.style.transform = `rotate(${-ballSpins*360}deg)`;
+  });
+  if (onDone) setTimeout(onDone, durationMs+150);
+}
+function rwShowBadge(stageEl, number){
+  const badge = document.getElementById(stageEl.id+'_badge');
+  const color = rwColor(number);
+  badge.querySelector('.circ').className = 'circ '+color;
+  badge.querySelector('.circ').textContent = number;
+  badge.classList.add('show');
+}
+/* ================================================================
+   ROULETTE — telefono
+================================================================ */
+function rwBuildNumGrid(){
+  const grid = $('rwpNumGrid');
+  if (grid._built) return;
+  grid._built = true;
+  let html = '';
+  for (let n=0;n<=36;n++) html += `<button class="rwNumBtn ${rwColor(n)}" onclick="rwNumPick(${n})">${n}</button>`;
+  grid.innerHTML = html;
+}
+function showPlayerCasino(g){
+  const m = g.roulette||{};
+  $('rwpName').textContent = P.name;
+  $('rwpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayCasino');
+  rwBuildNumGrid();
+  if (m.phase==='active'){
+    const sig = 'act:'+m.roundId;
+    if (P.rwSig !== sig){
+      P.rwSig = sig; P.rwBetType = null; P.rwBetNum = null; P.rwStake = null; P.rwSent = false;
+      $('rwpStatus').textContent = '🎰 SCEGLI SU COSA PUNTARE!';
+      $('rwpResult').textContent = '';
+      $('rwStagePlayer').style.display = 'none';
+      document.querySelectorAll('.rwBetBtn, .rwNumBtn, .rwStakeBtn').forEach(b=>b.classList.remove('sel'));
+      $('rwpBtnBet').disabled = true; $('rwpBtnBet').style.display='block';
+      $('rwpStakeRow').innerHTML = (m.stakes||[]).map(s=>`<button class="rwStakeBtn" onclick="rwStakePick(${s})">${s} pt</button>`).join('');
+      clearInterval(P.rwInt);
+      P.rwInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('rwpTimerBar').style.width = (left/(m.durationMs||1)*100)+'%';
+        if (left<=0){ clearInterval(P.rwInt); if (!P.rwSent) $('rwpStatus').textContent = '⏱ TEMPO SCADUTO, NESSUNA SCOMMESSA INVIATA!'; $('rwpBtnBet').style.display='none'; }
+      }, 100);
+    }
+  } else if (m.phase==='spin' || m.phase==='result'){
+    clearInterval(P.rwInt);
+    if (P.rwSent && !P.rwRevealed){
+      P.rwRevealed = true;
+      $('rwpBtnBet').style.display='none';
+      $('rwStagePlayer').style.display='block';
+      const stage = $('rwStagePlayer');
+      rwBuildWheel(stage);
+      $('rwpStatus').textContent = '🎡 LA RUOTA GIRA...';
+      setTimeout(()=>{
+        rwSpinTo(stage, m.winningNumber, 3200, ()=>{
+          rwShowBadge(stage, m.winningNumber);
+          const myBet = (m.bets||{})[P.id];
+          const r = (m.results||{})[P.id];
+          if (myBet && r){
+            if (r.win){ $('rwpResult').innerHTML = `🎉 <b style="color:var(--lime)">HAI VINTO! +${r.pts} PUNTI!</b>`; confetti(); if(navigator.vibrate) navigator.vibrate([80,50,80,50,150]); }
+            else { $('rwpResult').innerHTML = `😬 Numero uscito: <b>${m.winningNumber}</b> (${rwColor(m.winningNumber).toUpperCase()}) — hai perso ${myBet.stake} punti.`; if(navigator.vibrate) navigator.vibrate(150); }
+          }
+        });
+      }, 300);
+    }
+  }
+}
+function rwPlayerPick(type){
+  if (P.rwSent) return;
+  P.rwBetType = type; P.rwBetNum = null;
+  document.querySelectorAll('.rwBetBtn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.rwNumBtn').forEach(b=>b.classList.remove('sel'));
+  $('rwpBet'+type[0].toUpperCase()+type.slice(1)).classList.add('sel');
+  rwCheckReady();
+}
+function rwNumPick(n){
+  if (P.rwSent) return;
+  P.rwBetType = 'number'; P.rwBetNum = n;
+  document.querySelectorAll('.rwBetBtn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.rwNumBtn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.rwNumBtn')[n].classList.add('sel');
+  rwCheckReady();
+}
+function rwStakePick(s){
+  if (P.rwSent) return;
+  P.rwStake = s;
+  document.querySelectorAll('.rwStakeBtn').forEach(b=> b.classList.toggle('sel', b.textContent.trim()===s+' pt'));
+  rwCheckReady();
+}
+function rwCheckReady(){
+  $('rwpBtnBet').disabled = !(P.rwBetType && P.rwStake);
+}
+function rwPlayerSendBet(){
+  if (P.rwSent || !P.rwBetType || !P.rwStake) return;
+  P.rwSent = true;
+  $('rwpBtnBet').disabled = true; $('rwpBtnBet').textContent = '✔ PUNTATA INVIATA!';
+  $('rwpStatus').textContent = `Hai puntato ${P.rwStake} punti su ${P.rwBetNum!=null ? 'numero '+P.rwBetNum : P.rwBetType.toUpperCase()}. Aspetta che girino tutti...`;
+  if (navigator.vibrate) navigator.vibrate(50);
+  P.ref.child('roulette/bets/'+P.id).set({ type:P.rwBetType, num:P.rwBetNum, stake:P.rwStake });
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -10785,6 +11031,96 @@ function gtStart(){
 }
 
 /* ================================================================
+   ROULETTE — regia
+================================================================ */
+let RW = {};
+const RW_DEFAULT_STAKES = [50,100,200,300,500,750,1000,1500,2500,5000];
+let RW_STAKES_LAST = null;
+function openCasino(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((RW||{}).timerInt);
+  G.ref.child('casino/bets').off();
+  G.ref.update({ status:'casino', casino:{ phase:'idle' } });
+  RW = {};
+  $('rwSetup').style.display='block'; $('rwLive').style.display='none';
+  const prevStakes = RW_STAKES_LAST || RW_DEFAULT_STAKES;
+  $('rwStakesInputs').innerHTML = prevStakes.map((s,i)=>
+    `<input type="number" id="rwStake${i}" value="${s}" style="width:80px" min="10">`).join('');
+  showScreen('scrCasino');
+}
+function rwCollectStakes(){
+  const stakes = [];
+  for (let i=0;i<10;i++){ const v = +$('rwStake'+i).value||0; if (v>0) stakes.push(v); }
+  RW_STAKES_LAST = stakes;
+  return stakes;
+}
+function rwStart(){
+  const stakes = rwCollectStakes();
+  if (!stakes.length) return alert('Imposta almeno una quota scommettibile!');
+  const durationSec = +($('rwDuration').value||20);
+  const durationMs = durationSec*1000;
+  const endAt = serverNow()+durationMs;
+  const roundId = serverNow();
+  RW = { stakes };
+  G.ref.update({ status:'casino', casino:{ phase:'active', stakes, endAt, durationMs, roundId } });
+  G.ref.child('casino/bets').remove();
+  $('rwSetup').style.display='none'; $('rwLive').style.display='block';
+  $('rwMsg').textContent = '🎰 SI SCOMMETTE! OGNI GIOCATORE SCEGLIE DAL TELEFONO...';
+  $('rwCount').textContent=''; $('rwResultsLive').innerHTML=''; $('rwBtnSpin').style.display='none'; $('rwBtnAgain').style.display='none';
+  rwBuildWheel($('rwStageHost'));
+  pjSend({type:'rwActive', stakes, endAt, durationMs});
+  clearInterval(RW.timerInt);
+  RW.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt-serverNow());
+    $('rwTimerBarHost').style.width = (left/durationMs*100)+'%';
+    if (left<=0){ clearInterval(RW.timerInt); $('rwBtnSpin').style.display='block'; }
+  }, 100);
+  G.ref.child('casino/bets').on('value', s=>{
+    const bets = s.val()||{};
+    $('rwCount').textContent = `Scommesse arrivate: ${Object.keys(bets).length}`;
+    if (Object.keys(bets).length>0) $('rwBtnSpin').style.display='block';
+  });
+}
+function rwSpin(){
+  clearInterval(RW.timerInt);
+  $('rwBtnSpin').style.display='none';
+  G.ref.child('casino/bets').once('value').then(s=>{
+    const bets = s.val()||{};
+    const winningNumber = RW_WHEEL_ORDER[Math.floor(Math.random()*RW_WHEEL_ORDER.length)];
+    const color = rwColor(winningNumber);
+    const isEven = winningNumber!==0 && winningNumber%2===0;
+    const isOdd = winningNumber!==0 && winningNumber%2===1;
+    const results = {};
+    Object.entries(bets).forEach(([pid,b])=>{
+      let win = false, mult = 0;
+      if (b.type==='red' && color==='red') { win=true; mult=2; }
+      else if (b.type==='black' && color==='black') { win=true; mult=2; }
+      else if (b.type==='even' && isEven) { win=true; mult=2; }
+      else if (b.type==='odd' && isOdd) { win=true; mult=2; }
+      else if (b.type==='number' && b.num===winningNumber) { win=true; mult=36; }
+      const pts = win ? Math.round(b.stake*(mult-1)) : -b.stake;
+      results[pid] = { win, pts };
+      applyScoreDelta(pid, pts);
+    });
+    $('rwMsg').textContent = '🎡 LA RUOTA GIRA...';
+    G.ref.child('casino').update({ phase:'spin', winningNumber, bets, results });
+    pjSend({type:'rwSpin', winningNumber});
+    rwSpinTo($('rwStageHost'), winningNumber, 3200, ()=>{
+      rwShowBadge($('rwStageHost'), winningNumber);
+      $('rwMsg').innerHTML = `Esce il <b style="color:var(--gold)">${winningNumber}</b> (${color.toUpperCase()})!`;
+      $('rwBtnAgain').style.display='block';
+      G.ref.child('players').once('value').then(ps=>{
+        const pl = ps.val()||{};
+        $('rwResultsLive').innerHTML = Object.entries(results).map(([pid,r])=>
+          `<div class="leadRow"><span class="pos">${r.win?'🎉':'💢'}</span> ${esc((pl[pid]||{}).name||'?')} <span class="pts">${r.pts>0?'+'+r.pts:r.pts}</span></div>`).join('')
+          || '<div class="byline">Nessuna scommessa arrivata.</div>';
+      });
+      confetti();
+    });
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -11245,6 +11581,7 @@ function modalGames(){
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#4a2fb8,#9d4dff); color:#fff; box-shadow:0 7px 0 #2a1866,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(157,77,255,.4)" onclick="openFindDiff()">🔍 Trova le Differenze</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#189a4a,#0b6fb8); color:#fff; box-shadow:0 7px 0 #0a3a1e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(24,154,74,.4)" onclick="openMaj()">🗳️ La Maggioranza Vince</button>
       <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#ffcf3d,#8a5a00); color:#3a2600; box-shadow:0 7px 0 #4a2f00,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(255,207,61,.4)" onclick="openGold()">🎫 Il Biglietto d'Oro</button>
+      <button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a3111c,#1a1108); color:#fff; box-shadow:0 7px 0 #3a0508,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(163,17,28,.4)" onclick="openCasino()">🎰 Roulette</button>
     </div>`);
 }
 function modalModules(){
@@ -11717,6 +12054,7 @@ function backToQuiz(title){
   G.ref.child('finddiff/results').off();
   G.ref.child('maggioranza/votes').off();
   G.ref.child('goldenticket/results').off();
+  G.ref.child('casino/bets').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -11731,7 +12069,8 @@ function backToQuiz(title){
   clearInterval((FD||{}).timerInt);
   clearInterval((MAJ||{}).timerInt);
   clearInterval((GOLD||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null, goldenticket:null });
+  clearInterval((RW||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null, goldenticket:null, casino:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -12695,6 +13034,28 @@ function pjRouteInner(m){
         $('pjGtTimerBar').style.width = (left/m.durationMs*100)+'%';
         if (left<=0) clearInterval(window._pjGtInt);
       }, 100);
+    }
+    else if (m.type==='rwActive') {
+      showScreen('scrPjCasino');
+      $('pjRwMsg').textContent = 'SCOMMETTETE DAL TELEFONO!';
+      $('pjRwResults').innerHTML='';
+      rwBuildWheel($('rwStagePj'));
+      clearInterval(window._pjRwInt);
+      window._pjRwInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjRwTimerBar').style.width = (left/m.durationMs*100)+'%';
+        if (left<=0) clearInterval(window._pjRwInt);
+      }, 100);
+    }
+    else if (m.type==='rwSpin') {
+      clearInterval(window._pjRwInt);
+      $('pjRwTimerBar').style.width = '0%';
+      $('pjRwMsg').textContent = '🎡 LA RUOTA GIRA...';
+      rwSpinTo($('rwStagePj'), m.winningNumber, 3200, ()=>{
+        rwShowBadge($('rwStagePj'), m.winningNumber);
+        const color = rwColor(m.winningNumber);
+        $('pjRwMsg').innerHTML = `Esce il <b style="color:var(--gold)">${m.winningNumber}</b> (${color.toUpperCase()})!`;
+      });
     }
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
