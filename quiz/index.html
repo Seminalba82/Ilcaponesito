@@ -1163,7 +1163,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.45</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.46</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2880,6 +2880,7 @@ body.suspense-on #pfRank{ display:none !important; }
     <div class="pill" id="rwpScore"></div>
   </div>
   <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="rwpTimerBar"></div></div>
+  <div class="rwStage" id="rwStagePlayer" style="max-width:220px"></div>
   <div class="byline mt" id="rwpStatus">🎰 SCEGLI SU COSA PUNTARE!</div>
   <div class="rwBetGrid">
     <button class="rwBetBtn red" id="rwpBetRed" onclick="rwPlayerPick('red')">🔴 ROSSO ·×2</button>
@@ -2892,7 +2893,6 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="label mt center" style="width:100%">Quanto punti?</div>
   <div class="rwStakeRow" id="rwpStakeRow"></div>
   <button class="btn mg mt" id="rwpBtnBet" onclick="rwPlayerSendBet()" disabled>🎰 PUNTA!</button>
-  <div class="rwStage" id="rwStagePlayer" style="max-width:260px; display:none"></div>
   <div class="byline mt" id="rwpResult"></div>
 </div>
 
@@ -6607,7 +6607,7 @@ function showPlayerCasino(g){
       P.rwSig = sig; P.rwBetType = null; P.rwBetNum = null; P.rwStake = null; P.rwSent = false;
       $('rwpStatus').textContent = '🎰 SCEGLI SU COSA PUNTARE!';
       $('rwpResult').textContent = '';
-      $('rwStagePlayer').style.display = 'none';
+      rwBuildWheel($('rwStagePlayer')); // visibile fin da subito, come riferimento mentre si sceglie dove puntare
       document.querySelectorAll('.rwBetBtn, .rwNumBtn, .rwStakeBtn').forEach(b=>b.classList.remove('sel'));
       $('rwpBtnBet').disabled = true; $('rwpBtnBet').style.display='block';
       // mostro solo le quote che il giocatore può davvero permettersi: non ha senso poter scommettere
@@ -6631,9 +6631,7 @@ function showPlayerCasino(g){
     if (P.rwSent && !P.rwRevealed){
       P.rwRevealed = true;
       $('rwpBtnBet').style.display='none';
-      $('rwStagePlayer').style.display='block';
       const stage = $('rwStagePlayer');
-      rwBuildWheel(stage);
       $('rwpStatus').textContent = '🎡 LA RUOTA GIRA...';
       setTimeout(()=>{
         rwSpinTo(stage, m.winningNumber, 3200, ()=>{
