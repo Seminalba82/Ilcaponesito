@@ -1163,7 +1163,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.48</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.49</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -6452,14 +6452,20 @@ function gtSetupScratch(canvas, onDone){
   const scratchAt = (clientX, clientY)=>{
     const r = canvas.getBoundingClientRect();
     const x = clientX-r.left, y = clientY-r.top;
+    const radius = Math.max(18, r.width*0.09);
     ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath(); ctx.arc(x, y, Math.max(18, r.width*0.09), 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, radius, 0, 7); ctx.fill();
     ctx.globalCompositeOperation = 'source-over';
-    const gx = Math.floor(x/r.width*GRID), gy = Math.floor(y/r.height*GRID);
-    touched.add(gy*GRID+gx);
-    const pct = Math.min(100, Math.round(touched.size/(GRID*GRID)*100*1.35)); // *1.35: il cerchio grattato copre più di una sola cella
+    // marco TUTTE le celle della griglia realmente coperte dal cerchio grattato (non solo quella
+    // centrale): così la percentuale rispecchia davvero quanto si vede scoperto, senza bisogno
+    // di fattori di correzione approssimativi che facevano comparire il premio troppo presto
+    const cellW = r.width/GRID, cellH = r.height/GRID;
+    const gxMin = Math.max(0, Math.floor((x-radius)/cellW)), gxMax = Math.min(GRID-1, Math.floor((x+radius)/cellW));
+    const gyMin = Math.max(0, Math.floor((y-radius)/cellH)), gyMax = Math.min(GRID-1, Math.floor((y+radius)/cellH));
+    for (let gy=gyMin; gy<=gyMax; gy++) for (let gx=gxMin; gx<=gxMax; gx++) touched.add(gy*GRID+gx);
+    const pct = Math.min(100, Math.round(touched.size/(GRID*GRID)*100));
     $('gtpProgressFill').style.width = pct+'%';
-    if (pct>=55 && !done){ done = true; onDone(); }
+    if (pct>=80 && !done){ done = true; onDone(); }
   };
   const onMove = (ev)=>{
     if (done) return;
