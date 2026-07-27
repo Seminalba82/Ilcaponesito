@@ -1163,7 +1163,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.43</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.45</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -6595,9 +6595,10 @@ function rwBuildNumGrid(){
   grid.innerHTML = html;
 }
 function showPlayerCasino(g){
-  const m = g.roulette||{};
+  const m = g.casino||{};
+  const myScore = ((g.players||{})[P.id]||{}).score||0;
   $('rwpName').textContent = P.name;
-  $('rwpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  $('rwpScore').textContent = myScore+' pt';
   showScreen('scrPlayCasino');
   rwBuildNumGrid();
   if (m.phase==='active'){
@@ -6609,7 +6610,15 @@ function showPlayerCasino(g){
       $('rwStagePlayer').style.display = 'none';
       document.querySelectorAll('.rwBetBtn, .rwNumBtn, .rwStakeBtn').forEach(b=>b.classList.remove('sel'));
       $('rwpBtnBet').disabled = true; $('rwpBtnBet').style.display='block';
-      $('rwpStakeRow').innerHTML = (m.stakes||[]).map(s=>`<button class="rwStakeBtn" onclick="rwStakePick(${s})">${s} pt</button>`).join('');
+      // mostro solo le quote che il giocatore può davvero permettersi: non ha senso poter scommettere
+      // punti che non si hanno — chi perde una scommessa "gratuita" (perché era già a zero) non rischia
+      // nulla di vero, mentre se vince si ritroverebbe un bottino mai realmente messo in palio
+      const affordable = (m.stakes||[]).filter(s=> s<=myScore);
+      if (!affordable.length){
+        $('rwpStakeRow').innerHTML = `<div class="byline" style="color:#ff5d5d">Non hai punti sufficienti per scommettere questo turno (minimo ${Math.min(...(m.stakes||[999999]))} pt, hai ${myScore} pt).</div>`;
+      } else {
+        $('rwpStakeRow').innerHTML = affordable.map(s=>`<button class="rwStakeBtn" onclick="rwStakePick(${s})">${s} pt</button>`).join('');
+      }
       clearInterval(P.rwInt);
       P.rwInt = setInterval(()=>{
         const left = Math.max(0, (m.endAt||0) - serverNow());
@@ -6628,13 +6637,21 @@ function showPlayerCasino(g){
       $('rwpStatus').textContent = '🎡 LA RUOTA GIRA...';
       setTimeout(()=>{
         rwSpinTo(stage, m.winningNumber, 3200, ()=>{
-          rwShowBadge(stage, m.winningNumber);
-          const myBet = (m.bets||{})[P.id];
-          const r = (m.results||{})[P.id];
-          if (myBet && r){
-            if (r.win){ $('rwpResult').innerHTML = `🎉 <b style="color:var(--lime)">HAI VINTO! +${r.pts} PUNTI!</b>`; confetti(); if(navigator.vibrate) navigator.vibrate([80,50,80,50,150]); }
-            else { $('rwpResult').innerHTML = `😬 Numero uscito: <b>${m.winningNumber}</b> (${rwColor(m.winningNumber).toUpperCase()}) — hai perso ${myBet.stake} punti.`; if(navigator.vibrate) navigator.vibrate(150); }
-          }
+          // rileggo i dati più freschi possibile, invece di fidarmi di quelli catturati a inizio giro:
+          // così, anche se l'esito arriva un attimo dopo il numero vincente, lo troviamo comunque
+          P.ref.child('casino').once('value').then(s=>{
+            const fresh = s.val()||{};
+            const winNum = fresh.winningNumber!=null ? fresh.winningNumber : m.winningNumber;
+            rwShowBadge(stage, winNum);
+            const myBet = (fresh.bets||{})[P.id];
+            const r = (fresh.results||{})[P.id];
+            if (myBet && r){
+              if (r.win){ $('rwpResult').innerHTML = `🎉 <b style="color:var(--lime)">HAI VINTO! +${r.pts} PUNTI!</b>`; confetti(); if(navigator.vibrate) navigator.vibrate([80,50,80,50,150]); }
+              else { $('rwpResult').innerHTML = `😬 Numero uscito: <b>${winNum}</b> (${rwColor(winNum).toUpperCase()}) — hai perso ${myBet.stake} punti.`; if(navigator.vibrate) navigator.vibrate(150); }
+            } else {
+              $('rwpResult').innerHTML = `Numero uscito: <b>${winNum}</b> (${rwColor(winNum).toUpperCase()}).`;
+            }
+          });
         });
       }, 300);
     }
@@ -6671,7 +6688,7 @@ function rwPlayerSendBet(){
   $('rwpBtnBet').disabled = true; $('rwpBtnBet').textContent = '✔ PUNTATA INVIATA!';
   $('rwpStatus').textContent = `Hai puntato ${P.rwStake} punti su ${P.rwBetNum!=null ? 'numero '+P.rwBetNum : P.rwBetType.toUpperCase()}. Aspetta che girino tutti...`;
   if (navigator.vibrate) navigator.vibrate(50);
-  P.ref.child('roulette/bets/'+P.id).set({ type:P.rwBetType, num:P.rwBetNum, stake:P.rwStake });
+  P.ref.child('casino/bets/'+P.id).set({ type:P.rwBetType, num:P.rwBetNum, stake:P.rwStake });
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
