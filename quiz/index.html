@@ -649,6 +649,22 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .tmbPrizeRow{display:flex; align-items:center; gap:10px; margin-top:6px;}
 .tmbPrizeRow .medal{width:40px; font-size:20px; text-align:center;}
 .tmbPrizeRow.loss .medal{color:#ff5d5d;}
+
+/* ===== XOX ===== */
+.xoxGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; max-width:320px; margin:14px auto; aspect-ratio:1;}
+.xoxCell{background:rgba(255,255,255,.06); border:2px solid rgba(157,77,255,.3); border-radius:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-family:'Bungee'; font-size:clamp(32px,10vw,54px);
+  transition:transform .1s, background .15s; box-shadow:inset 0 4px 10px rgba(0,0,0,.25);}
+.xoxCell:active{transform:scale(.94);}
+.xoxCell.x{color:#5ec8ff; text-shadow:0 0 16px rgba(94,200,255,.7);}
+.xoxCell.o{color:#ff6b9d; text-shadow:0 0 16px rgba(255,107,157,.7);}
+.xoxCell.win{background:rgba(182,242,46,.25); border-color:var(--lime);}
+.xoxCell.disabled{cursor:default;}
+.xoxPtsWrap{text-align:center; margin:10px 0;}
+.xoxPts{font-family:'Bungee'; font-size:clamp(28px,8vw,42px); color:var(--gold); text-shadow:0 0 18px rgba(255,201,60,.6); transition:color .3s;}
+.xoxPts.low{color:#ff5d5d;}
+.xoxPtsLabel{font-size:11px; letter-spacing:2px; color:var(--muted); text-transform:uppercase;}
+.xoxStatus{font-family:'Outfit'; font-weight:700; font-size:15px; text-align:center; margin-top:8px; min-height:22px;}
 .rouCylinder::after{content:''; position:absolute; width:22px; height:22px; border-radius:50%; left:50%; top:50%;
   transform:translate(-50%,-50%); background:radial-gradient(circle at 35% 30%,#777,#151515 80%); box-shadow:0 0 4px rgba(0,0,0,.7), inset 0 0 4px rgba(0,0,0,.6);}
 .rouChamber{position:absolute; width:19px; height:19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#555,#0a0a0a);
@@ -1194,7 +1210,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.53</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.54</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -2868,6 +2884,57 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="shapePct" id="shapepPct"></div>
 </div>
 
+<!-- ==================== HOST: XOX ==================== -->
+<div class="screen" id="scrXox">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">❌⭕ XOX</div></div>
+  <div class="panel mt" style="max-width:480px" id="xoxSetup">
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti massimi (a inizio partita)</div><select id="xoxPoints"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="xoxPointsMan" class="ptsManual" placeholder="—" min="1"></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Punti persi se il computer vince</div><select id="xoxPenalty"></select></div>
+      <div><div class="label">O scrivili</div><input type="number" id="xoxPenaltyMan" class="ptsManual" placeholder="—" min="0"></div>
+    </div>
+    <div class="label mt">Tempo a disposizione</div>
+    <select id="xoxDuration">
+      <option value="30">30 secondi</option>
+      <option value="60" selected>1 minuto</option>
+      <option value="90">1 minuto e mezzo</option>
+    </select>
+    <button class="btn mg mt" style="width:100%" onclick="xoxStart()">❌⭕ SFIDA IL COMPUTER!</button>
+  </div>
+  <div id="xoxLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="xoxMsg"></div>
+    <div class="timerWrap mt" style="max-width:420px"><div class="timerBar" id="xoxTimerBarHost"></div></div>
+    <div class="byline" id="xoxCount"></div>
+    <div class="lead mt" id="xoxResultsLive" style="max-width:500px; width:100%"></div>
+    <button class="btn cy mt" id="xoxBtnAgain" onclick="openXox()" style="display:none">🔁 Un'altra manche</button>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: XOX ==================== -->
+<div class="screen" id="scrPjXox">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">❌⭕ XOX</div></div>
+  <div class="miniMsg">SFIDATE IL COMPUTER A TRIS DAL TELEFONO!</div>
+  <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="pjXoxTimerBar"></div></div>
+  <div class="lead mt" id="pjXoxResults" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: XOX ==================== -->
+<div class="screen" id="scrPlayXox" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="xoxpName" style="color:var(--gold)"></div>
+    <div class="pill" id="xoxpScore"></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="xoxpTimerBar"></div></div>
+  <div class="xoxPtsWrap"><div class="xoxPts" id="xoxpPts">0</div><div class="xoxPtsLabel">punti in palio ora</div></div>
+  <div class="byline center">TU SEI ❌ · IL COMPUTER È ⭕</div>
+  <div class="xoxGrid" id="xoxpGrid"></div>
+  <div class="xoxStatus" id="xoxpStatus">Tocca una casella per iniziare!</div>
+</div>
+
 <!-- ==================== HOST: I TAMBURINI ==================== -->
 <div class="screen" id="scrTamb">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🥁 I TAMBURINI</div></div>
@@ -3694,7 +3761,7 @@ body.suspense-on #pfRank{ display:none !important; }
 /* ================================================================
    📋 ELENCO MINIGIOCHI — aggiornare questa lista ogni volta che se ne
    aggiunge uno nuovo (serve ad Alberto per la documentazione delle licenze).
-   Ultimo aggiornamento: v12.51 — 36 minigiochi totali.
+   Ultimo aggiornamento: v12.54 — 37 minigiochi totali.
    ================================================================
    1.  🥃 Bussolotti
    2.  🎲 Pari o Dispari
@@ -3732,6 +3799,7 @@ body.suspense-on #pfRank{ display:none !important; }
    34. 🌡 Votometro
    35. ⏱ Timer
    36. 📊 Classifica di Gradimento
+   37. ❌⭕ XOX
 ================================================================ */
 
 /* ================================================================
@@ -3752,7 +3820,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 1253; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 1254; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -5287,6 +5355,7 @@ function listenGame(){
     else if (g.status==='goldenticket') showPlayerGold(g);
     else if (g.status==='casino') showPlayerCasino(g);
     else if (g.status==='tamburini') showPlayerTamb(g);
+    else if (g.status==='xox') showPlayerXox(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
       if (P.tmrAt !== t.endAt) { P.tmrAt = t.endAt; showScreen('scrPlayTimer'); runBigTimer('Pl', t.title, t.endAt||0); }
@@ -7011,6 +7080,104 @@ function tambSync(force){
   if (!force && P.tambN===P.tambSynced) return;
   P.tambSynced = P.tambN;
   P.ref.child('tamburini/counts/'+P.id).set(P.tambN);
+}
+/* ================================================================
+   XOX — motore condiviso (giocatore contro computer)
+================================================================ */
+const XOX_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function xoxCheckWinner(board){
+  for (const [a,b,c] of XOX_LINES){
+    if (board[a] && board[a]===board[b] && board[b]===board[c]) return { winner:board[a], line:[a,b,c] };
+  }
+  if (board.every(c=>c)) return { winner:'draw', line:null };
+  return null;
+}
+/* Un'intelligenza artificiale "onesta ma battibile": vince se può, blocca se deve, altrimenti
+   sceglie in modo semi-casuale (con una piccola preferenza per il centro) — così il computer
+   è una vera sfida ma non un avversario perfetto e imbattibile, altrimenti nessuno vincerebbe mai. */
+function xoxAiMove(board){
+  const empty = board.map((v,i)=>v?null:i).filter(v=>v!==null);
+  const tryWin = (sym)=>{
+    for (const i of empty){
+      const copy = board.slice(); copy[i]=sym;
+      if (xoxCheckWinner(copy)?.winner===sym) return i;
+    }
+    return null;
+  };
+  const winMove = tryWin('O'); if (winMove!=null) return winMove;
+  const blockMove = tryWin('X'); if (blockMove!=null && Math.random()<0.85) return blockMove; // sbaglia a bloccare 1 volta su ~7, per restare battibile
+  if (empty.includes(4) && Math.random()<0.5) return 4;
+  return empty[Math.floor(Math.random()*empty.length)];
+}
+/* ================================================================
+   XOX — telefono
+================================================================ */
+function xoxBuildGrid(){
+  const grid = $('xoxpGrid');
+  grid.innerHTML = Array.from({length:9},(_,i)=>`<div class="xoxCell" id="xoxpCell${i}" onclick="xoxCellTap(${i})"></div>`).join('');
+}
+function showPlayerXox(g){
+  const m = g.xox||{};
+  $('xoxpName').textContent = P.name;
+  $('xoxpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayXox');
+  if (m.phase==='play'){
+    const sig = 'play:'+m.roundId;
+    if (P.xoxSig !== sig){
+      P.xoxSig = sig; P.xoxDone = false; P.xoxBoard = Array(9).fill(null); P.xoxTurnLock = false;
+      P.xoxStartPts = m.points; P.xoxEndAt = m.endAt; P.xoxDurationMs = m.durationMs;
+      xoxBuildGrid();
+      $('xoxpStatus').textContent = 'Tocca una casella per iniziare!';
+      $('xoxpPts').textContent = m.points; $('xoxpPts').classList.remove('low');
+      clearInterval(P.xoxInt);
+      P.xoxInt = setInterval(()=>{
+        const left = Math.max(0, P.xoxEndAt - serverNow());
+        $('xoxpTimerBar').style.width = (left/P.xoxDurationMs*100)+'%';
+        const pts = Math.round(P.xoxStartPts * (left/P.xoxDurationMs));
+        $('xoxpPts').textContent = pts;
+        $('xoxpPts').classList.toggle('low', pts < P.xoxStartPts*0.3);
+        if (left<=0){
+          clearInterval(P.xoxInt);
+          if (!P.xoxDone){ P.xoxDone=true; $('xoxpStatus').textContent='⏱ TEMPO SCADUTO!'; document.querySelectorAll('.xoxCell').forEach(c=>c.classList.add('disabled'));
+            P.ref.child('xox/results/'+P.id).set({ result:'timeout', pts:0 }); }
+        }
+      }, 100);
+    }
+  }
+}
+function xoxCellTap(i){
+  if (P.xoxDone || P.xoxTurnLock || P.xoxBoard[i]) return;
+  P.xoxBoard[i] = 'X';
+  $('xoxpCell'+i).textContent='❌'; $('xoxpCell'+i).classList.add('x');
+  let res = xoxCheckWinner(P.xoxBoard);
+  if (res){ xoxEndGame(res); return; }
+  P.xoxTurnLock = true;
+  $('xoxpStatus').textContent = 'Il computer sta pensando...';
+  setTimeout(()=>{
+    const aiMove = xoxAiMove(P.xoxBoard);
+    if (aiMove!=null){
+      P.xoxBoard[aiMove] = 'O';
+      $('xoxpCell'+aiMove).textContent='⭕'; $('xoxpCell'+aiMove).classList.add('o');
+    }
+    res = xoxCheckWinner(P.xoxBoard);
+    if (res){ xoxEndGame(res); return; }
+    P.xoxTurnLock = false;
+    $('xoxpStatus').textContent = 'Tocca a te!';
+  }, 500);
+}
+function xoxEndGame(res){
+  if (P.xoxDone) return;
+  P.xoxDone = true;
+  clearInterval(P.xoxInt);
+  document.querySelectorAll('.xoxCell').forEach(c=>c.classList.add('disabled'));
+  if (res.line) res.line.forEach(i=> $('xoxpCell'+i).classList.add('win'));
+  const left = Math.max(0, P.xoxEndAt - serverNow());
+  const pts = Math.round(P.xoxStartPts * (left/P.xoxDurationMs));
+  let result, finalPts;
+  if (res.winner==='X'){ result='win'; finalPts=pts; $('xoxpStatus').textContent = `🎉 TRIS! HAI VINTO ${pts} PUNTI!`; confetti(); if(navigator.vibrate) navigator.vibrate([80,50,120]); }
+  else if (res.winner==='O'){ result='lose'; finalPts=null; $('xoxpStatus').textContent = '😬 HA VINTO IL COMPUTER...'; if(navigator.vibrate) navigator.vibrate(150); }
+  else { result='draw'; finalPts=0; $('xoxpStatus').textContent = '🤝 PAREGGIO! Nessun punto.'; }
+  P.ref.child('xox/results/'+P.id).set({ result, pts: finalPts });
 }
 function puzzleTap(i){
   if (P.puzSolved || !P.puzOrder) return;
@@ -11584,6 +11751,64 @@ function tambFinish(){
 }
 
 /* ================================================================
+   XOX — regia
+================================================================ */
+let XOX = {};
+function openXox(){
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((XOX||{}).timerInt);
+  G.ref.child('xox/results').off();
+  G.ref.update({ status:'xox', xox:{ phase:'idle' } });
+  XOX = { credited:{} };
+  $('xoxSetup').style.display='block'; $('xoxLive').style.display='none';
+  if (!$('xoxPoints').innerHTML){
+    $('xoxPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}" ${k===4?'selected':''}>${(k+1)*100} punti</option>`).join('');
+    $('xoxPenalty').innerHTML = Array.from({length:10},(_,k)=>`<option value="${(k+1)*50}" ${k===3?'selected':''}>${(k+1)*50} punti</option>`).join('');
+  }
+  showScreen('scrXox');
+}
+function xoxStart(){
+  const points = getPoints('xoxPoints','xoxPointsMan');
+  const penalty = getPoints('xoxPenalty','xoxPenaltyMan');
+  const durationSec = +($('xoxDuration').value||60);
+  const durationMs = durationSec*1000;
+  const endAt = serverNow()+durationMs;
+  const roundId = serverNow();
+  XOX = { points, penalty, durationMs, credited:{} };
+  G.ref.update({ status:'xox', xox:{ phase:'play', points, penalty, endAt, durationMs, roundId } });
+  G.ref.child('xox/results').remove();
+  $('xoxSetup').style.display='none'; $('xoxLive').style.display='block';
+  $('xoxMsg').textContent = '❌⭕ SI GIOCA! OGNUNO SFIDA IL COMPUTER DAL SUO TELEFONO...';
+  $('xoxCount').textContent=''; $('xoxResultsLive').innerHTML=''; $('xoxBtnAgain').style.display='none';
+  pjSend({type:'xoxActive', endAt, durationMs});
+  clearInterval(XOX.timerInt);
+  XOX.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt-serverNow());
+    $('xoxTimerBarHost').style.width = (left/durationMs*100)+'%';
+    if (left<=0) clearInterval(XOX.timerInt);
+  }, 100);
+  G.ref.child('xox/results').on('child_added', snap=>{
+    const pid = snap.key, r = snap.val();
+    if (!r || XOX.credited[pid]) return;
+    XOX.credited[pid] = true;
+    let delta = 0;
+    if (r.result==='win') delta = r.pts||0;
+    else if (r.result==='lose') delta = -penalty;
+    if (delta!==0) applyScoreDelta(pid, delta);
+    G.ref.child('players').once('value').then(ps=>{
+      const pl = ps.val()||{};
+      const name = esc((pl[pid]||{}).name||'?');
+      const icon = r.result==='win'?'🎉':r.result==='lose'?'💢':r.result==='draw'?'🤝':'⏱';
+      const label = r.result==='win'?`+${delta}`:r.result==='lose'?`${delta}`:'0';
+      $('xoxCount').textContent = `Partite concluse: ${Object.keys(XOX.credited).length}`;
+      $('xoxResultsLive').innerHTML += `<div class="leadRow"><span class="pos">${icon}</span> ${name} <span class="pts">${label}</span></div>`;
+      $('xoxBtnAgain').style.display='';
+      pjSend({type:'xoxResult', name, result:r.result, delta});
+    });
+  });
+}
+
+/* ================================================================
    MEMO LE COPPIE — motore condiviso + regia
 ================================================================ */
 const MC_SYMS = ['🎩','🔫','💰','🥃','🚬','🕵️','💎','🍸','🎲','🚗','🗽','🍕','🍷','🎷','🐍','🦁','🐯','💄','👑','⭐','🎯','🎪','🎭','🎤','🎸','🥊','🏆','🍀','🎳','🧨'];
@@ -12043,7 +12268,8 @@ const GIOCHI_CATALOGO = [
   {k:'maj', l:'🗳️ La Maggioranza Vince'},
   {k:'gold', l:"🎫 Il Biglietto d'Oro"},
   {k:'casino', l:'🎰 Roulette (Casinò)'},
-  {k:'tamb', l:'🥁 I Tamburini'}
+  {k:'tamb', l:'🥁 I Tamburini'},
+  {k:'xox', l:'❌⭕ XOX'}
   // 👉 QUANDO AGGIUNGI UN NUOVO MINIGIOCO: aggiungi qui una riga {k:'chiave', l:'Emoji Nome'},
   // poi apri il quiz come host e clicca una volta su "GIOCHI": il pannello admin lo vedrà da solo.
 ];
@@ -12096,7 +12322,8 @@ function modalGames(){
     gk('maj', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#189a4a,#0b6fb8); color:#fff; box-shadow:0 7px 0 #0a3a1e,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(24,154,74,.4)" onclick="openMaj()">🗳️ La Maggioranza Vince</button>`),
     gk('gold', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#ffcf3d,#8a5a00); color:#3a2600; box-shadow:0 7px 0 #4a2f00,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(255,207,61,.4)" onclick="openGold()">🎫 Il Biglietto d'Oro</button>`),
     gk('casino', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a3111c,#1a1108); color:#fff; box-shadow:0 7px 0 #3a0508,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(163,17,28,.4)" onclick="openCasino()">🎰 Roulette</button>`),
-    gk('tamb', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#e8b45a,#8a4a12); color:#3a2000; box-shadow:0 7px 0 #4a2400,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(232,180,90,.4)" onclick="openTamb()">🥁 I Tamburini</button>`)
+    gk('tamb', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#e8b45a,#8a4a12); color:#3a2000; box-shadow:0 7px 0 #4a2400,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(232,180,90,.4)" onclick="openTamb()">🥁 I Tamburini</button>`),
+    gk('xox', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5ec8ff,#0b6fb8); color:#fff; box-shadow:0 7px 0 #063a5c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(94,200,255,.4)" onclick="openXox()">❌⭕ XOX</button>`)
   ].filter(Boolean).join('');
 
   const msgVuoto = btns ? '' : '<div class="byline" style="letter-spacing:1px">Nessun minigioco abilitato per questa licenza.</div>';
@@ -12579,6 +12806,7 @@ function backToQuiz(title){
   G.ref.child('goldenticket/results').off();
   G.ref.child('casino/bets').off();
   G.ref.child('tamburini/counts').off();
+  G.ref.child('xox/results').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
   clearInterval((TOC||{}).timerInt);
@@ -12595,7 +12823,8 @@ function backToQuiz(title){
   clearInterval((GOLD||{}).timerInt);
   clearInterval((RW||{}).timerInt);
   clearInterval((TAMB||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null, goldenticket:null, casino:null, tamburini:null });
+  clearInterval((XOX||{}).timerInt);
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null, goldenticket:null, casino:null, tamburini:null, xox:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -12895,6 +13124,21 @@ function pjRouteInner(m){
       tambRenderRanking($('pjTambRanking'), m.ranking||[], m.prizes||[], m.losses||[], false);
       $('pjTambMsg').textContent = (m.ranking&&m.ranking.length) ? `🏆 ${m.ranking[0].name} VINCE CON ${m.ranking[0].n} TAP!` : 'NESSUNO HA SUONATO!';
       if (m.ranking && m.ranking.length) confetti();
+    }
+    else if (m.type==='xoxActive') {
+      showScreen('scrPjXox');
+      $('pjXoxResults').innerHTML='';
+      clearInterval(window._pjXoxInt);
+      window._pjXoxInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjXoxTimerBar').style.width = (left/m.durationMs*100)+'%';
+        if (left<=0) clearInterval(window._pjXoxInt);
+      }, 100);
+    }
+    else if (m.type==='xoxResult') {
+      const icon = m.result==='win'?'🎉':m.result==='lose'?'💢':m.result==='draw'?'🤝':'⏱';
+      const label = m.delta>0?`+${m.delta}`:m.delta;
+      $('pjXoxResults').innerHTML = `<div class="leadRow"><span class="pos">${icon}</span> ${esc(m.name)} <span class="pts">${label}</span></div>` + $('pjXoxResults').innerHTML;
     }
     else if (m.type==='gradState') {
       showScreen('scrPjGrad');
