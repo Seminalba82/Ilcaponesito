@@ -1210,7 +1210,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.54</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.55</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3820,7 +3820,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 1254; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 1255; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -8267,6 +8267,7 @@ function wheelsStopAll(rowEl, resIdx, done){
 ================================================================ */
 let WH = { round:0 };
 function openWheels(){
+  if (!isGameEnabled('wheels')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(WH.timerInt);
   WH.orders = [shuffledWheel(), shuffledWheel(), shuffledWheel()];
@@ -8341,6 +8342,7 @@ function wheelsStop(){
 let HILO = {};
 $('hiloPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 function openHiLo(){
+  if (!isGameEnabled('hilo')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(HILO.timerInt);
   G.ref.update({ status:'hilo', hilo:{ phase:'idle', round:0, revealed:null, lastResult:null } });
@@ -8547,6 +8549,7 @@ function ruotaDoubleToggled(){
   if (dbl){ ruotaSourceChanged('A'); ruotaSourceChanged('B'); }
 }
 function openRuota(){
+  if (!isGameEnabled('ruota')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal();
   $('ruotaTitleIn').value='';
@@ -8695,6 +8698,7 @@ let TAP = {};
 $('tapSecs').innerHTML = [10,15,20,30,45,60].map(t=>`<option value="${t}" ${t===20?'selected':''}>${t} secondi</option>`).join('');
 const TAP_DEFAULTS = [1000,700,500,300,200];
 function openTapTap(){
+  if (!isGameEnabled('taptap')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(TAP.timerInt); clearInterval(TAP.pollInt);
   G.ref.child('taptap/counts').off();
@@ -8911,6 +8915,7 @@ let SEED = {};
 $('seedPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 $('seedSecs').innerHTML = [10,15,20,30,45,60].map(t=>`<option value="${t}" ${t===10?'selected':''}>${t} secondi</option>`).join('');
 function openSeed(){
+  if (!isGameEnabled('seed')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(SEED.timerInt);
   G.ref.update({ status:'seed', seed:{ phase:'idle', round:0, revealed:null, lastResult:null } });
@@ -9013,6 +9018,7 @@ function swissRunClock(el, startAt, stopped){
 let SW = {};
 $('swissPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 function openSwiss(){
+  if (!isGameEnabled('swiss')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearTimeout(SW.revealTO);
   const c = $('swissClockHost'); if (c) clearInterval(c._int);
@@ -9104,6 +9110,7 @@ function resetCardTable(el){ el._cbuilt = false; renderCardTable(el, []); }
 let CARDS = {};
 $('cardsPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 function openCards(){
+  if (!isGameEnabled('cards')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(CARDS.timerInt);
   G.ref.update({ status:'cards', cards:{ phase:'idle', round:0, revealed:null, lastResult:null } });
@@ -9254,6 +9261,7 @@ function renderCartella(el, grid, drawnSet){
 let TOM = {};
 const TOM_DEFAULTS = { ambo:100, terno:200, quaterna:300, cinquina:500, tombola:1000 };
 function openTombola(){
+  if (!isGameEnabled('tombola')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal();
   $('tomPrizeInputs').innerHTML = [...TOM_LEVELS].reverse().map(([k,,label])=>`
@@ -9438,6 +9446,7 @@ function uploadPuzzlePhotosSequentially(files, idx, total){
     .then(()=> uploadPuzzlePhotosSequentially(files, idx+1, total));
 }
 function openPuzzle(){
+  if (!isGameEnabled('puzzle')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(($('puzTimerBar')||{})._int);
   G.ref.child('puzzle/solves').off();
@@ -9519,6 +9528,7 @@ function anaAutoScramble(force){
 $('anaScramble').addEventListener('input', ()=>{ $('anaScramble')._touched = true; });
 
 function openAnagram(){
+  if (!isGameEnabled('anagram')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(($('anaTimerBar')||{})._int);
   G.ref.child('anagram/answers').off();
@@ -9690,6 +9700,7 @@ let WS = { rows:[] };
 $('wsPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 $('wsTime').innerHTML = [30,45,60,90,120,180,240].map(t=>`<option value="${t}" ${t===60?'selected':''}>${t} secondi</option>`).join('');
 function openWordSearch(){
+  if (!isGameEnabled('wordsearch')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(($('wsTimerBar')||{})._int);
   G.ref.child('wordsearch/solves').off();
@@ -9866,6 +9877,7 @@ function memoRunReveal(el, n, cards, startAt, speed, onDone){
 let MEMO = {};
 $('memoPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 function openMemo(){
+  if (!isGameEnabled('memo')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal();
   clearInterval(($('memoGridHost')||{})._memoInt); clearInterval(MEMO.timerInt);
@@ -10017,6 +10029,7 @@ function hrsRenderNameInputs(){
 }
 let HRS = {};
 function openHorses(){
+  if (!isGameEnabled('horses')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(HRS.timerInt);
   G.ref.child('horses/bets').off();
@@ -10158,6 +10171,7 @@ function uploadTfPhotosSequentially(files, idx, total){
 }
 let TF = {};
 function openTFiscale(){
+  if (!isGameEnabled('tfiscale')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((TF||{}).timerInt);
   G.ref.child('tfiscale/guesses').off();
@@ -10266,6 +10280,7 @@ function tocSpinCoin(el, result, durationMs){
 }
 let TOC = {};
 function openToc(){
+  if (!isGameEnabled('toc')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((TOC||{}).timerInt);
   G.ref.child('toc/bets').off();
@@ -10376,6 +10391,7 @@ function cnrRenderGrid(el, revealed, winningBox, clickable){
   }
 }
 function openCenerentola(){
+  if (!isGameEnabled('cenerentola')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((CNR||{}).timerInt);
   G.ref.child('cenerentola/bets').off();
@@ -10485,6 +10501,7 @@ function pacRandomFill(){
   document.querySelectorAll('.pacValIn').forEach((inp,i)=> inp.value = suggested[i]||0);
 }
 function openPacchi(){
+  if (!isGameEnabled('pacchi')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((PAC||{}).timerInt);
   G.ref.child('pacchi/bets').off();
@@ -10577,6 +10594,7 @@ function rouRenderPreview(){
     `<div class="leadRow"><span class="pos">${i+1} colpi</span> <span class="pts">${t} pt</span></div>`).join('');
 }
 function openRoulette(){
+  if (!isGameEnabled('roulette')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((ROU||{}).timerInt);
   G.ref.child('roulette/bets').off();
@@ -10667,6 +10685,7 @@ function pagRevealStraws(el, lengths){
   }
 }
 function openPagliuzza(){
+  if (!isGameEnabled('pagliuzza')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((PAG||{}).timerInt);
   G.ref.child('pagliuzza/bets').off();
@@ -10777,6 +10796,7 @@ function stGenerateLosingGrid(){
   return { grid, winLine: null };
 }
 function openSupertris(){
+  if (!isGameEnabled('supertris')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal();
   G.ref.child('supertris/results').off();
@@ -10906,6 +10926,7 @@ function rdcRunReveal(el, data, startAt, stepMs, onDone){
   }, 80);
 }
 function openRdc(){
+  if (!isGameEnabled('rdc')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((RDC||{}).timerInt);
   G.ref.child('rdc/answers').off();
@@ -11031,6 +11052,7 @@ function mmSetupClear(){
   mmRenderSlots($('mmSetupSlots'), MM_SETUP_SEQ);
 }
 function openMastermind(){
+  if (!isGameEnabled('mastermind')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((MM||{}).timerInt);
   G.ref.child('mastermind/pendingAttempts').off();
@@ -11124,6 +11146,7 @@ function mmClose(){
    (gioco individuale: ogni telefono ha il proprio filo giusto, il proiettore mostra solo il timer comune)
 ================================================================ */
 function openBomba(){
+  if (!isGameEnabled('bomba')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((BOMB||{}).timerInt);
   G.ref.child('bomba/results').off();
@@ -11189,6 +11212,7 @@ function bombStart(){
    (gioco individuale: ogni telefono ha la propria forma in movimento indipendente, il proiettore fa da atmosfera)
 ================================================================ */
 function openShapes(){
+  if (!isGameEnabled('shapes')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((SHAPES||{}).timerInt);
   G.ref.child('shapes/results').off();
@@ -11253,6 +11277,7 @@ function shapeStart(){
 ================================================================ */
 let FD = { markers:[], orig:null, mod:null };
 function openFindDiff(){
+  if (!isGameEnabled('finddiff')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((FD||{}).timerInt);
   G.ref.child('finddiff/results').off();
@@ -11399,6 +11424,7 @@ function fdStart(){
 ================================================================ */
 let MAJ = {};
 function openMaj(){
+  if (!isGameEnabled('maj')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((MAJ||{}).timerInt);
   G.ref.child('maggioranza/votes').off();
@@ -11472,6 +11498,7 @@ function majReveal(){
 ================================================================ */
 let GOLD = {};
 function openGold(){
+  if (!isGameEnabled('gold')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((GOLD||{}).timerInt);
   G.ref.child('goldenticket/results').off();
@@ -11572,6 +11599,7 @@ let RW = {};
 const RW_DEFAULT_STAKES = [50,100,200,300,500,750,1000,1500,2500,5000];
 let RW_STAKES_LAST = null;
 function openCasino(){
+  if (!isGameEnabled('casino')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((RW||{}).timerInt);
   G.ref.child('casino/bets').off();
@@ -11678,6 +11706,7 @@ function tambRenderRanking(el, rows, prizes, losses, live){
   }).join('') || '<div class="byline">Nessuno sta ancora suonando...</div>';
 }
 function openTamb(){
+  if (!isGameEnabled('tamb')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((TAMB||{}).timerInt);
   G.ref.child('tamburini/counts').off();
@@ -11755,6 +11784,7 @@ function tambFinish(){
 ================================================================ */
 let XOX = {};
 function openXox(){
+  if (!isGameEnabled('xox')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval((XOX||{}).timerInt);
   G.ref.child('xox/results').off();
@@ -11851,6 +11881,7 @@ $('mcSecs').innerHTML = [20,30,40,50,60,90,120,180,240,300].map(t=>{
   return `<option value="${t}" ${t===60?'selected':''}>${lbl}</option>`;
 }).join('');
 function openMemoCoppie(){
+  if (!isGameEnabled('memocoppie')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(MC.timerInt);
   G.ref.child('memocoppie/results').off();
@@ -12520,6 +12551,7 @@ const SIMON_INPUT_MS = 10000;
 $('simonPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 $('simonCount').innerHTML = Array.from({length:8},(_,k)=>`<option value="${k+3}">${k+3} lampeggi</option>`).join('');
 function openSimon(){
+  if (!isGameEnabled('simon')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(SIM.timerInt);
   G.ref.update({ status:'simon', simon:{ phase:'idle', round:SIM.round, points:getPoints('simonPoints','simonPointsMan') } });
@@ -12606,6 +12638,7 @@ let DICE = { round: 0 };
 const DICE_BET_MS = 10000;
 $('dicePoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 function openDice(){
+  if (!isGameEnabled('dice')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion(); closeModal(); clearInterval(DICE.timerInt);
   G.ref.update({ status:'dice', dice:{ phase:'idle', round:DICE.round, points:getPoints('dicePoints','dicePointsMan') } });
@@ -12686,6 +12719,7 @@ function diceAgain(){
 let MINI = { round: 0 };
 $('miniPoints').innerHTML = Array.from({length:20},(_,k)=>`<option value="${(k+1)*100}">${(k+1)*100} punti</option>`).join('');
 function openMini(){
+  if (!isGameEnabled('mini')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
   if (!G) return alert('Avvia prima una partita!');
   cancelLiveQuestion();
   closeModal();
