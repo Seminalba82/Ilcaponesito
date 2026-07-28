@@ -12313,7 +12313,7 @@ function syncGiochiCatalogo(){
 function isGameEnabled(key){
   const en = window.CAPONE_MINIGIOCHI_ABILITATI;
   if(!en) return true; // nessuna licenza attiva registrata: non blocchiamo (fallback sicuro)
-  return en[key] !== false; // abilitato di default, bloccato solo se esplicitamente false
+  return en[key] === true; // abilitato SOLO se esplicitamente concesso (true); i giochi nuovi restano bloccati finché non li abiliti tu su ogni licenza
 }
 function gk(key, html){
   return isGameEnabled(key) ? html : '';
