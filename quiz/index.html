@@ -35,6 +35,11 @@ body::before{ /* griglia retro-futuristica */
   -webkit-mask-image:radial-gradient(ellipse at 50% 45%, black 30%, transparent 75%);
 }
 .screen{display:none; position:relative; z-index:1; min-height:100vh; padding:22px; max-width:1100px; margin:0 auto;}
+/* Sul proiettore, il contenuto "naturale" (prima dell'ingrandimento automatico) non deve essere limitato
+   a 1100px come su regia/telefono — altrimenti il meccanismo che scala per riempire lo schermo parte già
+   da un blocco troppo stretto, e arriva al tetto massimo di sicurezza senza mai riempire davvero lo schermo
+   grande. Qui lo lasciamo libero di usare tutta la larghezza disponibile. */
+body.proj .screen{max-width:none;}
 .screen.active{display:flex; flex-direction:column; align-items:center;}
 
 /* ===== TITOLI ===== */
@@ -177,9 +182,9 @@ option{background:var(--bg2);}
 .podHiddenLead.show{opacity:1;}
 .podStep .nm{font-weight:900; font-size:clamp(16px,3.1vw,40px); padding:0 10px; text-align:center; word-break:break-word;}
 .podStep .sc{font-family:'Bungee'; font-size:clamp(15px,2.7vw,34px); margin-top:6px;}
-.pod1{height:clamp(200px,38vh,480px); background:linear-gradient(180deg,var(--gold),#8a5f00); box-shadow:0 0 34px rgba(255,201,60,.7);}
-.pod2{height:clamp(150px,29vh,380px); background:linear-gradient(180deg,#e8e8f5,#7a7a90); color:#111; box-shadow:0 0 24px rgba(230,230,245,.5);}
-.pod3{height:clamp(110px,22vh,300px); background:linear-gradient(180deg,#ff9c5b,#8a4300); box-shadow:0 0 24px rgba(255,156,91,.5);}
+.pod1{height:clamp(200px,38vh,640px); background:linear-gradient(180deg,var(--gold),#8a5f00); box-shadow:0 0 34px rgba(255,201,60,.7);}
+.pod2{height:clamp(150px,29vh,500px); background:linear-gradient(180deg,#e8e8f5,#7a7a90); color:#111; box-shadow:0 0 24px rgba(230,230,245,.5);}
+.pod3{height:clamp(110px,22vh,400px); background:linear-gradient(180deg,#ff9c5b,#8a4300); box-shadow:0 0 24px rgba(255,156,91,.5);}
 .crown{font-size:clamp(36px,5.6vw,72px); margin-top:-46px; animation:float 2s ease-in-out infinite;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .warn{background:rgba(255,59,59,.12); border:2px solid var(--red); border-radius:14px; padding:14px; font-weight:700; font-size:14px; color:#ffb3b3;}
@@ -1210,7 +1215,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.55</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.56</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1465,6 +1470,20 @@ body.suspense-on #pfRank{ display:none !important; }
   <div id="waitLinktree" style="display:none; margin-top:26px; text-align:center">
     <a href="https://linktr.ee/Albertoseminerio" target="_blank" rel="noopener"
        style="font-family:'Bungee'; font-size:18px; color:var(--cyan); text-decoration:none; text-shadow:0 0 14px rgba(0,240,255,.6)">
+      🔗 linktr.ee/Albertoseminerio
+    </a>
+    <div class="byline mt" style="margin:8px 0 0">Seguimi per tutti gli eventi</div>
+  </div>
+</div>
+
+<!-- ==================== PLAYER: PODIO (intermedio o finale) ==================== -->
+<div class="screen" id="scrPlayPodium">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,6vw,32px)" id="podpTitle">🏆 PODIO</div></div>
+  <div class="podio" id="podpPodium" style="max-width:340px; margin-top:14px"></div>
+  <div class="byline mt" id="podpMe" style="font-size:15px"></div>
+  <div id="podpLinktree" style="display:none; margin-top:22px; text-align:center">
+    <a href="https://linktr.ee/Albertoseminerio" target="_blank" rel="noopener"
+       style="font-family:'Bungee'; font-size:16px; color:var(--cyan); text-decoration:none; text-shadow:0 0 14px rgba(0,240,255,.6)">
       🔗 linktr.ee/Albertoseminerio
     </a>
     <div class="byline mt" style="margin:8px 0 0">Seguimi per tutti gli eventi</div>
@@ -3750,11 +3769,14 @@ body.suspense-on #pfRank{ display:none !important; }
 </div>
 
 <!-- ==================== PROIETTORE: PODIO ==================== -->
-<div class="screen" id="scrPjPodium">
-  <div class="brand"><div class="t1">🏆 PODIO FINALE</div></div>
-  <div class="podio" id="pjPodium" style="max-width:1100px"></div>
-  <div class="lead mtb" style="max-width:700px"><div id="pjPodLead"></div></div>
-  <div class="byline mtb" style="opacity:.8">🎩 IL CAPONE QUIZ · by <b>Alberto Seminerio</b></div>
+<div class="screen" id="scrPjPodium" style="padding-top:10px">
+  <div class="brand"><div class="t1" style="font-size:clamp(24px,3.2vw,44px)">🏆 PODIO FINALE</div></div>
+  <div class="podio" id="pjPodium" style="max-width:1700px; margin-top:12px"></div>
+  <!-- la classifica completa qui sotto è volutamente NASCOSTA sul proiettore: renderPodiumBuild/podiumRevealRank
+       controllano già "if(leadEl)" prima di usarla, quindi può restare vuota/assente senza causare errori.
+       Così il podio resta l'unico protagonista e riempie molto di più lo schermo grande — la classifica
+       completa resta comunque visibile in regia, per chi conduce la serata. -->
+  <div class="byline" style="opacity:.7; margin-top:10px; font-size:12px">🎩 IL CAPONE QUIZ · by <b>Alberto Seminerio</b></div>
 </div>
 
 <script>
@@ -3820,7 +3842,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 1255; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 1256; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -5138,6 +5160,9 @@ function openInterimPodium(){
     renderLead($('podLead'), players);
     podStage = 0; podiumUpdateBtn();
     $('btnPodResume').style.display = '';
+    // avviso anche i telefoni (non solo il proiettore): così chi non è vicino allo schermo grande
+    // vede comunque il podio, in sincrono con la rivelazione a tappe della regia
+    G.ref.update({ status:'interimpodium', final: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})), podiumStage:0 });
     pjSend({type:'podium', top3: arr.slice(0,3).map(p=>({name:p.name, score:p.score||0})),
       lead: arr.map(p=>({name:p.name, score:p.score||0}))});
     showScreen('scrPodium');
@@ -5365,7 +5390,8 @@ function listenGame(){
       if (P.countAt !== st) { P.countAt = st; showScreen('scrPlayCount'); runCountdown($('countPlay'), st); }
     }
     else if (g.status==='pausa') { showScreen('scrWait'); $('waitMsg').textContent='OCCHI ALLO SCHERMO! 🎩'; $('waitSub').textContent='Il quiz continua tra poco...'; }
-    else if (g.status==='end') showPlayerEnd(g);
+    else if (g.status==='end') showPlayerPodium(g, true);
+    else if (g.status==='interimpodium') showPlayerPodium(g, false);
   });
 }
 /* Mostra la foto O l'audio della domanda/round corrente sul telefono, se presente e se corrisponde al turno attivo ora.
@@ -7950,22 +7976,37 @@ function showPlayerFb(g){
   else $('pfStats').innerHTML='';
   showScreen('scrPlayFb');
 }
-function showPlayerEnd(g){
+function showPlayerPodium(g, isFinal){
   clearInterval(P.timerInt);
-  const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
-  const pos = arr.findIndex(p=>p.id===P.id)+1;
-  showScreen('scrWait');
-  $('waitLinktree').style.display = 'block';
-  if (g.suspense && (g.podiumStage||0) < 3){
-    // niente spoiler finché la regia non rivela almeno il podio (3°,2°,1°): da quel momento in poi
-    // lo sanno tutti comunque, quindi lo mostro anche a chi segue solo da smartphone, in sincrono col resto
-    $('waitMsg').textContent = '🏁 PARTITA FINITA!';
-    $('waitSub').innerHTML = 'La regia sta per rivelare la classifica finale... resta qui, si aggiorna da sola appena è il momento! 🎩';
-    return;
+  showScreen('scrPlayPodium');
+  const top3 = g.final || [];
+  const stage = g.podiumStage || 0;
+  const sig = 'pod:' + JSON.stringify(top3) + ':' + (isFinal?'f':'i');
+  if (P.podSig !== sig){
+    P.podSig = sig; P.podRevealed = new Set(); P.podConfettiDone = false;
+    renderPodiumBuild($('podpPodium'), null, top3);
+    $('podpTitle').textContent = isFinal ? '🏆 PODIO FINALE' : '🏆 PODIO INTERMEDIO';
+    $('podpLinktree').style.display = isFinal ? 'block' : 'none';
   }
-  $('waitMsg').textContent = pos===1 ? '👑 HAI VINTO, BOSS!' : pos===2 ? '🥈 SECONDO POSTO!' : pos===3 ? '🥉 TERZO POSTO!' : 'PARTITA FINITA!';
-  $('waitSub').innerHTML = `Sei arrivato <b style="color:var(--gold)">${pos}°</b> con ${((g.players||{})[P.id]||{}).score||0} punti · Grazie per aver giocato 🎩`;
-  if (pos<=3) confetti();
+  // rivelo le posizioni via via che la regia le svela, restando sempre sincronizzati con
+  // proiettore e regia — vale sia con la modalità Suspense attiva che disattivata, così
+  // l'effetto sorpresa è coerente su tutti gli schermi, non solo su quello grande
+  const ranksToReveal = [];
+  if (stage>=1) ranksToReveal.push(3);
+  if (stage>=2) ranksToReveal.push(2);
+  if (stage>=3) ranksToReveal.push(1);
+  ranksToReveal.forEach(r=>{
+    if (!P.podRevealed.has(r)){ P.podRevealed.add(r); podiumRevealRank($('podpPodium'), null, r); }
+  });
+  if (stage>=3){
+    const arr = Object.entries(g.players||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
+    const pos = arr.findIndex(p=>p.id===P.id)+1;
+    const myScore = ((g.players||{})[P.id]||{}).score||0;
+    $('podpMe').innerHTML = `Sei arrivato <b style="color:var(--gold)">${pos}°</b> con ${myScore} punti` + (isFinal ? ' · Grazie per aver giocato 🎩' : '');
+    if (pos<=3 && !P.podConfettiDone){ P.podConfettiDone = true; confetti(); }
+  } else {
+    $('podpMe').textContent = 'La regia sta per rivelare il podio... resta qui!';
+  }
 }
 
 /* ================================================================
@@ -12313,7 +12354,7 @@ function syncGiochiCatalogo(){
 function isGameEnabled(key){
   const en = window.CAPONE_MINIGIOCHI_ABILITATI;
   if(!en) return true; // nessuna licenza attiva registrata: non blocchiamo (fallback sicuro)
-  return en[key] === true; // abilitato SOLO se esplicitamente concesso (true); i giochi nuovi restano bloccati finché non li abiliti tu su ogni licenza
+  return en[key] !== false; // abilitato di default, bloccato solo se esplicitamente false
 }
 function gk(key, html){
   return isGameEnabled(key) ? html : '';
@@ -13888,8 +13929,6 @@ function pjRouteInner(m){
     else if (m.type==='podium') {
       clearInterval(pjTimerInt);
       pjApplyLead({on:false});
-      $('pjPodLead').innerHTML = (m.lead||[]).map((p,i)=>
-        `<div class="leadRow"><span class="pos">${i+1}°</span> ${esc(p.name)} <span class="pts">${p.score}</span></div>`).join('');
       showScreen('scrPjPodium');
       renderPodiumBuild($('pjPodium'), $('pjPodLead'), (m.top3||[]).map(p=>({name:p.name, score:p.score})));
     }
