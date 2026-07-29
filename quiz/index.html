@@ -843,7 +843,7 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 
 /* ===== OVERLAY CLASSIFICHE SU PROIETTORE ===== */
 #pjLeadOverlay{display:none; position:fixed; inset:0; z-index:65; background:rgba(5,2,10,.94); backdrop-filter:blur(6px);
-  flex-direction:column; align-items:center; justify-content:center; padding:30px; overflow:auto;}
+  flex-direction:column; align-items:center; justify-content:flex-start; padding:30px; padding-top:8vh; overflow:auto;}
 #pjLeadOverlay .brand{margin-bottom:10px;}
 #pjLeadRows{width:100%; max-width:min(90vw, 1400px);}
 #pjLeadRows .leadRow{font-size:clamp(16px,2.4vw,40px); padding:14px 22px;}
@@ -934,7 +934,7 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 
 /* ===== OVERLAY MESSAGGIO SU PROIETTORE ===== */
 #plLeadOverlay{display:none; position:fixed; inset:0; z-index:65; background:rgba(5,2,10,.96); backdrop-filter:blur(6px);
-  flex-direction:column; align-items:center; justify-content:center; padding:18px; overflow:auto;}
+  flex-direction:column; align-items:center; justify-content:flex-start; padding:18px; padding-top:6vh; overflow:auto;}
 #plLeadOverlay .t1{font-size:clamp(20px,6vw,32px);}
 #plLeadRows{width:100%; max-width:420px;}
 #plLeadRows .leadRow{font-size:clamp(14px,4vw,18px); padding:10px 14px;}
@@ -1219,7 +1219,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.57</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.59</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3846,7 +3846,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 1257; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 1259; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -4903,9 +4903,9 @@ function nextQuestion(){
   const q = G.quiz.questions[G.qi];
   G.played.add(G.qi);
   G.closed = false;
-  if (leadOv.on) sendLeadOverlay({on:false});
-  if (msgOv.on) sendPjMsg(false);
-  if (photoOv.on) sendPjPhoto(false);
+  sendLeadOverlay({on:false}); // sempre incondizionato: leadOv.on (variabile locale) può restare disallineato da un ricaricamento della pagina di regia, lasciando la sovrapposizione accesa sui telefoni senza che l'host se ne accorga
+  sendPjMsg(false); // incondizionato per lo stesso motivo del leaderboard qui sopra
+  sendPjPhoto(false); // incondizionato per lo stesso motivo del leaderboard qui sopra
   if (qrOverlayOn) toggleQrOverlay();
   if (q.type==='wordsearch') { playWsQuestion(q); return; }
   if (q.type==='anagram') { playAnagramQuestion(q); return; }
@@ -4972,9 +4972,9 @@ function cancelLiveQuestion(){
   const au = $('hqAudio'); if (au) au.pause();
   if (G.qi >= 0) G.ref.child('answers/'+G.qi).off();
   G.closed = true;
-  if (leadOv.on) sendLeadOverlay({on:false});
-  if (msgOv.on) sendPjMsg(false);
-  if (photoOv.on) sendPjPhoto(false);
+  sendLeadOverlay({on:false}); // sempre incondizionato: leadOv.on (variabile locale) può restare disallineato da un ricaricamento della pagina di regia, lasciando la sovrapposizione accesa sui telefoni senza che l'host se ne accorga
+  sendPjMsg(false); // incondizionato per lo stesso motivo del leaderboard qui sopra
+  sendPjPhoto(false); // incondizionato per lo stesso motivo del leaderboard qui sopra
   if (qrOverlayOn) toggleQrOverlay();
 }
 function modalQuestions(){
@@ -5179,7 +5179,7 @@ function endQuiz(){
   if (G && G.dataSnapshotAtStart && captureLocalDataSnapshot() !== G.dataSnapshotAtStart){
     if (confirm('📌 Durante questa serata sono cambiati alcuni dati salvati (gruppi WhatsApp, nomi cavalli, set o messaggi). Vuoi fare un backup adesso?')) backupAllQuizzes();
   }
-  if (leadOv.on) sendLeadOverlay({on:false});
+  sendLeadOverlay({on:false}); // sempre incondizionato: leadOv.on (variabile locale) può restare disallineato da un ricaricamento della pagina di regia, lasciando la sovrapposizione accesa sui telefoni senza che l'host se ne accorga
   G.ref.child('players').once('value').then(ps=>{
     const players = ps.val()||{};
     const arr = Object.entries(players).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
@@ -5305,6 +5305,7 @@ function plApplyLead(v){
     $('plLeadRows').innerHTML = (v.rows||[]).map(r=>
       `<div class="leadRow"><span class="pos">${esc(r.pos)}</span> ${esc(r.name)} <span class="pts">${esc(r.val)}</span></div>`).join('');
     ov.style.display='flex';
+    ov.scrollTop = 0; // stessa correzione già fatta per il proiettore: altrimenti riparte da dove si era scorso l'ultima volta
   } else ov.style.display='none';
 }
 function plApplyMsg(v){
@@ -12361,7 +12362,7 @@ function syncGiochiCatalogo(){
 function isGameEnabled(key){
   const en = window.CAPONE_MINIGIOCHI_ABILITATI;
   if(!en) return true; // nessuna licenza attiva registrata: non blocchiamo (fallback sicuro)
-  return en[key] !== false; // abilitato di default, bloccato solo se esplicitamente false
+  return en[key] === true; // abilitato SOLO se esplicitamente concesso (true); i giochi nuovi restano bloccati finché non li abiliti tu su ogni licenza
 }
 function gk(key, html){
   return isGameEnabled(key) ? html : '';
