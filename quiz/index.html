@@ -198,6 +198,10 @@ audio{width:100%; margin-top:10px;}
 #hostBar{position:fixed; left:0; right:0; bottom:0; z-index:50; display:none; padding:0 10px 10px;
   background:linear-gradient(0deg, rgba(11,6,20,.97), rgba(11,6,20,.8), transparent);}
 #hostBar.on{display:block;}
+/* Barra fissa in basso per il pulsante "rivela il prossimo posto" del podio: resta sempre a portata
+   di tap, senza dover scorrere su e giù la pagina a ogni singola rivelazione durante la premiazione. */
+#podRevealBar{position:fixed; left:0; right:0; bottom:0; z-index:55; display:none; justify-content:center;
+  padding:16px 10px calc(16px + env(safe-area-inset-bottom,0px)); background:linear-gradient(0deg, rgba(11,6,20,.97), rgba(11,6,20,.85) 70%, transparent);}
 #hbToggle{display:block; margin:0 auto 8px; font-family:'Bungee'; font-size:12px; letter-spacing:2px; color:var(--gold);
   background:linear-gradient(180deg,#2a1a4d,#170c30); border:2px solid rgba(255,201,60,.6); border-radius:0 0 14px 14px;
   padding:6px 22px; cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,.5), 0 0 14px rgba(255,201,60,.3);}
@@ -1215,7 +1219,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.56</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.57</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -1423,13 +1427,10 @@ body.suspense-on #pfRank{ display:none !important; }
 </div>
 
 <!-- ==================== HOST: PODIO FINALE ==================== -->
-<div class="screen" id="scrPodium">
+<div class="screen" id="scrPodium" style="padding-bottom:110px">
   <div class="brand"><div class="t1">🏆 PODIO FINALE</div></div>
   <div class="podio" id="podium"></div>
   <div class="lead mtb"><div id="podLead"></div></div>
-  <div class="row mtb" style="justify-content:center">
-    <button class="btn mg" id="btnPodReveal" onclick="podiumRevealNext()" style="font-size:22px; padding:18px 34px;">🥉 Rivela il 3° posto</button>
-  </div>
   <div class="row mtb">
     <button class="btn lm" id="btnSaveCamp" onclick="saveCampionato()">💾 Salva nel campionato serate</button>
     <button class="btn cy" onclick="location.href=location.pathname">🏠 Torna alla home</button>
@@ -1437,6 +1438,9 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="row mtb">
     <button class="btn ghost" id="btnPodResume" style="display:none" onclick="backToQuiz()">↩ Torna al quiz (riprendi da dove eri)</button>
   </div>
+</div>
+<div id="podRevealBar">
+  <button class="btn mg" id="btnPodReveal" onclick="podiumRevealNext()" style="font-size:20px; padding:16px 30px;">🥉 Rivela il 3° posto</button>
 </div>
 
 <!-- ==================== PLAYER: JOIN ==================== -->
@@ -3842,7 +3846,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 1256; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 1257; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3856,6 +3860,8 @@ const $ = id => document.getElementById(id);
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $(id).classList.add('active'); window.scrollTo(0,0);
+  // la barra fissa del pulsante "rivela" ha senso solo sulla schermata del podio: altrove va sempre nascosta
+  if (id!=='scrPodium' && $('podRevealBar')) $('podRevealBar').style.display='none';
   // segno il momento in cui, in regia, si esce per la prima volta dalla lobby verso un gioco vero:
   // da qui in poi l'ascoltatore dei giocatori non deve più rimandare il proiettore al QR
   if (typeof G!=='undefined' && G && G.code && id!=='scrLobby') G.leftLobby = true;
@@ -5134,9 +5140,10 @@ function podiumRevealRank(podEl, leadEl, rank){
 let podStage = 0;
 const POD_LABELS = ['🥉 Rivela il 3° posto', '🥈 Rivela il 2° posto', '👑 RIVELA IL VINCITORE!', '📊 Mostra classifica completa'];
 function podiumUpdateBtn(){
-  const btn = $('btnPodReveal');
+  const btn = $('btnPodReveal'), bar = $('podRevealBar');
   if (!btn) return;
-  if (podStage >= POD_LABELS.length) { btn.style.display='none'; return; }
+  if (podStage >= POD_LABELS.length) { if (bar) bar.style.display='none'; return; }
+  if (bar) bar.style.display='flex';
   btn.style.display=''; btn.textContent = POD_LABELS[podStage];
 }
 function podiumRevealNext(){
