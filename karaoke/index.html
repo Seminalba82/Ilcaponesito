@@ -140,6 +140,11 @@
     cursor:pointer;flex-shrink:0;font-size:14px;display:flex;align-items:center;justify-content:center;
   }
   .mute-btn.on{background:var(--red);color:var(--navy-deep);}
+  .air-btn{
+    width:34px;height:34px;border-radius:50%;border:2px solid var(--green);background:transparent;color:var(--green);
+    cursor:pointer;flex-shrink:0;font-size:14px;display:flex;align-items:center;justify-content:center;
+  }
+  .air-btn.on{background:var(--green);color:var(--navy-deep);box-shadow:0 0 12px rgba(95,184,139,0.6);}
 
   .banner-muted{
     background:rgba(255,71,87,0.15);border:1px solid var(--red);color:var(--red);
@@ -254,7 +259,7 @@ const DEFAULT_DB_URL = 'https://karaoke-d0484-default-rtdb.europe-west1.firebase
 
 /* Indirizzo web pubblico dove è pubblicata questa app (Netlify): il QR di
    default diventa così un vero link cliccabile con il codice già incluso. */
-const APP_PUBLIC_URL = location.origin + '/karaoke';
+const APP_PUBLIC_URL = 'https://preeminent-centaur-8ee6b0.netlify.app';
 
 function normalizeDbUrl(url){
   return String(url || '').trim().replace(/\/+$/, '');
@@ -286,7 +291,22 @@ async function fbSet(dbUrl, path, value){
     return null;
   }
 }
+async function fbDelete(dbUrl, path){
+  try{
+    await fetch(`${dbUrl}/${path}.json`, { method: 'DELETE' });
+    return true;
+  }catch(e){ return null; }
+}
 function sleep(ms){ return new Promise(res => setTimeout(res, ms)); }
+
+/* Configurazione WebRTC per l'audio "in onda": server STUN pubblici di Google
+   più un relay TURN gratuito come riserva per le reti mobili più restrittive. */
+const RTC_CONFIG = { iceServers: [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+]};
 
 /* Mostra a schermo intero una scritta neon lampeggiante per qualche secondo */
 function showNeonOverlay(text, color, durationMs){
@@ -480,6 +500,7 @@ function emptyBoard(name){
     wins: {},
     lastWinner: null,
     standings: [],
+    onAir: [],
     updatedAt: Date.now()
   };
 }
@@ -493,11 +514,13 @@ function renderHome(){
       <div class="card" style="display:flex;flex-direction:column;gap:12px;">
         <button class="btn btn-primary" id="btnAdmin">🎙️ Sono il presentatore</button>
         <button class="btn btn-ghost" id="btnJoin">🎶 Partecipo alla serata</button>
+        <button class="btn btn-ghost" id="btnRegia" style="font-size:13px;">🎛️ Regia audio (per il computer)</button>
       </div>
       <p class="hint">I dati della serata (nomi e onde vocali) sono visibili a tutti i partecipanti collegati con lo stesso codice.</p>
     </div>`;
-  document.getElementById('btnAdmin').onclick = () => goto('adminPin');
+  document.getElementById('btnAdmin').onclick = () => { App.pinTarget = 'adminCreate'; goto('adminPin'); };
   document.getElementById('btnJoin').onclick = () => goto('participantJoin');
+  document.getElementById('btnRegia').onclick = () => { App.pinTarget = 'regia'; goto('adminPin'); };
 }
 
 /* Il PIN non è scritto in chiaro nel codice: viene salvata solo la sua
@@ -531,7 +554,7 @@ function renderAdminPin(){
     if(!val){ err.textContent = 'Inserisci il PIN.'; return; }
     const hash = await sha256Hex(val);
     if(hash === ADMIN_PIN_HASH){
-      goto('adminCreate');
+      goto(App.pinTarget || 'adminCreate');
     } else {
       err.textContent = 'PIN errato.';
       pinInput.value = '';
@@ -631,6 +654,10 @@ function renderAdminDashboard(){
       </div>
       <div style="width:100%;">
         <h3 style="text-align:left;color:var(--gold-dim);font-size:13px;text-transform:uppercase;letter-spacing:1px;">Classifica in tempo reale</h3>
+        <div class="btn-row controls-hidden" style="margin-bottom:10px;">
+          <button class="btn btn-ghost btn-sm" id="btnAirAll">📢 Tutti in onda</button>
+          <button class="btn btn-ghost btn-sm" id="btnAirNone">🔕 Tutti fuori onda</button>
+        </div>
         <div class="leaderboard" id="leaderboard"><p class="hint">In attesa di partecipanti…</p></div>
       </div>
       <div style="width:100%;">
@@ -679,6 +706,18 @@ function renderAdminDashboard(){
     const val = songInput.value.trim();
     if(!val) return;
     board.songName = val;
+    await publishBoard();
+    refreshUi();
+  };
+
+  document.getElementById('btnAirAll').onclick = async () => {
+    const muted = new Set(board.mutedIds || []);
+    board.onAir = Object.keys(lastParticipants).filter(id => !muted.has(id));
+    await publishBoard();
+    refreshUi();
+  };
+  document.getElementById('btnAirNone').onclick = async () => {
+    board.onAir = [];
     await publishBoard();
     refreshUi();
   };
@@ -733,7 +772,7 @@ function renderAdminDashboard(){
     const list = Object.keys(participants).map(id => {
       const data = participants[id] || {};
       const score = computeScore(data.envelope, presenterEnv.slice(-10));
-      return { id, name: data.name || '?', envelope: data.envelope || [], score, muted: mutedIds.includes(id), wins: wins[id] || 0 };
+      return { id, name: data.name || '?', envelope: data.envelope || [], score, muted: mutedIds.includes(id), wins: wins[id] || 0, onAir: (board.onAir || []).includes(id) };
     }).sort((a,b) => b.score - a.score);
 
     // Classifica compatta pubblicata per i partecipanti (senza onde: pochi byte)
@@ -746,9 +785,10 @@ function renderAdminDashboard(){
       lb.innerHTML = list.map((p, i) => `
         <div class="lb-row ${i===0 ? 'top1' : ''}">
           <div class="lb-rank">${i+1}</div>
-          <div class="lb-name">${escapeHtml(p.name)}${p.wins ? ' <span style="color:var(--gold);">🏆×' + p.wins + '</span>' : ''}</div>
+          <div class="lb-name">${escapeHtml(p.name)}${p.wins ? ' <span style="color:var(--gold);">🏆×' + p.wins + '</span>' : ''}${p.onAir ? ' <span style="color:var(--green);">📢</span>' : ''}</div>
           ${sparkline(p.envelope, 70, 24)}
           <div class="lb-score mono">${p.score}%</div>
+          <button class="air-btn controls-hidden ${p.onAir ? 'on' : ''}" data-airid="${p.id}" title="Metti/togli in onda">📢</button>
           <button class="mute-btn controls-hidden ${p.muted ? 'on' : ''}" data-id="${p.id}" title="Silenzia/riattiva">${p.muted ? '🔇' : '🎤'}</button>
         </div>`).join('');
       lb.querySelectorAll('.mute-btn').forEach(btn => {
@@ -757,6 +797,20 @@ function renderAdminDashboard(){
           const set = new Set(board.mutedIds || []);
           if(set.has(id)) set.delete(id); else set.add(id);
           board.mutedIds = Array.from(set);
+          await publishBoard();
+          refreshUi();
+        };
+      });
+      lb.querySelectorAll('.air-btn').forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.getAttribute('data-airid');
+          let onAir = (board.onAir || []).slice();
+          if(onAir.includes(id)){
+            onAir = onAir.filter(x => x !== id);
+          } else {
+            onAir.push(id); // nessun tetto: per i giochi a squadre si possono aprire tutti
+          }
+          board.onAir = onAir;
           await publishBoard();
           refreshUi();
         };
@@ -1060,9 +1114,25 @@ function renderParticipantMic(){
       if(songTitle) songTitle.textContent = '🎵 ' + (board.songName || '—');
       const mutedIds = board.mutedIds || [];
       App.muted = mutedIds.includes(App.participantId);
+
+      // Messa in onda: avvio/fermo la trasmissione verso la regia
+      const amOnAir = (board.onAir || []).includes(App.participantId) && !App.muted;
+      if(amOnAir && !rtcState){
+        showNeonOverlay('SEI IN ONDA! 📢', 'gold', 3500);
+        startBroadcast(path);
+      } else if(!amOnAir && rtcState){
+        stopBroadcast(path);
+      }
+
       const banner = document.getElementById('mutedBanner');
       if(banner){
-        banner.innerHTML = App.muted ? '<div class="banner-muted">🔇 SEI STATO SILENZIATO DAL PRESENTATORE</div>' : '';
+        if(App.muted){
+          banner.innerHTML = '<div class="banner-muted">🔇 SEI STATO SILENZIATO DAL PRESENTATORE</div>';
+        } else if(amOnAir){
+          banner.innerHTML = '<div class="banner-muted" style="border-color:var(--green);color:var(--green);animation:pulse 1.2s ease-in-out infinite;">📢 SEI IN ONDA — ti sentono dalle casse!</div>';
+        } else {
+          banner.innerHTML = '';
+        }
       }
 
       const standings = board.standings || [];
@@ -1092,6 +1162,228 @@ function renderParticipantMic(){
   }
 }
 
+/* ---------- Trasmissione "in onda" (lato partecipante) ----------
+   Quando la regia mette in onda questo partecipante, il telefono apre un
+   collegamento WebRTC diretto verso il computer della regia: l'audio viaggia
+   da telefono a computer senza passare dal database (Firebase serve solo a
+   scambiare i messaggi di aggancio iniziali). */
+let rtcState = null;
+
+async function startBroadcast(path){
+  if(rtcState || !App.mic || !App.mic.stream) return;
+  const base = path + '/rtc/' + App.participantId;
+  const pc = new RTCPeerConnection(RTC_CONFIG);
+  let candIdx = 0;
+  rtcState = { pc, timer: null, gotAnswer: false, seenAnswerCands: {} };
+
+  App.mic.stream.getAudioTracks().forEach(t => pc.addTrack(t, App.mic.stream));
+  pc.onicecandidate = (e) => {
+    if(e.candidate) fbSet(App.dbUrl, base + '/oc/c' + (candIdx++), e.candidate.toJSON());
+  };
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  await fbDelete(App.dbUrl, base + '/answer');
+  await fbDelete(App.dbUrl, base + '/ac');
+  await fbSet(App.dbUrl, base + '/offer', { type: offer.type, sdp: offer.sdp, at: Date.now() });
+
+  rtcState.timer = setInterval(async () => {
+    if(!rtcState) return;
+    if(!rtcState.gotAnswer){
+      const answer = await fbGet(App.dbUrl, base + '/answer');
+      if(answer && answer.sdp){
+        try{
+          await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: answer.sdp }));
+          rtcState.gotAnswer = true;
+        }catch(e){ console.error(e); }
+      }
+    }
+    const cands = await fbGet(App.dbUrl, base + '/ac');
+    if(cands){
+      for(const k of Object.keys(cands)){
+        if(!rtcState.seenAnswerCands[k]){
+          rtcState.seenAnswerCands[k] = true;
+          try{ await pc.addIceCandidate(new RTCIceCandidate(cands[k])); }catch(e){}
+        }
+      }
+    }
+  }, 1500);
+  App.timers.push(rtcState.timer);
+}
+
+async function stopBroadcast(path){
+  if(!rtcState) return;
+  clearInterval(rtcState.timer);
+  try{ rtcState.pc.close(); }catch(e){}
+  rtcState = null;
+  await fbDelete(App.dbUrl, path + '/rtc/' + App.participantId);
+}
+
+/* ---------- Regia audio (lato computer) ----------
+   Pagina da aprire sul computer collegato alle casse: riceve via WebRTC le
+   voci dei partecipanti messi in onda e le riproduce. */
+function renderRegia(){
+  document.getElementById('app').innerHTML = `
+    <div class="screen">
+      <h1 class="marquee-title display" style="font-size:28px;">REGIA AUDIO</h1>
+      <div class="card" id="regiaSetup">
+        <label class="label">Codice della serata</label>
+        <input class="input mono" id="regiaCode" maxlength="10" placeholder="ES. A59RX" autocapitalize="characters" autocomplete="off" style="font-size:26px;letter-spacing:6px;text-transform:uppercase;">
+        <button class="btn btn-primary" id="btnRegiaGo">🔊 Avvia la regia</button>
+        <p class="hint" id="regiaError" style="color:var(--red);"></p>
+        <p class="hint">Apri questa pagina sul computer collegato alle casse. Le voci messe in onda dal presentatore (📢) usciranno da qui.</p>
+      </div>
+      <div id="regiaLive" style="display:none;width:100%;max-width:520px;">
+        <div class="card" style="max-width:none;">
+          <label class="label">In onda adesso</label>
+          <div id="airList"><p class="hint air-empty">Nessuno in onda. Usa 📢 nella classifica del presentatore.</p></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" style="max-width:420px;" id="btnBack">← Indietro</button>
+    </div>`;
+  document.getElementById('btnBack').onclick = () => goto('home');
+
+  const conns = {}; // id -> { pc, audio, seenOfferCands, name }
+
+  let audioCtx = null;
+
+  async function ensureConn(id, name, path){
+    if(conns[id]) return;
+    const base = path + '/rtc/' + id;
+    const offer = await fbGet(App.dbUrl, base + '/offer');
+    if(!offer || !offer.sdp) return; // il telefono non ha ancora pubblicato l'aggancio
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const pc = new RTCPeerConnection(RTC_CONFIG);
+    let candIdx = 0;
+    // Elemento audio silenziato: serve solo a "tenere vivo" il flusso; il suono
+    // vero passa dal nodo di guadagno regolabile del mixer.
+    const audio = new Audio();
+    audio.autoplay = true;
+    audio.muted = true;
+    const gain = audioCtx.createGain();
+    gain.gain.value = 1;
+    gain.connect(audioCtx.destination);
+    conns[id] = { pc, audio, gain, seenOfferCands: {}, name, row: null };
+    addRow(id, name);
+    pc.ontrack = (e) => {
+      audio.srcObject = e.streams[0];
+      audio.play().catch(() => {});
+      try{
+        const src = audioCtx.createMediaStreamSource(e.streams[0]);
+        src.connect(conns[id].gain);
+      }catch(err){ console.error(err); }
+    };
+    pc.onicecandidate = (e) => {
+      if(e.candidate) fbSet(App.dbUrl, base + '/ac/c' + (candIdx++), e.candidate.toJSON());
+    };
+    try{
+      await pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: offer.sdp }));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      await fbSet(App.dbUrl, base + '/answer', { type: answer.type, sdp: answer.sdp, at: Date.now() });
+    }catch(e){ console.error(e); }
+  }
+
+  function dropConn(id){
+    const c = conns[id];
+    if(!c) return;
+    try{ c.pc.close(); }catch(e){}
+    try{ c.audio.srcObject = null; }catch(e){}
+    try{ c.gain.disconnect(); }catch(e){}
+    if(c.row && c.row.parentNode) c.row.remove();
+    delete conns[id];
+    updateEmptyHint();
+  }
+
+  function updateEmptyHint(){
+    const airList = document.getElementById('airList');
+    if(!airList) return;
+    const hint = airList.querySelector('.air-empty');
+    const hasRows = airList.querySelector('.air-row');
+    if(hasRows){ if(hint) hint.style.display = 'none'; }
+    else { if(hint) hint.style.display = ''; }
+  }
+
+  function addRow(id, name){
+    const airList = document.getElementById('airList');
+    if(!airList) return;
+    const row = document.createElement('div');
+    row.className = 'lb-row air-row';
+    row.style.flexWrap = 'wrap';
+    row.innerHTML = `
+      <div class="lb-name">📢 ${escapeHtml(name)}</div>
+      <div class="lb-score mono air-status" style="width:auto;color:var(--gold-dim);">aggancio…</div>
+      <div style="flex-basis:100%;display:flex;align-items:center;gap:10px;">
+        <span class="hint" style="white-space:nowrap;">🔊 Volume</span>
+        <input type="range" min="0" max="200" value="100" style="flex:1;accent-color:var(--gold);">
+        <span class="mono hint air-vol" style="width:44px;text-align:right;">100%</span>
+      </div>`;
+    const slider = row.querySelector('input[type=range]');
+    const volLabel = row.querySelector('.air-vol');
+    slider.oninput = () => {
+      const v = Number(slider.value);
+      volLabel.textContent = v + '%';
+      if(conns[id]) conns[id].gain.gain.value = v / 100;
+    };
+    airList.appendChild(row);
+    conns[id].row = row;
+    updateEmptyHint();
+  }
+
+  document.getElementById('btnRegiaGo').onclick = async () => {
+    const err = document.getElementById('regiaError');
+    err.textContent = '';
+    const raw = document.getElementById('regiaCode').value.trim();
+    if(!raw){ err.textContent = 'Inserisci il codice della serata.'; return; }
+    const { sessionId, dbUrl } = unpackCode(raw);
+    const path = 'karaoke_' + sessionId;
+    const boardData = await fbGet(dbUrl, path + '/board');
+    if(!boardData){ err.textContent = 'Codice non trovato: controlla e riprova.'; return; }
+    App.code = sessionId; App.dbUrl = dbUrl;
+    document.getElementById('regiaSetup').style.display = 'none';
+    document.getElementById('regiaLive').style.display = '';
+
+    const loop = setInterval(async () => {
+      const board = await fbGet(App.dbUrl, path + '/board');
+      if(!board) return;
+      const onAir = board.onAir || [];
+      const names = {};
+      (board.standings || []).forEach(s => { names[s.id] = s.name; });
+
+      // apro le connessioni per chi è in onda, chiudo per chi non lo è più
+      for(const id of onAir) await ensureConn(id, names[id] || 'Partecipante', path);
+      for(const id of Object.keys(conns)) if(!onAir.includes(id)) dropConn(id);
+
+      // raccolgo i candidati di aggancio pubblicati dai telefoni
+      for(const id of Object.keys(conns)){
+        const cands = await fbGet(App.dbUrl, path + '/rtc/' + id + '/oc');
+        if(cands){
+          for(const k of Object.keys(cands)){
+            if(!conns[id].seenOfferCands[k]){
+              conns[id].seenOfferCands[k] = true;
+              try{ await conns[id].pc.addIceCandidate(new RTCIceCandidate(cands[k])); }catch(e){}
+            }
+          }
+        }
+      }
+
+      // interfaccia: aggiorno solo lo stato, i cursori del volume restano com'erano
+      for(const id of Object.keys(conns)){
+        const c = conns[id];
+        if(!c.row) continue;
+        const ok = (c.pc.connectionState === 'connected');
+        const statusEl = c.row.querySelector('.air-status');
+        if(statusEl){
+          statusEl.textContent = ok ? 'IN ONDA' : 'aggancio…';
+          statusEl.style.color = ok ? 'var(--green)' : 'var(--gold-dim)';
+        }
+        c.row.classList.toggle('top1', ok);
+      }
+    }, 2000);
+    App.timers.push(loop);
+  };
+}
+
 /* ---------- Router ---------- */
 const VIEWS = {
   home: renderHome,
@@ -1099,7 +1391,8 @@ const VIEWS = {
   adminCreate: renderAdminCreate,
   adminDashboard: renderAdminDashboard,
   participantJoin: renderParticipantJoin,
-  participantMic: renderParticipantMic
+  participantMic: renderParticipantMic,
+  regia: renderRegia
 };
 function render(){ (VIEWS[App.view] || renderHome)(); }
 
