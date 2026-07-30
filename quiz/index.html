@@ -1219,7 +1219,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.59</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.60</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3846,7 +3846,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 1259; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 1260; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -3943,7 +3943,12 @@ function randCode(){ const A='ABCDEFGHJKLMNPQRSTUVWXYZ'; let c=''; for(let i=0;i
 const SYMS = ['♠','♦','🎩','★','🎲'];
 /* pattern caselle per risposte aperte: lunghezze parole + lettere di aiuto */
 function buildPattern(answer, hintN){
-  const words = (answer||'').trim().split(/\s+/).filter(Boolean).map(w=>[...w.toUpperCase()]);
+  // se l'host ha inserito più risposte accettate separate da virgola (es. "CASA,CASE"), le caselle mostrate
+  // ai giocatori devono seguire SOLO la prima (quella "canonica") — altrimenti virgola e alternative extra
+  // finiscono dentro lo schema, producendo un numero di caselle sbagliato che non corrisponde a nessuna
+  // risposta valida (il giocatore si troverebbe davanti uno schema che non può mai riempire correttamente)
+  const first = (answer||'').split(',')[0];
+  const words = first.trim().split(/\s+/).filter(Boolean).map(w=>[...w.toUpperCase()]);
   const hints = [];
   let li = 0;
   for (const w of words) for (const ch of w){ if (li < (hintN||0)) hints.push(ch); else hints.push(null); li++; }
@@ -4423,7 +4428,9 @@ function qePenTouched(which){
 function qeAnaAutoScramble(force){
   const w = $('qeAnaWord').value.trim();
   if (!w) { $('qeAnaScramble').value=''; return; }
-  if (force || !$('qeAnaScramble')._touched) $('qeAnaScramble').value = shuffleLetters(w);
+  // stessa correzione della versione standalone: con più risposte accettate separate da virgola,
+  // le lettere mischiate si generano solo dalla prima
+  if (force || !$('qeAnaScramble')._touched) $('qeAnaScramble').value = shuffleLetters(w.split(',')[0]);
 }
 $('qeAnaScramble').addEventListener('input', ()=>{ $('qeAnaScramble')._touched = true; });
 /* ================================================================
@@ -4549,7 +4556,7 @@ function qeBuildQuestion(){
     const word = $('qeAnaWord').value.trim();
     if (!word) { alert('Scrivi la parola giusta!'); return null; }
     q.accepted = word;
-    q.scramble = ($('qeAnaScramble').value.trim() || shuffleLetters(word)).toUpperCase();
+    q.scramble = ($('qeAnaScramble').value.trim() || shuffleLetters(word.split(',')[0])).toUpperCase();
   }
   return q;
 }
@@ -4971,6 +4978,8 @@ function cancelLiveQuestion(){
   clearInterval(G.timerInt);
   const au = $('hqAudio'); if (au) au.pause();
   if (G.qi >= 0) G.ref.child('answers/'+G.qi).off();
+  G.ref.child('anagram/answers').off(); // stessa correzione di runAnagram: copre il caso in cui si esce
+    // da un anagramma prima che finisca da solo (salto ad altra domanda, skip)
   G.closed = true;
   sendLeadOverlay({on:false}); // sempre incondizionato: leadOv.on (variabile locale) può restare disallineato da un ricaricamento della pagina di regia, lasciando la sovrapposizione accesa sui telefoni senza che l'host se ne accorga
   sendPjMsg(false); // incondizionato per lo stesso motivo del leaderboard qui sopra
@@ -9591,9 +9600,13 @@ function openAnagram(){
   showScreen('scrAnagram');
 }
 function anagramStart(){
+  if (anagramStart._busy) return; anagramStart._busy = true; setTimeout(()=>anagramStart._busy=false, 1000);
   const word = $('anaWord').value.trim();
   if (!word) return alert('Scrivi la parola giusta!');
-  const scramble = ($('anaScramble').value.trim() || shuffleLetters(word)).toUpperCase();
+  // se ci sono più risposte accettate separate da virgola, le lettere mischiate generate in automatico
+  // (quando il campo apposito è vuoto) devono basarsi solo sulla prima, altrimenti la virgola stessa
+  // finirebbe mischiata insieme alle lettere
+  const scramble = ($('anaScramble').value.trim() || shuffleLetters(word.split(',')[0])).toUpperCase();
   const q = { text: $('anaClue').value.trim(), type:'anagram', accepted: word,
     hint: Math.max(0,+$('anaHint').value||0), penWrong: Math.max(0,+$('anaPenWrong').value||0),
     penNone: Math.max(0,+$('anaPenNone').value||0), points: getPoints('anaPoints','anaPointsMan'),
@@ -9604,6 +9617,9 @@ function anagramStart(){
 /* Motore di gioco condiviso — usato sia dal minigioco standalone sia dalla scaletta quiz */
 function runAnagram(q){
   clearInterval(($('anaTimerBar')||{})._int);
+  G.ref.child('anagram/answers').off(); // pulizia incondizionata: se il round precedente è stato abbandonato
+    // (es. saltato con "Scelta domanda" prima che si chiudesse da solo), il suo ascoltatore resterebbe
+    // attivo per sempre, sommandosi a quello nuovo e causando comportamenti imprevedibili sui round successivi
   const pattern = buildPattern(q.accepted, q.hint||0);
   const startAt = serverNow()+800, endAt = startAt + q.timer*1000;
   ANA = { q, startAt, endAt, closed:false };
