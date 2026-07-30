@@ -144,6 +144,16 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
       <div class="mini-grid" id="miniGrid"></div>
     </fieldset>
 
+    <fieldset>
+      <legend>Prodotti standalone (app separate)</legend>
+      <div class="mini-grid">
+        <label class="mini-chip">
+          <input type="checkbox" id="fTombolaStandalone">
+          🎱 Tombola Standalone
+        </label>
+      </div>
+    </fieldset>
+
    <button class="btn-primary" id="btnGenera" onclick="generaLicenza()">Genera licenza</button>
 <button class="btn-secondary" id="btnAnnullaModifica" style="display:none;margin-top:8px" onclick="annullaModifica()">Annulla modifica</button>
 
@@ -290,6 +300,7 @@ function generaLicenza(){
   document.querySelectorAll('.mini-cb').forEach(cb=>{
     minigiochi_abilitati[cb.value] = cb.checked;
   });
+  minigiochi_abilitati.tombola_standalone = document.getElementById('fTombolaStandalone').checked;
 
   if(editingCode){
     // Modalità MODIFICA: aggiorna una licenza esistente (rinnova scadenza da oggi)
@@ -359,6 +370,7 @@ function modificaLicenza(codice){
     const abil = lic.minigiochi_abilitati ? lic.minigiochi_abilitati[cb.value] : true;
     cb.checked = abil !== false;
   });
+  document.getElementById('fTombolaStandalone').checked = !!(lic.minigiochi_abilitati && lic.minigiochi_abilitati.tombola_standalone === true);
 
   document.getElementById('formTitle').textContent = '✏️ Modifica licenza: '+codice;
   document.getElementById('btnGenera').textContent = 'Salva modifiche';
@@ -374,6 +386,7 @@ function annullaModifica(){
   document.getElementById('fNote').value = '';
   document.getElementById('fPiano').value = 'giorno';
   document.querySelectorAll('.mini-cb').forEach(cb=> cb.checked = true);
+  document.getElementById('fTombolaStandalone').checked = false;
   document.getElementById('formTitle').textContent = '➕ Genera nuova licenza';
   document.getElementById('btnGenera').textContent = 'Genera licenza';
   document.getElementById('btnAnnullaModifica').style.display = 'none';
@@ -433,7 +446,10 @@ function renderLicenze(){
       ? '<span class="badge badge-active">DISPOSITIVO BLOCCATO</span>'
       : '<span class="badge badge-unused">MAI USATA</span>';
 
-    const nMini = lic.minigiochi_abilitati ? Object.values(lic.minigiochi_abilitati).filter(v=>v).length : 0;
+    const tombolaBadge = (lic.minigiochi_abilitati && lic.minigiochi_abilitati.tombola_standalone === true)
+      ? '<span class="badge badge-active">🎱 TOMBOLA STANDALONE</span>' : '';
+
+    const nMini = lic.minigiochi_abilitati ? Object.entries(lic.minigiochi_abilitati).filter(([k,v])=> v && k!=='tombola_standalone').length : 0;
 
     return `
     <div class="lic-item">
@@ -444,7 +460,7 @@ function renderLicenze(){
           <div class="lic-meta">Scadenza: ${new Date(lic.data_scadenza).toLocaleString('it-IT')}</div>
           ${lic.note ? `<div class="lic-meta">Note: ${lic.note}</div>` : ''}
         </div>
-        <div>${badge}${deviceBadge}</div>
+        <div>${badge}${deviceBadge}${tombolaBadge}</div>
       </div>
       <div class="actions-row">
         ${lic.device_bloccato ? `<button class="btn-warn" onclick="sbloccaDevice('${code}')">🔓 Sblocca dispositivo</button>` : ''}
