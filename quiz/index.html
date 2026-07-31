@@ -655,6 +655,39 @@ body.barOn.barCollapsed .screen.active{padding-bottom:70px;}
 .tmbTotal{font-family:'Bungee'; font-size:clamp(30px,8vw,46px); color:var(--gold); text-align:center; margin-top:8px;
   text-shadow:0 0 20px rgba(255,201,60,.6);}
 .tmbHint{font-size:12px; letter-spacing:1px; color:var(--muted); text-align:center; text-transform:uppercase;}
+/* ===== MERCATISTA PER UN GIORNO — colonna equalizzatore 3D ===== */
+.mercStage{display:flex; flex-direction:column; align-items:center; gap:10px; margin:10px auto; position:relative; width:100%;}
+.mercFlame{font-size:clamp(26px,7vw,44px); transform:scale(1); filter:drop-shadow(0 0 4px rgba(255,120,0,0)); transition:transform .12s ease-out, filter .12s ease-out;}
+.mercBarFrame{
+  position:relative; width:min(58vw,150px); height:min(48vh,420px);
+  padding:12px 9px; border-radius:22px; box-sizing:border-box;
+  background:linear-gradient(155deg,#2f2448,#140a26 55%,#0a0616);
+  box-shadow:
+    inset 0 3px 6px rgba(255,255,255,.10),
+    inset 0 -6px 14px rgba(0,0,0,.65),
+    0 12px 26px rgba(0,0,0,.55),
+    0 0 0 2px rgba(157,77,255,.28),
+    0 0 26px rgba(157,77,255,.18);
+}
+.mercBarTrack{position:relative; width:100%; height:100%; display:flex; flex-direction:column-reverse; gap:4px;}
+.mercSeg{
+  flex:1; min-height:0; border-radius:5px; background:rgba(255,255,255,.045);
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.55), inset 0 -1px 1px rgba(255,255,255,.03);
+  transition:background .05s linear, box-shadow .08s linear;
+}
+.mercPeakLine{
+  position:absolute; left:-5px; right:-5px; height:5px; border-radius:3px; bottom:0;
+  background:linear-gradient(90deg,transparent,#fff 18%,#fff 82%,transparent);
+  box-shadow:0 0 10px 2px #fff, 0 0 22px 7px currentColor;
+  transition:bottom .18s cubic-bezier(.2,.8,.3,1);
+  pointer-events:none; z-index:2;
+}
+.mercPeakLine::after{content:"◀ RECORD"; position:absolute; right:calc(100% + 8px); top:50%; transform:translateY(-50%);
+  font-family:'Bungee'; font-size:10px; letter-spacing:1px; color:#fff; text-shadow:0 0 6px currentColor; white-space:nowrap;}
+.mercPctBig{font-family:'Bungee'; font-size:clamp(30px,9vw,50px); color:var(--gold); text-shadow:0 0 20px rgba(255,201,60,.55); line-height:1;}
+.mercPeakBig{font-size:13px; letter-spacing:1px; color:var(--muted); text-transform:uppercase;}
+.mercWarnZone{position:absolute; left:9px; right:9px; top:12px; height:14%; border-radius:10px 10px 0 0;
+  background:repeating-linear-gradient(135deg, rgba(255,59,59,.16) 0 8px, transparent 8px 16px); pointer-events:none;}
 .tmbPrizeRow{display:flex; align-items:center; gap:10px; margin-top:6px;}
 .tmbPrizeRow .medal{width:40px; font-size:20px; text-align:center;}
 .tmbPrizeRow.loss .medal{color:#ff5d5d;}
@@ -1219,7 +1252,7 @@ body.suspense-on #pfRank{ display:none !important; }
 <div class="screen" id="scrHome">
   <div class="logoWrap" style="width:150px" data-logo></div>
   <div class="brand"><div class="t1">IL CAPONE</div><div class="t2">QUIZ <span class="v3">3.0</span></div></div>
-  <div class="byline">by <b>Alberto Seminerio</b> · v12.60</div>
+  <div class="byline">by <b>Alberto Seminerio</b> · v12.61</div>
   <div id="fbWarn" class="warn mtb" style="display:none; max-width:560px">
     ⚠️ <b>Firebase non configurato.</b> Apri il file e incolla la tua configurazione Firebase nella sezione <b>FIREBASE CONFIG</b> in cima al codice JavaScript (puoi usare lo stesso progetto di IL CAPONE CHAT).
   </div>
@@ -3010,6 +3043,68 @@ body.suspense-on #pfRank{ display:none !important; }
   <div class="feedback mtb" id="tambpFbPts" style="display:none"></div>
 </div>
 
+<!-- ==================== HOST: MERCATISTA PER UN GIORNO ==================== -->
+<div class="screen" id="scrMerc">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">📣 MERCATISTA PER UN GIORNO</div></div>
+  <div class="panel mt" style="max-width:560px" id="mercSetup">
+    <div class="label">Punti a chi urla più forte, secondo, terzo...</div>
+    <div id="mercPrizeInputs"></div>
+    <div class="label mt">Punti tolti a chi urla più piano, penultimo...</div>
+    <div id="mercLossInputs"></div>
+    <div class="label mt">Tempo per gridare</div>
+    <select id="mercSecs">
+      <option value="8">8 secondi</option>
+      <option value="10" selected>10 secondi</option>
+      <option value="15">15 secondi</option>
+      <option value="20">20 secondi</option>
+    </select>
+    <div class="byline mt" style="opacity:.75">🎤 Ogni giocatore userà il microfono del proprio telefono. I risultati arrivano tutti insieme, in regia, solo allo scadere del tempo — nessuno sa chi sta vincendo finché il tempo non finisce!</div>
+    <button class="btn mg mt" style="width:100%" onclick="mercStart()">📣 SI GRIDA!</button>
+  </div>
+  <div id="mercLive" style="display:none; width:100%" class="center">
+    <div class="miniMsg" id="mercMsg"></div>
+    <div class="timerWrap mt" style="max-width:420px"><div class="timerBar" id="mercTimerBar"></div></div>
+    <div class="lead mt" id="mercRanking" style="max-width:500px; width:100%"></div>
+    <button class="btn cy mt" id="mercBtnAgain" onclick="openMerc()" style="display:none">🔁 Un'altra manche</button>
+  </div>
+  <div class="row mt"><button class="btn ghost" onclick="backToQuiz()">↩ Torna al quiz</button></div>
+</div>
+
+<!-- ==================== PROIETTORE: MERCATISTA PER UN GIORNO ==================== -->
+<div class="screen" id="scrPjMerc">
+  <div class="brand"><div class="t1" style="font-size:clamp(26px,4vw,48px)">📣 MERCATISTA PER UN GIORNO</div></div>
+  <div class="miniMsg" id="pjMercMsg">GRIDATE FORTISSIMO DAL TELEFONO!</div>
+  <div class="timerWrap mt" style="max-width:460px"><div class="timerBar" id="pjMercTimerBar"></div></div>
+  <div class="byline mt" id="pjMercSub" style="opacity:.8"></div>
+  <div class="lead mt" id="pjMercRanking" style="max-width:600px; width:100%"></div>
+</div>
+
+<!-- ==================== PLAYER: MERCATISTA PER UN GIORNO ==================== -->
+<div class="screen" id="scrPlayMerc" style="align-items:center; justify-content:center">
+  <div class="row" style="width:100%; justify-content:space-between">
+    <div class="pill" id="mrcpName" style="color:var(--gold)"></div>
+    <div class="pill" id="mrcpScore"></div>
+  </div>
+  <div class="timerWrap mt" style="max-width:300px"><div class="timerBar" id="mrcpTimerBar"></div></div>
+  <div class="tmbHint mt">🎤 GRIDA FORTISSIMO NEL MICROFONO! ATTENTO A NON TOCCARE IL PICCO...</div>
+  <div class="mercStage mt">
+    <div class="mercFlame" id="mrcFlame">🔥</div>
+    <div class="mercBarFrame">
+      <div class="mercWarnZone"></div>
+      <div class="mercBarTrack" id="mrcBar">
+        <div class="mercPeakLine" id="mrcPeakLine"></div>
+      </div>
+    </div>
+    <div class="mercPctBig" id="mrcPct">0%</div>
+    <div class="mercPeakBig" id="mrcPeak">Record: 0%</div>
+  </div>
+  <div class="byline mt" id="mrcNoMic" style="display:none; color:var(--red); text-align:center; max-width:300px">
+    ⚠️ Non riesco ad accedere al microfono. Controlla i permessi del browser e ricarica la pagina.
+  </div>
+  <div class="feedback mtb" id="mrcFbMsg" style="display:none"></div>
+  <div class="feedback mtb" id="mrcFbPts" style="display:none"></div>
+</div>
+
 <!-- ==================== HOST: ROULETTE ==================== -->
 <div class="screen" id="scrCasino">
   <div class="brand"><div class="t1" style="font-size:clamp(20px,3.6vw,36px)">🎰 ROULETTE</div></div>
@@ -3787,7 +3882,7 @@ body.suspense-on #pfRank{ display:none !important; }
 /* ================================================================
    📋 ELENCO MINIGIOCHI — aggiornare questa lista ogni volta che se ne
    aggiunge uno nuovo (serve ad Alberto per la documentazione delle licenze).
-   Ultimo aggiornamento: v12.54 — 37 minigiochi totali.
+   Ultimo aggiornamento: v12.61 — 38 minigiochi totali.
    ================================================================
    1.  🥃 Bussolotti
    2.  🎲 Pari o Dispari
@@ -3826,6 +3921,7 @@ body.suspense-on #pfRank{ display:none !important; }
    35. ⏱ Timer
    36. 📊 Classifica di Gradimento
    37. ❌⭕ XOX
+   38. 📣 Mercatista per un Giorno
 ================================================================ */
 
 /* ================================================================
@@ -3846,7 +3942,7 @@ const firebaseConfig = {
 };
 /* =============================================================== */
 
-const APP_V = 1260; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
+const APP_V = 1261; // versione app: la regia la scrive nella partita, i telefoni si auto-aggiornano
 const TIMES = [5,10,15,20,30,40,60,90,120];
 const LSKEY = 'capone_quizzes_v3';
 let db = null, fbOK = firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('INCOLLA');
@@ -5397,6 +5493,7 @@ function listenGame(){
     else if (g.status==='goldenticket') showPlayerGold(g);
     else if (g.status==='casino') showPlayerCasino(g);
     else if (g.status==='tamburini') showPlayerTamb(g);
+    else if (g.status==='mercatista') showPlayerMerc(g);
     else if (g.status==='xox') showPlayerXox(g);
     else if (g.status==='timer') {
       const t = g.timer||{};
@@ -7123,6 +7220,140 @@ function tambSync(force){
   if (!force && P.tambN===P.tambSynced) return;
   P.tambSynced = P.tambN;
   P.ref.child('tamburini/counts/'+P.id).set(P.tambN);
+}
+/* ================================================================
+   MERCATISTA PER UN GIORNO — telefono (microfono + colonna equalizzatore 3D)
+   Il volume si legge SOLO in locale sul telefono (stessa tecnica, sicura e senza consumo dati,
+   già usata per la barra "urla" di Pubbliche Offese) — non si registra né si invia mai audio.
+   Si manda alla regia SOLO il picco massimo raggiunto, e SOLO allo scadere del tempo: questo
+   tiene tutti col fiato sospeso e non intasa Firebase con letture continue da più telefoni insieme.
+================================================================ */
+let mercAudioCtx=null, mercAnalyser=null, mercMicStream=null, mercMicRaf=null;
+const MERC_SEGS = 22;
+// Taratura difficoltà: MERC_REF_MAX è il volume medio (0-255) che corrisponderebbe al 100% pieno —
+// tenuto volutamente alto, in modo che anche urlando fortissimo ci si avvicini soltanto al picco,
+// senza mai riempirlo davvero facilmente. MERC_CURVE comprime la parte alta della scala: ogni punto
+// percentuale in più, salendo, richiede sempre più urlo. Se in pratica risultasse troppo facile o
+// troppo difficile da riempire con i microfoni reali usati durante le serate, si può aggiustare
+// alzando o abbassando questi due numeri.
+const MERC_REF_MAX = 195;
+const MERC_CURVE = 1.5;
+function mercPctFromAvg(avg){
+  const ratio = Math.min(1, avg / MERC_REF_MAX);
+  return Math.max(0, Math.min(100, Math.round(100 * Math.pow(ratio, MERC_CURVE))));
+}
+function mercSegHue(i){ return Math.round(100 - (i/(MERC_SEGS-1))*100); } // 100=verde acceso → 0=rosso
+function mercBuildBar(el){
+  el.innerHTML = '<div class="mercPeakLine" id="mrcPeakLine"></div>';
+  for (let i=0;i<MERC_SEGS;i++){
+    const seg = document.createElement('div');
+    seg.className='mercSeg';
+    el.appendChild(seg);
+  }
+}
+function mercUpdateBar(el, pct){
+  const litCount = Math.round((pct/100)*MERC_SEGS);
+  const segs = el.querySelectorAll('.mercSeg');
+  for (let i=0;i<segs.length;i++){
+    const seg = segs[i];
+    if (i < litCount){
+      const hue = mercSegHue(i);
+      seg.style.background = `linear-gradient(180deg, hsl(${hue},95%,68%), hsl(${hue},95%,42%))`;
+      seg.style.boxShadow = `inset 0 2px 2px rgba(255,255,255,.55), inset 0 -3px 5px rgba(0,0,0,.35), 0 0 10px 2px hsla(${hue},100%,55%,.85)`;
+    } else {
+      seg.style.background=''; seg.style.boxShadow='';
+    }
+  }
+}
+function mercStartMic(onPct){
+  if (mercMicStream){ return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ onPct(null); return; }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    mercMicStream = stream;
+    mercAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const source = mercAudioCtx.createMediaStreamSource(stream);
+    mercAnalyser = mercAudioCtx.createAnalyser();
+    mercAnalyser.fftSize = 512;
+    source.connect(mercAnalyser);
+    const data = new Uint8Array(mercAnalyser.frequencyBinCount);
+    let smoothed = 0;
+    const loop = ()=>{
+      if (!mercAnalyser) return;
+      mercAnalyser.getByteFrequencyData(data);
+      let sum=0; for (let i=0;i<data.length;i++) sum+=data[i];
+      const avg = sum/data.length;
+      // attacco immediato, rilascio morbido: la colonna sale di scatto ma scende dolcemente,
+      // così resta leggibile e non sfarfalla ad ogni minima variazione di voce
+      smoothed = avg > smoothed ? avg : smoothed*0.86 + avg*0.14;
+      onPct(mercPctFromAvg(smoothed));
+      mercMicRaf = requestAnimationFrame(loop);
+    };
+    loop();
+  }).catch(()=> onPct(null));
+}
+function mercStopMic(){
+  if (mercMicRaf) cancelAnimationFrame(mercMicRaf);
+  mercMicRaf = null;
+  if (mercMicStream){ mercMicStream.getTracks().forEach(t=>t.stop()); mercMicStream=null; }
+  if (mercAudioCtx){ try{ mercAudioCtx.close(); }catch(e){} mercAudioCtx=null; }
+  mercAnalyser = null;
+}
+function showPlayerMerc(g){
+  const m = g.mercatista||{};
+  $('mrcpName').textContent = P.name;
+  $('mrcpScore').textContent = (((g.players||{})[P.id]||{}).score||0)+' pt';
+  showScreen('scrPlayMerc');
+  if (m.phase==='play'){
+    if (P.mrcStartAt !== m.startAt){
+      P.mrcStartAt = m.startAt; P.mrcEndAt = m.endAt; P.mrcSecs = m.secs;
+      P.mrcPeak = 0; P.mrcSent = false;
+      mercBuildBar($('mrcBar'));
+      $('mrcPct').textContent='0%'; $('mrcPeak').textContent='Record: 0%';
+      $('mrcNoMic').style.display='none';
+      $('mrcFbMsg').style.display='none'; $('mrcFbPts').style.display='none';
+      $('mrcFlame').style.transform='scale(1)'; $('mrcFlame').style.filter='drop-shadow(0 0 4px rgba(255,120,0,0))';
+      mercStartMic(pct=>{
+        if (pct==null){ $('mrcNoMic').style.display='block'; return; }
+        mercUpdateBar($('mrcBar'), pct);
+        $('mrcPct').textContent = pct+'%';
+        const flame = $('mrcFlame');
+        if (flame){
+          flame.style.transform = `scale(${(1+pct/200).toFixed(2)})`;
+          flame.style.filter = `drop-shadow(0 0 ${4+pct/3}px hsla(${mercSegHue(Math.round(pct/100*(MERC_SEGS-1)))},100%,55%,${(0.25+pct/150).toFixed(2)}))`;
+        }
+        if (pct > P.mrcPeak){
+          P.mrcPeak = pct;
+          $('mrcPeak').textContent = 'Record: '+pct+'%';
+          const line = $('mrcPeakLine');
+          if (line){ line.style.bottom = pct+'%'; line.style.color = `hsl(${mercSegHue(Math.round(pct/100*(MERC_SEGS-1)))},100%,60%)`; }
+        }
+      });
+      clearInterval(P.mrcInt);
+      P.mrcInt = setInterval(()=>{
+        const left = Math.max(0, (m.endAt||0) - serverNow());
+        $('mrcpTimerBar').style.width = (left/((m.secs||10)*1000)*100)+'%';
+        if (left<=0){
+          clearInterval(P.mrcInt);
+          mercStopMic();
+          if (!P.mrcSent){ P.mrcSent = true; P.ref.child('mercatista/peaks/'+P.id).set(P.mrcPeak); }
+        }
+      }, 100);
+    }
+  } else if (m.phase==='result'){
+    clearInterval(P.mrcInt); mercStopMic();
+    $('mrcpTimerBar').style.width='0%';
+    const rv = m.results||{};
+    const rk = rv.ranking||[];
+    const idx = rk.findIndex(r=>r.pid===P.id);
+    const mine = idx>=0 ? rk[idx] : null;
+    const msg = $('mrcFbMsg'), pts = $('mrcFbPts');
+    msg.style.display='block'; pts.style.display='block';
+    if (!mine){ msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='NON HAI GRIDATO'; pts.textContent='+0'; }
+    else if (idx===0){ msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent='🥇 SEI IL MERCATISTA DEL GIORNO!'; pts.textContent='+'+mine.pts+' PUNTI · picco '+mine.peak+'%'; if(navigator.vibrate) navigator.vibrate([80,50,120]); }
+    else if (mine.pts>0){ msg.className='feedback mtb fb-ok'; msg.style.color=''; msg.textContent=(idx+1)+'° POSTO!'; pts.textContent='+'+mine.pts+' PUNTI · picco '+mine.peak+'%'; if(navigator.vibrate) navigator.vibrate([60,40,60]); }
+    else if (mine.pts<0){ msg.className='feedback mtb fb-no'; msg.style.color=''; msg.textContent=(idx+1)+'° POSTO...'; pts.textContent=mine.pts+' PUNTI · picco '+mine.peak+'%'; if(navigator.vibrate) navigator.vibrate(150); }
+    else { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent=(idx+1)+'° POSTO'; pts.textContent='picco '+mine.peak+'% · nessun punto'; }
+  }
 }
 /* ================================================================
    XOX — motore condiviso (giocatore contro computer)
@@ -11845,6 +12076,99 @@ function tambFinish(){
 }
 
 /* ================================================================
+   MERCATISTA PER UN GIORNO — regia
+   A differenza de I Tamburini, qui NON c'è sincronizzazione in tempo reale: ogni telefono legge
+   il proprio microfono in locale e manda alla regia SOLO il picco raggiunto, e SOLO allo scadere
+   del tempo. Questo tiene tutti col fiato sospeso fino alla fine, ed evita di inondare Firebase
+   con decibel misurati più volte al secondo da più telefoni contemporaneamente.
+================================================================ */
+const MERC_MEDALS = ['🥇','🥈','🥉','4°','5°'];
+const MERC_PRIZE_DEFAULTS = [1000,700,500,300,200];
+const MERC_LOSS_LABELS = ['Ultimo 💢','Penultimo','Terzultimo','4°ultimo','5°ultimo'];
+const MERC_LOSS_DEFAULTS = [300,200,100,0,0];
+let MERC = {};
+function mercRenderRanking(el, rows, prizes, losses, live){
+  const n = rows.length;
+  el.innerHTML = rows.map((r,i)=>{
+    const fromEnd = n-1-i;
+    let ptsLabel = '';
+    if (!live){
+      if (i<5 && prizes[i]>0) ptsLabel = `<span class="pts" style="color:var(--lime)">+${prizes[i]}</span>`;
+      else if (fromEnd<5 && losses[fromEnd]>0) ptsLabel = `<span class="pts" style="color:#ff5d5d">-${losses[fromEnd]}</span>`;
+      else ptsLabel = `<span class="pts">0</span>`;
+    }
+    const medal = i<3 ? MERC_MEDALS[i] : (i+1)+'°';
+    return `<div class="leadRow"><span class="pos">${medal}</span> ${esc(r.name)} <span class="byline" style="margin:0 8px">picco ${r.peak}%</span> ${ptsLabel}</div>`;
+  }).join('') || (live ? '<div class="byline">Stanno gridando... i risultati arrivano tutti insieme alla fine!</div>' : '<div class="byline">Nessuno ha gridato...</div>');
+}
+function openMerc(){
+  if (!isGameEnabled('merc')) return alert('⚠️ Questo minigioco non è compreso nella licenza attiva. Contatta Alberto per sbloccarlo.');
+  if (!G) return alert('Avvia prima una partita!');
+  cancelLiveQuestion(); closeModal(); clearInterval((MERC||{}).timerInt);
+  G.ref.update({ status:'mercatista', mercatista:{ phase:'idle' } });
+  MERC = {};
+  $('mercPrizeInputs').innerHTML = MERC_MEDALS.map((m,k)=>`
+    <div class="tmbPrizeRow"><span class="medal">${m}</span>
+      <input type="number" id="mercPz${k}" value="${MERC_PRIZE_DEFAULTS[k]}" min="0" style="width:110px; text-align:center"></div>`).join('');
+  $('mercLossInputs').innerHTML = MERC_LOSS_LABELS.map((lbl,k)=>`
+    <div class="tmbPrizeRow loss"><span class="medal">${lbl}</span>
+      <input type="number" id="mercLs${k}" value="${MERC_LOSS_DEFAULTS[k]}" min="0" style="width:110px; text-align:center"></div>`).join('');
+  $('mercSetup').style.display='block'; $('mercLive').style.display='none';
+  pjSend({type:'mercState', msg:'IL MERCATO STA PER APRIRE...'});
+  showScreen('scrMerc');
+}
+function mercStart(){
+  const secs = +$('mercSecs').value;
+  const prizes = MERC_MEDALS.map((_,k)=> Math.max(0,+$('mercPz'+k).value||0));
+  const losses = MERC_LOSS_LABELS.map((_,k)=> Math.max(0,+$('mercLs'+k).value||0));
+  const startAt = serverNow()+800, endAt = startAt + secs*1000;
+  MERC = { prizes, losses, secs, startAt, endAt };
+  G.ref.update({ status:'mercatista', mercatista:{ phase:'play', secs, prizes, losses, startAt, endAt, peaks:null, results:null } });
+  G.ref.child('mercatista/peaks').remove();
+  $('mercSetup').style.display='none'; $('mercLive').style.display='block';
+  $('mercMsg').textContent = '📣 SI GRIDA! I RISULTATI ARRIVANO TUTTI INSIEME ALLA FINE...';
+  $('mercBtnAgain').style.display='none';
+  mercRenderRanking($('mercRanking'), [], prizes, losses, true);
+  pjSend({type:'mercStart', secs, startAt, endAt});
+  clearInterval(MERC.timerInt);
+  MERC.timerInt = setInterval(()=>{
+    const left = Math.max(0, endAt - serverNow());
+    $('mercTimerBar').style.width = (left/(secs*1000)*100)+'%';
+    if (left<=0) { clearInterval(MERC.timerInt); mercFinish(); }
+  }, 100);
+}
+function mercFinish(){
+  // do ai telefoni un margine di mezzo secondo per fare in tempo a mandare il loro picco finale
+  // prima di leggere i risultati, dato che qui (a differenza de I Tamburini) non arrivano già in diretta
+  setTimeout(()=>{
+    G.ref.child('mercatista/peaks').once('value').then(s=>{
+      const peaks = s.val()||{};
+      G.ref.child('players').once('value').then(ps=>{
+        const players = ps.val()||{};
+        const ranking = Object.entries(peaks).map(([pid,peak])=>({pid, name:(players[pid]||{}).name||'?', peak}))
+          .sort((a,b)=>b.peak-a.peak);
+        const total = ranking.length;
+        const updates = {};
+        ranking.forEach((r,i)=>{
+          const fromEnd = total-1-i;
+          let pts = 0;
+          if (i<5 && MERC.prizes[i]>0) pts = MERC.prizes[i];
+          else if (fromEnd<5 && MERC.losses[fromEnd]>0 && total>1) pts = -MERC.losses[fromEnd]; // con un solo giocatore, niente penalità: non avrebbe senso
+          r.pts = pts;
+          if (pts!==0 && players[r.pid]) updates['players/'+r.pid+'/score'] = Math.max(0,(players[r.pid].score||0) + pts);
+        });
+        G.ref.update({ ...updates, 'mercatista/phase':'result', 'mercatista/results':{ ranking, at:Date.now() } });
+        mercRenderRanking($('mercRanking'), ranking, MERC.prizes, MERC.losses, false);
+        $('mercMsg').textContent = ranking.length ? `🏆 ${ranking[0].name} È IL MERCATISTA DEL GIORNO CON IL ${ranking[0].peak}%!` : 'NESSUNO HA GRIDATO!';
+        $('mercBtnAgain').style.display='';
+        pjSend({type:'mercEnd', ranking, prizes:MERC.prizes, losses:MERC.losses});
+        if (ranking.length) confetti();
+      });
+    });
+  }, 600);
+}
+
+/* ================================================================
    XOX — regia
 ================================================================ */
 let XOX = {};
@@ -12365,6 +12689,7 @@ const GIOCHI_CATALOGO = [
   {k:'gold', l:"🎫 Il Biglietto d'Oro"},
   {k:'casino', l:'🎰 Roulette (Casinò)'},
   {k:'tamb', l:'🥁 I Tamburini'},
+  {k:'merc', l:'📣 Mercatista per un Giorno'},
   {k:'xox', l:'❌⭕ XOX'}
   // 👉 QUANDO AGGIUNGI UN NUOVO MINIGIOCO: aggiungi qui una riga {k:'chiave', l:'Emoji Nome'},
   // poi apri il quiz come host e clicca una volta su "GIOCHI": il pannello admin lo vedrà da solo.
@@ -12419,6 +12744,7 @@ function modalGames(){
     gk('gold', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#ffcf3d,#8a5a00); color:#3a2600; box-shadow:0 7px 0 #4a2f00,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(255,207,61,.4)" onclick="openGold()">🎫 Il Biglietto d'Oro</button>`),
     gk('casino', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#a3111c,#1a1108); color:#fff; box-shadow:0 7px 0 #3a0508,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(163,17,28,.4)" onclick="openCasino()">🎰 Roulette</button>`),
     gk('tamb', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#e8b45a,#8a4a12); color:#3a2000; box-shadow:0 7px 0 #4a2400,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(232,180,90,.4)" onclick="openTamb()">🥁 I Tamburini</button>`),
+    gk('merc', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#ff5d7a,#8a0f2e); color:#fff; box-shadow:0 7px 0 #5a0018,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(255,93,122,.4)" onclick="openMerc()">📣 Mercatista per un Giorno</button>`),
     gk('xox', `<button class="btn" style="grid-column:1/-1; background:linear-gradient(180deg,#5ec8ff,#0b6fb8); color:#fff; box-shadow:0 7px 0 #063a5c,0 10px 0 rgba(0,0,0,.45),0 14px 30px rgba(94,200,255,.4)" onclick="openXox()">❌⭕ XOX</button>`)
   ].filter(Boolean).join('');
 
@@ -12905,6 +13231,7 @@ function backToQuiz(title){
   G.ref.child('goldenticket/results').off();
   G.ref.child('casino/bets').off();
   G.ref.child('tamburini/counts').off();
+  G.ref.child('mercatista/peaks').off();
   G.ref.child('xox/results').off();
   clearInterval(($('hrsTrackHost')||{})._raceInt); clearInterval(($('hrsTrackHost')||{})._cdInt);
   clearInterval((TF||{}).timerInt);
@@ -12922,8 +13249,9 @@ function backToQuiz(title){
   clearInterval((GOLD||{}).timerInt);
   clearInterval((RW||{}).timerInt);
   clearInterval((TAMB||{}).timerInt);
+  clearInterval((MERC||{}).timerInt);
   clearInterval((XOX||{}).timerInt);
-  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null, goldenticket:null, casino:null, tamburini:null, xox:null });
+  G.ref.update({ status:'pausa', mini:null, dice:null, simon:null, voto:null, timer:null, tombola:null, cards:null, swiss:null, hilo:null, wheels:null, puzzle:null, wordsearch:null, anagram:null, seed:null, grad:null, taptap:null, ruota:null, memo:null, memocoppie:null, horses:null, tfiscale:null, toc:null, cenerentola:null, pacchi:null, roulette:null, pagliuzza:null, supertris:null, rdc:null, mastermind:null, bomba:null, shapes:null, finddiff:null, maggioranza:null, goldenticket:null, casino:null, tamburini:null, mercatista:null, xox:null });
   G.ref.child('players').once('value', ps=>{
     const players = ps.val()||{};
     $('hrTitle').textContent = title || 'SI TORNA AL QUIZ!';
@@ -13222,6 +13550,29 @@ function pjRouteInner(m){
       clearInterval(window._pjTambInt); $('pjTambTimerBar').style.width='0%';
       tambRenderRanking($('pjTambRanking'), m.ranking||[], m.prizes||[], m.losses||[], false);
       $('pjTambMsg').textContent = (m.ranking&&m.ranking.length) ? `🏆 ${m.ranking[0].name} VINCE CON ${m.ranking[0].n} TAP!` : 'NESSUNO HA SUONATO!';
+      if (m.ranking && m.ranking.length) confetti();
+    }
+    else if (m.type==='mercState') {
+      showScreen('scrPjMerc');
+      $('pjMercMsg').textContent = m.msg||''; $('pjMercRanking').innerHTML=''; $('pjMercSub').textContent='';
+      $('pjMercTimerBar').style.width='100%';
+    }
+    else if (m.type==='mercStart') {
+      showScreen('scrPjMerc');
+      $('pjMercMsg').textContent = '📣 GRIDATE FORTISSIMO DAL TELEFONO!';
+      $('pjMercSub').textContent = 'I risultati si vedranno tutti insieme allo scadere del tempo...';
+      $('pjMercRanking').innerHTML='';
+      clearInterval(window._pjMercInt);
+      window._pjMercInt = setInterval(()=>{
+        const left = Math.max(0, m.endAt - serverNow());
+        $('pjMercTimerBar').style.width = (left/(m.secs*1000)*100)+'%';
+        if (left<=0) { clearInterval(window._pjMercInt); $('pjMercSub').textContent='Si contano gli ultimi urli...'; }
+      },100);
+    }
+    else if (m.type==='mercEnd') {
+      clearInterval(window._pjMercInt); $('pjMercTimerBar').style.width='0%'; $('pjMercSub').textContent='';
+      mercRenderRanking($('pjMercRanking'), m.ranking||[], m.prizes||[], m.losses||[], false);
+      $('pjMercMsg').textContent = (m.ranking&&m.ranking.length) ? `🏆 ${m.ranking[0].name} È IL MERCATISTA DEL GIORNO CON IL ${m.ranking[0].peak}%!` : 'NESSUNO HA GRIDATO!';
       if (m.ranking && m.ranking.length) confetti();
     }
     else if (m.type==='xoxActive') {
