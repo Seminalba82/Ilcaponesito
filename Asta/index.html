@@ -1,1 +1,499 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ASTA — by Alberto Seminerio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --gold:#ffc93c; --lime:#b6ff2e; --red:#ff3b3b; --cyan:#00f0ff; --muted:#9d8fc9;
+  --bg1:#0b0614; --bg2:#1c1236;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0; min-height:100vh; background:radial-gradient(circle at 50% 0%, var(--bg2), var(--bg1) 70%);
+  color:#fff; font-family:'Poppins',sans-serif; overflow-x:hidden;}
+.screen{display:none; position:relative; z-index:1; min-height:100vh; padding:22px; max-width:1100px; margin:0 auto;
+  flex-direction:column; align-items:center;}
+.screen.active{display:flex;}
+.brand{font-family:'Bungee'; text-align:center; line-height:1.1; letter-spacing:1px; margin-top:10px;}
+.brand .t1{font-size:clamp(24px,5vw,40px); color:var(--gold); text-shadow:0 0 18px rgba(255,201,60,.5);}
+.byline{font-size:13px; color:var(--muted); text-align:center;}
+.mt{margin-top:16px;} .mtb{margin-top:22px;}
+.panel{width:100%; background:rgba(255,255,255,.04); border-radius:18px; padding:20px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);}
+.label{font-size:12px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-top:10px;}
+.label:first-child{margin-top:0;}
+input[type=text], input[type=number], select{
+  width:100%; padding:12px 14px; margin-top:4px; border-radius:10px; border:none;
+  background:#0d0620; color:#fff; font-family:inherit; font-size:16px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);}
+input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;}
+.row{display:flex; gap:10px; width:100%;}
+.grow{flex:1;}
+.btn{font-family:'Bungee'; font-size:15px; letter-spacing:1px; padding:14px 20px; border:none; border-radius:14px;
+  cursor:pointer; color:#fff; background:linear-gradient(180deg,#3a2c5c,#1c1236);
+  box-shadow:0 5px 0 #0d0820, 0 8px 16px rgba(0,0,0,.4); transition:transform .08s;}
+.btn:active{transform:translateY(3px); box-shadow:0 2px 0 #0d0820, 0 4px 10px rgba(0,0,0,.35);}
+.btn:disabled{opacity:.4; cursor:default;}
+.btn.mg{background:linear-gradient(180deg,#d4a63a,#8a6a1a); box-shadow:0 5px 0 #5c4a10, 0 8px 16px rgba(212,166,58,.35);}
+.btn.ghost{background:transparent; box-shadow:inset 0 0 0 2px rgba(255,255,255,.2); color:var(--muted);}
+.btn.cy{background:linear-gradient(180deg,#00d4e8,#0b6f8a); box-shadow:0 5px 0 #003a44, 0 8px 16px rgba(0,212,232,.3);}
+.center{display:flex; flex-direction:column; align-items:center; text-align:center;}
+.pill{padding:6px 14px; border-radius:20px; background:rgba(255,255,255,.06); font-size:13px; font-weight:600;}
+.feedback{font-family:'Bungee'; font-size:20px; text-align:center;}
+.fb-ok{color:var(--lime);} .fb-no{color:var(--red);}
+/* ===== ASTA — cornice dorata ===== */
+.astaCard{position:relative; width:100%; max-width:520px; margin:14px auto; padding:26px 22px; border-radius:22px;
+  background:linear-gradient(165deg,#241a08,#0e0a04 70%);
+  box-shadow:inset 0 2px 4px rgba(255,215,120,.15), inset 0 -8px 16px rgba(0,0,0,.6),
+    0 0 0 2px #d4a63a, 0 0 24px rgba(212,166,58,.35), 0 14px 30px rgba(0,0,0,.5);}
+.astaCard.sold{box-shadow:inset 0 2px 4px rgba(255,215,120,.15), inset 0 -8px 16px rgba(0,0,0,.6),
+    0 0 0 3px #ffd76a, 0 0 40px rgba(255,215,106,.7), 0 14px 30px rgba(0,0,0,.5);}
+.astaTitle{font-family:'Bungee'; font-size:clamp(14px,3vw,20px); letter-spacing:2px; text-align:center;
+  color:#ffd76a; text-shadow:0 0 12px rgba(255,215,106,.5); text-transform:uppercase; opacity:.85;}
+.astaPhotoWrap{width:min(70vw,260px); height:min(70vw,260px); margin:14px auto; border-radius:16px; overflow:hidden;
+  background:#1a1408; box-shadow:0 0 0 3px #d4a63a, 0 0 26px rgba(212,166,58,.55), inset 0 0 20px rgba(0,0,0,.5);
+  display:flex; align-items:center; justify-content:center;}
+.astaPhotoWrap img{width:100%; height:100%; object-fit:cover;}
+.astaPhotoWrap .ph{font-size:64px; opacity:.35;}
+.astaItemName{font-family:'Bungee'; font-size:clamp(22px,5.5vw,34px); text-align:center; color:#fff;
+  text-shadow:0 0 16px rgba(255,215,106,.4); margin-top:6px;}
+.astaBidLabel{text-align:center; font-size:12px; letter-spacing:2px; color:#c9a45c; text-transform:uppercase; margin-top:16px;}
+.astaBidAmount{font-family:'Bungee'; font-size:clamp(38px,10vw,58px); text-align:center; color:#ffd76a;
+  text-shadow:0 0 22px rgba(255,215,106,.6); line-height:1.1;}
+.astaBidder{text-align:center; font-family:'Bungee'; font-size:clamp(16px,4vw,22px); color:#fff; margin-top:2px;}
+.astaBidder.none{color:var(--muted); font-family:inherit; font-size:14px;}
+.astaCountTxt{font-family:'Bungee'; font-size:clamp(40px,12vw,70px); text-align:center; color:#ffd76a;
+  text-shadow:0 0 26px rgba(255,215,106,.7); animation:astaPop .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes astaPop{0%{transform:scale(.5);} 60%{transform:scale(1.15);} 100%{transform:scale(1);}}
+.astaSoldBanner{font-family:'Bungee'; font-size:clamp(20px,5vw,30px); text-align:center; color:#ffd76a;
+  text-shadow:0 0 22px rgba(255,215,106,.7); margin-top:10px;}
+.leadRow{display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.04); border-radius:12px;
+  padding:10px 14px; margin-top:8px; font-size:14px;}
+.leadRow .pos{font-family:'Bungee'; width:34px; text-align:center; color:var(--gold);}
+.leadRow .pts{margin-left:auto; font-family:'Bungee'; color:var(--lime);}
+#qrBox{background:#fff; padding:14px; border-radius:14px; display:inline-block; margin-top:14px;}
+#qrBox canvas, #qrBox img{display:block;}
+.codeBig{font-family:'Bungee'; font-size:clamp(26px,7vw,40px); letter-spacing:4px; color:var(--gold); text-align:center;
+  text-shadow:0 0 16px rgba(255,201,60,.4);}
+</style>
+</head>
+<body>
 
+<!-- ==================== SCELTA RUOLO (solo se non c'è ?proj o ?g nell'indirizzo) ==================== -->
+<div class="screen" id="scrHome">
+  <div class="brand"><div class="t1">🔨 ASTA</div></div>
+  <div class="byline mt">by Alberto Seminerio</div>
+  <div class="panel mt center" style="max-width:420px">
+    <div class="byline">Sei il banditore? Crea una nuova asta.</div>
+    <button class="btn mg mt" style="width:100%" onclick="hostCreateSession()">🔨 CREA NUOVA ASTA</button>
+  </div>
+</div>
+
+<!-- ==================== HOST: IMPOSTAZIONE ASTA (creata, in attesa di partecipanti) ==================== -->
+<div class="screen" id="scrHostSetup">
+  <div class="brand"><div class="t1" style="font-size:clamp(18px,3.4vw,28px)">🔨 LA TUA ASTA È PRONTA</div></div>
+  <div class="codeBig mt" id="hsCode">----</div>
+  <div id="qrBox"></div>
+  <div class="byline mt" id="hsUrl"></div>
+  <div class="byline mt" style="opacity:.7">🖥️ Da aprire sul videoproiettore:</div>
+  <div class="byline" id="hsProjUrl" style="color:var(--gold); word-break:break-all"></div>
+  <div class="panel mtb" style="max-width:520px" id="astaSetup">
+    <div class="label">Titolo dell'asta (si vede sul proiettore)</div>
+    <input type="text" id="astaTitle" value="ASTA DI BENEFICENZA" maxlength="60">
+    <div class="label mt">Nome dell'oggetto/soggetto messo all'asta</div>
+    <input type="text" id="astaItemName" placeholder="Es. Bottiglia di vino pregiato" maxlength="60">
+    <div class="label mt">Foto (facoltativa)</div>
+    <input type="file" id="astaPhotoInput" accept="image/*" onchange="astaPhotoChanged()">
+    <div id="astaPhotoPreviewWrap" style="display:none; margin-top:10px; text-align:center">
+      <img id="astaPhotoPreview" style="max-width:160px; border-radius:10px; box-shadow:0 0 0 2px #d4a63a">
+      <div class="mt"><button class="btn ghost" onclick="astaClearPhoto()">✕ Rimuovi foto</button></div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Base d'asta (€ o punti)</div><input type="number" id="astaStartBid" value="10" min="0"></div>
+      <div class="grow"><div class="label">Rilancio minimo</div><input type="number" id="astaIncrement" value="5" min="1"></div>
+    </div>
+    <div class="label mt">Come si chiude l'asta</div>
+    <select id="astaEndMode">
+      <option value="hammer" selected>Col martello del banditore (e uno, e due, e tre!)</option>
+      <option value="manual">Decido io quando fermarla</option>
+    </select>
+    <div class="byline mt" style="opacity:.75">🔨 I partecipanti rilanciano liberamente dal proprio telefono: qui non ci sono punti da spendere, sei tu a gestire fuori dall'app i soldi realmente offerti.</div>
+    <button class="btn mg mt" style="width:100%" onclick="astaStart()">🔨 APRI L'ASTA!</button>
+  </div>
+  <div class="panel mtb" style="max-width:520px" id="hsHistoryPanel" style="display:none">
+    <div class="label">Oggetti già aggiudicati</div>
+    <div id="hsHistory"></div>
+  </div>
+</div>
+
+<!-- ==================== HOST: ASTA IN CORSO ==================== -->
+<div class="screen" id="scrHostLive">
+  <div class="brand"><div class="t1" style="font-size:clamp(18px,3.4vw,28px)">🔨 ASTA IN CORSO</div></div>
+  <div class="astaCard" id="astaCardHost">
+    <div class="astaTitle" id="astaTitleHost"></div>
+    <div class="astaPhotoWrap" id="astaPhotoWrapHost"><div class="ph">🔨</div></div>
+    <div class="astaItemName" id="astaItemNameHost"></div>
+    <div class="astaBidLabel">Offerta attuale</div>
+    <div class="astaBidAmount" id="astaBidAmountHost">0</div>
+    <div class="astaBidder none" id="astaBidderHost">Nessuna offerta ancora...</div>
+    <div class="astaCountTxt" id="astaCountHost" style="display:none"></div>
+    <div class="astaSoldBanner" id="astaSoldHost" style="display:none"></div>
+  </div>
+  <div class="row mt" id="astaHostControlsManual" style="display:none">
+    <button class="btn mg" style="width:100%" onclick="astaCloseManual()">🔨 AGGIUDICA ORA!</button>
+  </div>
+  <div class="row mt" id="astaHostControlsHammer" style="display:none">
+    <button class="btn mg" style="width:100%" id="astaBtnHammer" onclick="astaHammerStrike()">🔨 E UNO!</button>
+  </div>
+  <div class="row mt">
+    <button class="btn cy" onclick="astaNextItem()" id="astaBtnNext" style="display:none; width:100%">➡️ Prossimo oggetto all'asta</button>
+  </div>
+  <div class="row mt">
+    <button class="btn ghost" onclick="hostShowHistory()">📋 Riepilogo aggiudicazioni</button>
+  </div>
+</div>
+
+<!-- ==================== PROIETTORE ==================== -->
+<div class="screen" id="scrProj">
+  <div class="brand"><div class="t1" id="pjTitleTop" style="font-size:clamp(26px,4vw,42px)">🔨 ASTA</div></div>
+  <div class="astaCard" id="astaCardPj" style="max-width:640px">
+    <div class="astaTitle" id="astaTitlePj"></div>
+    <div class="astaPhotoWrap" id="astaPhotoWrapPj" style="width:min(46vw,340px); height:min(46vw,340px)"><div class="ph">🔨</div></div>
+    <div class="astaItemName" id="astaItemNamePj"></div>
+    <div class="astaBidLabel">Offerta attuale</div>
+    <div class="astaBidAmount" id="astaBidAmountPj">0</div>
+    <div class="astaBidder none" id="astaBidderPj">Nessuna offerta ancora...</div>
+    <div class="astaCountTxt" id="astaCountPj" style="display:none"></div>
+    <div class="astaSoldBanner" id="astaSoldPj" style="display:none"></div>
+  </div>
+  <div class="byline mtb" style="opacity:.8">🎩 IL CAPONE · ASTA · by <b style="color:var(--gold)">Alberto Seminerio</b></div>
+</div>
+
+<!-- ==================== PLAYER: ENTRA ==================== -->
+<div class="screen" id="scrJoin">
+  <div class="brand"><div class="t1">🔨 ASTA</div></div>
+  <div class="panel mt center" style="max-width:380px">
+    <div class="byline">Scrivi il tuo nome per partecipare</div>
+    <input type="text" id="joinName" placeholder="Il tuo nome" maxlength="20" class="mt">
+    <button class="btn mg mt" style="width:100%" onclick="playerJoin()">🔨 ENTRA NELL'ASTA</button>
+  </div>
+</div>
+
+<!-- ==================== PLAYER: ASTA ==================== -->
+<div class="screen" id="scrPlay">
+  <div class="row" style="width:100%; justify-content:space-between; max-width:420px; margin:0 auto">
+    <div class="pill" id="astapName" style="color:var(--gold)"></div>
+    <div class="pill" id="astapSpent">Speso: 0</div>
+  </div>
+  <div class="astaCard" id="astaCardMe" style="max-width:380px">
+    <div class="astaTitle" id="astaTitleMe"></div>
+    <div class="astaPhotoWrap" id="astaPhotoWrapMe"><div class="ph">🔨</div></div>
+    <div class="astaItemName" id="astaItemNameMe"></div>
+    <div class="astaBidLabel">Offerta attuale</div>
+    <div class="astaBidAmount" id="astaBidAmountMe">0</div>
+    <div class="astaBidder none" id="astaBidderMe">Nessuna offerta ancora...</div>
+  </div>
+  <button class="btn mg mt" id="astaBtnBid" onclick="astaBid()" style="width:min(88vw,320px)">🔨 RILANCIA A <span id="astaBtnBidAmount">0</span></button>
+  <div class="byline mt" id="astaMyStatus"></div>
+  <div class="feedback mtb" id="astaFbMsg" style="display:none"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ================================================================
+   ASTA — versione standalone
+   Stesso motore di gioco della versione integrata nel quiz, ma qui non esistono punti da
+   spendere: ogni partecipante rilancia liberamente, il banditore gestisce i soldi veri fuori
+   dall'app. L'unica cosa che l'app traccia da sola è "quanto ha speso" ciascuno, sommando le
+   aggiudicazioni vinte — utile a fine serata per sapere chi ha speso di più.
+================================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAVTrq0PCEH7HK5VEHK88m7b-Qgdf9nGmE",
+  authDomain: "il-capone-quiz.firebaseapp.com",
+  databaseURL: "https://il-capone-quiz-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "il-capone-quiz",
+  storageBucket: "il-capone-quiz.firebasestorage.app",
+  messagingSenderId: "293529788369",
+  appId: "1:293529788369:web:7063a22dbb884f9bf30af0"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let svOffset = 0;
+db.ref('.info/serverTimeOffset').on('value', s=> svOffset = s.val()||0);
+function serverNow(){ return Date.now() + svOffset; }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active'); window.scrollTo(0,0);
+}
+function genCode(){
+  const letters='ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let s=''; for(let i=0;i<5;i++) s+=letters[Math.floor(Math.random()*letters.length)];
+  return s;
+}
+function confetti(){
+  const colors=['#ffc93c','#ffd76a','#d4a63a','#fff','#b6ff2e'];
+  for (let i=0;i<60;i++){
+    const el = document.createElement('div');
+    el.style.cssText = `position:fixed; top:-20px; left:${Math.random()*100}vw; width:${6+Math.random()*8}px; height:${6+Math.random()*8}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]}; z-index:999; border-radius:2px; pointer-events:none;
+      transform:rotate(${Math.random()*360}deg);`;
+    document.body.appendChild(el);
+    const dur = 1800+Math.random()*1200;
+    el.animate([
+      {transform:`translateY(0) rotate(0deg)`, opacity:1},
+      {transform:`translateY(110vh) rotate(${360+Math.random()*360}deg)`, opacity:.3}
+    ], {duration:dur, easing:'ease-in'});
+    setTimeout(()=>el.remove(), dur+100);
+  }
+}
+
+/* ---------------- ROUTING (chi sono: banditore, proiettore o partecipante) ---------------- */
+const urlParams = new URLSearchParams(location.search);
+const isProj = urlParams.get('proj')==='1';
+const joinCode = urlParams.get('g');
+let G = null, P = null;
+
+if (isProj && joinCode){
+  G = { code: joinCode.toUpperCase(), ref: db.ref('astaStandalone/games/'+joinCode.toUpperCase()) };
+  showScreen('scrProj');
+  G.ref.child('pjLast').on('value', s=>{
+    const a = s.val()||{};
+    if (!a.phase) return;
+    astaRenderCard('Pj', a);
+    astaRenderHammer('Pj', a);
+    astaRenderSold('Pj', a);
+    $('astaCardPj').classList.toggle('sold', a.phase==='sold');
+    if (a.phase==='sold' && a.soldTo) confetti();
+  });
+} else if (isProj){
+  // proiettore aperto senza codice: mostro un messaggio d'attesa invece di uno schermo vuoto o sbagliato
+  showScreen('scrProj');
+  $('astaItemNamePj').textContent = 'In attesa del codice della sessione...';
+  $('astaTitlePj').textContent = '';
+} else if (joinCode){
+  G = { code: joinCode.toUpperCase(), ref: db.ref('astaStandalone/games/'+joinCode.toUpperCase()) };
+  showScreen('scrJoin');
+} else {
+  showScreen('scrHome');
+}
+
+/* ---------------- BANDITORE: creazione sessione ---------------- */
+function hostCreateSession(){
+  const code = genCode();
+  G = { code, ref: db.ref('astaStandalone/games/'+code) };
+  G.ref.set({ created: Date.now(), players:{}, asta:{phase:'idle'}, history:[] });
+  $('hsCode').textContent = code;
+  const url = location.origin + location.pathname + '?g=' + code;
+  $('hsUrl').textContent = url;
+  $('hsProjUrl').textContent = location.origin + location.pathname + '?proj=1&g=' + code;
+  $('qrBox').innerHTML = '';
+  new QRCode($('qrBox'), { text: url, width:180, height:180 });
+  showScreen('scrHostSetup');
+  G.ref.on('value', s=>{
+    const g = s.val()||{};
+    hostRenderHistory(g.history||[]);
+  });
+}
+function hostShowHistory(){
+  showScreen('scrHostSetup');
+  $('astaSetup').style.display='none';
+  $('hsHistoryPanel').style.display='block';
+  $('hsCode').textContent = G.code;
+}
+
+/* ---------------- BANDITORE: gestione asta (stesso motore della versione quiz) ---------------- */
+function astaRenderCard(suffix, a){
+  const titleEl = $('astaTitle'+suffix); if (titleEl) titleEl.textContent = a.title||'';
+  const nameEl = $('astaItemName'+suffix); if (nameEl) nameEl.textContent = a.itemName||'';
+  const wrap = $('astaPhotoWrap'+suffix);
+  if (wrap) wrap.innerHTML = a.itemPhoto ? `<img src="${a.itemPhoto}">` : `<div class="ph">🔨</div>`;
+  const amountEl = $('astaBidAmount'+suffix);
+  if (amountEl) amountEl.textContent = (a.currentBid!=null ? a.currentBid : (a.startBid||0));
+  const bidderEl = $('astaBidder'+suffix);
+  if (bidderEl){
+    if (a.currentBidderName){ bidderEl.className='astaBidder'; bidderEl.textContent = '🔨 '+a.currentBidderName; }
+    else { bidderEl.className='astaBidder none'; bidderEl.textContent = 'Nessuna offerta ancora... base: '+(a.startBid||0); }
+  }
+}
+function astaRenderHammer(suffix, a){
+  const el = $('astaCount'+suffix); if (!el) return;
+  if (a.phase==='live' && (a.hammerStage||0)>0){
+    el.style.display='block';
+    el.textContent = a.hammerStage===1 ? '🔨 E UNO!...' : (a.hammerStage===2 ? '🔨 E DUE!...' : '');
+  } else el.style.display='none';
+}
+function astaRenderSold(suffix, a){
+  const el = $('astaSold'+suffix); if (!el) return;
+  if (a.phase==='sold'){
+    el.style.display='block';
+    el.textContent = a.soldTo ? `🏆 AGGIUDICATO A ${a.soldTo} PER ${a.soldAmount}!` : '😕 INVENDUTO — nessuna offerta ricevuta';
+  } else el.style.display='none';
+}
+function hostRenderHistory(history){
+  $('hsHistory').innerHTML = history.map(h=>
+    `<div class="leadRow"><span class="pos">🔨</span> ${esc(h.itemName)}
+      <span class="byline" style="margin:0 8px">${h.soldTo?('a '+esc(h.soldTo)):'invenduto'}</span>
+      <span class="pts">${h.soldTo?h.soldAmount:''}</span></div>`
+  ).join('') || '<div class="byline">Ancora nessun oggetto aggiudicato...</div>';
+}
+let ASTA = { photo:null };
+function astaPhotoChanged(){
+  const f = $('astaPhotoInput').files[0];
+  if (!f) return;
+  const maxDim=1000, maxBytes=400*1024;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{
+    URL.revokeObjectURL(url);
+    let w=img.naturalWidth, h=img.naturalHeight;
+    if (w>maxDim || h>maxDim){ if (w>=h){ h=Math.round(h*maxDim/w); w=maxDim; } else { w=Math.round(w*maxDim/h); h=maxDim; } }
+    const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+    const ctx = canvas.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+    let quality=0.82, dataUrl=canvas.toDataURL('image/jpeg',quality), tries=0;
+    while (dataUrl.length*0.75>maxBytes && quality>0.4 && tries<6){ quality-=0.12; tries++; dataUrl=canvas.toDataURL('image/jpeg',quality); }
+    ASTA.photo = dataUrl;
+    $('astaPhotoPreview').src = dataUrl;
+    $('astaPhotoPreviewWrap').style.display='block';
+  };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); alert("Non sono riuscito a caricare questa foto, riprova con un'altra."); };
+  img.src = url;
+}
+function astaClearPhoto(){
+  ASTA.photo = null; $('astaPhotoInput').value=''; $('astaPhotoPreviewWrap').style.display='none';
+}
+function astaStart(){
+  const title = $('astaTitle').value.trim() || 'ASTA';
+  const itemName = $('astaItemName').value.trim();
+  if (!itemName) return alert("Scrivi il nome dell'oggetto messo all'asta!");
+  const startBid = Math.max(0, +$('astaStartBid').value||0);
+  const increment = Math.max(1, +$('astaIncrement').value||1);
+  const endMode = $('astaEndMode').value;
+  const a = { phase:'live', title, itemName, itemPhoto: ASTA.photo||null, startBid, increment, endMode,
+    currentBid:null, currentBidderId:null, currentBidderName:null, hammerStage:0, soldTo:null, soldAmount:null };
+  G.ref.child('asta').off();
+  G.ref.child('asta').set(a);
+  showScreen('scrHostLive');
+  $('astaHostControlsManual').style.display = endMode==='manual' ? '' : 'none';
+  $('astaHostControlsHammer').style.display = endMode==='hammer' ? '' : 'none';
+  $('astaBtnHammer').textContent = '🔨 E UNO!';
+  $('astaBtnNext').style.display='none';
+  astaRenderCard('Host', a); astaRenderHammer('Host', a); astaRenderSold('Host', a);
+  pjSend(a);
+  G.ref.child('asta').on('value', s=>{
+    const av = s.val()||{}; if (!av.phase) return;
+    astaRenderCard('Host', av); astaRenderHammer('Host', av); astaRenderSold('Host', av);
+    if (av.endMode==='hammer') $('astaBtnHammer').textContent = (av.hammerStage||0)===0 ? '🔨 E UNO!' : ((av.hammerStage===1) ? '🔨 E DUE!' : '🔨 E TRE! (AGGIUDICATO)');
+    if (av.phase==='sold'){
+      $('astaHostControlsManual').style.display='none'; $('astaHostControlsHammer').style.display='none';
+      $('astaBtnNext').style.display='';
+    }
+    pjSend(av);
+  });
+}
+function pjSend(a){
+  G.ref.child('pjLast').set(a); // il proiettore ascolta questo percorso: scrivere qui basta a farlo aggiornare
+}
+function astaHammerStrike(){
+  G.ref.child('asta').once('value').then(s=>{
+    const av = s.val()||{};
+    if (av.phase!=='live') return;
+    if (av.currentBid==null) return alert("Nessuno ha ancora fatto un'offerta: non si può aggiudicare nulla!");
+    const next = (av.hammerStage||0)+1;
+    if (next>=3) astaSell(av); else G.ref.child('asta/hammerStage').set(next);
+  });
+}
+function astaCloseManual(){
+  G.ref.child('asta').once('value').then(s=>{
+    const av = s.val()||{};
+    if (av.phase!=='live') return;
+    astaSell(av);
+  });
+}
+function astaSell(av){
+  const soldTo = av.currentBidderName||null, soldToId = av.currentBidderId||null, soldAmount = av.currentBid||0;
+  const updates = { 'asta/phase':'sold', 'asta/soldTo':soldTo, 'asta/soldAmount':soldAmount, 'asta/hammerStage':0 };
+  G.ref.update(updates);
+  G.ref.child('history').once('value').then(s=>{
+    const hist = s.val()||[];
+    hist.push({ itemName: av.itemName, soldTo, soldAmount });
+    G.ref.child('history').set(hist);
+  });
+  if (soldToId) G.ref.child('players/'+soldToId+'/spent').once('value').then(sp=>{
+    const cur = sp.val()||0;
+    G.ref.child('players/'+soldToId+'/spent').set(cur+soldAmount);
+  });
+  confetti();
+}
+function astaNextItem(){
+  G.ref.child('asta').off();
+  $('astaItemName').value=''; astaClearPhoto();
+  $('astaSetup').style.display='block'; $('hsHistoryPanel').style.display='none';
+  G.ref.child('asta').set({ phase:'idle' });
+  pjSend({phase:'idle'});
+  showScreen('scrHostSetup');
+}
+
+/* ---------------- PARTECIPANTE ---------------- */
+function playerJoin(){
+  const name = $('joinName').value.trim();
+  if (!name) return alert('Scrivi il tuo nome!');
+  const pid = 'p_'+Math.random().toString(36).slice(2,10);
+  P = { id: pid, name, ref: G.ref };
+  G.ref.child('players/'+pid).set({ name, spent:0, joinedAt:Date.now() });
+  showScreen('scrPlay');
+  $('astapName').textContent = name;
+  listenAsta();
+}
+function listenAsta(){
+  G.ref.child('asta').on('value', s=>{
+    const a = s.val()||{};
+    if (!a.phase || a.phase==='idle'){
+      $('astaBtnBid').style.display='none';
+      $('astaMyStatus').textContent = '⏳ Il banditore sta preparando il prossimo oggetto...';
+      $('astaFbMsg').style.display='none';
+      return;
+    }
+    astaRenderCard('Me', a);
+    if (a.phase==='sold'){
+      const won = a.currentBidderId===P.id;
+      $('astaBtnBid').style.display='none';
+      $('astaMyStatus').textContent='';
+      const msg=$('astaFbMsg');
+      msg.style.display='block';
+      if (a.soldTo && won){ msg.className='feedback mtb fb-ok'; msg.textContent='🏆 TE LO SEI AGGIUDICATO!'; if(navigator.vibrate) navigator.vibrate([80,50,120]); }
+      else if (a.soldTo){ msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent="Se l'è aggiudicato "+a.soldTo; }
+      else { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='INVENDUTO'; }
+    } else {
+      const nextBid = a.currentBid==null ? a.startBid : a.currentBid+a.increment;
+      $('astaBtnBidAmount').textContent = nextBid;
+      $('astaBtnBid').style.display='';
+      $('astaFbMsg').style.display='none';
+      const iAmWinning = a.currentBidderId===P.id;
+      $('astaBtnBid').disabled = iAmWinning;
+      if (iAmWinning) $('astaMyStatus').innerHTML = '🔨 <b style="color:var(--lime)">SEI IN TESTA!</b>';
+      else $('astaMyStatus').textContent = '';
+    }
+  });
+  G.ref.child('players/'+P.id+'/spent').on('value', s=>{
+    $('astapSpent').textContent = 'Speso: '+(s.val()||0);
+  });
+}
+function astaBid(){
+  G.ref.child('asta').once('value').then(s=>{
+    const a = s.val()||{};
+    if (a.phase!=='live') return;
+    if (a.currentBidderId===P.id) return;
+    const nextBid = a.currentBid==null ? a.startBid : a.currentBid+a.increment;
+    G.ref.child('asta').update({ currentBid: nextBid, currentBidderId: P.id, currentBidderName: P.name, hammerStage: 0 });
+    if (navigator.vibrate) navigator.vibrate(40);
+  });
+}
+</script>
+</body>
+</html>
