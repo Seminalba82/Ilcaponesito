@@ -268,7 +268,7 @@ function buildBigWheel(box, segs){
     let txt = s2.label + (s2.points ? ' +'+s2.points : '');
     if (txt.length>16) txt = txt.slice(0,15)+'…';
     l.textContent = txt;
-    l.style.transform = `rotate(${i*seg+seg/2}deg) translateY(calc(-1 * min(15vw, 190px)))`;
+    l.style.transform = `rotate(${i*seg+seg/2}deg) translateY(calc(-1 * min(15vw, 190px))) rotate(90deg)`;
     l.style.transformOrigin = '0 0';
     w.appendChild(l);
   });
