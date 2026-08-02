@@ -78,9 +78,27 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
 #qrBox canvas, #qrBox img{display:block;}
 .codeBig{font-family:'Bungee'; font-size:clamp(26px,7vw,40px); letter-spacing:4px; color:var(--gold); text-align:center;
   text-shadow:0 0 16px rgba(255,201,60,.4);}
+#licModal{display:none; position:fixed; inset:0; z-index:90; background:rgba(5,2,10,.93); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:22px;}
+#licModal.on{display:flex;}
+.licBox{width:100%; max-width:380px; background:rgba(255,255,255,.04); border-radius:18px; padding:24px; text-align:center;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08), 0 20px 50px rgba(0,0,0,.55);}
+#licInput{text-transform:uppercase; text-align:center; letter-spacing:1px;}
+#licErr{min-height:18px; margin-top:10px; font-size:13px; font-weight:700; color:var(--red);}
 </style>
 </head>
 <body>
+
+<div id="licModal">
+  <div class="licBox">
+    <div class="brand"><div class="t1" style="font-size:22px">🔐 LICENZA</div></div>
+    <div class="label mt">Inserisci il codice per avviare la ruota</div>
+    <input type="text" id="licInput" placeholder="CAPONE-XXXX-XXXX" autocomplete="off">
+    <div id="licErr"></div>
+    <button class="btn mg mt" style="width:100%" onclick="verificaLicenzaEavvia()">Verifica e avvia</button>
+  </div>
+</div>
+
 
 <!-- ==================== SCELTA RUOLO (solo se non c'è ?proj o ?g nell'indirizzo) ==================== -->
 <div class="screen" id="scrHome">
@@ -88,7 +106,7 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
   <div class="byline mt">by Alberto Seminerio</div>
   <div class="panel mt center" style="max-width:420px">
     <div class="byline">Sei il conduttore? Prepara una nuova estrazione.</div>
-    <button class="btn mg mt" style="width:100%" onclick="hostCreateSession()">🎡 CREA NUOVA RUOTA</button>
+    <button class="btn mg mt" style="width:100%" onclick="checkLicenseAndStart()">🎡 CREA NUOVA RUOTA</button>
   </div>
 </div>
 
@@ -369,6 +387,60 @@ function pjApplyRuota(m){
 let _pjHistN = 0;
 
 /* ---------------- CONDUTTORE: creazione sessione ---------------- */
+/* ================================================================
+   LICENZA — stessa infrastruttura di Tombola/Asta (Firebase 'licenze/'),
+   chiave localStorage CONDIVISA capone_licenza_codice, flag 'ruota_standalone'
+================================================================ */
+function getDeviceId(){
+  let id = localStorage.getItem('capone_device_id');
+  if (!id){ id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem('capone_device_id', id); }
+  return id;
+}
+function showLicenseModal(){
+  $('licErr').textContent = '';
+  $('licModal').classList.add('on');
+  setTimeout(()=> $('licInput').focus(), 50);
+  if (!$('licInput')._bound){
+    $('licInput').addEventListener('keydown', e=>{ if (e.key==='Enter') verificaLicenzaEavvia(); });
+    $('licInput')._bound = true;
+  }
+}
+function closeLicenseModal(){ $('licModal').classList.remove('on'); }
+function verificaLicenzaEavvia(){
+  const codice = ($('licInput').value || '').trim().toUpperCase();
+  if (!codice) { $('licErr').textContent = 'Inserisci un codice.'; return; }
+  verificaCodiceEAvvia(codice, false);
+}
+function verificaCodiceEAvvia(codice, silente){
+  const fallisciConn = ()=>{ if (silente) showLicenseModal(); else $('licErr').textContent = 'Errore di connessione. Riprova.'; };
+  db.ref('licenze/'+codice).once('value').then(snap=>{
+    const lic = snap.val();
+    const fallisci = (msg)=>{
+      if (silente) { try{ localStorage.removeItem('capone_licenza_codice'); }catch(e){} showLicenseModal(); }
+      else { $('licErr').textContent = msg; }
+    };
+    if (!lic) { fallisci('Codice licenza non valido.'); return; }
+    if (lic.attiva === false) { fallisci('Licenza disattivata. Contatta Alberto.'); return; }
+    if (Date.now() > lic.data_scadenza) { fallisci('Licenza scaduta.'); return; }
+    if (!lic.minigiochi_abilitati || lic.minigiochi_abilitati.ruota_standalone !== true) { fallisci('Questa licenza non include La Ruota standalone. Contatta Alberto.'); return; }
+    const myDevice = getDeviceId();
+    if (lic.device_bloccato && lic.device_id && lic.device_id !== myDevice) { fallisci('Licenza già in uso su un altro dispositivo. Contatta Alberto per lo sblocco.'); return; }
+    const finalizza = ()=>{
+      try{ localStorage.setItem('capone_licenza_codice', codice); }catch(e){}
+      closeLicenseModal();
+      hostCreateSession();
+    };
+    if (!lic.device_bloccato){
+      db.ref('licenze/'+codice).update({ device_bloccato:true, device_id:myDevice, primo_utilizzo:Date.now() }).then(finalizza).catch(()=> fallisci('Errore di registrazione dispositivo.'));
+    } else finalizza();
+  }).catch(fallisciConn);
+}
+function checkLicenseAndStart(){
+  const saved = localStorage.getItem('capone_licenza_codice');
+  if (saved) verificaCodiceEAvvia(saved, true);
+  else showLicenseModal();
+}
+
 function hostCreateSession(){
   const code = genCode();
   G = { code, ref: db.ref('ruotaStandalone/games/'+code) };
