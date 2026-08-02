@@ -90,6 +90,14 @@ function buildHubContent(){
       tombola.innerHTML = '<span class="ico">🎱</span>TOMBOLA<small>Numeri, cartelle e premi</small>';
       karaoke.insertAdjacentElement('afterend', tombola);
     }
+  const ruota = document.querySelector('.grid .ruota');
+  if (ruota && !document.querySelector('.grid .fantacalcio')) {
+    const fantacalcio = document.createElement('a');
+    fantacalcio.className = 'app fantacalcio';
+    fantacalcio.href = '/fantacalcio/';
+    fantacalcio.innerHTML = '<span class="ico">🏆</span>FANTACALCIO<small>Asta punti coi ruoli colorati</small>';
+    ruota.insertAdjacentElement('afterend', fantacalcio);
+  }
 }
 function showHub(){
   document.getElementById('gateBox').style.display = 'none';
