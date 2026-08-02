@@ -1,1 +1,783 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FANTACALCIO — by Alberto Seminerio</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;700&family=Bungee&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --gold:#ffc93c; --lime:#6dff6d; --red:#ff3b3b; --cyan:#00f0ff; --muted:#8fc9a0;
+  --bg1:#05170a; --bg2:#123f1b;
+  --rP:#29b6f6; --rD:#2ecc71; --rC:#ffd400; --rA:#ff4757;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0; min-height:100vh; background:radial-gradient(circle at 50% 0%, var(--bg2), var(--bg1) 70%);
+  color:#fff; font-family:'Poppins',sans-serif; overflow-x:hidden;}
+body::before{content:""; position:fixed; inset:0; pointer-events:none; opacity:.05; z-index:0;
+  background-image:repeating-linear-gradient(0deg, #fff 0 2px, transparent 2px 90px);}
+.screen{display:none; position:relative; z-index:1; min-height:100vh; padding:22px; max-width:1100px; margin:0 auto;
+  flex-direction:column; align-items:center;}
+.screen.active{display:flex;}
+.brand{font-family:'Bungee'; text-align:center; line-height:1.1; letter-spacing:1px; margin-top:10px;}
+.brand .t1{font-family:'Anton',sans-serif; font-weight:400; font-size:clamp(30px,6.4vw,50px); letter-spacing:2px;
+  color:var(--gold); text-shadow:0 0 18px rgba(255,201,60,.5); text-transform:uppercase;}
+.fcSubtitle{font-family:'Oswald',sans-serif; font-weight:700; font-size:clamp(12px,2.6vw,15px); letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--lime); text-shadow:0 0 10px rgba(109,255,109,.4); text-align:center;}
+.fcSubtitle b{color:var(--gold); text-shadow:0 0 10px rgba(255,201,60,.5);}
+.byline{font-size:13px; color:var(--muted); text-align:center;}
+.mt{margin-top:16px;} .mtb{margin-top:22px;}
+.panel{width:100%; background:rgba(255,255,255,.04); border-radius:18px; padding:20px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);}
+.label{font-size:12px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-top:10px;}
+.label:first-child{margin-top:0;}
+input[type=text], input[type=number], select{
+  width:100%; padding:12px 14px; margin-top:4px; border-radius:10px; border:none;
+  background:#081a0c; color:#fff; font-family:inherit; font-size:16px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);}
+input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;}
+.row{display:flex; gap:10px; width:100%;}
+.grow{flex:1;}
+.btn{font-family:'Bungee'; font-size:15px; letter-spacing:1px; padding:14px 20px; border:none; border-radius:14px;
+  cursor:pointer; color:#fff; background:linear-gradient(180deg,#1e4d29,#0d2314);
+  box-shadow:0 5px 0 #061a0b, 0 8px 16px rgba(0,0,0,.4); transition:transform .08s;}
+.btn:active{transform:translateY(3px); box-shadow:0 2px 0 #061a0b, 0 4px 10px rgba(0,0,0,.35);}
+.btn:disabled{opacity:.4; cursor:default;}
+.btn.mg{background:linear-gradient(180deg,#ffd76a,#d4a63a); color:#2a1a00; box-shadow:0 5px 0 #6e4e12, 0 8px 16px rgba(212,166,58,.35);}
+.btn.ghost{background:transparent; box-shadow:inset 0 0 0 2px rgba(255,255,255,.2); color:var(--muted);}
+.btn.small{font-size:13px; padding:10px 16px; border-radius:14px; box-shadow:0 5px 0 rgba(0,0,0,.5);}
+.btn.cy{background:linear-gradient(180deg,#00d4e8,#0b6f8a); box-shadow:0 5px 0 #003a44, 0 8px 16px rgba(0,212,232,.3);}
+.center{display:flex; flex-direction:column; align-items:center; text-align:center;}
+.pill{padding:6px 14px; border-radius:20px; background:rgba(255,255,255,.06); font-size:13px; font-weight:600;}
+.feedback{font-family:'Bungee'; font-size:20px; text-align:center;}
+.fb-ok{color:var(--lime);} .fb-no{color:var(--red);}
+/* ===== FANTACALCIO — cornice campo/trofeo ===== */
+.fcCard{position:relative; width:100%; max-width:520px; margin:14px auto; padding:26px 22px; border-radius:22px;
+  background:linear-gradient(165deg,#123f1b,#05170a 70%);
+  box-shadow:inset 0 2px 4px rgba(120,255,150,.12), inset 0 -8px 16px rgba(0,0,0,.6),
+    0 0 0 2px #ffc93c, 0 0 24px rgba(255,201,60,.3), 0 14px 30px rgba(0,0,0,.5);}
+.fcCard.sold{box-shadow:inset 0 2px 4px rgba(120,255,150,.12), inset 0 -8px 16px rgba(0,0,0,.6),
+    0 0 0 3px #ffd76a, 0 0 40px rgba(255,215,106,.7), 0 14px 30px rgba(0,0,0,.5);}
+.fcTitle{font-family:'Bungee'; font-size:clamp(14px,3vw,20px); letter-spacing:2px; text-align:center;
+  color:var(--gold); text-shadow:0 0 12px rgba(255,201,60,.5); text-transform:uppercase; opacity:.85;}
+.fcPhotoWrap{width:min(70vw,260px); height:min(70vw,260px); margin:14px auto; border-radius:16px; overflow:hidden;
+  background:#0a2010; box-shadow:0 0 0 3px #ffc93c, 0 0 26px rgba(255,201,60,.4), inset 0 0 20px rgba(0,0,0,.5);
+  display:flex; align-items:center; justify-content:center;}
+.fcPhotoWrap img{width:100%; height:100%; object-fit:cover;}
+.fcPhotoWrap .ph{font-size:64px; opacity:.35;}
+.roleBadge{display:inline-block; padding:4px 12px; border-radius:20px; font-family:'Bungee'; font-size:11px; letter-spacing:1px; margin-top:8px;}
+.roleBadge.P{background:rgba(41,182,246,.18); color:var(--rP); box-shadow:inset 0 0 0 1px rgba(41,182,246,.5);}
+.roleBadge.D{background:rgba(46,204,113,.18); color:var(--rD); box-shadow:inset 0 0 0 1px rgba(46,204,113,.5);}
+.roleBadge.C{background:rgba(255,212,0,.18); color:var(--rC); box-shadow:inset 0 0 0 1px rgba(255,212,0,.5);}
+.roleBadge.A{background:rgba(255,71,87,.18); color:var(--rA); box-shadow:inset 0 0 0 1px rgba(255,71,87,.5);}
+.fcPlayerName{font-family:'Bungee'; font-size:clamp(20px,5vw,30px); text-align:center; margin-top:4px;}
+.roleP{color:var(--rP); text-shadow:0 0 14px rgba(41,182,246,.5);}
+.roleD{color:var(--rD); text-shadow:0 0 14px rgba(46,204,113,.5);}
+.roleC{color:var(--rC); text-shadow:0 0 14px rgba(255,212,0,.5);}
+.roleA{color:var(--rA); text-shadow:0 0 14px rgba(255,71,87,.5);}
+.fcBidLabel{text-align:center; font-size:12px; letter-spacing:2px; color:#c9a45c; text-transform:uppercase; margin-top:16px;}
+.fcBidAmount{font-family:'Bungee'; font-size:clamp(38px,10vw,58px); text-align:center; color:var(--gold);
+  text-shadow:0 0 22px rgba(255,201,60,.6); line-height:1.1;}
+.fcBidder{text-align:center; font-family:'Bungee'; font-size:clamp(16px,4vw,22px); color:#fff; margin-top:2px;}
+.fcBidder.none{color:var(--muted); font-family:inherit; font-size:14px;}
+.fcCountTxt{font-family:'Bungee'; font-size:clamp(40px,12vw,70px); text-align:center; color:var(--gold);
+  text-shadow:0 0 26px rgba(255,201,60,.7); animation:fcPop .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes fcPop{0%{transform:scale(.5);} 60%{transform:scale(1.15);} 100%{transform:scale(1);}}
+.fcSoldBanner{font-family:'Bungee'; font-size:clamp(20px,5vw,30px); text-align:center; color:var(--gold);
+  text-shadow:0 0 22px rgba(255,201,60,.7); margin-top:10px;}
+.leadRow{display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.04); border-radius:12px;
+  padding:10px 14px; margin-top:8px; font-size:14px;}
+.leadRow .pos{font-family:'Bungee'; width:34px; text-align:center; color:var(--gold);}
+.leadRow .pts{margin-left:auto; font-family:'Bungee'; color:var(--lime);}
+#qrBox{background:#fff; padding:14px; border-radius:14px; display:inline-block; margin-top:14px;}
+#qrBox canvas, #qrBox img{display:block;}
+.codeBig{font-family:'Bungee'; font-size:clamp(26px,7vw,40px); letter-spacing:4px; color:var(--gold); text-align:center;
+  text-shadow:0 0 16px rgba(255,201,60,.4);}
+/* ===== ROSA (elenco acquisti per ruolo) ===== */
+.rosterBox{width:100%; max-width:420px; margin-top:10px;}
+.rosterRoleHead{font-family:'Bungee'; font-size:12px; letter-spacing:1px; text-transform:uppercase; margin-top:14px; margin-bottom:6px;}
+.rosterItem{display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.04); border-radius:10px;
+  padding:8px 10px; margin-bottom:6px; font-size:13px;}
+.rosterItem img{width:30px; height:30px; border-radius:6px; object-fit:cover; flex-shrink:0;}
+.rosterItem .pz{margin-left:auto; font-family:'Bungee'; color:var(--gold); font-size:12px;}
+.rosterEmpty{font-size:12px; color:var(--muted); opacity:.7;}
+#licModal{display:none; position:fixed; inset:0; z-index:90; background:rgba(2,10,4,.93); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:22px;}
+#licModal.on{display:flex;}
+.licBox{width:100%; max-width:380px; background:rgba(255,255,255,.04); border-radius:18px; padding:24px; text-align:center;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08), 0 20px 50px rgba(0,0,0,.55);}
+#licInput{text-transform:uppercase; text-align:center; letter-spacing:1px;}
+#licErr{min-height:18px; margin-top:10px; font-size:13px; font-weight:700; color:var(--red);}
+</style>
+</head>
+<body>
 
+<div id="licModal">
+  <div class="licBox">
+    <div class="brand"><div class="t1" style="font-size:22px">🔐 LICENZA</div></div>
+    <div class="label mt">Inserisci il codice per avviare il Fantacalcio</div>
+    <input type="text" id="licInput" placeholder="CAPONE-XXXX-XXXX" autocomplete="off">
+    <div id="licErr"></div>
+    <button class="btn mg mt" style="width:100%" onclick="verificaLicenzaEavvia()">Verifica e avvia</button>
+  </div>
+</div>
+
+<!-- ==================== HOME ==================== -->
+<div class="screen" id="scrHome">
+  <div class="brand"><div class="t1">🏆 FANTACALCIO</div></div>
+  <div class="fcSubtitle mt">by <b>Il Capone Quiz 3.0</b> di Alberto Seminerio</div>
+  <div class="panel mt center" style="max-width:420px">
+    <div class="byline">Sei il presidente d'asta? Crea una nuova sessione.</div>
+    <button class="btn mg mt" style="width:100%" onclick="checkLicenseAndStart()">🏆 CREA ASTA FANTACALCIO</button>
+  </div>
+</div>
+
+<!-- ==================== HOST: IMPOSTAZIONE ==================== -->
+<div class="screen" id="scrHostSetup">
+  <div class="brand"><div class="t1" style="font-size:clamp(18px,3.4vw,28px)">🏆 LA TUA ASTA È PRONTA</div></div>
+  <div class="codeBig mt" id="hsCode">----</div>
+  <div id="qrBox"></div>
+  <div class="byline mt" id="hsUrl"></div>
+  <div class="byline mt" style="opacity:.7">🖥️ Da aprire sul videoproiettore:</div>
+  <div class="byline" id="hsProjUrl" style="color:var(--gold); word-break:break-all"></div>
+
+  <div class="panel mtb" style="max-width:520px">
+    <div class="label">💰 Budget iniziale per ogni squadra</div>
+    <input type="number" id="fcBudgetInput" value="500" min="1" onchange="fcSetBudget()">
+    <div class="byline mt" style="opacity:.75; text-align:left">Libero — tipicamente 500 o 1000 punti. Si applica a chi si iscrive da questo momento in poi.</div>
+  </div>
+
+  <div class="panel mtb" style="max-width:520px" id="fcSetup">
+    <div class="label">Titolo dell'asta (si vede sul proiettore)</div>
+    <input type="text" id="fcTitle" value="ASTA FANTACALCIO" maxlength="60">
+    <div id="fcPresetRow"></div>
+    <div class="label mt">Nome del calciatore</div>
+    <input type="text" id="fcPlayerName" placeholder="Es. Osimhen" maxlength="40">
+    <div class="label mt">Ruolo</div>
+    <select id="fcPlayerRole">
+      <option value="P">🧤 Portiere</option>
+      <option value="D">🛡️ Difensore</option>
+      <option value="C">⚙️ Centrocampista</option>
+      <option value="A">⚔️ Attaccante</option>
+    </select>
+    <div class="label mt">Foto (facoltativa)</div>
+    <input type="file" id="fcPhotoInput" accept="image/*" onchange="fcPhotoChanged()">
+    <div id="fcPhotoPreviewWrap" style="display:none; margin-top:10px; text-align:center">
+      <img id="fcPhotoPreview" style="max-width:160px; border-radius:10px; box-shadow:0 0 0 2px #ffc93c">
+      <div class="mt row" style="justify-content:center">
+        <button class="btn ghost" onclick="fcClearPhoto()">✕ Rimuovi foto</button>
+        <button class="btn ghost" onclick="fcSavePresetPrompt()">💾 Salva come giocatore pronto</button>
+      </div>
+    </div>
+    <div class="row mt">
+      <div class="grow"><div class="label">Base d'asta (punti)</div><input type="number" id="fcStartBid" value="10" min="0"></div>
+      <div class="grow"><div class="label">Rilancio minimo</div><input type="number" id="fcIncrement" value="5" min="1"></div>
+    </div>
+    <div class="label mt">Come si chiude l'asta</div>
+    <select id="fcEndMode">
+      <option value="hammer" selected>Col martello del banditore (e uno, e due, e tre!)</option>
+      <option value="manual">Decido io quando fermarla</option>
+    </select>
+    <div class="byline mt" style="opacity:.75">⚽ Chi si aggiudica il calciatore lo vede comparire subito nella propria rosa, sotto il ruolo giusto, con i punti spesi tolti dal budget.</div>
+    <button class="btn mg mt" style="width:100%" onclick="fcStart()">🏆 METTI ALL'ASTA!</button>
+  </div>
+
+  <div class="row mt" style="max-width:520px">
+    <button class="btn ghost" style="width:100%" onclick="hostShowHistory()">📋 Riepilogo aggiudicazioni</button>
+  </div>
+  <div class="panel mtb" style="max-width:520px; display:none" id="hsHistoryPanel">
+    <div class="label">Calciatori già aggiudicati</div>
+    <div id="hsHistory"></div>
+    <button class="btn cy mt" style="width:100%" onclick="exportRosterHTML()">📄 Esporta rose in HTML</button>
+    <button class="btn ghost mt" style="width:100%" onclick="backToSetupFromHistory()">← Torna all'asta</button>
+  </div>
+  <div class="panel mtb" style="max-width:520px" id="fcManagersPanelWrap">
+    <div class="label">💰 Budget squadre</div>
+    <div id="fcManagersPanel"></div>
+  </div>
+</div>
+
+<!-- ==================== HOST: ASTA IN CORSO ==================== -->
+<div class="screen" id="scrHostLive">
+  <div class="brand"><div class="t1" style="font-size:clamp(18px,3.4vw,28px)">🏆 ASTA IN CORSO</div></div>
+  <div class="fcCard" id="fcCardHost">
+    <div class="fcTitle" id="fcTitleHost"></div>
+    <div class="fcPhotoWrap" id="fcPhotoWrapHost"><div class="ph">⚽</div></div>
+    <div class="center"><span class="roleBadge" id="fcRoleBadgeHost"></span></div>
+    <div class="fcPlayerName" id="fcPlayerNameHost"></div>
+    <div class="fcBidLabel">Offerta attuale</div>
+    <div class="fcBidAmount" id="fcBidAmountHost">0</div>
+    <div class="fcBidder none" id="fcBidderHost">Nessuna offerta ancora...</div>
+    <div class="fcCountTxt" id="fcCountHost" style="display:none"></div>
+    <div class="fcSoldBanner" id="fcSoldHost" style="display:none"></div>
+  </div>
+  <div class="row mt" id="fcHostControlsManual" style="display:none">
+    <button class="btn mg" style="width:100%" onclick="fcCloseManual()">🏆 AGGIUDICA ORA!</button>
+  </div>
+  <div class="row mt" id="fcHostControlsHammer" style="display:none">
+    <button class="btn mg" style="width:100%" id="fcBtnHammer" onclick="fcHammerStrike()">🔨 E UNO!</button>
+  </div>
+  <div class="row mt">
+    <button class="btn cy" onclick="fcNextItem()" id="fcBtnNext" style="display:none; width:100%">➡️ Prossimo calciatore</button>
+  </div>
+  <div class="row mt">
+    <button class="btn ghost" onclick="hostShowHistory()">📋 Riepilogo aggiudicazioni</button>
+  </div>
+</div>
+
+<!-- ==================== PROIETTORE ==================== -->
+<div class="screen" id="scrProj">
+  <div class="brand"><div class="t1" id="pjTitleTop" style="font-size:clamp(26px,4vw,42px)">🏆 FANTACALCIO</div></div>
+  <div class="fcCard" id="fcCardPj" style="max-width:640px">
+    <div class="fcTitle" id="fcTitlePj"></div>
+    <div class="fcPhotoWrap" id="fcPhotoWrapPj" style="width:min(46vw,340px); height:min(46vw,340px)"><div class="ph">⚽</div></div>
+    <div class="center"><span class="roleBadge" id="fcRoleBadgePj"></span></div>
+    <div class="fcPlayerName" id="fcPlayerNamePj"></div>
+    <div class="fcBidLabel">Offerta attuale</div>
+    <div class="fcBidAmount" id="fcBidAmountPj">0</div>
+    <div class="fcBidder none" id="fcBidderPj">Nessuna offerta ancora...</div>
+    <div class="fcCountTxt" id="fcCountPj" style="display:none"></div>
+    <div class="fcSoldBanner" id="fcSoldPj" style="display:none"></div>
+  </div>
+  <div class="byline mtb" style="opacity:.8">🎩 IL CAPONE · FANTACALCIO · by <b style="color:var(--gold)">Alberto Seminerio</b></div>
+</div>
+
+<!-- ==================== PARTECIPANTE: ENTRA ==================== -->
+<div class="screen" id="scrJoin">
+  <div class="brand"><div class="t1">🏆 FANTACALCIO</div></div>
+  <div class="fcSubtitle mt">by <b>Il Capone Quiz 3.0</b> di Alberto Seminerio</div>
+  <div class="panel mt center" style="max-width:380px">
+    <div class="byline">Scrivi il nome della tua squadra</div>
+    <input type="text" id="joinName" placeholder="Es. FC Capone" maxlength="24" class="mt">
+    <button class="btn mg mt" style="width:100%" onclick="playerJoin()">🏆 ENTRA NELL'ASTA</button>
+  </div>
+</div>
+
+<!-- ==================== PARTECIPANTE: ASTA + ROSA ==================== -->
+<div class="screen" id="scrPlay">
+  <div class="row" style="width:100%; justify-content:space-between; max-width:420px; margin:0 auto">
+    <div class="pill" id="fcpName" style="color:var(--gold)"></div>
+    <div class="pill" id="fcpBudget">Budget: 0</div>
+  </div>
+  <div class="fcCard" id="fcCardMe" style="max-width:380px">
+    <div class="fcTitle" id="fcTitleMe"></div>
+    <div class="fcPhotoWrap" id="fcPhotoWrapMe"><div class="ph">⚽</div></div>
+    <div class="center"><span class="roleBadge" id="fcRoleBadgeMe"></span></div>
+    <div class="fcPlayerName" id="fcPlayerNameMe"></div>
+    <div class="fcBidLabel">Offerta attuale</div>
+    <div class="fcBidAmount" id="fcBidAmountMe">0</div>
+    <div class="fcBidder none" id="fcBidderMe">Nessuna offerta ancora...</div>
+  </div>
+  <button class="btn mg mt" id="fcBtnBid" onclick="fcBid()" style="width:min(88vw,320px)">🏆 RILANCIA A <span id="fcBtnBidAmount">0</span></button>
+  <div class="byline mt" style="opacity:.7">oppure fai un'offerta più alta</div>
+  <div class="row mt" style="width:min(88vw,320px)">
+    <input type="number" id="fcCustomBid" placeholder="Es. 120" min="0" style="flex:1; text-align:center">
+    <button class="btn cy" id="fcBtnBidCustom" onclick="fcBidCustom()">RILANCIA</button>
+  </div>
+  <div class="byline mt" id="fcMyStatus"></div>
+  <div class="feedback mtb" id="fcFbMsg" style="display:none"></div>
+
+  <div class="rosterBox" id="fcMyRoster"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ================================================================
+   FANTACALCIO — variante dell'Asta standalone
+   Stesso motore di rilancio/aggiudicazione, con l'aggiunta di:
+   - budget a punti per squadra (non più soldi gestiti fuori dall'app)
+   - calciatori con ruolo colorato (P blu, D verde, C giallo, A rosso)
+   - rosa che si riempie in automatico, divisa per ruolo, per ogni squadra
+   - esportazione delle rose finali in un file HTML da girare ai partecipanti
+================================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAVTrq0PCEH7HK5VEHK88m7b-Qgdf9nGmE",
+  authDomain: "il-capone-quiz.firebaseapp.com",
+  databaseURL: "https://il-capone-quiz-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "il-capone-quiz",
+  storageBucket: "il-capone-quiz.firebasestorage.app",
+  messagingSenderId: "293529788369",
+  appId: "1:293529788369:web:7063a22dbb884f9bf30af0"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+function $(id){ return document.getElementById(id); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active'); window.scrollTo(0,0);
+}
+function genCode(){
+  const letters='ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let s=''; for(let i=0;i<5;i++) s+=letters[Math.floor(Math.random()*letters.length)];
+  return s;
+}
+function confetti(){
+  const colors=['#ffc93c','#ffd76a','#6dff6d','#29b6f6','#fff'];
+  for (let i=0;i<60;i++){
+    const el = document.createElement('div');
+    el.style.cssText = `position:fixed; top:-20px; left:${Math.random()*100}vw; width:${6+Math.random()*8}px; height:${6+Math.random()*8}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]}; z-index:999; border-radius:2px; pointer-events:none;
+      transform:rotate(${Math.random()*360}deg);`;
+    document.body.appendChild(el);
+    const dur = 1800+Math.random()*1200;
+    el.animate([
+      {transform:`translateY(0) rotate(0deg)`, opacity:1},
+      {transform:`translateY(110vh) rotate(${360+Math.random()*360}deg)`, opacity:.3}
+    ], {duration:dur, easing:'ease-in'});
+    setTimeout(()=>el.remove(), dur+100);
+  }
+}
+const ROLE_NAMES = {P:'Portiere', D:'Difensore', C:'Centrocampista', A:'Attaccante'};
+const ROLE_NAMES_PL = {P:'🧤 Portieri', D:'🛡️ Difensori', C:'⚙️ Centrocampisti', A:'⚔️ Attaccanti'};
+
+/* ================================================================
+   LICENZA — stessa infrastruttura di Tombola/Asta/Ruota (Firebase 'licenze/'),
+   chiave localStorage CONDIVISA capone_licenza_codice, flag 'fantacalcio_standalone'
+================================================================ */
+function getDeviceId(){
+  let id = localStorage.getItem('capone_device_id');
+  if (!id){ id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem('capone_device_id', id); }
+  return id;
+}
+function showLicenseModal(){
+  $('licErr').textContent = '';
+  $('licModal').classList.add('on');
+  setTimeout(()=> $('licInput').focus(), 50);
+  if (!$('licInput')._bound){
+    $('licInput').addEventListener('keydown', e=>{ if (e.key==='Enter') verificaLicenzaEavvia(); });
+    $('licInput')._bound = true;
+  }
+}
+function closeLicenseModal(){ $('licModal').classList.remove('on'); }
+function verificaLicenzaEavvia(){
+  const codice = ($('licInput').value || '').trim().toUpperCase();
+  if (!codice) { $('licErr').textContent = 'Inserisci un codice.'; return; }
+  verificaCodiceEAvvia(codice, false);
+}
+function verificaCodiceEAvvia(codice, silente){
+  const fallisciConn = ()=>{ if (silente) showLicenseModal(); else $('licErr').textContent = 'Errore di connessione. Riprova.'; };
+  db.ref('licenze/'+codice).once('value').then(snap=>{
+    const lic = snap.val();
+    const fallisci = (msg)=>{
+      if (silente) { try{ localStorage.removeItem('capone_licenza_codice'); }catch(e){} showLicenseModal(); }
+      else { $('licErr').textContent = msg; }
+    };
+    if (!lic) { fallisci('Codice licenza non valido.'); return; }
+    if (lic.attiva === false) { fallisci('Licenza disattivata. Contatta Alberto.'); return; }
+    if (Date.now() > lic.data_scadenza) { fallisci('Licenza scaduta.'); return; }
+    if (!lic.minigiochi_abilitati || lic.minigiochi_abilitati.fantacalcio_standalone !== true) { fallisci('Questa licenza non include il Fantacalcio standalone. Contatta Alberto.'); return; }
+    const myDevice = getDeviceId();
+    if (lic.device_bloccato && lic.device_id && lic.device_id !== myDevice) { fallisci('Licenza già in uso su un altro dispositivo. Contatta Alberto per lo sblocco.'); return; }
+    const finalizza = ()=>{
+      try{ localStorage.setItem('capone_licenza_codice', codice); }catch(e){}
+      closeLicenseModal();
+      hostCreateSession();
+    };
+    if (!lic.device_bloccato){
+      db.ref('licenze/'+codice).update({ device_bloccato:true, device_id:myDevice, primo_utilizzo:Date.now() }).then(finalizza).catch(()=> fallisci('Errore di registrazione dispositivo.'));
+    } else finalizza();
+  }).catch(fallisciConn);
+}
+function checkLicenseAndStart(){
+  const saved = localStorage.getItem('capone_licenza_codice');
+  if (saved) verificaCodiceEAvvia(saved, true);
+  else showLicenseModal();
+}
+
+/* ---------------- ROUTING ---------------- */
+const urlParams = new URLSearchParams(location.search);
+const isProj = urlParams.get('proj')==='1';
+const joinCode = urlParams.get('g');
+let G = null, P = null, M = { budget:0, spent:0, roster:{} };
+
+if (isProj && joinCode){
+  G = { code: joinCode.toUpperCase(), ref: db.ref('fantacalcioStandalone/games/'+joinCode.toUpperCase()) };
+  showScreen('scrProj');
+  G.ref.child('pjLast').on('value', s=>{
+    const f = s.val()||{};
+    if (!f.phase) return;
+    fcRenderCard('Pj', f); fcRenderHammer('Pj', f); fcRenderSold('Pj', f);
+    $('fcCardPj').classList.toggle('sold', f.phase==='sold');
+    if (f.phase==='sold' && f.soldTo) confetti();
+  });
+} else if (isProj){
+  showScreen('scrProj');
+  $('fcPlayerNamePj').textContent = 'In attesa del codice della sessione...';
+  $('fcTitlePj').textContent = '';
+} else if (joinCode){
+  G = { code: joinCode.toUpperCase(), ref: db.ref('fantacalcioStandalone/games/'+joinCode.toUpperCase()) };
+  showScreen('scrJoin');
+} else {
+  showScreen('scrHome');
+}
+
+/* ---------------- BANDITORE: creazione sessione ---------------- */
+function hostCreateSession(){
+  const code = genCode();
+  G = { code, ref: db.ref('fantacalcioStandalone/games/'+code) };
+  G.ref.set({ created: Date.now(), budget:500, managers:{}, asta:{phase:'idle'}, history:[] });
+  $('hsCode').textContent = code;
+  const url = location.origin + location.pathname + '?g=' + code;
+  $('hsUrl').textContent = url;
+  $('hsProjUrl').textContent = location.origin + location.pathname + '?proj=1&g=' + code;
+  $('qrBox').innerHTML = '';
+  new QRCode($('qrBox'), { text: url, width:180, height:180 });
+  $('fcBudgetInput').value = 500;
+  fcRenderPresetRow();
+  showScreen('scrHostSetup');
+  G.ref.on('value', s=>{
+    const g = s.val()||{};
+    hostRenderHistory(g.history||[]);
+    fcRenderManagersPanel(g.managers||{});
+  });
+}
+function fcSetBudget(){
+  const v = Math.max(1, +$('fcBudgetInput').value||500);
+  G.ref.child('budget').set(v);
+}
+function hostShowHistory(){
+  showScreen('scrHostSetup');
+  $('fcSetup').style.display='none';
+  $('fcManagersPanelWrap').style.display='none';
+  $('hsHistoryPanel').style.display='block';
+  $('hsCode').textContent = G.code;
+}
+function backToSetupFromHistory(){
+  $('fcSetup').style.display='block';
+  $('fcManagersPanelWrap').style.display='block';
+  $('hsHistoryPanel').style.display='none';
+}
+function fcRenderManagersPanel(managers){
+  const list = Object.values(managers||{}).sort((a,b)=>(b.budget-(b.spent||0))-(a.budget-(a.spent||0)));
+  $('fcManagersPanel').innerHTML = list.length ? list.map(m=>
+    `<div class="leadRow">${esc(m.name)}<span class="pts">${m.budget-(m.spent||0)} / ${m.budget}</span></div>`
+  ).join('') : '<div class="byline">Ancora nessuna squadra iscritta...</div>';
+}
+
+/* ---------------- BANDITORE: gestione asta ---------------- */
+function fcRenderCard(suffix, f){
+  const titleEl = $('fcTitle'+suffix); if (titleEl) titleEl.textContent = f.title||'';
+  const nameEl = $('fcPlayerName'+suffix);
+  if (nameEl){ nameEl.textContent = f.playerName||''; nameEl.className = 'fcPlayerName role'+(f.playerRole||'A'); }
+  const badgeEl = $('fcRoleBadge'+suffix);
+  if (badgeEl){ badgeEl.className = 'roleBadge '+(f.playerRole||'A'); badgeEl.textContent = ROLE_NAMES[f.playerRole]||''; }
+  const wrap = $('fcPhotoWrap'+suffix);
+  if (wrap) wrap.innerHTML = f.playerPhoto ? `<img src="${f.playerPhoto}">` : `<div class="ph">⚽</div>`;
+  const amountEl = $('fcBidAmount'+suffix);
+  if (amountEl) amountEl.textContent = (f.currentBid!=null ? f.currentBid : (f.startBid||0));
+  const bidderEl = $('fcBidder'+suffix);
+  if (bidderEl){
+    if (f.currentBidderName){ bidderEl.className='fcBidder'; bidderEl.textContent = '🏆 '+f.currentBidderName; }
+    else { bidderEl.className='fcBidder none'; bidderEl.textContent = 'Nessuna offerta ancora... base: '+(f.startBid||0); }
+  }
+}
+function fcRenderHammer(suffix, f){
+  const el = $('fcCount'+suffix); if (!el) return;
+  if (f.phase==='live' && (f.hammerStage||0)>0){
+    el.style.display='block';
+    el.textContent = f.hammerStage===1 ? '🔨 E UNO!...' : (f.hammerStage===2 ? '🔨 E DUE!...' : '');
+  } else el.style.display='none';
+}
+function fcRenderSold(suffix, f){
+  const el = $('fcSold'+suffix); if (!el) return;
+  if (f.phase==='sold'){
+    el.style.display='block';
+    el.textContent = f.soldTo ? `🏆 AGGIUDICATO A ${f.soldTo} PER ${f.soldAmount}!` : '😕 INVENDUTO — nessuna offerta ricevuta';
+  } else el.style.display='none';
+}
+function hostRenderHistory(history){
+  $('hsHistory').innerHTML = history.map(h=>
+    `<div class="leadRow"><span class="pos roleBadge ${h.playerRole||'A'}" style="margin-top:0">${h.playerRole||''}</span> ${esc(h.playerName)}
+      <span class="byline" style="margin:0 8px">${h.soldTo?('a '+esc(h.soldTo)):'invenduto'}</span>
+      <span class="pts">${h.soldTo?h.soldAmount:''}</span></div>`
+  ).join('') || '<div class="byline">Ancora nessun calciatore aggiudicato...</div>';
+}
+let FC = { photo:null };
+function fcPhotoChanged(){
+  const f = $('fcPhotoInput').files[0];
+  if (!f) return;
+  const maxDim=1000, maxBytes=400*1024;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{
+    URL.revokeObjectURL(url);
+    let w=img.naturalWidth, h=img.naturalHeight;
+    if (w>maxDim || h>maxDim){ if (w>=h){ h=Math.round(h*maxDim/w); w=maxDim; } else { w=Math.round(w*maxDim/h); h=maxDim; } }
+    const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+    const ctx = canvas.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+    let quality=0.82, dataUrl=canvas.toDataURL('image/jpeg',quality), tries=0;
+    while (dataUrl.length*0.75>maxBytes && quality>0.4 && tries<6){ quality-=0.12; tries++; dataUrl=canvas.toDataURL('image/jpeg',quality); }
+    FC.photo = dataUrl;
+    $('fcPhotoPreview').src = dataUrl;
+    $('fcPhotoPreviewWrap').style.display='block';
+  };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); alert("Non sono riuscito a caricare questa foto, riprova con un'altra."); };
+  img.src = url;
+}
+function fcClearPhoto(){
+  FC.photo = null; $('fcPhotoInput').value=''; $('fcPhotoPreviewWrap').style.display='none';
+}
+/* ---- calciatori già pronti (nome + ruolo + foto), salvati in locale su questo dispositivo ---- */
+function fcSavedList(){
+  try{ return JSON.parse(localStorage.getItem('capone_fantacalcio_standalone_saved')||'[]'); }catch(e){ return []; }
+}
+function fcRenderPresetRow(){
+  const list = fcSavedList();
+  $('fcPresetRow').innerHTML = list.length ? `
+    <div class="label mt">Calciatori già pronti</div>
+    <div class="row">
+      <select id="fcPresetSel" class="grow">
+        <option value="">— scegli un calciatore già pronto —</option>
+        ${list.map(s=>`<option value="${esc(s.name)}">${esc(s.name)} (${ROLE_NAMES[s.role]||''})</option>`).join('')}
+      </select>
+      <button class="btn small cy" onclick="fcLoadPreset($('fcPresetSel').value)">▶ Usa</button>
+      <button class="btn small ghost" onclick="fcDeletePreset($('fcPresetSel').value)" title="Elimina questo calciatore">🗑</button>
+    </div>` : '';
+}
+function fcLoadPreset(name){
+  if (!name) return;
+  const s = fcSavedList().find(x=>x.name===name);
+  if (!s) return;
+  $('fcPlayerName').value = s.name;
+  $('fcPlayerRole').value = s.role||'A';
+  if (s.photo){ FC.photo = s.photo; $('fcPhotoPreview').src = s.photo; $('fcPhotoPreviewWrap').style.display='block'; }
+  else fcClearPhoto();
+}
+function fcDeletePreset(name){
+  if (!name) return;
+  if (!confirm(`Eliminare "${name}" dall'elenco dei calciatori pronti?`)) return;
+  const list = fcSavedList().filter(x=>x.name!==name);
+  try{ localStorage.setItem('capone_fantacalcio_standalone_saved', JSON.stringify(list)); }catch(e){}
+  fcRenderPresetRow();
+}
+function fcSavePresetPrompt(){
+  const name = $('fcPlayerName').value.trim();
+  if (!name) return alert('Scrivi prima il nome del calciatore!');
+  const role = $('fcPlayerRole').value;
+  const list = fcSavedList();
+  const i = list.findIndex(s=>s.name===name);
+  const entry = { name, role, photo: FC.photo||null };
+  if (i>=0) list[i] = entry; else list.push(entry);
+  try{
+    localStorage.setItem('capone_fantacalcio_standalone_saved', JSON.stringify(list));
+    fcRenderPresetRow();
+    alert(`✔ "${name}" salvato tra i calciatori pronti! La prossima volta lo richiami dal menu.`);
+  }catch(e){ alert('⚠️ Memoria piena: prova a eliminare qualche calciatore più vecchio, o usa foto più piccole.'); }
+}
+function fcStart(){
+  const title = $('fcTitle').value.trim() || 'ASTA FANTACALCIO';
+  const playerName = $('fcPlayerName').value.trim();
+  if (!playerName) return alert('Scrivi il nome del calciatore messo all\'asta!');
+  const playerRole = $('fcPlayerRole').value;
+  const startBid = Math.max(0, +$('fcStartBid').value||0);
+  const increment = Math.max(1, +$('fcIncrement').value||1);
+  const endMode = $('fcEndMode').value;
+  const f = { phase:'live', title, playerName, playerRole, playerPhoto: FC.photo||null, startBid, increment, endMode,
+    currentBid:null, currentBidderId:null, currentBidderName:null, hammerStage:0, soldTo:null, soldAmount:null };
+  G.ref.child('asta').off();
+  G.ref.child('asta').set(f);
+  showScreen('scrHostLive');
+  $('fcHostControlsManual').style.display = endMode==='manual' ? '' : 'none';
+  $('fcHostControlsHammer').style.display = endMode==='hammer' ? '' : 'none';
+  $('fcBtnHammer').textContent = '🔨 E UNO!';
+  $('fcBtnNext').style.display='none';
+  fcRenderCard('Host', f); fcRenderHammer('Host', f); fcRenderSold('Host', f);
+  pjSend(f);
+  G.ref.child('asta').on('value', s=>{
+    const fv = s.val()||{}; if (!fv.phase) return;
+    fcRenderCard('Host', fv); fcRenderHammer('Host', fv); fcRenderSold('Host', fv);
+    if (fv.endMode==='hammer') $('fcBtnHammer').textContent = (fv.hammerStage||0)===0 ? '🔨 E UNO!' : ((fv.hammerStage===1) ? '🔨 E DUE!' : '🔨 E TRE! (AGGIUDICATO)');
+    if (fv.phase==='sold'){
+      $('fcHostControlsManual').style.display='none'; $('fcHostControlsHammer').style.display='none';
+      $('fcBtnNext').style.display='';
+    }
+    pjSend(fv);
+  });
+}
+function pjSend(f){
+  G.ref.child('pjLast').set(f);
+}
+function fcHammerStrike(){
+  G.ref.child('asta').once('value').then(s=>{
+    const fv = s.val()||{};
+    if (fv.phase!=='live') return;
+    if (fv.currentBid==null) return alert('Nessuno ha ancora fatto un\'offerta: non si può aggiudicare nulla!');
+    const next = (fv.hammerStage||0)+1;
+    if (next>=3) fcSell(fv); else G.ref.child('asta/hammerStage').set(next);
+  });
+}
+function fcCloseManual(){
+  G.ref.child('asta').once('value').then(s=>{
+    const fv = s.val()||{};
+    if (fv.phase!=='live') return;
+    fcSell(fv);
+  });
+}
+function fcSell(fv){
+  const soldTo = fv.currentBidderName||null, soldToId = fv.currentBidderId||null, soldAmount = fv.currentBid||0;
+  const updates = { 'asta/phase':'sold', 'asta/soldTo':soldTo, 'asta/soldAmount':soldAmount, 'asta/hammerStage':0 };
+  G.ref.update(updates);
+  G.ref.child('history').once('value').then(s=>{
+    const hist = s.val()||[];
+    hist.push({ playerName: fv.playerName, playerRole: fv.playerRole, soldTo, soldAmount });
+    G.ref.child('history').set(hist);
+  });
+  if (soldToId){
+    G.ref.child('managers/'+soldToId).once('value').then(sp=>{
+      const m = sp.val()||{};
+      const spent = (m.spent||0)+soldAmount;
+      const roster = m.roster||{};
+      const roleKey = fv.playerRole||'A';
+      const arr = (roster[roleKey]||[]).slice();
+      arr.push({ name: fv.playerName, photo: fv.playerPhoto||null, price: soldAmount });
+      roster[roleKey] = arr;
+      G.ref.child('managers/'+soldToId).update({ spent, roster });
+    });
+  }
+  confetti();
+}
+function fcNextItem(){
+  G.ref.child('asta').off();
+  $('fcPlayerName').value=''; fcClearPhoto();
+  $('fcSetup').style.display='block'; $('hsHistoryPanel').style.display='none'; $('fcManagersPanelWrap').style.display='block';
+  fcRenderPresetRow();
+  G.ref.child('asta').set({ phase:'idle' });
+  pjSend({phase:'idle'});
+  showScreen('scrHostSetup');
+}
+function exportRosterHTML(){
+  G.ref.once('value').then(s=>{
+    const g = s.val()||{};
+    const managers = Object.values(g.managers||{});
+    const roleColors = {P:'#1976d2', D:'#219653', C:'#b8860b', A:'#d32f2f'};
+    const managersHtml = managers.map(m=>{
+      const spent = m.spent||0, budget = m.budget||0, rimasti = budget-spent;
+      const rosterHtml = ['P','D','C','A'].map(rk=>{
+        const list = (m.roster&&m.roster[rk])||[];
+        return `<div style="margin-top:14px"><div style="font-weight:800;color:${roleColors[rk]};text-transform:uppercase;letter-spacing:1px;font-size:13px;margin-bottom:6px">${ROLE_NAMES_PL[rk]} (${list.length})</div>
+          ${list.length ? list.map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #eee">
+            ${p.photo?`<img src="${p.photo}" style="width:36px;height:36px;border-radius:8px;object-fit:cover">`:''}
+            <span style="flex:1">${esc(p.name)}</span><b style="color:#8a6a1a">${p.price}</b></div>`).join('') : '<div style="color:#999;font-size:13px">Nessun acquisto</div>'}
+        </div>`;
+      }).join('');
+      return `<div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,.08)">
+        <div style="font-size:20px;font-weight:900;color:#123f1b">${esc(m.name)}</div>
+        <div style="font-size:13px;color:#666;margin-top:2px">Budget: ${budget} · Speso: ${spent} · Rimasto: ${rimasti}</div>
+        ${rosterHtml}
+      </div>`;
+    }).join('');
+    const doc = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Rose Fantacalcio — ${esc(g.title||'Asta')}</title>
+<style>body{font-family:Poppins,Arial,sans-serif;background:#f2f6f0;padding:26px;max-width:700px;margin:0 auto}
+h1{text-align:center;color:#123f1b}</style></head><body>
+<h1>🏆 Rose Fantacalcio</h1>
+<p style="text-align:center;color:#666">Esportato il ${new Date().toLocaleString('it-IT')}</p>
+${managersHtml || '<p style="text-align:center">Nessuna squadra ancora registrata.</p>'}
+</body></html>`;
+    const blob = new Blob([doc], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'rose-fantacalcio-'+G.code+'.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+}
+
+/* ---------------- PARTECIPANTE ---------------- */
+function playerJoin(){
+  const name = $('joinName').value.trim();
+  if (!name) return alert('Scrivi il nome della tua squadra!');
+  G.ref.child('budget').once('value').then(bs=>{
+    const budget = bs.val()||500;
+    const pid = 'p_'+Math.random().toString(36).slice(2,10);
+    P = { id: pid, name, ref: G.ref };
+    G.ref.child('managers/'+pid).set({ name, budget, spent:0, roster:{}, joinedAt:Date.now() });
+    showScreen('scrPlay');
+    $('fcpName').textContent = name;
+    listenFc();
+  });
+}
+function listenFc(){
+  G.ref.child('asta').on('value', s=>{
+    const f = s.val()||{};
+    if (!f.phase || f.phase==='idle'){
+      $('fcBtnBid').style.display='none';
+      $('fcCustomBid').parentElement.style.display='none';
+      $('fcMyStatus').textContent = '⏳ Il banditore sta preparando il prossimo calciatore...';
+      $('fcFbMsg').style.display='none';
+      return;
+    }
+    fcRenderCard('Me', f);
+    if (f.phase==='sold'){
+      const won = f.currentBidderId===P.id;
+      $('fcBtnBid').style.display='none';
+      $('fcCustomBid').parentElement.style.display='none';
+      $('fcMyStatus').textContent='';
+      const msg=$('fcFbMsg');
+      msg.style.display='block';
+      if (f.soldTo && won){ msg.className='feedback mtb fb-ok'; msg.textContent='🏆 TE LO SEI AGGIUDICATO!'; if(navigator.vibrate) navigator.vibrate([80,50,120]); }
+      else if (f.soldTo){ msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent="Se l'è aggiudicato "+f.soldTo; }
+      else { msg.className='feedback mtb'; msg.style.color='var(--muted)'; msg.textContent='INVENDUTO'; }
+    } else {
+      const nextBid = f.currentBid==null ? f.startBid : f.currentBid+f.increment;
+      $('fcBtnBidAmount').textContent = nextBid;
+      const remaining = M.budget-(M.spent||0);
+      $('fcBtnBid').style.display='';
+      $('fcCustomBid').parentElement.style.display='flex';
+      $('fcCustomBid').min = nextBid;
+      $('fcCustomBid').placeholder = 'Almeno '+nextBid;
+      $('fcFbMsg').style.display='none';
+      const iAmWinning = f.currentBidderId===P.id;
+      const noBudget = nextBid > remaining;
+      $('fcBtnBid').disabled = iAmWinning || noBudget;
+      $('fcBtnBidCustom').disabled = iAmWinning;
+      if (iAmWinning) $('fcMyStatus').innerHTML = '🏆 <b style="color:var(--lime)">SEI IN TESTA!</b>';
+      else if (noBudget) $('fcMyStatus').innerHTML = '<b style="color:var(--red)">Budget insufficiente per rilanciare</b>';
+      else $('fcMyStatus').textContent = '';
+    }
+  });
+  G.ref.child('managers/'+P.id).on('value', s=>{
+    M = s.val()||{ budget:0, spent:0, roster:{} };
+    $('fcpBudget').textContent = 'Budget: '+(M.budget-(M.spent||0))+' / '+M.budget;
+    fcRenderMyRoster(M.roster||{});
+  });
+}
+function fcRenderMyRoster(roster){
+  $('fcMyRoster').innerHTML = ['P','D','C','A'].map(rk=>{
+    const list = (roster&&roster[rk])||[];
+    return `<div class="rosterRoleHead role${rk}">${ROLE_NAMES_PL[rk]} (${list.length})</div>` +
+      (list.length ? list.map(p=>`<div class="rosterItem">${p.photo?`<img src="${p.photo}">`:''}<span>${esc(p.name)}</span><span class="pz">${p.price}</span></div>`).join('')
+        : `<div class="rosterEmpty">Ancora nessun acquisto in questo ruolo</div>`);
+  }).join('');
+}
+function fcBid(){
+  G.ref.child('asta').once('value').then(s=>{
+    const f = s.val()||{};
+    if (f.phase!=='live') return;
+    if (f.currentBidderId===P.id) return;
+    const nextBid = f.currentBid==null ? f.startBid : f.currentBid+f.increment;
+    if (nextBid > (M.budget-(M.spent||0))) return alert('Non hai punti a sufficienza! Ti restano '+(M.budget-(M.spent||0))+'.');
+    G.ref.child('asta').update({ currentBid: nextBid, currentBidderId: P.id, currentBidderName: P.name, hammerStage: 0 });
+    if (navigator.vibrate) navigator.vibrate(40);
+  });
+}
+function fcBidCustom(){
+  const v = Math.floor(+$('fcCustomBid').value||0);
+  if (!v) return;
+  G.ref.child('asta').once('value').then(s=>{
+    const f = s.val()||{};
+    if (f.phase!=='live') return;
+    if (f.currentBidderId===P.id) return;
+    const minBid = f.currentBid==null ? f.startBid : f.currentBid+f.increment;
+    if (v < minBid) return alert(`L'offerta minima adesso è ${minBid}!`);
+    if (v > (M.budget-(M.spent||0))) return alert('Non hai punti a sufficienza! Ti restano '+(M.budget-(M.spent||0))+'.');
+    G.ref.child('asta').update({ currentBid: v, currentBidderId: P.id, currentBidderName: P.name, hammerStage: 0 });
+    $('fcCustomBid').value='';
+    if (navigator.vibrate) navigator.vibrate(40);
+  });
+}
+</script>
+</body>
+</html>
