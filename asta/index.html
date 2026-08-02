@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- saved from url=(0059)file:///C:/Users/semin/Downloads/asta-index-DEFINITIVO.html -->
-<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="it">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ASTA — by Alberto Seminerio</title>
-<link href="./ASTA — by Alberto Seminerio_files/css2" rel="stylesheet">
-<script src="./ASTA — by Alberto Seminerio_files/firebase-app-compat.js.download"></script>
-<script src="./ASTA — by Alberto Seminerio_files/firebase-database-compat.js.download"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root{
   --gold:#ffc93c; --lime:#b6ff2e; --red:#ff3b3b; --cyan:#00f0ff; --muted:#9d8fc9;
@@ -103,7 +103,7 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
 
 
 <!-- ==================== SCELTA RUOLO (solo se non c'è ?proj o ?g nell'indirizzo) ==================== -->
-<div class="screen active" id="scrHome">
+<div class="screen" id="scrHome">
   <div class="brand"><div class="t1">🔨 ASTA</div></div>
   <div class="byline mt">by Alberto Seminerio</div>
   <div class="panel mt center" style="max-width:420px">
@@ -141,13 +141,13 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
     </div>
     <div class="label mt">Come si chiude l'asta</div>
     <select id="astaEndMode">
-      <option value="hammer" selected="">Col martello del banditore (e uno, e due, e tre!)</option>
+      <option value="hammer" selected>Col martello del banditore (e uno, e due, e tre!)</option>
       <option value="manual">Decido io quando fermarla</option>
     </select>
     <div class="byline mt" style="opacity:.75">🔨 I partecipanti rilanciano liberamente dal proprio telefono: qui non ci sono punti da spendere, sei tu a gestire fuori dall'app i soldi realmente offerti.</div>
     <button class="btn mg mt" style="width:100%" onclick="astaStart()">🔨 APRI L'ASTA!</button>
   </div>
-  <div class="panel mtb" style="max-width:520px" id="hsHistoryPanel">
+  <div class="panel mtb" style="max-width:520px" id="hsHistoryPanel" style="display:none">
     <div class="label">Oggetti già aggiudicati</div>
     <div id="hsHistory"></div>
   </div>
@@ -230,7 +230,7 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
   <div class="feedback mtb" id="astaFbMsg" style="display:none"></div>
 </div>
 
-<script src="./ASTA — by Alberto Seminerio_files/qrcode.min.js.download"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 /* ================================================================
    ASTA — versione standalone
@@ -644,6 +644,5 @@ function astaBidCustom(){
   });
 }
 </script>
-
-
-</body></html>
+</body>
+</html>
