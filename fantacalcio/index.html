@@ -73,6 +73,7 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
 .roleBadge.C{background:rgba(255,212,0,.18); color:var(--rC); box-shadow:inset 0 0 0 1px rgba(255,212,0,.5);}
 .roleBadge.A{background:rgba(255,71,87,.18); color:var(--rA); box-shadow:inset 0 0 0 1px rgba(255,71,87,.5);}
 .fcPlayerName{font-family:'Bungee'; font-size:clamp(20px,5vw,30px); text-align:center; margin-top:4px;}
+.fcPlayerTeam{text-align:center; font-size:13px; color:var(--muted); font-weight:600; margin-top:2px; letter-spacing:.5px;}
 .roleP{color:var(--rP); text-shadow:0 0 14px rgba(41,182,246,.5);}
 .roleD{color:var(--rD); text-shadow:0 0 14px rgba(46,204,113,.5);}
 .roleC{color:var(--rC); text-shadow:0 0 14px rgba(255,212,0,.5);}
@@ -131,7 +132,50 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
   <div class="panel mt center" style="max-width:420px">
     <div class="byline">Sei il presidente d'asta? Crea una nuova sessione.</div>
     <button class="btn mg mt" style="width:100%" onclick="checkLicenseAndStart()">🏆 CREA ASTA FANTACALCIO</button>
+    <button class="btn ghost mt" style="width:100%" onclick="praOpen('scrHome')">📝 Prepara i calciatori prima dell'asta</button>
   </div>
+</div>
+
+<!-- ==================== PREPARA I CALCIATORI (prima o durante l'asta) ==================== -->
+<div class="screen" id="scrPrepara">
+  <div class="brand"><div class="t1" style="font-size:clamp(20px,4vw,32px)">📝 PREPARA I CALCIATORI</div></div>
+  <div class="byline mt" style="max-width:460px; text-align:center">Aggiungili con calma prima della serata: li ritroverai nel menu "calciatori già pronti" al momento di metterli all'asta.</div>
+
+  <div class="panel mtb" style="max-width:460px">
+    <div class="label">Nome del calciatore</div>
+    <input type="text" id="praName" placeholder="Es. Osimhen" maxlength="40">
+    <div class="label mt">Ruolo</div>
+    <select id="praRole">
+      <option value="P">🧤 Portiere</option>
+      <option value="D">🛡️ Difensore</option>
+      <option value="C">⚙️ Centrocampista</option>
+      <option value="A">⚔️ Attaccante</option>
+    </select>
+    <div class="label mt">Squadra di appartenenza (facoltativo)</div>
+    <input type="text" id="praTeam" placeholder="Es. Napoli" maxlength="30">
+    <div class="label mt">Foto (facoltativa)</div>
+    <input type="file" id="praPhotoInput" accept="image/*" onchange="praPhotoChanged()">
+    <div id="praPhotoPreviewWrap" style="display:none; margin-top:10px; text-align:center">
+      <img id="praPhotoPreview" style="max-width:140px; border-radius:10px; box-shadow:0 0 0 2px #ffc93c">
+      <div class="mt"><button class="btn ghost small" onclick="praClearPhoto()">✕ Rimuovi foto</button></div>
+    </div>
+    <button class="btn mg mt" style="width:100%" onclick="praAddPlayer()">➕ Aggiungi alla lista</button>
+  </div>
+
+  <div class="panel mtb" style="max-width:460px">
+    <div class="label">Calciatori pronti (<span id="praCount">0</span>)</div>
+    <div id="praList" class="mt"></div>
+  </div>
+
+  <div class="panel mtb" style="max-width:460px">
+    <div class="label">💾 Backup dei calciatori pronti</div>
+    <div class="byline mt" style="text-align:left; opacity:.85">I calciatori pronti sono salvati solo su questo dispositivo/browser. Scarica ogni tanto un backup completo, così non li perdi mai — anche se cancelli i dati di navigazione.</div>
+    <button class="btn cy mt" style="width:100%" onclick="praBackupDownload()">⬇️ Scarica backup calciatori</button>
+    <div class="label mt">Ripristina da un backup</div>
+    <input type="file" id="praRestoreInput" accept="application/json" onchange="praBackupRestore(event)">
+  </div>
+
+  <button class="btn ghost mtb" onclick="praBack()">← Torna indietro</button>
 </div>
 
 <!-- ==================== HOST: IMPOSTAZIONE ==================== -->
@@ -147,6 +191,7 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
     <div class="label">💰 Budget iniziale per ogni squadra</div>
     <input type="number" id="fcBudgetInput" value="500" min="1" onchange="fcSetBudget()">
     <div class="byline mt" style="opacity:.75; text-align:left">Libero — tipicamente 500 o 1000 punti. Si applica a chi si iscrive da questo momento in poi.</div>
+    <button class="btn ghost mt" style="width:100%" onclick="praOpen('scrHostSetup')">📝 Prepara altri calciatori</button>
   </div>
 
   <div class="panel mtb" style="max-width:520px" id="fcSetup">
@@ -162,6 +207,8 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
       <option value="C">⚙️ Centrocampista</option>
       <option value="A">⚔️ Attaccante</option>
     </select>
+    <div class="label mt">Squadra di appartenenza (facoltativo)</div>
+    <input type="text" id="fcPlayerTeam" placeholder="Es. Napoli" maxlength="30">
     <div class="label mt">Foto (facoltativa)</div>
     <input type="file" id="fcPhotoInput" accept="image/*" onchange="fcPhotoChanged()">
     <div id="fcPhotoPreviewWrap" style="display:none; margin-top:10px; text-align:center">
@@ -188,8 +235,12 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
     <button class="btn ghost" style="width:100%" onclick="hostShowHistory()">📋 Riepilogo aggiudicazioni</button>
   </div>
   <div class="panel mtb" style="max-width:520px; display:none" id="hsHistoryPanel">
-    <div class="label">Calciatori già aggiudicati</div>
-    <div id="hsHistory"></div>
+    <div class="label">🛠️ Correggi punti squadre</div>
+    <div class="byline mt" style="text-align:left; opacity:.8">Aggiungi o togli punti a una squadra per correggere un errore (bonus, penalità, refuso).</div>
+    <div id="hsCorrezioniManagers" class="mt"></div>
+    <div class="label mt">Calciatori già aggiudicati</div>
+    <div class="byline mt" style="text-align:left; opacity:.8">In caso di errore puoi cambiare chi si è aggiudicato un calciatore, o il prezzo pagato, anche a cose fatte.</div>
+    <div id="hsHistory" class="mt"></div>
     <button class="btn cy mt" style="width:100%" onclick="exportRosterHTML()">📄 Esporta rose in HTML</button>
     <button class="btn ghost mt" style="width:100%" onclick="backToSetupFromHistory()">← Torna all'asta</button>
   </div>
@@ -207,6 +258,7 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
     <div class="fcPhotoWrap" id="fcPhotoWrapHost"><div class="ph">⚽</div></div>
     <div class="center"><span class="roleBadge" id="fcRoleBadgeHost"></span></div>
     <div class="fcPlayerName" id="fcPlayerNameHost"></div>
+    <div class="fcPlayerTeam" id="fcPlayerTeamHost"></div>
     <div class="fcBidLabel">Offerta attuale</div>
     <div class="fcBidAmount" id="fcBidAmountHost">0</div>
     <div class="fcBidder none" id="fcBidderHost">Nessuna offerta ancora...</div>
@@ -235,6 +287,7 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
     <div class="fcPhotoWrap" id="fcPhotoWrapPj" style="width:min(46vw,340px); height:min(46vw,340px)"><div class="ph">⚽</div></div>
     <div class="center"><span class="roleBadge" id="fcRoleBadgePj"></span></div>
     <div class="fcPlayerName" id="fcPlayerNamePj"></div>
+    <div class="fcPlayerTeam" id="fcPlayerTeamPj"></div>
     <div class="fcBidLabel">Offerta attuale</div>
     <div class="fcBidAmount" id="fcBidAmountPj">0</div>
     <div class="fcBidder none" id="fcBidderPj">Nessuna offerta ancora...</div>
@@ -266,6 +319,7 @@ input[type=file]{width:100%; margin-top:6px; color:var(--muted); font-size:13px;
     <div class="fcPhotoWrap" id="fcPhotoWrapMe"><div class="ph">⚽</div></div>
     <div class="center"><span class="roleBadge" id="fcRoleBadgeMe"></span></div>
     <div class="fcPlayerName" id="fcPlayerNameMe"></div>
+    <div class="fcPlayerTeam" id="fcPlayerTeamMe"></div>
     <div class="fcBidLabel">Offerta attuale</div>
     <div class="fcBidAmount" id="fcBidAmountMe">0</div>
     <div class="fcBidder none" id="fcBidderMe">Nessuna offerta ancora...</div>
@@ -430,7 +484,7 @@ function hostCreateSession(){
   showScreen('scrHostSetup');
   G.ref.on('value', s=>{
     const g = s.val()||{};
-    hostRenderHistory(g.history||[]);
+    hostRenderHistory(g.history||[], g.managers||{});
     fcRenderManagersPanel(g.managers||{});
   });
 }
@@ -455,6 +509,85 @@ function fcRenderManagersPanel(managers){
   $('fcManagersPanel').innerHTML = list.length ? list.map(m=>
     `<div class="leadRow">${esc(m.name)}<span class="pts">${m.budget-(m.spent||0)} / ${m.budget}</span></div>`
   ).join('') : '<div class="byline">Ancora nessuna squadra iscritta...</div>';
+  renderCorrezioniManagers(managers);
+}
+function renderCorrezioniManagers(managers){
+  const el = $('hsCorrezioniManagers'); if (!el) return;
+  const entries = Object.entries(managers||{});
+  el.innerHTML = entries.length ? entries.map(([id,m])=>`
+    <div class="leadRow" style="flex-wrap:wrap">
+      <span>${esc(m.name)}</span>
+      <span class="pts" style="margin-left:auto">${m.budget-(m.spent||0)} / ${m.budget}</span>
+      <input type="number" id="corrDelta_${id}" placeholder="±punti" style="width:90px; margin-top:6px" step="1">
+      <button class="btn small cy" style="margin-top:6px" onclick="fcCorreggiBudget('${id}')">✔ Applica</button>
+    </div>`).join('') : '<div class="byline">Ancora nessuna squadra iscritta...</div>';
+}
+function fcCorreggiBudget(managerId){
+  const input = $('corrDelta_'+managerId);
+  const delta = Math.trunc(+input.value||0);
+  if (!delta) return;
+  G.ref.child('managers/'+managerId+'/budget').once('value').then(s=>{
+    const cur = s.val()||0;
+    G.ref.child('managers/'+managerId+'/budget').set(cur+delta);
+    input.value='';
+  });
+}
+function hostRenderHistory(history, managers){
+  const managerOptions = Object.entries(managers||{}).map(([id,m])=>`<option value="${id}">${esc(m.name)}</option>`).join('');
+  $('hsHistory').innerHTML = history.map((h,idx)=>{
+    if (!h.hid) return `<div class="leadRow"><span class="pos roleBadge ${h.playerRole||'A'}" style="margin-top:0">${h.playerRole||''}</span> ${esc(h.playerName)}
+      <span class="byline" style="margin:0 8px">${h.soldTo?('a '+esc(h.soldTo)):'invenduto'}</span>
+      <span class="pts">${h.soldTo?h.soldAmount:''}</span></div>`;
+    return `<div class="leadRow" style="flex-wrap:wrap">
+      <span class="pos roleBadge ${h.playerRole||'A'}" style="margin-top:0">${h.playerRole||''}</span>
+      <span>${esc(h.playerName)}${h.playerTeam?` <span style="opacity:.6">(${esc(h.playerTeam)})</span>`:''}</span>
+      <div class="row mt" style="width:100%; align-items:center">
+        <select id="corrMgr_${h.hid}" class="grow">
+          <option value="">— invenduto —</option>
+          ${managerOptions}
+        </select>
+        <input type="number" id="corrPrice_${h.hid}" value="${h.soldAmount||0}" style="width:80px" min="0">
+        <button class="btn small cy" onclick="fcCorreggiVendita('${h.hid}')">✔</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="byline">Ancora nessun calciatore aggiudicato...</div>';
+  // preseleziona la squadra attualmente assegnata in ogni tendina
+  history.forEach(h=>{ if (h.hid){ const sel = $('corrMgr_'+h.hid); if (sel) sel.value = h.soldToId||''; } });
+}
+function fcCorreggiVendita(hid){
+  const newManagerId = $('corrMgr_'+hid).value || null;
+  const newPrice = Math.max(0, Math.trunc(+$('corrPrice_'+hid).value||0));
+  G.ref.once('value').then(s=>{
+    const g = s.val()||{};
+    const history = g.history||[];
+    const managers = g.managers||{};
+    const hIdx = history.findIndex(h=>h.hid===hid);
+    if (hIdx<0) return;
+    const h = history[hIdx];
+    const oldManagerId = h.soldToId||null;
+    const role = h.playerRole||'A';
+    // annullo l'effetto sulla vecchia squadra (se c'era)
+    if (oldManagerId && managers[oldManagerId]){
+      const om = managers[oldManagerId];
+      om.spent = Math.max(0, (om.spent||0) - (h.soldAmount||0));
+      if (om.roster && om.roster[role]) om.roster[role] = om.roster[role].filter(p=>p.hid!==hid);
+    }
+    // applico l'effetto alla nuova squadra (se scelta)
+    let newManagerName = null;
+    if (newManagerId && managers[newManagerId]){
+      const nm = managers[newManagerId];
+      nm.spent = (nm.spent||0) + newPrice;
+      nm.roster = nm.roster||{};
+      nm.roster[role] = nm.roster[role]||[];
+      nm.roster[role].push({ hid, name:h.playerName, team:h.playerTeam||'', photo:h.playerPhoto||null, price:newPrice });
+      newManagerName = nm.name;
+    }
+    h.soldToId = newManagerId;
+    h.soldTo = newManagerName;
+    h.soldAmount = newManagerId ? newPrice : null;
+    history[hIdx] = h;
+    G.ref.update({ managers, history }).then(()=> alert('✔ Correzione applicata.'));
+  });
 }
 
 /* ---------------- BANDITORE: gestione asta ---------------- */
@@ -462,6 +595,8 @@ function fcRenderCard(suffix, f){
   const titleEl = $('fcTitle'+suffix); if (titleEl) titleEl.textContent = f.title||'';
   const nameEl = $('fcPlayerName'+suffix);
   if (nameEl){ nameEl.textContent = f.playerName||''; nameEl.className = 'fcPlayerName role'+(f.playerRole||'A'); }
+  const teamEl = $('fcPlayerTeam'+suffix);
+  if (teamEl) teamEl.textContent = f.playerTeam ? '⚽ '+f.playerTeam : '';
   const badgeEl = $('fcRoleBadge'+suffix);
   if (badgeEl){ badgeEl.className = 'roleBadge '+(f.playerRole||'A'); badgeEl.textContent = ROLE_NAMES[f.playerRole]||''; }
   const wrap = $('fcPhotoWrap'+suffix);
@@ -487,13 +622,6 @@ function fcRenderSold(suffix, f){
     el.style.display='block';
     el.textContent = f.soldTo ? `🏆 AGGIUDICATO A ${f.soldTo} PER ${f.soldAmount}!` : '😕 INVENDUTO — nessuna offerta ricevuta';
   } else el.style.display='none';
-}
-function hostRenderHistory(history){
-  $('hsHistory').innerHTML = history.map(h=>
-    `<div class="leadRow"><span class="pos roleBadge ${h.playerRole||'A'}" style="margin-top:0">${h.playerRole||''}</span> ${esc(h.playerName)}
-      <span class="byline" style="margin:0 8px">${h.soldTo?('a '+esc(h.soldTo)):'invenduto'}</span>
-      <span class="pts">${h.soldTo?h.soldAmount:''}</span></div>`
-  ).join('') || '<div class="byline">Ancora nessun calciatore aggiudicato...</div>';
 }
 let FC = { photo:null };
 function fcPhotoChanged(){
@@ -531,7 +659,7 @@ function fcRenderPresetRow(){
     <div class="row">
       <select id="fcPresetSel" class="grow">
         <option value="">— scegli un calciatore già pronto —</option>
-        ${list.map(s=>`<option value="${esc(s.name)}">${esc(s.name)} (${ROLE_NAMES[s.role]||''})</option>`).join('')}
+        ${list.map(s=>`<option value="${esc(s.name)}">${esc(s.name)} (${ROLE_NAMES[s.role]||''}${s.team?' · '+esc(s.team):''})</option>`).join('')}
       </select>
       <button class="btn small cy" onclick="fcLoadPreset($('fcPresetSel').value)">▶ Usa</button>
       <button class="btn small ghost" onclick="fcDeletePreset($('fcPresetSel').value)" title="Elimina questo calciatore">🗑</button>
@@ -543,6 +671,7 @@ function fcLoadPreset(name){
   if (!s) return;
   $('fcPlayerName').value = s.name;
   $('fcPlayerRole').value = s.role||'A';
+  $('fcPlayerTeam').value = s.team||'';
   if (s.photo){ FC.photo = s.photo; $('fcPhotoPreview').src = s.photo; $('fcPhotoPreviewWrap').style.display='block'; }
   else fcClearPhoto();
 }
@@ -557,13 +686,15 @@ function fcSavePresetPrompt(){
   const name = $('fcPlayerName').value.trim();
   if (!name) return alert('Scrivi prima il nome del calciatore!');
   const role = $('fcPlayerRole').value;
+  const team = $('fcPlayerTeam').value.trim();
   const list = fcSavedList();
   const i = list.findIndex(s=>s.name===name);
-  const entry = { name, role, photo: FC.photo||null };
+  const entry = { name, role, team, photo: FC.photo||null };
   if (i>=0) list[i] = entry; else list.push(entry);
   try{
     localStorage.setItem('capone_fantacalcio_standalone_saved', JSON.stringify(list));
     fcRenderPresetRow();
+    if ($('praList')) fcRenderPrepList();
     alert(`✔ "${name}" salvato tra i calciatori pronti! La prossima volta lo richiami dal menu.`);
   }catch(e){ alert('⚠️ Memoria piena: prova a eliminare qualche calciatore più vecchio, o usa foto più piccole.'); }
 }
@@ -572,10 +703,11 @@ function fcStart(){
   const playerName = $('fcPlayerName').value.trim();
   if (!playerName) return alert('Scrivi il nome del calciatore messo all\'asta!');
   const playerRole = $('fcPlayerRole').value;
+  const playerTeam = $('fcPlayerTeam').value.trim();
   const startBid = Math.max(0, +$('fcStartBid').value||0);
   const increment = Math.max(1, +$('fcIncrement').value||1);
   const endMode = $('fcEndMode').value;
-  const f = { phase:'live', title, playerName, playerRole, playerPhoto: FC.photo||null, startBid, increment, endMode,
+  const f = { phase:'live', title, playerName, playerRole, playerTeam, playerPhoto: FC.photo||null, startBid, increment, endMode,
     currentBid:null, currentBidderId:null, currentBidderName:null, hammerStage:0, soldTo:null, soldAmount:null };
   G.ref.child('asta').off();
   G.ref.child('asta').set(f);
@@ -618,11 +750,12 @@ function fcCloseManual(){
 }
 function fcSell(fv){
   const soldTo = fv.currentBidderName||null, soldToId = fv.currentBidderId||null, soldAmount = fv.currentBid||0;
-  const updates = { 'asta/phase':'sold', 'asta/soldTo':soldTo, 'asta/soldAmount':soldAmount, 'asta/hammerStage':0 };
+  const hid = 'h_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+  const updates = { 'asta/phase':'sold', 'asta/soldTo':soldTo, 'asta/soldAmount':soldAmount, 'asta/hammerStage':0, 'asta/hid':hid };
   G.ref.update(updates);
   G.ref.child('history').once('value').then(s=>{
     const hist = s.val()||[];
-    hist.push({ playerName: fv.playerName, playerRole: fv.playerRole, soldTo, soldAmount });
+    hist.push({ hid, playerName: fv.playerName, playerRole: fv.playerRole, playerTeam: fv.playerTeam||'', playerPhoto: fv.playerPhoto||null, soldTo, soldToId, soldAmount });
     G.ref.child('history').set(hist);
   });
   if (soldToId){
@@ -632,7 +765,7 @@ function fcSell(fv){
       const roster = m.roster||{};
       const roleKey = fv.playerRole||'A';
       const arr = (roster[roleKey]||[]).slice();
-      arr.push({ name: fv.playerName, photo: fv.playerPhoto||null, price: soldAmount });
+      arr.push({ hid, name: fv.playerName, team: fv.playerTeam||'', photo: fv.playerPhoto||null, price: soldAmount });
       roster[roleKey] = arr;
       G.ref.child('managers/'+soldToId).update({ spent, roster });
     });
@@ -641,7 +774,7 @@ function fcSell(fv){
 }
 function fcNextItem(){
   G.ref.child('asta').off();
-  $('fcPlayerName').value=''; fcClearPhoto();
+  $('fcPlayerName').value=''; $('fcPlayerTeam').value=''; fcClearPhoto();
   $('fcSetup').style.display='block'; $('hsHistoryPanel').style.display='none'; $('fcManagersPanelWrap').style.display='block';
   fcRenderPresetRow();
   G.ref.child('asta').set({ phase:'idle' });
@@ -660,7 +793,7 @@ function exportRosterHTML(){
         return `<div style="margin-top:14px"><div style="font-weight:800;color:${roleColors[rk]};text-transform:uppercase;letter-spacing:1px;font-size:13px;margin-bottom:6px">${ROLE_NAMES_PL[rk]} (${list.length})</div>
           ${list.length ? list.map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #eee">
             ${p.photo?`<img src="${p.photo}" style="width:36px;height:36px;border-radius:8px;object-fit:cover">`:''}
-            <span style="flex:1">${esc(p.name)}</span><b style="color:#8a6a1a">${p.price}</b></div>`).join('') : '<div style="color:#999;font-size:13px">Nessun acquisto</div>'}
+            <span style="flex:1">${esc(p.name)}${p.team?` <span style="color:#999;font-size:12px">(${esc(p.team)})</span>`:''}</span><b style="color:#8a6a1a">${p.price}</b></div>`).join('') : '<div style="color:#999;font-size:13px">Nessun acquisto</div>'}
         </div>`;
       }).join('');
       return `<div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,.08)">
@@ -683,6 +816,108 @@ ${managersHtml || '<p style="text-align:center">Nessuna squadra ancora registrat
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
   });
+}
+
+/* ---------------- PREPARA I CALCIATORI (schermata dedicata, prima o durante l'asta) ---------------- */
+let praOrigin = 'scrHome', PRA = { photo:null };
+function praOpen(fromScreen){
+  praOrigin = fromScreen;
+  fcRenderPrepList();
+  showScreen('scrPrepara');
+}
+function praBack(){ showScreen(praOrigin); }
+function praPhotoChanged(){
+  const f = $('praPhotoInput').files[0];
+  if (!f) return;
+  const maxDim=1000, maxBytes=400*1024;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{
+    URL.revokeObjectURL(url);
+    let w=img.naturalWidth, h=img.naturalHeight;
+    if (w>maxDim || h>maxDim){ if (w>=h){ h=Math.round(h*maxDim/w); w=maxDim; } else { w=Math.round(w*maxDim/h); h=maxDim; } }
+    const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+    const ctx = canvas.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+    let quality=0.82, dataUrl=canvas.toDataURL('image/jpeg',quality), tries=0;
+    while (dataUrl.length*0.75>maxBytes && quality>0.4 && tries<6){ quality-=0.12; tries++; dataUrl=canvas.toDataURL('image/jpeg',quality); }
+    PRA.photo = dataUrl;
+    $('praPhotoPreview').src = dataUrl;
+    $('praPhotoPreviewWrap').style.display='block';
+  };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); alert("Non sono riuscito a caricare questa foto, riprova con un'altra."); };
+  img.src = url;
+}
+function praClearPhoto(){
+  PRA.photo = null; $('praPhotoInput').value=''; $('praPhotoPreviewWrap').style.display='none';
+}
+function praAddPlayer(){
+  const name = $('praName').value.trim();
+  if (!name) return alert('Scrivi il nome del calciatore!');
+  const role = $('praRole').value;
+  const team = $('praTeam').value.trim();
+  const list = fcSavedList();
+  const i = list.findIndex(s=>s.name===name);
+  const entry = { name, role, team, photo: PRA.photo||null };
+  if (i>=0) list[i] = entry; else list.push(entry);
+  try{
+    localStorage.setItem('capone_fantacalcio_standalone_saved', JSON.stringify(list));
+  }catch(e){ alert('⚠️ Memoria piena: prova a eliminare qualche calciatore più vecchio, o usa foto più piccole.'); return; }
+  $('praName').value=''; $('praTeam').value=''; praClearPhoto();
+  fcRenderPrepList();
+  if (document.getElementById('fcPresetRow')) fcRenderPresetRow();
+}
+function praDeletePlayer(name){
+  if (!confirm(`Eliminare "${name}" dall'elenco dei calciatori pronti?`)) return;
+  const list = fcSavedList().filter(x=>x.name!==name);
+  try{ localStorage.setItem('capone_fantacalcio_standalone_saved', JSON.stringify(list)); }catch(e){}
+  fcRenderPrepList();
+  if (document.getElementById('fcPresetRow')) fcRenderPresetRow();
+}
+function fcRenderPrepList(){
+  const list = fcSavedList();
+  $('praCount').textContent = list.length;
+  $('praList').innerHTML = list.length ? list.map(s=>
+    `<div class="rosterItem">${s.photo?`<img src="${s.photo}">`:''}
+      <span class="roleBadge ${s.role||'A'}" style="margin-top:0">${s.role||''}</span>
+      <span>${esc(s.name)}${s.team?` <span style="opacity:.6">(${esc(s.team)})</span>`:''}</span>
+      <button class="btn ghost small" style="margin-left:auto; padding:6px 10px" onclick="praDeletePlayer('${esc(s.name).replace(/'/g,"\\'")}')">🗑</button>
+    </div>`
+  ).join('') : '<div class="rosterEmpty">Ancora nessun calciatore pronto — aggiungine uno dal modulo qui sopra.</div>';
+}
+function praBackupDownload(){
+  const list = fcSavedList();
+  const blob = new Blob([JSON.stringify(list, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = 'backup-calciatori-fantacalcio-'+stamp+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function praBackupRestore(evt){
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    let imported;
+    try{ imported = JSON.parse(reader.result); }catch(e){ alert('⚠️ File non valido: non sembra un backup di calciatori.'); return; }
+    if (!Array.isArray(imported)) { alert('⚠️ File non valido: non sembra un backup di calciatori.'); return; }
+    const list = fcSavedList();
+    let aggiunti=0, aggiornati=0;
+    imported.forEach(s=>{
+      if (!s || !s.name) return;
+      const i = list.findIndex(x=>x.name===s.name);
+      if (i>=0){ list[i]=s; aggiornati++; } else { list.push(s); aggiunti++; }
+    });
+    try{
+      localStorage.setItem('capone_fantacalcio_standalone_saved', JSON.stringify(list));
+      fcRenderPrepList();
+      if (document.getElementById('fcPresetRow')) fcRenderPresetRow();
+      alert(`✔ Backup ripristinato: ${aggiunti} calciatori aggiunti, ${aggiornati} aggiornati.`);
+    }catch(e){ alert('⚠️ Memoria piena: il backup è troppo grande per essere ripristinato tutto insieme.'); }
+    $('praRestoreInput').value='';
+  };
+  reader.readAsText(file);
 }
 
 /* ---------------- PARTECIPANTE ---------------- */
@@ -748,7 +983,7 @@ function fcRenderMyRoster(roster){
   $('fcMyRoster').innerHTML = ['P','D','C','A'].map(rk=>{
     const list = (roster&&roster[rk])||[];
     return `<div class="rosterRoleHead role${rk}">${ROLE_NAMES_PL[rk]} (${list.length})</div>` +
-      (list.length ? list.map(p=>`<div class="rosterItem">${p.photo?`<img src="${p.photo}">`:''}<span>${esc(p.name)}</span><span class="pz">${p.price}</span></div>`).join('')
+      (list.length ? list.map(p=>`<div class="rosterItem">${p.photo?`<img src="${p.photo}">`:''}<span>${esc(p.name)}${p.team?` <span style="opacity:.6">(${esc(p.team)})</span>`:''}</span><span class="pz">${p.price}</span></div>`).join('')
         : `<div class="rosterEmpty">Ancora nessun acquisto in questo ruolo</div>`);
   }).join('');
 }
