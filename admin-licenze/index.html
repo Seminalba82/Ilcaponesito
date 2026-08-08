@@ -517,6 +517,8 @@ function eliminaLicenza(codice){
 function loadLicenze(){
   db.ref('licenze').on('value', snap=>{
     licenzeCache = snap.val() || {};
+    renderFolders();
+    renderExpiryAlert();
     renderLicenze();
   });
 }
@@ -535,6 +537,7 @@ function renderLicenze(){
 
   const filtered = entries.filter(([code, lic])=>{
     const scaduta = lic.data_scadenza < now;
+    if(currentFolder && (lic.categoria||'clienti') !== currentFolder) return false;
     if(currentFilter==='attive') return !scaduta && lic.attiva!==false;
     if(currentFilter==='scadute') return scaduta || lic.attiva===false;
     return true;
