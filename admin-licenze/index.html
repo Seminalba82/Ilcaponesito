@@ -395,6 +395,7 @@ function generaLicenza(){
   const cliente = document.getElementById('fCliente').value.trim();
   const piano = document.getElementById('fPiano').value;
   const note = document.getElementById('fNote').value.trim();
+  const categoria = document.getElementById('fCategoria').value;
 
   if(!cliente){ alert('Inserisci il nome del cliente.'); return; }
 
@@ -414,6 +415,7 @@ function generaLicenza(){
     const scadenza = now + PIANI_MS[piano];
     const aggiornamento = {
       cliente,
+      categoria,
       tipo_piano: piano,
       note: note || null,
       minigiochi_abilitati,
@@ -438,6 +440,7 @@ function generaLicenza(){
   const codice = generaCodice();
 
   const licenza = {
+    categoria,
     cliente,
     tipo_piano: piano,
     data_inizio: now,
