@@ -229,7 +229,72 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-let MINIGIOCHI = [
+const CATEGORIE = [
+  {k:'clienti', l:'Clienti', icon:'💼'},
+  {k:'personali', l:'Personali', icon:'👤'},
+  {k:'prova_gratuita', l:'Prova Gratuita', icon:'🧪'},
+  {k:'regalo', l:'Regalo', icon:'🎁'}
+];
+let currentFolder = null; // null = mostra tutte le cartelle
+
+function setFolder(k){
+  currentFolder = k;
+  renderFolders();
+  renderLicenze();
+}
+
+function renderFolders(){
+  const grid = document.getElementById('folderGrid');
+  const now = Date.now();
+  const counts = {};
+  CATEGORIE.forEach(c=> counts[c.k] = {attive:0, scadute:0});
+  Object.values(licenzeCache).forEach(lic=>{
+    const cat = lic.categoria || 'clienti';
+    if(!counts[cat]) counts[cat] = {attive:0, scadute:0};
+    const scaduta = lic.data_scadenza < now || lic.attiva === false;
+    if(scaduta) counts[cat].scadute++; else counts[cat].attive++;
+  });
+
+  const totAttive = Object.values(counts).reduce((s,c)=>s+c.attive,0);
+  const totScadute = Object.values(counts).reduce((s,c)=>s+c.scadute,0);
+
+  const allCard = `
+    <div class="folder-card ${currentFolder===null?'active':''}" onclick="setFolder(null)">
+      <div class="fc-icon">📁</div>
+      <div class="fc-label">Tutte</div>
+      <div class="fc-counts"><b class="ok">${totAttive}</b> attive · <b class="bad">${totScadute}</b> scadute</div>
+    </div>`;
+
+  const cards = CATEGORIE.map(c=>{
+    const cnt = counts[c.k] || {attive:0,scadute:0};
+    return `
+    <div class="folder-card ${currentFolder===c.k?'active':''}" onclick="setFolder('${c.k}')">
+      <div class="fc-icon">${c.icon}</div>
+      <div class="fc-label">${c.l}</div>
+      <div class="fc-counts"><b class="ok">${cnt.attive}</b> attive · <b class="bad">${cnt.scadute}</b> scadute</div>
+    </div>`;
+  }).join('');
+
+  grid.innerHTML = allCard + cards;
+}
+
+function renderExpiryAlert(){
+  const box = document.getElementById('expiryAlert');
+  const list = document.getElementById('expiryList');
+  const now = Date.now();
+  const soglia = now + 3*24*60*60*1000;
+  const inScadenza = Object.entries(licenzeCache).filter(([code, lic])=>{
+    return lic.attiva !== false && lic.data_scadenza > now && lic.data_scadenza <= soglia;
+  }).sort((a,b)=> a[1].data_scadenza - b[1].data_scadenza);
+
+  if(inScadenza.length === 0){ box.style.display = 'none'; return; }
+
+  box.style.display = 'block';
+  list.innerHTML = inScadenza.map(([code, lic])=>
+    `<div class="ea-line">${code} — ${lic.cliente||'—'} · scade ${new Date(lic.data_scadenza).toLocaleString('it-IT')}</div>`
+  ).join('');
+}
+  let MINIGIOCHI = [
   {k:'mini', l:'🥃 Bussolotti'},
   {k:'dice', l:'🎲 Pari o Dispari'},
   {k:'simon', l:'🎨 Simon'},
