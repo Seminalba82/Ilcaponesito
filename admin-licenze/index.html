@@ -473,6 +473,7 @@ function modificaLicenza(codice){
   document.getElementById('fCliente').value = lic.cliente || '';
   document.getElementById('fPiano').value = lic.tipo_piano || 'giorno';
   document.getElementById('fNote').value = lic.note || '';
+  document.getElementById('fCategoria').value = lic.categoria || 'clienti';
 
   document.querySelectorAll('.mini-cb').forEach(cb=>{
     const abil = lic.minigiochi_abilitati ? lic.minigiochi_abilitati[cb.value] : true;
