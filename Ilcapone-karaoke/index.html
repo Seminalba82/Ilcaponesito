@@ -488,6 +488,166 @@ let ytPlayer = null;
 let isProjector = false;
 
 // ---------------------------------------------------------------
+// LETTORE CDG — testo karaoke sincronizzato (formato CD+Grafica)
+// Parser dello standard: pacchetti da 24 byte, 300 al secondo.
+// Schermo 300x216px composto da tile di 6x12px (50 colonne x 18 righe).
+// ---------------------------------------------------------------
+const CDG_PACKETS_PER_SEC = 300;
+const CDG_CMD_MASK = 0x3F;
+const CDG_COMMAND = 9;
+const CDG_INST_MEMORY_PRESET = 1;
+const CDG_INST_BORDER_PRESET = 2;
+const CDG_INST_TILE_BLOCK = 6;
+const CDG_INST_SCROLL_PRESET = 20;
+const CDG_INST_SCROLL_COPY = 24;
+const CDG_INST_TRANSPARENT_COLOR = 28;
+const CDG_INST_LOAD_LOW = 30;
+const CDG_INST_LOAD_HIGH = 31;
+const CDG_INST_TILE_BLOCK_XOR = 38;
+const CDG_W = 300, CDG_H = 216;
+
+class CdgPlayer{
+  constructor(canvas){
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.imageData = this.ctx.createImageData(CDG_W, CDG_H);
+    this.reset();
+  }
+  reset(){
+    this.packets = null;       // Uint8Array grezzo, caricato una volta
+    this.nextPacketIndex = 0;
+    this.pixels = new Uint8Array(CDG_W * CDG_H); // indice colore (0-15) per pixel
+    this.palette = new Array(16).fill(0).map(() => [0,0,0]);
+    this.borderColor = 0;
+    this.transparentIndex = -1;
+    this.hOffset = 0; this.vOffset = 0;
+    this.loaded = false;
+    this.loadingUrl = null;
+  }
+  async load(url){
+    if(this.loadingUrl === url) return;
+    this.reset();
+    this.loadingUrl = url;
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const buf = await res.arrayBuffer();
+      this.packets = new Uint8Array(buf);
+      this.loaded = true;
+      this.error = null;
+    }catch(e){
+      this.loaded = false;
+      this.error = e.message || 'errore sconosciuto';
+      console.error('Caricamento file .cdg fallito:', url, e);
+    }
+  }
+  // Esegue tutti i pacchetti dall'ultimo processato fino al tempo audio corrente.
+  advanceTo(seconds){
+    if(!this.loaded || !this.packets) return;
+    const targetPacket = Math.max(0, Math.floor(seconds * CDG_PACKETS_PER_SEC));
+    if(targetPacket < this.nextPacketIndex){
+      // si torna indietro (riavvolgimento/aggancio a posizione precedente): si riparte da zero
+      this.pixels.fill(0);
+      this.palette = new Array(16).fill(0).map(() => [0,0,0]);
+      this.nextPacketIndex = 0;
+    }
+    const totalPackets = this.packets.length / 24;
+    const end = Math.min(targetPacket, totalPackets);
+    for(; this.nextPacketIndex < end; this.nextPacketIndex++){
+      this.processPacket(this.nextPacketIndex);
+    }
+  }
+  processPacket(i){
+    const off = i * 24;
+    const p = this.packets;
+    if((p[off] & CDG_CMD_MASK) !== CDG_COMMAND) return;
+    const inst = p[off + 1] & CDG_CMD_MASK;
+    const d = p.subarray(off + 4, off + 20); // 16 byte dati
+
+    if(inst === CDG_INST_MEMORY_PRESET){
+      const color = d[0] & 0x0F;
+      this.pixels.fill(color);
+    }else if(inst === CDG_INST_BORDER_PRESET){
+      this.borderColor = d[0] & 0x0F;
+    }else if(inst === CDG_INST_TILE_BLOCK || inst === CDG_INST_TILE_BLOCK_XOR){
+      const color0 = d[0] & 0x0F;
+      const color1 = d[1] & 0x0F;
+      const row = d[2] & 0x1F;
+      const col = d[3] & 0x3F;
+      const baseX = col * 6, baseY = row * 12;
+      if(baseX + 6 <= CDG_W && baseY + 12 <= CDG_H){
+        for(let r = 0; r < 12; r++){
+          const rowByte = d[4 + r] & 0x3F;
+          for(let c = 0; c < 6; c++){
+            const bit = (rowByte >> (5 - c)) & 1;
+            const idx = (baseY + r) * CDG_W + (baseX + c);
+            if(inst === CDG_INST_TILE_BLOCK_XOR){
+              this.pixels[idx] = this.pixels[idx] ^ (bit ? color1 : color0);
+            }else{
+              this.pixels[idx] = bit ? color1 : color0;
+            }
+          }
+        }
+      }
+    }else if(inst === CDG_INST_LOAD_LOW || inst === CDG_INST_LOAD_HIGH){
+      const base = inst === CDG_INST_LOAD_HIGH ? 8 : 0;
+      for(let i2 = 0; i2 < 8; i2++){
+        const b0 = d[i2 * 2] & 0x3F, b1 = d[i2 * 2 + 1] & 0x3F;
+        const red = (b0 >> 2) & 0x0F;
+        const green = ((b0 & 0x03) << 2) | ((b1 >> 4) & 0x03);
+        const blue = b1 & 0x0F;
+        this.palette[base + i2] = [red * 17, green * 17, blue * 17];
+      }
+    }else if(inst === CDG_INST_TRANSPARENT_COLOR){
+      this.transparentIndex = d[0] & 0x0F;
+    }
+    // Nota: i comandi di scroll fine (SCROLL_PRESET/SCROLL_COPY) non sono
+    // implementati — riguardano solo alcuni effetti di scorrimento decorativo,
+    // non il testo karaoke standard che usa i tile block.
+  }
+  draw(){
+    const data = this.imageData.data;
+    for(let i = 0; i < this.pixels.length; i++){
+      const c = this.palette[this.pixels[i]] || [0,0,0];
+      const o = i * 4;
+      data[o] = c[0]; data[o+1] = c[1]; data[o+2] = c[2]; data[o+3] = 255;
+    }
+    this.ctx.putImageData(this.imageData, 0, 0);
+  }
+}
+
+// Ciclo continuo (indipendente dagli aggiornamenti del database) che tiene
+// il testo a schermo sincronizzato fotogramma per fotogramma con l'audio.
+function cdgAnimationLoop(){
+  if(consoleCdgActive && consoleCdgPlayer){
+    const v = document.getElementById('console-video');
+    if(v){ consoleCdgPlayer.advanceTo(v.currentTime); consoleCdgPlayer.draw(); }
+    const errEl = document.getElementById('console-cdg-error');
+    if(errEl) errEl.style.display = (consoleCdgPlayer.error && !consoleCdgPlayer.loaded) ? 'block' : 'none';
+    if(errEl && consoleCdgPlayer.error) errEl.textContent = 'Testo CDG non caricato (' + consoleCdgPlayer.error + ') — l\'audio prosegue comunque.';
+  }
+  if(projCdgActive && projCdgPlayer){
+    const v = document.getElementById('proj-video');
+    if(v){ projCdgPlayer.advanceTo(v.currentTime); projCdgPlayer.draw(); }
+  }
+  requestAnimationFrame(cdgAnimationLoop);
+}
+requestAnimationFrame(cdgAnimationLoop);
+
+// ---------------------------------------------------------------
+// SESSIONE / PLAYER (lato console = "regia" — vede e sente anche lei)
+// ---------------------------------------------------------------
+let consoleCurrentSource = null;
+let consoleYtPlayer = null;
+let consoleLastRestartToken = null;
+let consoleMuted = true; // di default la regia è muta: il suono esce solo dal proiettore, per evitare doppio audio/eco
+let heartbeatInterval = null;
+let consoleCdgPlayer = null;
+let projCdgPlayer = null;
+let consoleCdgActive = false;
+let projCdgActive = false;
+
+// ---------------------------------------------------------------
 // AVVIO
 // ---------------------------------------------------------------
 (function init(){
@@ -841,165 +1001,6 @@ function clearQueue(){
   if(confirm('Svuotare tutta la coda?')) db.ref('queue').remove();
 }
 
-// ---------------------------------------------------------------
-// LETTORE CDG — testo karaoke sincronizzato (formato CD+Grafica)
-// Parser dello standard: pacchetti da 24 byte, 300 al secondo.
-// Schermo 300x216px composto da tile di 6x12px (50 colonne x 18 righe).
-// ---------------------------------------------------------------
-const CDG_PACKETS_PER_SEC = 300;
-const CDG_CMD_MASK = 0x3F;
-const CDG_COMMAND = 9;
-const CDG_INST_MEMORY_PRESET = 1;
-const CDG_INST_BORDER_PRESET = 2;
-const CDG_INST_TILE_BLOCK = 6;
-const CDG_INST_SCROLL_PRESET = 20;
-const CDG_INST_SCROLL_COPY = 24;
-const CDG_INST_TRANSPARENT_COLOR = 28;
-const CDG_INST_LOAD_LOW = 30;
-const CDG_INST_LOAD_HIGH = 31;
-const CDG_INST_TILE_BLOCK_XOR = 38;
-const CDG_W = 300, CDG_H = 216;
-
-class CdgPlayer{
-  constructor(canvas){
-    this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
-    this.imageData = this.ctx.createImageData(CDG_W, CDG_H);
-    this.reset();
-  }
-  reset(){
-    this.packets = null;       // Uint8Array grezzo, caricato una volta
-    this.nextPacketIndex = 0;
-    this.pixels = new Uint8Array(CDG_W * CDG_H); // indice colore (0-15) per pixel
-    this.palette = new Array(16).fill(0).map(() => [0,0,0]);
-    this.borderColor = 0;
-    this.transparentIndex = -1;
-    this.hOffset = 0; this.vOffset = 0;
-    this.loaded = false;
-    this.loadingUrl = null;
-  }
-  async load(url){
-    if(this.loadingUrl === url) return;
-    this.reset();
-    this.loadingUrl = url;
-    try{
-      const res = await fetch(url);
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const buf = await res.arrayBuffer();
-      this.packets = new Uint8Array(buf);
-      this.loaded = true;
-      this.error = null;
-    }catch(e){
-      this.loaded = false;
-      this.error = e.message || 'errore sconosciuto';
-      console.error('Caricamento file .cdg fallito:', url, e);
-    }
-  }
-  // Esegue tutti i pacchetti dall'ultimo processato fino al tempo audio corrente.
-  advanceTo(seconds){
-    if(!this.loaded || !this.packets) return;
-    const targetPacket = Math.max(0, Math.floor(seconds * CDG_PACKETS_PER_SEC));
-    if(targetPacket < this.nextPacketIndex){
-      // si torna indietro (riavvolgimento/aggancio a posizione precedente): si riparte da zero
-      this.pixels.fill(0);
-      this.palette = new Array(16).fill(0).map(() => [0,0,0]);
-      this.nextPacketIndex = 0;
-    }
-    const totalPackets = this.packets.length / 24;
-    const end = Math.min(targetPacket, totalPackets);
-    for(; this.nextPacketIndex < end; this.nextPacketIndex++){
-      this.processPacket(this.nextPacketIndex);
-    }
-  }
-  processPacket(i){
-    const off = i * 24;
-    const p = this.packets;
-    if((p[off] & CDG_CMD_MASK) !== CDG_COMMAND) return;
-    const inst = p[off + 1] & CDG_CMD_MASK;
-    const d = p.subarray(off + 4, off + 20); // 16 byte dati
-
-    if(inst === CDG_INST_MEMORY_PRESET){
-      const color = d[0] & 0x0F;
-      this.pixels.fill(color);
-    }else if(inst === CDG_INST_BORDER_PRESET){
-      this.borderColor = d[0] & 0x0F;
-    }else if(inst === CDG_INST_TILE_BLOCK || inst === CDG_INST_TILE_BLOCK_XOR){
-      const color0 = d[0] & 0x0F;
-      const color1 = d[1] & 0x0F;
-      const row = d[2] & 0x1F;
-      const col = d[3] & 0x3F;
-      const baseX = col * 6, baseY = row * 12;
-      if(baseX + 6 <= CDG_W && baseY + 12 <= CDG_H){
-        for(let r = 0; r < 12; r++){
-          const rowByte = d[4 + r] & 0x3F;
-          for(let c = 0; c < 6; c++){
-            const bit = (rowByte >> (5 - c)) & 1;
-            const idx = (baseY + r) * CDG_W + (baseX + c);
-            if(inst === CDG_INST_TILE_BLOCK_XOR){
-              this.pixels[idx] = this.pixels[idx] ^ (bit ? color1 : color0);
-            }else{
-              this.pixels[idx] = bit ? color1 : color0;
-            }
-          }
-        }
-      }
-    }else if(inst === CDG_INST_LOAD_LOW || inst === CDG_INST_LOAD_HIGH){
-      const base = inst === CDG_INST_LOAD_HIGH ? 8 : 0;
-      for(let i2 = 0; i2 < 8; i2++){
-        const b0 = d[i2 * 2] & 0x3F, b1 = d[i2 * 2 + 1] & 0x3F;
-        const red = (b0 >> 2) & 0x0F;
-        const green = ((b0 & 0x03) << 2) | ((b1 >> 4) & 0x03);
-        const blue = b1 & 0x0F;
-        this.palette[base + i2] = [red * 17, green * 17, blue * 17];
-      }
-    }else if(inst === CDG_INST_TRANSPARENT_COLOR){
-      this.transparentIndex = d[0] & 0x0F;
-    }
-    // Nota: i comandi di scroll fine (SCROLL_PRESET/SCROLL_COPY) non sono
-    // implementati — riguardano solo alcuni effetti di scorrimento decorativo,
-    // non il testo karaoke standard che usa i tile block.
-  }
-  draw(){
-    const data = this.imageData.data;
-    for(let i = 0; i < this.pixels.length; i++){
-      const c = this.palette[this.pixels[i]] || [0,0,0];
-      const o = i * 4;
-      data[o] = c[0]; data[o+1] = c[1]; data[o+2] = c[2]; data[o+3] = 255;
-    }
-    this.ctx.putImageData(this.imageData, 0, 0);
-  }
-}
-
-// Ciclo continuo (indipendente dagli aggiornamenti del database) che tiene
-// il testo a schermo sincronizzato fotogramma per fotogramma con l'audio.
-function cdgAnimationLoop(){
-  if(consoleCdgActive && consoleCdgPlayer){
-    const v = document.getElementById('console-video');
-    if(v){ consoleCdgPlayer.advanceTo(v.currentTime); consoleCdgPlayer.draw(); }
-    const errEl = document.getElementById('console-cdg-error');
-    if(errEl) errEl.style.display = (consoleCdgPlayer.error && !consoleCdgPlayer.loaded) ? 'block' : 'none';
-    if(errEl && consoleCdgPlayer.error) errEl.textContent = 'Testo CDG non caricato (' + consoleCdgPlayer.error + ') — l\'audio prosegue comunque.';
-  }
-  if(projCdgActive && projCdgPlayer){
-    const v = document.getElementById('proj-video');
-    if(v){ projCdgPlayer.advanceTo(v.currentTime); projCdgPlayer.draw(); }
-  }
-  requestAnimationFrame(cdgAnimationLoop);
-}
-requestAnimationFrame(cdgAnimationLoop);
-
-// ---------------------------------------------------------------
-// SESSIONE / PLAYER (lato console = "regia" — vede e sente anche lei)
-// ---------------------------------------------------------------
-let consoleCurrentSource = null;
-let consoleYtPlayer = null;
-let consoleLastRestartToken = null;
-let consoleMuted = true; // di default la regia è muta: il suono esce solo dal proiettore, per evitare doppio audio/eco
-let heartbeatInterval = null;
-let consoleCdgPlayer = null;
-let projCdgPlayer = null;
-let consoleCdgActive = false;
-let projCdgActive = false;
 
 // Calcola il punto esatto (in secondi) a cui un player che si aggancia
 // ORA dovrebbe posizionarsi, in base a dove eravamo rimasti + quanto
