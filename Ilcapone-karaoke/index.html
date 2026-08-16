@@ -284,7 +284,11 @@
   </div>
   <div class="modal-error" id="config-error" style="display:block; color:#e0a3a3;"></div>
   <button class="btn primary" onclick="saveConfig()">Salva e avvia la console</button>
-  <p style="font-size:12px;">Questo va fatto una sola volta per dispositivo: resta salvato nella memoria locale del browser.</p>
+  <div style="display:flex; gap:10px;">
+    <button class="btn ghost" onclick="document.getElementById('setup-screen').style.display='none';" style="font-size:11px;">Annulla</button>
+    <button class="btn ghost" onclick="restoreDefaultConfig()" style="font-size:11px;">Ripristina valori predefiniti</button>
+  </div>
+  <p style="font-size:12px;">Serve solo se vuoi collegare un progetto Firebase o un account Cloudinary diverso da quello già incorporato nel file.</p>
 </div>
 
 <!-- ================================================================
@@ -297,7 +301,6 @@
   <input type="password" id="pin-input" inputmode="numeric" maxlength="6" placeholder="••••">
   <div class="modal-error" id="pin-error" style="display:block; color:#e0a3a3;"></div>
   <button class="btn primary" onclick="checkPin()">Entra</button>
-  <button class="btn ghost" onclick="resetConfig()" style="font-size:11px;">Cambia progetto Firebase</button>
 </div>
 
 <!-- ================================================================
@@ -313,7 +316,8 @@
     <div class="topbar-actions">
       <button class="btn" id="open-projector-btn" onclick="openProjectorWindow()">🎬 Apri proiettore</button>
       <button class="btn ghost" onclick="openAddModal()">＋ Aggiungi canzone</button>
-      <button class="btn ghost" onclick="resetConfig()">⚙️ Progetto Firebase</button>
+      <button class="btn ghost" onclick="openConfigOverride()">⚙️ Configurazione</button>
+      <button class="btn ghost" onclick="resetConfig()" title="Richiede di nuovo il PIN al prossimo accesso">🔒 Disconnetti</button>
     </div>
   </header>
   <div class="fallback-link" id="projector-fallback-link" style="display:none; padding:4px 20px;"></div>
@@ -447,6 +451,20 @@ const LS_CLOUDINARY_KEY = 'ilcapone_karaoke_cloudinary_config';
 const LS_PIN_KEY        = 'ilcapone_karaoke_pin_ok';
 const ADMIN_PIN         = '2026'; // <-- cambia questo PIN a piacere prima di usarlo a un evento
 
+// Valori di default incorporati nel file: nessun dispositivo dovrà più
+// inserirli a mano. Restano comunque sovrascrivibili (vedi resetConfig)
+// nel caso in futuro cambiassi progetto Firebase o account Cloudinary.
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCGk5izixxNZsXHvIqRvgCAzO2OzwURhoo",
+  authDomain: "console-karaoke.firebaseapp.com",
+  databaseURL: "https://console-karaoke-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "console-karaoke",
+  storageBucket: "console-karaoke.firebasestorage.app",
+  messagingSenderId: "219352745431",
+  appId: "1:219352745431:web:90bec14fc309158d68f792"
+};
+const DEFAULT_CLOUDINARY_CONFIG = { cloudName: "xcerfto3", uploadPreset: "karaoke_uploads" };
+
 let db;
 let cloudinaryConfig = null; // { cloudName, uploadPreset }
 let libraryCache = {};
@@ -463,19 +481,14 @@ let isProjector = false;
   const params = new URLSearchParams(location.search);
   isProjector = params.get('projector') === '1';
 
+  // Usa un'eventuale configurazione salvata manualmente (override), altrimenti
+  // parte subito con i valori incorporati di default: zero digitazione.
   const savedConfig = localStorage.getItem(LS_CONFIG_KEY);
   const savedCloudinary = localStorage.getItem(LS_CLOUDINARY_KEY);
-  if(!savedConfig || !savedCloudinary){
-    if(isProjector){
-      document.getElementById('proj-idle').innerHTML = 'Console non configurata su questo dispositivo.';
-      document.getElementById('projector').classList.add('active');
-      return;
-    }
-    document.getElementById('setup-screen').style.display = 'flex';
-    return;
-  }
-  cloudinaryConfig = JSON.parse(savedCloudinary);
-  startFirebase(JSON.parse(savedConfig));
+  const fbConfig = savedConfig ? JSON.parse(savedConfig) : DEFAULT_FIREBASE_CONFIG;
+  cloudinaryConfig = savedCloudinary ? JSON.parse(savedCloudinary) : DEFAULT_CLOUDINARY_CONFIG;
+
+  startFirebase(fbConfig);
 })();
 
 function saveConfig(){
@@ -503,10 +516,33 @@ function saveConfig(){
   }
 }
 
-function resetConfig(){
-  if(!confirm('Vuoi scollegare questo dispositivo dal progetto Firebase/Cloudinary attuale?')) return;
+// Apre la schermata di configurazione SOLO se richiesto esplicitamente
+// (es. per collegare un progetto Firebase/Cloudinary diverso), precompilata
+// con i valori attualmente in uso.
+function openConfigOverride(){
+  const active = (function(){
+    try{ return JSON.parse(localStorage.getItem(LS_CONFIG_KEY)) || DEFAULT_FIREBASE_CONFIG; }
+    catch(e){ return DEFAULT_FIREBASE_CONFIG; }
+  })();
+  const activeCloud = (function(){
+    try{ return JSON.parse(localStorage.getItem(LS_CLOUDINARY_KEY)) || DEFAULT_CLOUDINARY_CONFIG; }
+    catch(e){ return DEFAULT_CLOUDINARY_CONFIG; }
+  })();
+  document.getElementById('config-input').value = JSON.stringify(active);
+  document.getElementById('cloudinary-name-input').value = activeCloud.cloudName || '';
+  document.getElementById('cloudinary-preset-input').value = activeCloud.uploadPreset || '';
+  document.getElementById('setup-screen').style.display = 'flex';
+}
+
+function restoreDefaultConfig(){
+  if(!confirm('Ripristinare i valori di default incorporati nel file (progetto "console-karaoke" + Cloudinary "xcerfto3")?')) return;
   localStorage.removeItem(LS_CONFIG_KEY);
   localStorage.removeItem(LS_CLOUDINARY_KEY);
+  location.reload();
+}
+
+function resetConfig(){
+  if(!confirm('Vuoi disconnetterti (serve di nuovo il PIN al prossimo accesso)?')) return;
   localStorage.removeItem(LS_PIN_KEY);
   location.reload();
 }
