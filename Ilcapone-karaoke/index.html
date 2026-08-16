@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0053)file:///C:/Users/semin/Downloads/karaoke-console.html -->
+<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IL CAPONE KARAOKE — Console</title>
 
 <!-- ============================================================
      FIREBASE SDK (compat, via CDN — un solo file, nessuna build)
      ============================================================ -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="./index_files/firebase-app-compat.js.download"></script>
+<script src="./index_files/firebase-database-compat.js.download"></script>
 
 <style>
   /* ============================================================
@@ -261,7 +261,7 @@
      SCHERMATA 1 — CONFIGURAZIONE FIREBASE (solo alla primissima apertura,
      poi il config resta salvato nel browser di questo dispositivo)
      ================================================================ -->
-<div id="setup-screen">
+<div id="setup-screen" style="display: flex;">
   <div class="marquee-strip" style="position:absolute;top:0;left:0;"></div>
   <h2>Prima apertura — collega i servizi</h2>
   <p>
@@ -269,7 +269,7 @@
     <strong>Realtime Database</strong> (modalità test, non serve Storage). Da
     "Impostazioni progetto → Le tue app → Web" copia l'oggetto <code>firebaseConfig</code> e incollalo qui sotto.
   </p>
-  <textarea id="config-input" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"...","messagingSenderId":"...","appId":"..."}'></textarea>
+  <textarea id="config-input" placeholder="{&quot;apiKey&quot;:&quot;...&quot;,&quot;authDomain&quot;:&quot;...&quot;,&quot;databaseURL&quot;:&quot;...&quot;,&quot;projectId&quot;:&quot;...&quot;,&quot;messagingSenderId&quot;:&quot;...&quot;,&quot;appId&quot;:&quot;...&quot;}"></textarea>
   <p>
     Per i file audio/video crea un account gratuito su <strong>cloudinary.com</strong> (nessuna carta richiesta),
     poi copia il tuo "Cloud name" e crea un "Upload preset" impostato su <strong>Unsigned</strong>.
@@ -304,7 +304,7 @@
      APP PRINCIPALE — CONSOLE DA REGIA
      ================================================================ -->
 <div id="app">
-  <div class="marquee-strip" id="marquee" ></div>
+  <div class="marquee-strip" id="marquee"></div>
   <header class="topbar">
     <div class="brand">
       <h1>IL CAPONE</h1>
@@ -332,7 +332,7 @@
     <section class="panel center-stage">
       <div class="curtain-frame" id="curtain-frame">
         <div class="idle-text" id="idle-text">Il sipario è chiuso.<br>Aggiungi un brano alla coda per iniziare.</div>
-        <video id="console-video" style="display:none;" playsinline></video>
+        <video id="console-video" style="display:none;" playsinline=""></video>
         <div class="yt-box" id="console-yt-container" style="display:none;"></div>
         <div class="tap-to-play" id="console-tap-to-play" onclick="resumeConsolePlayback()">▶ Tocca per avviare l'audio</div>
       </div>
@@ -350,6 +350,8 @@
         <input type="range" id="volume-slider" min="0" max="100" value="80" oninput="setVolume(this.value)">
         <span id="volume-label">80%</span>
       </div>
+      <button class="btn ghost" id="console-mute-btn" onclick="toggleConsoleMute()" style="font-size:11px;">🔇 Audio qui: silenziato</button>
+      <div class="fallback-link" style="max-width:320px;">Il suono per il pubblico esce dal proiettore. Attiva l'audio qui solo se stai usando questo dispositivo da solo, senza proiettore collegato.</div>
     </section>
 
     <!-- CODA -->
@@ -368,10 +370,10 @@
      ================================================================ -->
 <div class="modal-overlay" id="add-modal-overlay">
   <div class="modal">
-    <h3>Aggiungi canzone</h3>
+    <h3 id="add-modal-title">Aggiungi canzone</h3>
     <div class="tabs">
-      <button class="tab-btn active" id="tab-btn-storage" onclick="switchTab('storage')">Carica file</button>
-      <button class="tab-btn" id="tab-btn-youtube" onclick="switchTab('youtube')">Link YouTube</button>
+      <button class="tab-btn active" id="tab-btn-storage" onclick="switchTab(&#39;storage&#39;)">Carica file</button>
+      <button class="tab-btn" id="tab-btn-youtube" onclick="switchTab(&#39;youtube&#39;)">Link YouTube</button>
     </div>
 
     <div class="tab-pane active" id="tab-storage">
@@ -386,6 +388,7 @@
       <div class="field">
         <label>File audio o video</label>
         <input type="file" id="storage-file" accept="audio/*,video/*">
+        <div class="fallback-link" id="storage-file-hint" style="display:none; text-align:left; margin-top:6px;">Lascia vuoto per mantenere il file già caricato, oppure scegline uno nuovo per sostituirlo.</div>
       </div>
       <div class="upload-progress" id="upload-progress"><div class="upload-progress-bar" id="upload-progress-bar"></div></div>
     </div>
@@ -422,7 +425,7 @@
     IL CAPONE KARAOKE
     <span class="sub">In attesa del prossimo brano…</span>
   </div>
-  <video id="proj-video" style="display:none;" playsinline></video>
+  <video id="proj-video" style="display:none;" playsinline=""></video>
   <div id="proj-yt-container" style="display:none; width:100%; height:100%;"></div>
   <div class="ticker" id="proj-ticker" style="display:none;">
     <span class="t-title" id="ticker-title"></span>
@@ -573,22 +576,69 @@ function renderLibrary(){
         <div class="song-title">${escapeHtml(s.title)} <span class="song-tag ${s.source === 'cloudinary' ? 'storage' : 'youtube'}">${s.source === 'cloudinary' ? 'File' : 'YouTube'}</span></div>
         <div class="song-artist">${escapeHtml(s.artist||'')}</div>
       </div>
-      <button class="icon-btn" title="Aggiungi in coda" onclick="addToQueue('${id}')">＋</button>
+      <div style="display:flex; gap:6px; flex-shrink:0;">
+        <button class="icon-btn" title="Modifica" onclick="openEditModal('${id}')" style="font-size:12px;">✎</button>
+        <button class="icon-btn" title="Elimina dalla libreria" onclick="deleteSong('${id}')" style="font-size:12px;">🗑</button>
+        <button class="icon-btn" title="Aggiungi in coda" onclick="addToQueue('${id}')">＋</button>
+      </div>
     </div>
   `).join('');
+}
+
+function deleteSong(id){
+  const song = libraryCache[id];
+  if(!song) return;
+  if(!confirm('Eliminare "' + song.title + '" dalla libreria? (resta nella coda solo se già in riproduzione)')) return;
+  db.ref('library/' + id).remove();
+  // rimuove anche eventuali copie in coda non ancora suonate
+  Object.entries(queueCache).forEach(([qid, item]) => {
+    if(item.songId === id) db.ref('queue/' + qid).remove();
+  });
 }
 
 // ---------------------------------------------------------------
 // AGGIUNTA CANZONE (modale)
 // ---------------------------------------------------------------
-function openAddModal(){ document.getElementById('add-modal-overlay').classList.add('open'); }
+let editingSongId = null;
+
+function openAddModal(){
+  editingSongId = null;
+  document.getElementById('add-modal-title').textContent = 'Aggiungi canzone';
+  document.getElementById('add-modal-submit').textContent = 'Salva in libreria';
+  document.getElementById('storage-file-hint').style.display = 'none';
+  document.getElementById('add-modal-overlay').classList.add('open');
+}
+
+function openEditModal(id){
+  const song = libraryCache[id];
+  if(!song) return;
+  editingSongId = id;
+  document.getElementById('add-modal-title').textContent = 'Modifica canzone';
+  document.getElementById('add-modal-submit').textContent = 'Salva modifiche';
+
+  if(song.source === 'cloudinary'){
+    switchTab('storage');
+    document.getElementById('storage-title').value = song.title || '';
+    document.getElementById('storage-artist').value = song.artist || '';
+    document.getElementById('storage-file-hint').style.display = 'block';
+  }else{
+    switchTab('youtube');
+    document.getElementById('yt-title').value = song.title || '';
+    document.getElementById('yt-artist').value = song.artist || '';
+    document.getElementById('yt-url').value = song.youtubeId ? ('https://www.youtube.com/watch?v=' + song.youtubeId) : '';
+  }
+  document.getElementById('add-modal-overlay').classList.add('open');
+}
+
 function closeAddModal(){
   document.getElementById('add-modal-overlay').classList.remove('open');
   document.getElementById('add-modal-error').style.display = 'none';
+  document.getElementById('storage-file-hint').style.display = 'none';
   ['storage-title','storage-artist','yt-title','yt-artist','yt-url'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('storage-file').value = '';
   document.getElementById('upload-progress').style.display = 'none';
   document.getElementById('upload-progress-bar').style.width = '0%';
+  editingSongId = null;
 }
 function switchTab(name){
   document.getElementById('tab-storage').classList.toggle('active', name === 'storage');
@@ -606,16 +656,32 @@ function submitAddSong(){
   const errEl = document.getElementById('add-modal-error');
   errEl.style.display = 'none';
   const activeStorage = document.getElementById('tab-storage').classList.contains('active');
+  const targetRef = editingSongId ? db.ref('library/' + editingSongId) : db.ref('library').push();
+  const existing = editingSongId ? (libraryCache[editingSongId] || {}) : null;
 
   if(activeStorage){
     const title = document.getElementById('storage-title').value.trim();
     const artist = document.getElementById('storage-artist').value.trim();
     const file = document.getElementById('storage-file').files[0];
-    if(!title || !file){
-      errEl.textContent = 'Inserisci almeno un titolo e scegli un file.';
+
+    if(!title){
+      errEl.textContent = 'Inserisci almeno un titolo.';
       errEl.style.display = 'block';
       return;
     }
+    if(!file && !(editingSongId && existing.source === 'cloudinary')){
+      errEl.textContent = 'Scegli un file.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    if(!file){
+      // Modifica senza nuovo file: mantiene l'URL già caricato su Cloudinary
+      targetRef.update({ title, artist, source: 'cloudinary', url: existing.url, addedAt: existing.addedAt || Date.now() });
+      closeAddModal();
+      return;
+    }
+
     document.getElementById('upload-progress').style.display = 'block';
     document.getElementById('add-modal-submit').disabled = true;
 
@@ -639,7 +705,7 @@ function submitAddSong(){
         return;
       }
       const res = JSON.parse(xhr.responseText);
-      db.ref('library').push({ title, artist, source: 'cloudinary', url: res.secure_url, addedAt: Date.now() });
+      targetRef.update({ title, artist, source: 'cloudinary', url: res.secure_url, youtubeId: null, addedAt: existing ? (existing.addedAt || Date.now()) : Date.now() });
       closeAddModal();
     };
     xhr.onerror = () => {
@@ -659,7 +725,7 @@ function submitAddSong(){
       errEl.style.display = 'block';
       return;
     }
-    db.ref('library').push({ title, artist, source: 'youtube', youtubeId: ytId, addedAt: Date.now() });
+    targetRef.update({ title, artist, source: 'youtube', youtubeId: ytId, url: null, addedAt: existing ? (existing.addedAt || Date.now()) : Date.now() });
     closeAddModal();
   }
 }
@@ -715,6 +781,19 @@ function clearQueue(){
 let consoleCurrentSource = null;
 let consoleYtPlayer = null;
 let consoleLastRestartToken = null;
+let consoleMuted = true; // di default la regia è muta: il suono esce solo dal proiettore, per evitare doppio audio/eco
+let heartbeatInterval = null;
+
+// Calcola il punto esatto (in secondi) a cui un player che si aggancia
+// ORA dovrebbe posizionarsi, in base a dove eravamo rimasti + quanto
+// tempo è passato da allora (se il brano è in riproduzione).
+function computeTargetPosition(s){
+  const base = s.positionSeconds || 0;
+  if(s.isPlaying && s.updatedAt){
+    return base + Math.max(0, (Date.now() - s.updatedAt) / 1000);
+  }
+  return base;
+}
 
 function attachSessionListenerConsole(){
   db.ref('session').on('value', snap => {
@@ -722,6 +801,21 @@ function attachSessionListenerConsole(){
     renderConsoleStage();
     renderConsolePlayer(sessionCache);
   });
+  // "Battito" periodico: mentre la regia sta suonando qualcosa, scrive ogni
+  // 4s la posizione reale di riproduzione, così chi si aggancia dopo
+  // (es. il proiettore aperto in ritardo) sa esattamente da dove ripartire.
+  if(heartbeatInterval) clearInterval(heartbeatInterval);
+  heartbeatInterval = setInterval(() => {
+    if(!sessionCache.songId || !sessionCache.isPlaying) return;
+    let t = null;
+    if(sessionCache.source === 'cloudinary'){
+      const v = document.getElementById('console-video');
+      if(v && !isNaN(v.currentTime)) t = v.currentTime;
+    }else if(sessionCache.source === 'youtube' && consoleYtPlayer && consoleYtPlayer.getCurrentTime){
+      t = consoleYtPlayer.getCurrentTime();
+    }
+    if(t != null) db.ref('session').update({ positionSeconds: t, updatedAt: Date.now() });
+  }, 4000);
 }
 
 function renderConsoleStage(){
@@ -769,17 +863,24 @@ function renderConsolePlayer(s){
   const restarted = s.restartToken && s.restartToken !== consoleLastRestartToken;
   consoleLastRestartToken = s.restartToken || consoleLastRestartToken;
   const vol = (s.volume != null ? s.volume : 80) / 100;
+  const target = computeTargetPosition(s);
 
   if(s.source === 'cloudinary'){
     ytContainer.style.display = 'none';
     videoEl.style.display = 'block';
+    videoEl.muted = consoleMuted;
     if(consoleCurrentSource !== 'cloudinary:' + s.url){
       consoleCurrentSource = 'cloudinary:' + s.url;
       videoEl.src = s.url;
       videoEl.load();
-      videoEl.oncanplay = () => { if(s.isPlaying) attemptPlay(videoEl, tapOverlay); };
+      videoEl.oncanplay = () => {
+        videoEl.currentTime = target;
+        if(s.isPlaying) attemptPlay(videoEl, tapOverlay);
+      };
+    }else{
+      if(restarted) videoEl.currentTime = 0;
+      else if(Math.abs(videoEl.currentTime - target) > 1.5) videoEl.currentTime = target;
     }
-    if(restarted) videoEl.currentTime = 0;
     videoEl.volume = vol;
     if(s.isPlaying) attemptPlay(videoEl, tapOverlay); else videoEl.pause();
 
@@ -789,21 +890,29 @@ function renderConsolePlayer(s){
     loadYouTubeApiIfNeeded(() => {
       if(consoleCurrentSource !== 'youtube:' + s.youtubeId){
         consoleCurrentSource = 'youtube:' + s.youtubeId;
-        if(consoleYtPlayer){ consoleYtPlayer.loadVideoById(s.youtubeId); }
-        else {
+        if(consoleYtPlayer){
+          consoleYtPlayer.loadVideoById(s.youtubeId, target);
+          if(consoleMuted) consoleYtPlayer.mute(); else consoleYtPlayer.unMute();
+        }else {
           consoleYtPlayer = new YT.Player('console-yt-container', {
             videoId: s.youtubeId,
             width:'100%', height:'100%',
-            playerVars:{ autoplay:1, controls:1, modestbranding:1, rel:0, playsinline:1 },
+            playerVars:{ autoplay:1, controls:1, modestbranding:1, rel:0, playsinline:1, start: Math.floor(target) },
             events:{
-              onReady: e => { e.target.setVolume(s.volume != null ? s.volume : 80); if(s.isPlaying) e.target.playVideo(); },
+              onReady: e => {
+                e.target.setVolume(s.volume != null ? s.volume : 80);
+                if(consoleMuted) e.target.mute(); else e.target.unMute();
+                if(s.isPlaying) e.target.playVideo();
+              },
               onError: () => { tapOverlay.classList.remove('show'); }
             }
           });
         }
+      }else if(consoleYtPlayer && consoleYtPlayer.getCurrentTime){
+        if(restarted) consoleYtPlayer.seekTo(0, true);
+        else if(Math.abs(consoleYtPlayer.getCurrentTime() - target) > 1.5) consoleYtPlayer.seekTo(target, true);
       }
       if(consoleYtPlayer && consoleYtPlayer.setVolume) consoleYtPlayer.setVolume(s.volume != null ? s.volume : 80);
-      if(restarted && consoleYtPlayer && consoleYtPlayer.seekTo) consoleYtPlayer.seekTo(0, true);
       if(consoleYtPlayer){
         if(s.isPlaying && consoleYtPlayer.playVideo) consoleYtPlayer.playVideo();
         else if(consoleYtPlayer.pauseVideo) consoleYtPlayer.pauseVideo();
@@ -827,6 +936,18 @@ function resumeConsolePlayback(){
   attemptPlay(videoEl, tapOverlay);
 }
 
+function toggleConsoleMute(){
+  consoleMuted = !consoleMuted;
+  const btn = document.getElementById('console-mute-btn');
+  btn.textContent = consoleMuted ? '🔇 Audio qui: silenziato' : '🔊 Audio qui: attivo';
+  const videoEl = document.getElementById('console-video');
+  if(videoEl) videoEl.muted = consoleMuted;
+  if(consoleYtPlayer){
+    if(consoleMuted && consoleYtPlayer.mute) consoleYtPlayer.mute();
+    else if(!consoleMuted && consoleYtPlayer.unMute) consoleYtPlayer.unMute();
+  }
+}
+
 function playQueueItem(qid){
   const item = queueCache[qid];
   if(!item) return;
@@ -841,6 +962,7 @@ function playQueueItem(qid){
     title: song.title,
     artist: song.artist || '',
     isPlaying: true,
+    positionSeconds: 0,
     volume: sessionCache.volume != null ? sessionCache.volume : 80,
     updatedAt: Date.now()
   });
@@ -856,17 +978,36 @@ function playNext(){
   playQueueItem(entries[0][0]);
 }
 
+function getConsoleCurrentTime(){
+  if(sessionCache.source === 'cloudinary'){
+    const v = document.getElementById('console-video');
+    return (v && !isNaN(v.currentTime)) ? v.currentTime : (sessionCache.positionSeconds || 0);
+  }
+  if(sessionCache.source === 'youtube' && consoleYtPlayer && consoleYtPlayer.getCurrentTime){
+    return consoleYtPlayer.getCurrentTime();
+  }
+  return sessionCache.positionSeconds || 0;
+}
+
 function togglePlay(){
   if(!sessionCache.songId) return;
-  db.ref('session/isPlaying').set(!sessionCache.isPlaying);
-  db.ref('session/updatedAt').set(Date.now());
+  const wasPlaying = !!sessionCache.isPlaying;
+  const t = wasPlaying ? getConsoleCurrentTime() : (sessionCache.positionSeconds || 0);
+  db.ref('session').update({
+    isPlaying: !wasPlaying,
+    positionSeconds: t,
+    updatedAt: Date.now()
+  });
 }
 
 function restartCurrent(){
   if(!sessionCache.songId) return;
-  db.ref('session/updatedAt').set(Date.now());
-  db.ref('session/restartToken').set(Date.now()); // il proiettore intercetta questo cambio per riavvolgere
-  db.ref('session/isPlaying').set(true);
+  db.ref('session').update({
+    isPlaying: true,
+    positionSeconds: 0,
+    updatedAt: Date.now(),
+    restartToken: Date.now() // il proiettore (e la console stessa) intercettano questo cambio per riavvolgere
+  });
 }
 
 function setVolume(val){
@@ -909,6 +1050,7 @@ function renderProjector(s){
 
   const restarted = s.restartToken && s.restartToken !== lastRestartToken;
   lastRestartToken = s.restartToken || lastRestartToken;
+  const target = computeTargetPosition(s);
 
   if(s.source === 'cloudinary'){
     ytContainer.style.display = 'none';
@@ -917,9 +1059,14 @@ function renderProjector(s){
       currentSource = 'cloudinary:' + s.url;
       videoEl.src = s.url;
       videoEl.load();
-      videoEl.oncanplay = () => { if(s.isPlaying) videoEl.play(); };
+      videoEl.oncanplay = () => {
+        videoEl.currentTime = target;
+        if(s.isPlaying) videoEl.play().catch(()=>{});
+      };
+    }else{
+      if(restarted) videoEl.currentTime = 0;
+      else if(Math.abs(videoEl.currentTime - target) > 1.5) videoEl.currentTime = target;
     }
-    if(restarted) videoEl.currentTime = 0;
     videoEl.volume = (s.volume != null ? s.volume : 80) / 100;
     if(s.isPlaying) videoEl.play().catch(()=>{}); else videoEl.pause();
 
@@ -929,18 +1076,20 @@ function renderProjector(s){
     loadYouTubeApiIfNeeded(() => {
       if(currentSource !== 'youtube:' + s.youtubeId){
         currentSource = 'youtube:' + s.youtubeId;
-        if(ytPlayer){ ytPlayer.loadVideoById(s.youtubeId); }
+        if(ytPlayer){ ytPlayer.loadVideoById(s.youtubeId, target); }
         else {
           ytPlayer = new YT.Player('proj-yt-container', {
             videoId: s.youtubeId,
             width:'100%', height:'100%',
-            playerVars:{ autoplay:1, controls:0, modestbranding:1, rel:0 },
+            playerVars:{ autoplay:1, controls:0, modestbranding:1, rel:0, start: Math.floor(target) },
             events:{ onReady: e => { e.target.setVolume(s.volume != null ? s.volume : 80); if(s.isPlaying) e.target.playVideo(); } }
           });
         }
+      }else if(ytPlayer && ytPlayer.getCurrentTime){
+        if(restarted) ytPlayer.seekTo(0, true);
+        else if(Math.abs(ytPlayer.getCurrentTime() - target) > 1.5) ytPlayer.seekTo(target, true);
       }
       if(ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(s.volume != null ? s.volume : 80);
-      if(restarted && ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(0, true);
       if(ytPlayer){
         if(s.isPlaying && ytPlayer.playVideo) ytPlayer.playVideo();
         else if(ytPlayer.pauseVideo) ytPlayer.pauseVideo();
@@ -980,5 +1129,6 @@ function escapeHtml(str){
   return (str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 </script>
-</body>
-</html>
+
+
+</body></html>
