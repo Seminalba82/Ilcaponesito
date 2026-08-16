@@ -51,6 +51,8 @@ a.app:active{transform:translateY(7px);}
 .asta:active{box-shadow:0 2px 0 #6e4e12,0 5px 0 rgba(0,0,0,.4);}
 .ruota{background:linear-gradient(180deg,#ff8a3d,#ff2e9a);box-shadow:0 9px 0 #8a0050,0 14px 0 rgba(0,0,0,.4),0 0 34px rgba(255,138,61,.45);}
 .ruota:active{box-shadow:0 2px 0 #8a0050,0 5px 0 rgba(0,0,0,.4);}
+.karaokeconsole{background:linear-gradient(180deg,#c9a227,#4a1620);color:#fff;text-shadow:none;box-shadow:0 9px 0 #2e0e14,0 14px 0 rgba(0,0,0,.4)}
+.karaokeconsole:active{box-shadow:0 2px 0 #2e0e14,0 5px 0 rgba(0,0,0,.4)}
 .admin{background:linear-gradient(180deg,#2a1a4d,#170c30);color:var(--gold);text-shadow:none;border:2px solid rgba(255,201,60,.55);box-shadow:0 9px 0 #0a0514,0 14px 0 rgba(0,0,0,.4),0 0 24px rgba(255,201,60,.25);}
 .admin:active{box-shadow:0 2px 0 #0a0514,0 5px 0 rgba(0,0,0,.4);}
 .foot{margin-top:34px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:2px;position:relative;z-index:1;}
@@ -118,6 +120,15 @@ function checkGate(){
 document.getElementById('gatePass').addEventListener('keydown', e=>{ if (e.key==='Enter') checkGate(); });
 document.getElementById('gateUser').addEventListener('keydown', e=>{ if (e.key==='Enter') checkGate(); });
 try{ if (localStorage.getItem('capone_hub_auth') === '1') showHub(); }catch(e){}
+const kcExist = document.querySelector('.grid .karaokeconsole');
+if (!kcExist) {
+  const kc = document.createElement('a');
+  kc.className = 'app karaokeconsole';
+  kc.href = '/llcapone-karaoke/';
+  kc.innerHTML = '<span class="ico">🎤</span>KARAOKE CONSOLE<small>Libreria, coda e proiettore</small>';
+  const tombolaEl = document.querySelector('.grid .tombola');
+  if (tombolaEl) tombolaEl.insertAdjacentElement('afterend', kc);
+}
 </script>
 </body>
 </html>
