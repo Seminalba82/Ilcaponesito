@@ -343,6 +343,7 @@
         <video id="console-video" style="display:none;" playsinline></video>
         <div class="yt-box" id="console-yt-container" style="display:none;"></div>
         <canvas id="console-cdg-canvas" width="300" height="216" style="display:none;"></canvas>
+        <div class="fallback-link" id="console-cdg-error" style="display:none; position:absolute; bottom:6px; left:6px; right:6px; text-align:center; background:rgba(0,0,0,.7); padding:4px; border-radius:6px;"></div>
         <div class="tap-to-play" id="console-tap-to-play" onclick="resumeConsolePlayback()">▶ Tocca per avviare l'audio</div>
       </div>
       <div class="now-playing-caption" id="now-playing-caption" style="display:none;">
@@ -883,11 +884,15 @@ class CdgPlayer{
     this.loadingUrl = url;
     try{
       const res = await fetch(url);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
       const buf = await res.arrayBuffer();
       this.packets = new Uint8Array(buf);
       this.loaded = true;
+      this.error = null;
     }catch(e){
       this.loaded = false;
+      this.error = e.message || 'errore sconosciuto';
+      console.error('Caricamento file .cdg fallito:', url, e);
     }
   }
   // Esegue tutti i pacchetti dall'ultimo processato fino al tempo audio corrente.
@@ -971,6 +976,9 @@ function cdgAnimationLoop(){
   if(consoleCdgActive && consoleCdgPlayer){
     const v = document.getElementById('console-video');
     if(v){ consoleCdgPlayer.advanceTo(v.currentTime); consoleCdgPlayer.draw(); }
+    const errEl = document.getElementById('console-cdg-error');
+    if(errEl) errEl.style.display = (consoleCdgPlayer.error && !consoleCdgPlayer.loaded) ? 'block' : 'none';
+    if(errEl && consoleCdgPlayer.error) errEl.textContent = 'Testo CDG non caricato (' + consoleCdgPlayer.error + ') — l\'audio prosegue comunque.';
   }
   if(projCdgActive && projCdgPlayer){
     const v = document.getElementById('proj-video');
@@ -1080,9 +1088,24 @@ function renderConsolePlayer(s){
 
   if(s.source === 'cloudinary'){
     ytContainer.style.display = 'none';
-    // Con testo CDG: il video resta invisibile (fa solo da sorgente audio),
-    // il canvas mostra la grafica del testo sincronizzata.
-    videoEl.style.display = hasCdg ? 'none' : 'block';
+    // Con testo CDG: il video resta "visibile" ma ridotto a 1px e trasparente
+    // (mai display:none) — su alcuni browser nascondere del tutto un video
+    // con display:none può impedirne l'avvio; così la riproduzione audio
+    // resta affidabile mentre il canvas mostra la grafica del testo sopra.
+    videoEl.style.display = 'block';
+    if(hasCdg){
+      videoEl.style.position = 'absolute';
+      videoEl.style.width = '1px';
+      videoEl.style.height = '1px';
+      videoEl.style.opacity = '0';
+      videoEl.style.pointerEvents = 'none';
+    }else{
+      videoEl.style.position = '';
+      videoEl.style.width = '';
+      videoEl.style.height = '';
+      videoEl.style.opacity = '';
+      videoEl.style.pointerEvents = '';
+    }
     cdgCanvas.style.display = hasCdg ? 'block' : 'none';
     consoleCdgActive = hasCdg;
     if(hasCdg){
@@ -1097,6 +1120,13 @@ function renderConsolePlayer(s){
       videoEl.oncanplay = () => {
         videoEl.currentTime = target;
         if(s.isPlaying) attemptPlay(videoEl, tapOverlay);
+      };
+      videoEl.onerror = () => {
+        const errEl = document.getElementById('console-cdg-error');
+        if(errEl){
+          errEl.style.display = 'block';
+          errEl.textContent = 'Errore nel caricamento del file audio (codice ' + (videoEl.error ? videoEl.error.code : '?') + '). Prova a ricaricare il brano dalla libreria.';
+        }
       };
     }else{
       if(restarted) videoEl.currentTime = 0;
@@ -1281,7 +1311,20 @@ function renderProjector(s){
 
   if(s.source === 'cloudinary'){
     ytContainer.style.display = 'none';
-    videoEl.style.display = hasCdg ? 'none' : 'block';
+    videoEl.style.display = 'block';
+    if(hasCdg){
+      videoEl.style.position = 'absolute';
+      videoEl.style.width = '1px';
+      videoEl.style.height = '1px';
+      videoEl.style.opacity = '0';
+      videoEl.style.pointerEvents = 'none';
+    }else{
+      videoEl.style.position = '';
+      videoEl.style.width = '';
+      videoEl.style.height = '';
+      videoEl.style.opacity = '';
+      videoEl.style.pointerEvents = '';
+    }
     cdgCanvas.style.display = hasCdg ? 'block' : 'none';
     projCdgActive = hasCdg;
     if(hasCdg){
