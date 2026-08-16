@@ -640,7 +640,7 @@ requestAnimationFrame(cdgAnimationLoop);
 let consoleCurrentSource = null;
 let consoleYtPlayer = null;
 let consoleLastRestartToken = null;
-let consoleMuted = true; // di default la regia è muta: il suono esce solo dal proiettore, per evitare doppio audio/eco
+let consoleMuted = localStorage.getItem('ilcapone_karaoke_console_muted') !== 'false'; // default muto; ricorda la scelta tra un ricaricamento e l'altro
 let heartbeatInterval = null;
 let consoleCdgPlayer = null;
 let projCdgPlayer = null;
@@ -752,6 +752,8 @@ function checkPin(){
 
 function showApp(){
   document.getElementById('app').classList.add('ready');
+  const muteBtn = document.getElementById('console-mute-btn');
+  if(muteBtn) muteBtn.textContent = consoleMuted ? '🔇 Audio qui: silenziato' : '🔊 Audio qui: attivo';
   attachLibraryListener();
   attachQueueListener();
   attachSessionListenerConsole();
@@ -1192,6 +1194,7 @@ function resumeConsolePlayback(){
 
 function toggleConsoleMute(){
   consoleMuted = !consoleMuted;
+  localStorage.setItem('ilcapone_karaoke_console_muted', consoleMuted ? 'true' : 'false');
   const btn = document.getElementById('console-mute-btn');
   btn.textContent = consoleMuted ? '🔇 Audio qui: silenziato' : '🔊 Audio qui: attivo';
   const videoEl = document.getElementById('console-video');
