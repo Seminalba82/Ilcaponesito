@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<!-- saved from url=(0053)file:///C:/Users/semin/Downloads/karaoke-console.html -->
-<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="it">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IL CAPONE KARAOKE — Console</title>
 
 <!-- ============================================================
      FIREBASE SDK (compat, via CDN — un solo file, nessuna build)
      ============================================================ -->
-<script src="./IL CAPONE KARAOKE — Console_files/firebase-app-compat.js.download"></script>
-<script src="./IL CAPONE KARAOKE — Console_files/firebase-database-compat.js.download"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <style>
   /* ============================================================
@@ -151,6 +151,10 @@
   }
   .curtain-frame .idle-text{ font-family:var(--font-display); color:var(--gold-bright); font-size:20px; opacity:.75; padding:0 20px; text-align:center; }
   .curtain-frame video, .curtain-frame .yt-box{ width:100%; height:100%; object-fit:contain; background:#000; }
+  #console-cdg-canvas, #proj-cdg-canvas{
+    width:100%; height:100%; object-fit:contain; background:#000;
+    image-rendering:pixelated; image-rendering:crisp-edges;
+  }
   .tap-to-play{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
     background:rgba(20,16,14,.55); color:var(--gold-bright); font-family:var(--font-display); font-size:18px;
@@ -269,7 +273,7 @@
     <strong>Realtime Database</strong> (modalità test, non serve Storage). Da
     "Impostazioni progetto → Le tue app → Web" copia l'oggetto <code>firebaseConfig</code> e incollalo qui sotto.
   </p>
-  <textarea id="config-input" placeholder="{&quot;apiKey&quot;:&quot;...&quot;,&quot;authDomain&quot;:&quot;...&quot;,&quot;databaseURL&quot;:&quot;...&quot;,&quot;projectId&quot;:&quot;...&quot;,&quot;messagingSenderId&quot;:&quot;...&quot;,&quot;appId&quot;:&quot;...&quot;}"></textarea>
+  <textarea id="config-input" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"...","messagingSenderId":"...","appId":"..."}'></textarea>
   <p>
     Per i file audio/video crea un account gratuito su <strong>cloudinary.com</strong> (nessuna carta richiesta),
     poi copia il tuo "Cloud name" e crea un "Upload preset" impostato su <strong>Unsigned</strong>.
@@ -285,7 +289,7 @@
   <div class="modal-error" id="config-error" style="display:block; color:#e0a3a3;"></div>
   <button class="btn primary" onclick="saveConfig()">Salva e avvia la console</button>
   <div style="display:flex; gap:10px;">
-    <button class="btn ghost" onclick="document.getElementById(&#39;setup-screen&#39;).style.display=&#39;none&#39;;" style="font-size:11px;">Annulla</button>
+    <button class="btn ghost" onclick="document.getElementById('setup-screen').style.display='none';" style="font-size:11px;">Annulla</button>
     <button class="btn ghost" onclick="restoreDefaultConfig()" style="font-size:11px;">Ripristina valori predefiniti</button>
   </div>
   <p style="font-size:12px;">Serve solo se vuoi collegare un progetto Firebase o un account Cloudinary diverso da quello già incorporato nel file.</p>
@@ -295,7 +299,7 @@
      SCHERMATA 2 — PIN DI ACCESSO ALLA CONSOLE (facoltativo, protegge
      solo i comandi da regia: il proiettore resta sempre visibile)
      ================================================================ -->
-<div id="pin-screen" style="display: flex;">
+<div id="pin-screen" style="display:none;">
   <h2>IL CAPONE KARAOKE</h2>
   <p>Inserisci il PIN da regia per accedere ai comandi.</p>
   <input type="password" id="pin-input" inputmode="numeric" maxlength="6" placeholder="••••">
@@ -307,7 +311,7 @@
      APP PRINCIPALE — CONSOLE DA REGIA
      ================================================================ -->
 <div id="app">
-  <div class="marquee-strip" id="marquee"></div>
+  <div class="marquee-strip" id="marquee" ></div>
   <header class="topbar">
     <div class="brand">
       <h1>IL CAPONE</h1>
@@ -336,8 +340,9 @@
     <section class="panel center-stage">
       <div class="curtain-frame" id="curtain-frame">
         <div class="idle-text" id="idle-text">Il sipario è chiuso.<br>Aggiungi un brano alla coda per iniziare.</div>
-        <video id="console-video" style="display:none;" playsinline=""></video>
+        <video id="console-video" style="display:none;" playsinline></video>
         <div class="yt-box" id="console-yt-container" style="display:none;"></div>
+        <canvas id="console-cdg-canvas" width="300" height="216" style="display:none;"></canvas>
         <div class="tap-to-play" id="console-tap-to-play" onclick="resumeConsolePlayback()">▶ Tocca per avviare l'audio</div>
       </div>
       <div class="now-playing-caption" id="now-playing-caption" style="display:none;">
@@ -376,8 +381,8 @@
   <div class="modal">
     <h3 id="add-modal-title">Aggiungi canzone</h3>
     <div class="tabs">
-      <button class="tab-btn active" id="tab-btn-storage" onclick="switchTab(&#39;storage&#39;)">Carica file</button>
-      <button class="tab-btn" id="tab-btn-youtube" onclick="switchTab(&#39;youtube&#39;)">Link YouTube</button>
+      <button class="tab-btn active" id="tab-btn-storage" onclick="switchTab('storage')">Carica file</button>
+      <button class="tab-btn" id="tab-btn-youtube" onclick="switchTab('youtube')">Link YouTube</button>
     </div>
 
     <div class="tab-pane active" id="tab-storage">
@@ -393,6 +398,12 @@
         <label>File audio o video</label>
         <input type="file" id="storage-file" accept="audio/*,video/*">
         <div class="fallback-link" id="storage-file-hint" style="display:none; text-align:left; margin-top:6px;">Lascia vuoto per mantenere il file già caricato, oppure scegline uno nuovo per sostituirlo.</div>
+      </div>
+      <div class="field">
+        <label>Testo sincronizzato — file .cdg (opzionale)</label>
+        <input type="file" id="storage-cdg-file" accept=".cdg">
+        <div class="fallback-link" id="storage-cdg-hint" style="display:none; text-align:left; margin-top:6px;">Lascia vuoto per mantenere il file .cdg già caricato.</div>
+        <div class="fallback-link" style="text-align:left; margin-top:6px;">Se hai una coppia classica karaoke "Titolo.mp3" + "Titolo.cdg", carica qui entrambi: il testo apparirà sincronizzato a schermo.</div>
       </div>
       <div class="upload-progress" id="upload-progress"><div class="upload-progress-bar" id="upload-progress-bar"></div></div>
     </div>
@@ -429,8 +440,9 @@
     IL CAPONE KARAOKE
     <span class="sub">In attesa del prossimo brano…</span>
   </div>
-  <video id="proj-video" style="display:none;" playsinline=""></video>
+  <video id="proj-video" style="display:none;" playsinline></video>
   <div id="proj-yt-container" style="display:none; width:100%; height:100%;"></div>
+  <canvas id="proj-cdg-canvas" width="300" height="216" style="display:none;"></canvas>
   <div class="ticker" id="proj-ticker" style="display:none;">
     <span class="t-title" id="ticker-title"></span>
     <span class="t-artist" id="ticker-artist"></span>
@@ -609,7 +621,7 @@ function renderLibrary(){
   list.innerHTML = entries.map(([id, s]) => `
     <div class="song-row">
       <div class="song-meta">
-        <div class="song-title">${escapeHtml(s.title)} <span class="song-tag ${s.source === 'cloudinary' ? 'storage' : 'youtube'}">${s.source === 'cloudinary' ? 'File' : 'YouTube'}</span></div>
+        <div class="song-title">${escapeHtml(s.title)} <span class="song-tag ${s.source === 'cloudinary' ? 'storage' : 'youtube'}">${s.source === 'cloudinary' ? 'File' : 'YouTube'}</span>${s.cdgUrl ? ' <span class="song-tag storage" style="background:#3d2f1a;color:#e8c766;">CDG</span>' : ''}</div>
         <div class="song-artist">${escapeHtml(s.artist||'')}</div>
       </div>
       <div style="display:flex; gap:6px; flex-shrink:0;">
@@ -642,6 +654,7 @@ function openAddModal(){
   document.getElementById('add-modal-title').textContent = 'Aggiungi canzone';
   document.getElementById('add-modal-submit').textContent = 'Salva in libreria';
   document.getElementById('storage-file-hint').style.display = 'none';
+  document.getElementById('storage-cdg-hint').style.display = 'none';
   document.getElementById('add-modal-overlay').classList.add('open');
 }
 
@@ -657,6 +670,7 @@ function openEditModal(id){
     document.getElementById('storage-title').value = song.title || '';
     document.getElementById('storage-artist').value = song.artist || '';
     document.getElementById('storage-file-hint').style.display = 'block';
+    document.getElementById('storage-cdg-hint').style.display = song.cdgUrl ? 'block' : 'none';
   }else{
     switchTab('youtube');
     document.getElementById('yt-title').value = song.title || '';
@@ -670,8 +684,10 @@ function closeAddModal(){
   document.getElementById('add-modal-overlay').classList.remove('open');
   document.getElementById('add-modal-error').style.display = 'none';
   document.getElementById('storage-file-hint').style.display = 'none';
+  document.getElementById('storage-cdg-hint').style.display = 'none';
   ['storage-title','storage-artist','yt-title','yt-artist','yt-url'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('storage-file').value = '';
+  document.getElementById('storage-cdg-file').value = '';
   document.getElementById('upload-progress').style.display = 'none';
   document.getElementById('upload-progress-bar').style.width = '0%';
   editingSongId = null;
@@ -688,7 +704,28 @@ function extractYouTubeId(url){
   return m ? m[1] : null;
 }
 
-function submitAddSong(){
+function uploadFileToCloudinary(file, resourceType, onProgress){
+  return new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/${resourceType}/upload`);
+    xhr.upload.onprogress = (e) => { if(e.lengthComputable && onProgress) onProgress(e.loaded / e.total); };
+    xhr.onload = () => {
+      if(xhr.status < 200 || xhr.status >= 300){
+        reject(new Error('Errore Cloudinary durante il caricamento (controlla cloud name e upload preset).'));
+        return;
+      }
+      try{ resolve(JSON.parse(xhr.responseText).secure_url); }
+      catch(e){ reject(e); }
+    };
+    xhr.onerror = () => reject(new Error('Errore di rete durante il caricamento.'));
+    xhr.send(formData);
+  });
+}
+
+async function submitAddSong(){
   const errEl = document.getElementById('add-modal-error');
   errEl.style.display = 'none';
   const activeStorage = document.getElementById('tab-storage').classList.contains('active');
@@ -699,6 +736,7 @@ function submitAddSong(){
     const title = document.getElementById('storage-title').value.trim();
     const artist = document.getElementById('storage-artist').value.trim();
     const file = document.getElementById('storage-file').files[0];
+    const cdgFile = document.getElementById('storage-cdg-file').files[0];
 
     if(!title){
       errEl.textContent = 'Inserisci almeno un titolo.';
@@ -706,14 +744,14 @@ function submitAddSong(){
       return;
     }
     if(!file && !(editingSongId && existing.source === 'cloudinary')){
-      errEl.textContent = 'Scegli un file.';
+      errEl.textContent = 'Scegli almeno il file audio/video.';
       errEl.style.display = 'block';
       return;
     }
 
-    if(!file){
-      // Modifica senza nuovo file: mantiene l'URL già caricato su Cloudinary
-      targetRef.update({ title, artist, source: 'cloudinary', url: existing.url, addedAt: existing.addedAt || Date.now() });
+    if(!file && !cdgFile){
+      // Modifica senza nuovi file: mantiene audio e .cdg già caricati in precedenza
+      targetRef.update({ title, artist, source: 'cloudinary', url: existing.url, cdgUrl: existing.cdgUrl || null, youtubeId: null, addedAt: existing.addedAt || Date.now() });
       closeAddModal();
       return;
     }
@@ -721,38 +759,26 @@ function submitAddSong(){
     document.getElementById('upload-progress').style.display = 'block';
     document.getElementById('add-modal-submit').disabled = true;
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', cloudinaryConfig.uploadPreset);
-
-    const xhr = new XMLHttpRequest();
-    // Usiamo esplicitamente l'endpoint "video" (che su Cloudinary copre anche l'audio)
-    // invece di "auto": con "auto" alcuni MP3 con copertina incorporata vengono
-    // rilevati male, causando riproduzione corrotta (click/scatti invece della musica).
-    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/video/upload`);
-    xhr.upload.onprogress = (e) => {
-      if(e.lengthComputable){
-        const pct = (e.loaded / e.total) * 100;
-        document.getElementById('upload-progress-bar').style.width = pct + '%';
-      }
-    };
-    xhr.onload = () => {
+    try{
+      const [audioUrl, cdgUrl] = await Promise.all([
+        file
+          ? uploadFileToCloudinary(file, 'video', p => { document.getElementById('upload-progress-bar').style.width = (p * 100) + '%'; })
+          : Promise.resolve(existing ? existing.url : null),
+        cdgFile
+          ? uploadFileToCloudinary(cdgFile, 'raw')
+          : Promise.resolve(existing ? (existing.cdgUrl || null) : null)
+      ]);
+      targetRef.update({
+        title, artist, source: 'cloudinary', url: audioUrl, cdgUrl: cdgUrl || null, youtubeId: null,
+        addedAt: existing ? (existing.addedAt || Date.now()) : Date.now()
+      });
       document.getElementById('add-modal-submit').disabled = false;
-      if(xhr.status < 200 || xhr.status >= 300){
-        errEl.textContent = 'Errore durante il caricamento su Cloudinary (controlla cloud name e upload preset).';
-        errEl.style.display = 'block';
-        return;
-      }
-      const res = JSON.parse(xhr.responseText);
-      targetRef.update({ title, artist, source: 'cloudinary', url: res.secure_url, youtubeId: null, addedAt: existing ? (existing.addedAt || Date.now()) : Date.now() });
       closeAddModal();
-    };
-    xhr.onerror = () => {
+    }catch(err){
       document.getElementById('add-modal-submit').disabled = false;
-      errEl.textContent = 'Errore di rete durante il caricamento.';
+      errEl.textContent = err.message || 'Errore durante il caricamento.';
       errEl.style.display = 'block';
-    };
-    xhr.send(formData);
+    }
 
   }else{
     const title = document.getElementById('yt-title').value.trim();
@@ -764,7 +790,7 @@ function submitAddSong(){
       errEl.style.display = 'block';
       return;
     }
-    targetRef.update({ title, artist, source: 'youtube', youtubeId: ytId, url: null, addedAt: existing ? (existing.addedAt || Date.now()) : Date.now() });
+    targetRef.update({ title, artist, source: 'youtube', youtubeId: ytId, url: null, cdgUrl: null, addedAt: existing ? (existing.addedAt || Date.now()) : Date.now() });
     closeAddModal();
   }
 }
@@ -815,6 +841,146 @@ function clearQueue(){
 }
 
 // ---------------------------------------------------------------
+// LETTORE CDG — testo karaoke sincronizzato (formato CD+Grafica)
+// Parser dello standard: pacchetti da 24 byte, 300 al secondo.
+// Schermo 300x216px composto da tile di 6x12px (50 colonne x 18 righe).
+// ---------------------------------------------------------------
+const CDG_PACKETS_PER_SEC = 300;
+const CDG_CMD_MASK = 0x3F;
+const CDG_COMMAND = 9;
+const CDG_INST_MEMORY_PRESET = 1;
+const CDG_INST_BORDER_PRESET = 2;
+const CDG_INST_TILE_BLOCK = 6;
+const CDG_INST_SCROLL_PRESET = 20;
+const CDG_INST_SCROLL_COPY = 24;
+const CDG_INST_TRANSPARENT_COLOR = 28;
+const CDG_INST_LOAD_LOW = 30;
+const CDG_INST_LOAD_HIGH = 31;
+const CDG_INST_TILE_BLOCK_XOR = 38;
+const CDG_W = 300, CDG_H = 216;
+
+class CdgPlayer{
+  constructor(canvas){
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.imageData = this.ctx.createImageData(CDG_W, CDG_H);
+    this.reset();
+  }
+  reset(){
+    this.packets = null;       // Uint8Array grezzo, caricato una volta
+    this.nextPacketIndex = 0;
+    this.pixels = new Uint8Array(CDG_W * CDG_H); // indice colore (0-15) per pixel
+    this.palette = new Array(16).fill(0).map(() => [0,0,0]);
+    this.borderColor = 0;
+    this.transparentIndex = -1;
+    this.hOffset = 0; this.vOffset = 0;
+    this.loaded = false;
+    this.loadingUrl = null;
+  }
+  async load(url){
+    if(this.loadingUrl === url) return;
+    this.reset();
+    this.loadingUrl = url;
+    try{
+      const res = await fetch(url);
+      const buf = await res.arrayBuffer();
+      this.packets = new Uint8Array(buf);
+      this.loaded = true;
+    }catch(e){
+      this.loaded = false;
+    }
+  }
+  // Esegue tutti i pacchetti dall'ultimo processato fino al tempo audio corrente.
+  advanceTo(seconds){
+    if(!this.loaded || !this.packets) return;
+    const targetPacket = Math.max(0, Math.floor(seconds * CDG_PACKETS_PER_SEC));
+    if(targetPacket < this.nextPacketIndex){
+      // si torna indietro (riavvolgimento/aggancio a posizione precedente): si riparte da zero
+      this.pixels.fill(0);
+      this.palette = new Array(16).fill(0).map(() => [0,0,0]);
+      this.nextPacketIndex = 0;
+    }
+    const totalPackets = this.packets.length / 24;
+    const end = Math.min(targetPacket, totalPackets);
+    for(; this.nextPacketIndex < end; this.nextPacketIndex++){
+      this.processPacket(this.nextPacketIndex);
+    }
+  }
+  processPacket(i){
+    const off = i * 24;
+    const p = this.packets;
+    if((p[off] & CDG_CMD_MASK) !== CDG_COMMAND) return;
+    const inst = p[off + 1] & CDG_CMD_MASK;
+    const d = p.subarray(off + 4, off + 20); // 16 byte dati
+
+    if(inst === CDG_INST_MEMORY_PRESET){
+      const color = d[0] & 0x0F;
+      this.pixels.fill(color);
+    }else if(inst === CDG_INST_BORDER_PRESET){
+      this.borderColor = d[0] & 0x0F;
+    }else if(inst === CDG_INST_TILE_BLOCK || inst === CDG_INST_TILE_BLOCK_XOR){
+      const color0 = d[0] & 0x0F;
+      const color1 = d[1] & 0x0F;
+      const row = d[2] & 0x1F;
+      const col = d[3] & 0x3F;
+      const baseX = col * 6, baseY = row * 12;
+      if(baseX + 6 <= CDG_W && baseY + 12 <= CDG_H){
+        for(let r = 0; r < 12; r++){
+          const rowByte = d[4 + r] & 0x3F;
+          for(let c = 0; c < 6; c++){
+            const bit = (rowByte >> (5 - c)) & 1;
+            const idx = (baseY + r) * CDG_W + (baseX + c);
+            if(inst === CDG_INST_TILE_BLOCK_XOR){
+              this.pixels[idx] = this.pixels[idx] ^ (bit ? color1 : color0);
+            }else{
+              this.pixels[idx] = bit ? color1 : color0;
+            }
+          }
+        }
+      }
+    }else if(inst === CDG_INST_LOAD_LOW || inst === CDG_INST_LOAD_HIGH){
+      const base = inst === CDG_INST_LOAD_HIGH ? 8 : 0;
+      for(let i2 = 0; i2 < 8; i2++){
+        const b0 = d[i2 * 2] & 0x3F, b1 = d[i2 * 2 + 1] & 0x3F;
+        const red = (b0 >> 2) & 0x0F;
+        const green = ((b0 & 0x03) << 2) | ((b1 >> 4) & 0x03);
+        const blue = b1 & 0x0F;
+        this.palette[base + i2] = [red * 17, green * 17, blue * 17];
+      }
+    }else if(inst === CDG_INST_TRANSPARENT_COLOR){
+      this.transparentIndex = d[0] & 0x0F;
+    }
+    // Nota: i comandi di scroll fine (SCROLL_PRESET/SCROLL_COPY) non sono
+    // implementati — riguardano solo alcuni effetti di scorrimento decorativo,
+    // non il testo karaoke standard che usa i tile block.
+  }
+  draw(){
+    const data = this.imageData.data;
+    for(let i = 0; i < this.pixels.length; i++){
+      const c = this.palette[this.pixels[i]] || [0,0,0];
+      const o = i * 4;
+      data[o] = c[0]; data[o+1] = c[1]; data[o+2] = c[2]; data[o+3] = 255;
+    }
+    this.ctx.putImageData(this.imageData, 0, 0);
+  }
+}
+
+// Ciclo continuo (indipendente dagli aggiornamenti del database) che tiene
+// il testo a schermo sincronizzato fotogramma per fotogramma con l'audio.
+function cdgAnimationLoop(){
+  if(consoleCdgActive && consoleCdgPlayer){
+    const v = document.getElementById('console-video');
+    if(v){ consoleCdgPlayer.advanceTo(v.currentTime); consoleCdgPlayer.draw(); }
+  }
+  if(projCdgActive && projCdgPlayer){
+    const v = document.getElementById('proj-video');
+    if(v){ projCdgPlayer.advanceTo(v.currentTime); projCdgPlayer.draw(); }
+  }
+  requestAnimationFrame(cdgAnimationLoop);
+}
+requestAnimationFrame(cdgAnimationLoop);
+
+// ---------------------------------------------------------------
 // SESSIONE / PLAYER (lato console = "regia" — vede e sente anche lei)
 // ---------------------------------------------------------------
 let consoleCurrentSource = null;
@@ -822,6 +988,10 @@ let consoleYtPlayer = null;
 let consoleLastRestartToken = null;
 let consoleMuted = true; // di default la regia è muta: il suono esce solo dal proiettore, per evitare doppio audio/eco
 let heartbeatInterval = null;
+let consoleCdgPlayer = null;
+let projCdgPlayer = null;
+let consoleCdgActive = false;
+let projCdgActive = false;
 
 // Calcola il punto esatto (in secondi) a cui un player che si aggancia
 // ORA dovrebbe posizionarsi, in base a dove eravamo rimasti + quanto
@@ -885,12 +1055,15 @@ function renderConsolePlayer(s){
   const idle = document.getElementById('idle-text');
   const videoEl = document.getElementById('console-video');
   const ytContainer = document.getElementById('console-yt-container');
+  const cdgCanvas = document.getElementById('console-cdg-canvas');
   const tapOverlay = document.getElementById('console-tap-to-play');
 
   if(!s.songId){
     idle.style.display = 'block';
     videoEl.style.display = 'none';
     ytContainer.style.display = 'none';
+    cdgCanvas.style.display = 'none';
+    consoleCdgActive = false;
     tapOverlay.classList.remove('show');
     videoEl.pause && videoEl.pause();
     if(consoleYtPlayer && consoleYtPlayer.pauseVideo) consoleYtPlayer.pauseVideo();
@@ -903,10 +1076,19 @@ function renderConsolePlayer(s){
   consoleLastRestartToken = s.restartToken || consoleLastRestartToken;
   const vol = (s.volume != null ? s.volume : 80) / 100;
   const target = computeTargetPosition(s);
+  const hasCdg = s.source === 'cloudinary' && !!s.cdgUrl;
 
   if(s.source === 'cloudinary'){
     ytContainer.style.display = 'none';
-    videoEl.style.display = 'block';
+    // Con testo CDG: il video resta invisibile (fa solo da sorgente audio),
+    // il canvas mostra la grafica del testo sincronizzata.
+    videoEl.style.display = hasCdg ? 'none' : 'block';
+    cdgCanvas.style.display = hasCdg ? 'block' : 'none';
+    consoleCdgActive = hasCdg;
+    if(hasCdg){
+      if(!consoleCdgPlayer) consoleCdgPlayer = new CdgPlayer(cdgCanvas);
+      if(consoleCdgPlayer.loadingUrl !== s.cdgUrl) consoleCdgPlayer.load(s.cdgUrl);
+    }
     videoEl.muted = consoleMuted;
     if(consoleCurrentSource !== 'cloudinary:' + s.url){
       consoleCurrentSource = 'cloudinary:' + s.url;
@@ -925,6 +1107,8 @@ function renderConsolePlayer(s){
 
   }else if(s.source === 'youtube'){
     videoEl.style.display = 'none';
+    cdgCanvas.style.display = 'none';
+    consoleCdgActive = false;
     ytContainer.style.display = 'block';
     loadYouTubeApiIfNeeded(() => {
       if(consoleCurrentSource !== 'youtube:' + s.youtubeId){
@@ -1070,12 +1254,15 @@ function renderProjector(s){
   const idleEl = document.getElementById('proj-idle');
   const videoEl = document.getElementById('proj-video');
   const ytContainer = document.getElementById('proj-yt-container');
+  const cdgCanvas = document.getElementById('proj-cdg-canvas');
   const ticker = document.getElementById('proj-ticker');
 
   if(!s.songId){
     idleEl.style.display = 'flex';
     videoEl.style.display = 'none';
     ytContainer.style.display = 'none';
+    cdgCanvas.style.display = 'none';
+    projCdgActive = false;
     ticker.style.display = 'none';
     videoEl.pause && videoEl.pause();
     if(ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
@@ -1090,10 +1277,17 @@ function renderProjector(s){
   const restarted = s.restartToken && s.restartToken !== lastRestartToken;
   lastRestartToken = s.restartToken || lastRestartToken;
   const target = computeTargetPosition(s);
+  const hasCdg = s.source === 'cloudinary' && !!s.cdgUrl;
 
   if(s.source === 'cloudinary'){
     ytContainer.style.display = 'none';
-    videoEl.style.display = 'block';
+    videoEl.style.display = hasCdg ? 'none' : 'block';
+    cdgCanvas.style.display = hasCdg ? 'block' : 'none';
+    projCdgActive = hasCdg;
+    if(hasCdg){
+      if(!projCdgPlayer) projCdgPlayer = new CdgPlayer(cdgCanvas);
+      if(projCdgPlayer.loadingUrl !== s.cdgUrl) projCdgPlayer.load(s.cdgUrl);
+    }
     if(currentSource !== 'cloudinary:' + s.url){
       currentSource = 'cloudinary:' + s.url;
       videoEl.src = s.url;
@@ -1111,6 +1305,8 @@ function renderProjector(s){
 
   }else if(s.source === 'youtube'){
     videoEl.style.display = 'none';
+    cdgCanvas.style.display = 'none';
+    projCdgActive = false;
     ytContainer.style.display = 'block';
     loadYouTubeApiIfNeeded(() => {
       if(currentSource !== 'youtube:' + s.youtubeId){
@@ -1168,6 +1364,5 @@ function escapeHtml(str){
   return (str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 </script>
-
-
-</body></html>
+</body>
+</html>
