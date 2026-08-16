@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0053)file:///C:/Users/semin/Downloads/karaoke-console.html -->
+<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IL CAPONE KARAOKE — Console</title>
 
 <!-- ============================================================
      FIREBASE SDK (compat, via CDN — un solo file, nessuna build)
      ============================================================ -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="./IL CAPONE KARAOKE — Console_files/firebase-app-compat.js.download"></script>
+<script src="./IL CAPONE KARAOKE — Console_files/firebase-database-compat.js.download"></script>
 
 <style>
   /* ============================================================
@@ -261,7 +261,7 @@
      SCHERMATA 1 — CONFIGURAZIONE FIREBASE (solo alla primissima apertura,
      poi il config resta salvato nel browser di questo dispositivo)
      ================================================================ -->
-<div id="setup-screen">
+<div id="setup-screen" style="display:none;">
   <div class="marquee-strip" style="position:absolute;top:0;left:0;"></div>
   <h2>Prima apertura — collega i servizi</h2>
   <p>
@@ -269,7 +269,7 @@
     <strong>Realtime Database</strong> (modalità test, non serve Storage). Da
     "Impostazioni progetto → Le tue app → Web" copia l'oggetto <code>firebaseConfig</code> e incollalo qui sotto.
   </p>
-  <textarea id="config-input" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"...","messagingSenderId":"...","appId":"..."}'></textarea>
+  <textarea id="config-input" placeholder="{&quot;apiKey&quot;:&quot;...&quot;,&quot;authDomain&quot;:&quot;...&quot;,&quot;databaseURL&quot;:&quot;...&quot;,&quot;projectId&quot;:&quot;...&quot;,&quot;messagingSenderId&quot;:&quot;...&quot;,&quot;appId&quot;:&quot;...&quot;}"></textarea>
   <p>
     Per i file audio/video crea un account gratuito su <strong>cloudinary.com</strong> (nessuna carta richiesta),
     poi copia il tuo "Cloud name" e crea un "Upload preset" impostato su <strong>Unsigned</strong>.
@@ -285,7 +285,7 @@
   <div class="modal-error" id="config-error" style="display:block; color:#e0a3a3;"></div>
   <button class="btn primary" onclick="saveConfig()">Salva e avvia la console</button>
   <div style="display:flex; gap:10px;">
-    <button class="btn ghost" onclick="document.getElementById('setup-screen').style.display='none';" style="font-size:11px;">Annulla</button>
+    <button class="btn ghost" onclick="document.getElementById(&#39;setup-screen&#39;).style.display=&#39;none&#39;;" style="font-size:11px;">Annulla</button>
     <button class="btn ghost" onclick="restoreDefaultConfig()" style="font-size:11px;">Ripristina valori predefiniti</button>
   </div>
   <p style="font-size:12px;">Serve solo se vuoi collegare un progetto Firebase o un account Cloudinary diverso da quello già incorporato nel file.</p>
@@ -295,7 +295,7 @@
      SCHERMATA 2 — PIN DI ACCESSO ALLA CONSOLE (facoltativo, protegge
      solo i comandi da regia: il proiettore resta sempre visibile)
      ================================================================ -->
-<div id="pin-screen" style="display:none;">
+<div id="pin-screen" style="display: flex;">
   <h2>IL CAPONE KARAOKE</h2>
   <p>Inserisci il PIN da regia per accedere ai comandi.</p>
   <input type="password" id="pin-input" inputmode="numeric" maxlength="6" placeholder="••••">
@@ -307,7 +307,7 @@
      APP PRINCIPALE — CONSOLE DA REGIA
      ================================================================ -->
 <div id="app">
-  <div class="marquee-strip" id="marquee" ></div>
+  <div class="marquee-strip" id="marquee"></div>
   <header class="topbar">
     <div class="brand">
       <h1>IL CAPONE</h1>
@@ -336,7 +336,7 @@
     <section class="panel center-stage">
       <div class="curtain-frame" id="curtain-frame">
         <div class="idle-text" id="idle-text">Il sipario è chiuso.<br>Aggiungi un brano alla coda per iniziare.</div>
-        <video id="console-video" style="display:none;" playsinline></video>
+        <video id="console-video" style="display:none;" playsinline=""></video>
         <div class="yt-box" id="console-yt-container" style="display:none;"></div>
         <div class="tap-to-play" id="console-tap-to-play" onclick="resumeConsolePlayback()">▶ Tocca per avviare l'audio</div>
       </div>
@@ -376,8 +376,8 @@
   <div class="modal">
     <h3 id="add-modal-title">Aggiungi canzone</h3>
     <div class="tabs">
-      <button class="tab-btn active" id="tab-btn-storage" onclick="switchTab('storage')">Carica file</button>
-      <button class="tab-btn" id="tab-btn-youtube" onclick="switchTab('youtube')">Link YouTube</button>
+      <button class="tab-btn active" id="tab-btn-storage" onclick="switchTab(&#39;storage&#39;)">Carica file</button>
+      <button class="tab-btn" id="tab-btn-youtube" onclick="switchTab(&#39;youtube&#39;)">Link YouTube</button>
     </div>
 
     <div class="tab-pane active" id="tab-storage">
@@ -429,7 +429,7 @@
     IL CAPONE KARAOKE
     <span class="sub">In attesa del prossimo brano…</span>
   </div>
-  <video id="proj-video" style="display:none;" playsinline></video>
+  <video id="proj-video" style="display:none;" playsinline=""></video>
   <div id="proj-yt-container" style="display:none; width:100%; height:100%;"></div>
   <div class="ticker" id="proj-ticker" style="display:none;">
     <span class="t-title" id="ticker-title"></span>
@@ -1168,5 +1168,6 @@ function escapeHtml(str){
   return (str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 </script>
-</body>
-</html>
+
+
+</body></html>
