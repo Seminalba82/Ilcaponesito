@@ -690,7 +690,10 @@ function submitAddSong(){
     formData.append('upload_preset', cloudinaryConfig.uploadPreset);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`);
+    // Usiamo esplicitamente l'endpoint "video" (che su Cloudinary copre anche l'audio)
+    // invece di "auto": con "auto" alcuni MP3 con copertina incorporata vengono
+    // rilevati male, causando riproduzione corrotta (click/scatti invece della musica).
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/video/upload`);
     xhr.upload.onprogress = (e) => {
       if(e.lengthComputable){
         const pct = (e.loaded / e.total) * 100;
