@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0060)file:///C:/Users/semin/Downloads/Pannello_Licenze_index.html -->
+<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Gestione Licenze — IL CAPONE QUIZ</title>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="./index_files/firebase-app-compat.js.download"></script>
+<script src="./index_files/firebase-auth-compat.js.download"></script>
+<script src="./index_files/firebase-database-compat.js.download"></script>
 <style>
 :root{
   --bg:#0b0614; --bg2:#150a26; --panel:#1c1033;
@@ -109,7 +109,7 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
 </head>
 <body>
 
-<div id="loginBox">
+<div id="loginBox" style="display: block;">
   <h2>🔐 Accesso Admin</h2>
   <input type="email" id="loginEmail" placeholder="Email" autocomplete="username">
   <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
@@ -117,7 +117,7 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
   <div id="loginError"></div>
 </div>
 
-<div id="app">
+<div id="app" style="display: none;">
 <div class="wrap">
   <div class="topbar">
     <div>
@@ -206,9 +206,9 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
 
 <div class="folder-grid" id="folderGrid"></div>
     <div class="filter-row">
-      <button class="active" onclick="setFilter('tutte',this)">Tutte</button>
-      <button onclick="setFilter('attive',this)">Attive</button>
-      <button onclick="setFilter('scadute',this)">Scadute</button>
+      <button class="active" onclick="setFilter(&#39;tutte&#39;,this)">Tutte</button>
+      <button onclick="setFilter(&#39;attive&#39;,this)">Attive</button>
+      <button onclick="setFilter(&#39;scadute&#39;,this)">Scadute</button>
     </div>
     <div id="licList"><div class="empty-state">Caricamento...</div></div>
   </div>
@@ -476,8 +476,12 @@ function modificaLicenza(codice){
   document.getElementById('fCategoria').value = lic.categoria || 'clienti';
 
   document.querySelectorAll('.mini-cb').forEach(cb=>{
+    // FIX v2: un gioco MAI esplicitamente salvato per questa licenza (chiave assente
+    // da lic.minigiochi_abilitati) ora parte SPENTO, non più acceso per default.
+    // Se la licenza non ha proprio nessun campo minigiochi_abilitati (mai toccata),
+    // resta il comportamento di prima: tutto acceso finché non la si configura.
     const abil = lic.minigiochi_abilitati ? lic.minigiochi_abilitati[cb.value] : true;
-    cb.checked = abil !== false;
+    cb.checked = abil === true;
   });
   document.getElementById('fTombolaStandalone').checked = !!(lic.minigiochi_abilitati && lic.minigiochi_abilitati.tombola_standalone === true);
   document.getElementById('fAstaStandalone').checked = !!(lic.minigiochi_abilitati && lic.minigiochi_abilitati.asta_standalone === true);
@@ -623,5 +627,6 @@ function riattivaLicenza(code){
   db.ref('licenze/'+code+'/attiva').set(true).catch(err=>alert('Errore: '+err.message));
 }
 </script>
-</body>
-</html>
+
+
+</body></html>
