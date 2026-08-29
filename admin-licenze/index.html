@@ -349,7 +349,7 @@ function doLogin(){
   const pass = document.getElementById('loginPass').value;
   document.getElementById('loginError').textContent = '';
   auth.signInWithEmailAndPassword(email, pass).catch(err=>{
-    document.getElementById('loginError').textContent = 'Accesso negato: controlla email e password.';
+    document.getElementById('loginError').textContent = 'Errore: ' + err.code + ' — ' + err.message;
   });
 }
 function doLogout(){ auth.signOut(); }
