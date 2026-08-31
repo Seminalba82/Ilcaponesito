@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0060)file:///C:/Users/semin/Downloads/Pannello_Licenze_index.html -->
-<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="it">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Gestione Licenze — IL CAPONE QUIZ</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -109,7 +109,7 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
 </head>
 <body>
 
-<div id="loginBox" style="display: block;">
+<div id="loginBox">
   <h2>🔐 Accesso Admin</h2>
   <input type="email" id="loginEmail" placeholder="Email" autocomplete="username">
   <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
@@ -117,7 +117,7 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
   <div id="loginError"></div>
 </div>
 
-<div id="app" style="display: none;">
+<div id="app">
 <div class="wrap">
   <div class="topbar">
     <div>
@@ -206,9 +206,9 @@ legend{color:var(--muted);font-size:.8rem;padding:0 6px;}
 
 <div class="folder-grid" id="folderGrid"></div>
     <div class="filter-row">
-      <button class="active" onclick="setFilter(&#39;tutte&#39;,this)">Tutte</button>
-      <button onclick="setFilter(&#39;attive&#39;,this)">Attive</button>
-      <button onclick="setFilter(&#39;scadute&#39;,this)">Scadute</button>
+      <button class="active" onclick="setFilter('tutte',this)">Tutte</button>
+      <button onclick="setFilter('attive',this)">Attive</button>
+      <button onclick="setFilter('scadute',this)">Scadute</button>
     </div>
     <div id="licList"><div class="empty-state">Caricamento...</div></div>
   </div>
@@ -349,7 +349,7 @@ function doLogin(){
   const pass = document.getElementById('loginPass').value;
   document.getElementById('loginError').textContent = '';
   auth.signInWithEmailAndPassword(email, pass).catch(err=>{
-    document.getElementById('loginError').textContent = 'Errore: ' + err.code + ' — ' + err.message;
+    document.getElementById('loginError').textContent = 'Accesso negato: controlla email e password.';
   });
 }
 function doLogout(){ auth.signOut(); }
@@ -371,7 +371,7 @@ function initMiniGrid(){
   const grid = document.getElementById('miniGrid');
   grid.innerHTML = MINIGIOCHI.map(m=>`
     <label class="mini-chip">
-      <input type="checkbox" class="mini-cb" value="${m.k}" checked>
+      <input type="checkbox" class="mini-cb" value="${m.k}">
       ${m.l}
     </label>`).join('');
 }
@@ -502,7 +502,7 @@ function annullaModifica(){
   document.getElementById('fNote').value = '';
   document.getElementById('fCategoria').value = 'clienti';
   document.getElementById('fPiano').value = 'giorno';
-  document.querySelectorAll('.mini-cb').forEach(cb=> cb.checked = true);
+  document.querySelectorAll('.mini-cb').forEach(cb=> cb.checked = false);
   document.getElementById('fTombolaStandalone').checked = false;
   document.getElementById('fAstaStandalone').checked = false;
   document.getElementById('fRuotaStandalone').checked = false;
@@ -627,6 +627,5 @@ function riattivaLicenza(code){
   db.ref('licenze/'+code+'/attiva').set(true).catch(err=>alert('Errore: '+err.message));
 }
 </script>
-
-
-</body></html>
+</body>
+</html>
