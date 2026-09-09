@@ -612,13 +612,15 @@ function renderLicenze(){
     const chiaviEscluse = ['tombola_standalone','asta_standalone','ruota_standalone','fantacalcio_standalone', ...chiaviModuli];
     const nMini = lic.minigiochi_abilitati ? Object.entries(lic.minigiochi_abilitati).filter(([k,v])=> v && !chiaviEscluse.includes(k)).length : 0;
     const totMini = MINIGIOCHI.filter(m=>!m.modulo).length;
+    const nModuli = chiaviModuli.filter(k=> lic.minigiochi_abilitati && lic.minigiochi_abilitati[k] === true).length;
+    const totModuli = chiaviModuli.length;
 
     return `
     <div class="lic-item">
       <div class="lic-head">
         <div>
           <div class="lic-code">${code}</div>
-          <div class="lic-meta">${lic.cliente || '—'} · piano: ${lic.tipo_piano} · ${nMini}/${totMini} minigiochi</div>
+          <div class="lic-meta">${lic.cliente || '—'} · piano: ${lic.tipo_piano} · ${nMini}/${totMini} minigiochi · ${nModuli}/${totModuli} moduli</div>
           <div class="lic-meta">Scadenza: ${new Date(lic.data_scadenza).toLocaleString('it-IT')}</div>
           ${lic.note ? `<div class="lic-meta">Note: ${lic.note}</div>` : ''}
         </div>
