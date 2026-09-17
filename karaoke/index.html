@@ -188,6 +188,31 @@
   .wa-close{margin-top:24px; background:none; border:2px solid rgba(255,255,255,.3); color:var(--gold-dim);
     padding:10px 22px; border-radius:14px; font-weight:700; cursor:pointer; font-size:13px;}
 
+  /* Prenotazione canzoni */
+  .transpose-btn{width:42px;height:42px;border-radius:12px;border:none;font-family:'Bungee',cursive;font-size:20px;
+    background:linear-gradient(180deg,#ffe08a,var(--gold));color:#1a0b00;cursor:pointer;
+    box-shadow:0 4px 0 #8a5f00, 0 6px 0 rgba(0,0,0,.4);flex-shrink:0;}
+  .transpose-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #8a5f00;}
+  .req-row{display:flex;flex-direction:column;gap:6px;background:var(--panel-2);border-left:4px solid var(--viola);
+    border-radius:10px;padding:10px 12px;text-align:left;}
+  .req-row.pending{border-left-color:var(--gold);}
+  .req-row.accepted{border-left-color:var(--green);}
+  .req-row.rejected{border-left-color:var(--magenta);}
+  .req-title{font-weight:700;color:var(--cream);font-size:14px;}
+  .req-meta{font-size:12px;color:var(--gold-dim);}
+  .req-actions{display:flex;gap:8px;margin-top:4px;}
+  .req-accept, .req-reject, .req-reset{
+    font-family:'Bungee',cursive;font-size:12px;border:none;border-radius:10px;padding:9px 12px;cursor:pointer;flex:1;
+  }
+  .req-accept{background:linear-gradient(180deg,#e2ff9a,var(--green));color:#1c2a00;box-shadow:0 4px 0 #5d8a00;}
+  .req-accept:active{transform:translateY(3px);box-shadow:0 1px 0 #5d8a00;}
+  .req-reject{background:linear-gradient(180deg,#ff8ac6,var(--magenta));color:#fff;box-shadow:0 4px 0 #8a0050;}
+  .req-reject:active{transform:translateY(3px);box-shadow:0 1px 0 #8a0050;}
+  .req-status{font-family:'Bungee',cursive;font-size:12px;}
+  .req-status.accepted{color:var(--green);}
+  .req-status.rejected{color:var(--magenta);}
+  .req-reset{background:none;box-shadow:none;color:var(--gold-dim);text-decoration:underline;flex:none;padding:4px;}
+
   .stage-mode .marquee-title{font-size:clamp(30px,6vw,54px);}
   .stage-mode .lb-name{font-size:20px;}
   .stage-mode .lb-score{font-size:20px;width:60px;}
@@ -708,6 +733,10 @@ function renderAdminDashboard(){
         <p class="hint" id="micStatus">Microfono spento</p>
       </div>
       <div style="width:100%;">
+        <h3 style="text-align:left;color:var(--gold-dim);font-size:13px;text-transform:uppercase;letter-spacing:1px;">🎶 Richieste canzoni</h3>
+        <div class="leaderboard" id="reqBoard"><p class="hint">Nessuna richiesta al momento.</p></div>
+      </div>
+      <div style="width:100%;">
         <h3 style="text-align:left;color:var(--gold-dim);font-size:13px;text-transform:uppercase;letter-spacing:1px;">Classifica in tempo reale</h3>
         <div class="btn-row controls-hidden" style="margin-bottom:10px;">
           <button class="btn btn-ghost btn-sm" id="btnAirAll" data-tip="Mette in onda tutti i partecipanti non silenziati, utile per giochi a squadre">📢 Tutti in onda</button>
@@ -943,6 +972,46 @@ function renderAdminDashboard(){
     }
   }
 
+  function keyLabel(k){
+    if(k === 0) return 'tonalità originale';
+    return (k > 0 ? '+' : '') + k + ' semitoni';
+  }
+
+  function renderRequests(requests){
+    const box = document.getElementById('reqBoard');
+    if(!box) return;
+    const ids = Object.keys(requests || {});
+    if(!ids.length){ box.innerHTML = '<p class="hint">Nessuna richiesta al momento.</p>'; return; }
+    const list = ids.map(id => ({ id, ...requests[id] })).sort((a,b) => (b.at||0) - (a.at||0));
+    box.innerHTML = list.map(r => {
+      const st = r.status || 'pending';
+      const cls = st === 'accepted' ? 'accepted' : st === 'rejected' ? 'rejected' : 'pending';
+      const actions = st === 'pending'
+        ? `<div class="req-actions">
+             <button class="req-accept" data-reqid="${r.id}" data-act="accepted">✅ Prenotata</button>
+             <button class="req-reject" data-reqid="${r.id}" data-act="rejected">❌ Non in catalogo</button>
+           </div>`
+        : `<div class="req-actions">
+             <span class="req-status ${cls}">${st === 'accepted' ? '✅ Prenotata' : '❌ Non in catalogo'}</span>
+             <button class="req-reset" data-reqid="${r.id}" data-act="pending">↺ rimetti in attesa</button>
+           </div>`;
+      return `<div class="req-row ${cls}">
+        <div class="req-title">${escapeHtml(r.title || '?')}</div>
+        <div class="req-meta">${escapeHtml(r.name || 'Partecipante')} · ${escapeHtml(keyLabel(r.key || 0))}</div>
+        ${actions}
+      </div>`;
+    }).join('');
+    box.querySelectorAll('[data-reqid]').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute('data-reqid');
+        const act = btn.getAttribute('data-act');
+        const current = requests[id] || {};
+        await fbSet(dbUrl, path + '/requests/' + id, { ...current, status: act });
+        pollLoop();
+      };
+    });
+  }
+
   async function pollLoop(){
     // Il presentatore è l'unico che scarica le onde di tutti (nodo /p),
     // calcola la classifica e pubblica il tabellone compatto.
@@ -950,6 +1019,8 @@ function renderAdminDashboard(){
     lastParticipants = participants || {};
     refreshUi();
     await publishBoard();
+    const requests = await fbGet(dbUrl, path + '/requests');
+    renderRequests(requests || {});
   }
   publishBoard();
   pollLoop();
@@ -1156,6 +1227,19 @@ function renderParticipantJoin(){
 function renderParticipantMic(){
   document.getElementById('app').innerHTML = `
     <div class="screen">
+      <div class="card" style="max-width:none;width:100%;">
+        <label class="label">🎶 Prenota una canzone</label>
+        <input class="input" id="reqSongInput" maxlength="80" placeholder="Scrivi il titolo della canzone che vuoi prenotare">
+        <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:16px;">
+          <span class="hint" style="margin:0;">Tonalità</span>
+          <button class="transpose-btn" id="reqKeyMinus" data-tip="Mezzo tono più basso">−</button>
+          <div class="code-badge mono" id="reqKeyVal" style="font-size:18px;letter-spacing:0;padding:8px 18px;margin:0;">0</div>
+          <button class="transpose-btn" id="reqKeyPlus" data-tip="Mezzo tono più alto">+</button>
+        </div>
+        <button class="btn btn-primary" id="btnSendReq" data-tip="Invia la richiesta alla regia, che ti farà sapere se la canzone è disponibile">Prenota la mia canzone</button>
+        <p class="hint" id="reqError" style="color:var(--red);"></p>
+        <div id="myRequests" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
       <div id="permGate" style="width:100%;">
         <h2 class="marquee-title display" style="font-size:24px;">ATTIVA IL MICROFONO</h2>
         <div class="card" style="display:flex;flex-direction:column;gap:14px;">
@@ -1191,6 +1275,56 @@ function renderParticipantMic(){
   };
 
   document.getElementById('btnExit').onclick = () => { App.code=null; App.dbUrl=null; App.role=null; goto('home'); };
+
+  // Prenotazione canzoni: ogni richiesta è un nodo separato scritto solo dal
+  // partecipante che la crea; la regia in seguito ne aggiorna solo lo stato.
+  let reqKey = 0;
+  const reqKeyVal = document.getElementById('reqKeyVal');
+  document.getElementById('reqKeyMinus').onclick = () => { reqKey--; reqKeyVal.textContent = reqKey; };
+  document.getElementById('reqKeyPlus').onclick = () => { reqKey++; reqKeyVal.textContent = reqKey; };
+
+  const myReqIds = [];
+  const myReqTitles = {};
+  function renderMyRequests(statuses){
+    const wrap = document.getElementById('myRequests');
+    if(!wrap) return;
+    wrap.innerHTML = myReqIds.map(id => {
+      const st = statuses[id] || 'pending';
+      const title = myReqTitles[id] || '';
+      const label = st === 'accepted' ? '✅ Prenotata!' : st === 'rejected' ? '❌ Non in catalogo' : '⏳ In attesa della regia…';
+      const cls = st === 'accepted' ? 'accepted' : st === 'rejected' ? 'rejected' : 'pending';
+      return `<div class="req-row ${cls}"><div class="req-title">${escapeHtml(title)}</div><div class="req-status ${cls}">${label}</div></div>`;
+    }).join('');
+  }
+
+  document.getElementById('btnSendReq').onclick = async () => {
+    const err = document.getElementById('reqError');
+    err.textContent = '';
+    const title = document.getElementById('reqSongInput').value.trim();
+    if(!title){ err.textContent = 'Scrivi prima il titolo della canzone.'; return; }
+    const path = 'karaoke_' + App.code;
+    const id = uid();
+    const saved = await fbSet(App.dbUrl, path + '/requests/' + id, {
+      participantId: App.participantId, name: App.name, title, key: reqKey, status: 'pending', at: Date.now()
+    });
+    if(!saved){ err.textContent = 'Non riesco a inviare la richiesta in questo momento. Riprova.'; return; }
+    myReqIds.unshift(id);
+    myReqTitles[id] = title;
+    document.getElementById('reqSongInput').value = '';
+    reqKey = 0; reqKeyVal.textContent = '0';
+    renderMyRequests({});
+  };
+
+  // Controllo stato richieste: parte subito, non serve aver già attivato il
+  // microfono per sapere se la canzone prenotata è stata accettata.
+  App.timers.push(setInterval(async () => {
+    if(!myReqIds.length) return;
+    const path = 'karaoke_' + App.code;
+    const all = await fbGet(App.dbUrl, path + '/requests');
+    const statuses = {};
+    myReqIds.forEach(id => { statuses[id] = (all && all[id] && all[id].status) || 'pending'; });
+    renderMyRequests(statuses);
+  }, 2500));
 
   const consentCheck = document.getElementById('consentCheck');
   const btnEnableMic = document.getElementById('btnEnableMic');
